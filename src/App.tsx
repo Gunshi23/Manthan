@@ -14,9 +14,12 @@ import { VoiceConsole } from './pages/VoiceConsole';
 import { OrbitAnalytics } from './pages/OrbitAnalytics';
 import { SystemConfiguration } from './pages/SystemConfiguration';
 import { FutureSimulator } from './pages/FutureSimulator';
+import { OpportunityRadar } from './pages/OpportunityRadar';
+import { SeasonalIntelligence } from './pages/SeasonalIntelligence';
+import { CompetitorIntelligence } from './pages/CompetitorIntelligence';
 
 type AppStage = 'landing' | 'auth' | 'init' | 'profile-setup' | 'setup' | 'app';
-type AppPage = 'command-center' | 'mission-control' | 'customer-galaxy' | 'growth-engine' | 'agent-boardroom' | 'voice-console' | 'analytics' | 'system-config' | 'future-simulator';
+type AppPage = 'command-center' | 'mission-control' | 'customer-galaxy' | 'growth-engine' | 'agent-boardroom' | 'voice-console' | 'analytics' | 'system-config' | 'future-simulator' | 'opportunity-radar' | 'seasonal-intel' | 'competitor-intel';
 
 function App() {
   const [stage, setStage] = useState<AppStage>('landing');
@@ -74,6 +77,9 @@ function App() {
       {activePage === 'analytics' && <OrbitAnalytics />}
       {activePage === 'system-config' && <SystemConfiguration />}
       {activePage === 'future-simulator' && <FutureSimulator />}
+      {activePage === 'opportunity-radar' && <OpportunityRadar />}
+      {activePage === 'seasonal-intel' && <SeasonalIntelligence />}
+      {activePage === 'competitor-intel' && <CompetitorIntelligence />}
     </AppShell>
   );
 }
