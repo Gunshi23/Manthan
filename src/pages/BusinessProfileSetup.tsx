@@ -1,364 +1,703 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { 
-  Shirt, Sparkles, Coffee, Gem, ShoppingBag, Briefcase, 
-  Wand2, ArrowRight, Loader2, CheckCircle2, MessageCircle, 
-  Mail, Layers, Zap
+  Cpu, Users, Target, ChevronRight, Loader2, Activity, CheckCircle2, ArrowRight
 } from "lucide-react";
 import { useOrbit } from "../context/OrbitContext";
 
 interface BusinessProfileSetupProps {
-  onSetupComplete: () => void;
+  onSetupComplete: (goal?: string) => void;
 }
 
-interface BusinessCard {
-  id: string;
-  title: string;
-  desc: string;
-  size: string;
-  channels: string[];
-  icon: React.FC<any>;
-  primaryChannel: string;
-  opportunity: string;
-  challenge: string;
-  missions: string[];
-  color: string;
-}
-
-const BUSINESS_PROFILES: BusinessCard[] = [
-  {
-    id: "fashion",
-    title: "Fashion & Apparel",
-    desc: "Streetwear, boutique retail, and casual collections.",
-    size: "5,000 - 25,000 customers",
-    channels: ["WhatsApp", "RCS", "SMS"],
-    icon: Shirt,
-    primaryChannel: "Instagram (DM Sync)",
-    opportunity: "Repeat Purchases & Loyalty Upgrades",
-    challenge: "Abandoned Cart Enquiries",
-    missions: ["Recover Leads", "Launch Collection", "Increase Repeat Purchases"],
-    color: "from-amber-500/15 to-orange-500/15 border-amber-500/30 text-amber-400"
-  },
-  {
-    id: "beauty",
-    title: "Beauty & Skincare",
-    desc: "Cosmetics, wellness formulas, and serum subscriptions.",
-    size: "2,500 - 15,000 customers",
-    channels: ["WhatsApp", "SMS", "Email"],
-    icon: Sparkles,
-    primaryChannel: "WhatsApp Broadcast",
-    opportunity: "Serum Replenishment Subscription",
-    challenge: "High Drop-off on Detail Pages",
-    missions: ["Skin Routine Follow-up", "Replenish Reminders", "Dormant Beauty Reactivation"],
-    color: "from-pink-500/15 to-rose-500/15 border-pink-500/30 text-pink-400"
-  },
-  {
-    id: "food",
-    title: "Food & Bakery",
-    desc: "Gourmet pastries, custom breads, and delivery packages.",
-    size: "1,200 - 8,000 customers",
-    channels: ["WhatsApp", "SMS"],
-    icon: Coffee,
-    primaryChannel: "SMS Delivery Sync",
-    opportunity: "Brunch Re-ordering Velocity",
-    challenge: "Low Customer Retention Rates",
-    missions: ["Weekend Brunch Alert", "Morning Repeat Trigger", "Dormant Foodie Reactivation"],
-    color: "from-yellow-500/15 to-amber-500/15 border-yellow-500/30 text-yellow-400"
-  },
-  {
-    id: "jewellery",
-    title: "Jewellery & Accessories",
-    desc: "High-ticket aura pendants, luxury rings, and quartz watches.",
-    size: "800 - 4,000 customers",
-    channels: ["RCS", "Email", "WhatsApp"],
-    icon: Gem,
-    primaryChannel: "RCS Rich Cards",
-    opportunity: "High-Ticket LTV Upgrades",
-    challenge: "Long Consideration & Checkout Hesitation",
-    missions: ["VIP Cart Recovery", "Pre-sale VIP Invites", "LTV Booster Sequences"],
-    color: "from-violet-500/15 to-purple-500/15 border-violet-500/30 text-violet-400"
-  },
-  {
-    id: "d2c",
-    title: "D2C Brand",
-    desc: "Eco-conscious utility packs, smart caps, and acoustic accessories.",
-    size: "10,000 - 50,000 customers",
-    channels: ["WhatsApp", "RCS", "SMS", "Email"],
-    icon: ShoppingBag,
-    primaryChannel: "WhatsApp Automation",
-    opportunity: "Cross-selling Core Accessories",
-    challenge: "High Customer Acquisition Cost",
-    missions: ["Abandoned Basket Recovery", "Loyalty Loop Boosters", "Cross-sell Campaign"],
-    color: "from-blue-500/15 to-cyan-500/15 border-blue-500/30 text-blue-400"
-  },
-  {
-    id: "enterprise",
-    title: "Enterprise",
-    desc: "SaaS software licensing, custom DB APIs, and cloud services.",
-    size: "100 - 500 accounts",
-    channels: ["Email", "RCS"],
-    icon: Briefcase,
-    primaryChannel: "Secure Email Gateway",
-    opportunity: "Cloud License Seat Add-ons",
-    challenge: "Stale Contract Renewal Proposals",
-    missions: ["Contract Renewal Alert", "SLA Health Audits", "License Extension Briefs"],
-    color: "from-green-500/15 to-emerald-500/15 border-green-500/30 text-green-400"
-  },
-  {
-    id: "custom",
-    title: "Custom Business",
-    desc: "Unique custom nodes, niche segments, and specialized objectives.",
-    size: "Variable size",
-    channels: ["Email", "WhatsApp", "SMS", "RCS"],
-    icon: Zap,
-    primaryChannel: "All Dispatch Sockets",
-    opportunity: "Custom Segment Target Calibration",
-    challenge: "Irregular Engagement Signals",
-    missions: ["Custom Objective Setup", "Dormant Custom Loop", "Targeted Cross-sell"],
-    color: "from-gray-500/15 to-slate-500/15 border-gray-700/60 text-gray-300"
-  }
-];
+// Types of options
+type BusinessType = "Fashion & Apparel" | "Beauty & Skincare" | "Food & Bakery" | "Jewellery & Accessories" | "D2C Brand" | "Enterprise" | "Custom";
+type SalesChannel = "Instagram" | "WhatsApp" | "Website" | "Offline Store" | "Marketplace" | "Multi-channel";
+type CustomerUniverse = "0–100" | "100–500" | "500–1000" | "1000–5000" | "5000+";
+type GrowthObjective = "Increase Revenue" | "Reduce Churn" | "Increase Repeat Purchases" | "Acquire New Customers" | "Launch New Products" | "Improve Engagement";
+type GrowthPersonality = "Conservative" | "Balanced" | "Aggressive" | "Customer First" | "Autopilot";
 
 export const BusinessProfileSetup: React.FC<BusinessProfileSetupProps> = ({ onSetupComplete }) => {
   const { personalizeForBusiness, theme } = useOrbit();
   const isLight = theme === "executive";
-  const [selectedProfile, setSelectedProfile] = useState<string>("fashion");
-  const [isCalibrating, setIsCalibrating] = useState(false);
+
+  // Wizard Steps: 1 = Identity, 2 = Customer Universe, 3 = Objective, 4 = Personality, 5 = Analyzing / Report
+  const [step, setStep] = useState<1 | 2 | 3 | 4 | 5>(1);
+
+  // Brand state values
+  const [brandName, setBrandName] = useState("Moonlight Kurtis");
+  const [businessType, setBusinessType] = useState<BusinessType>("Fashion & Apparel");
+  const [salesChannel, setSalesChannel] = useState<SalesChannel>("Instagram");
+  const [customerUniverse, setCustomerUniverse] = useState<CustomerUniverse>("100–500");
+  const [growthObjective, setGrowthObjective] = useState<GrowthObjective>("Increase Repeat Purchases");
+  const [growthPersonality, setGrowthPersonality] = useState<GrowthPersonality>("Customer First");
+
+  // AI Analysis sequence loading states
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [analysisProgress, setAnalysisProgress] = useState(0);
   const [calibLogs, setCalibLogs] = useState<string[]>([]);
-  const [logProgress, setLogProgress] = useState(0);
+  const [showReport, setShowReport] = useState(false);
 
-  const selectedData = BUSINESS_PROFILES.find(p => p.id === selectedProfile) || BUSINESS_PROFILES[0];
-  const ProfileIcon = selectedData.icon;
+  // procedural generation of stars coordinates for the customer galaxy
+  // memorized so it doesn't flicker on hover state changes, only changes when selection changes
+  const galaxyStars = useMemo(() => {
+    const starCounts = {
+      "0–100": 25,
+      "100–500": 60,
+      "500–1000": 110,
+      "1000–5000": 200,
+      "5000+": 350
+    };
 
-  const handleStartCalibration = () => {
-    setIsCalibrating(true);
-    setLogProgress(0);
+    const count = starCounts[customerUniverse];
+    const stars: { x: number; y: number; r: number; opacity: number; speedOffset: number }[] = [];
+    const centerX = 150;
+    const centerY = 150;
+
+    for (let i = 0; i < count; i++) {
+      // Spiral distribution
+      const angle = Math.random() * Math.PI * 2;
+      
+      // Arm factor for spiral arms (2 arms)
+      const arm = Math.floor(Math.random() * 2) * Math.PI;
+      const t = Math.random();
+      const distance = 12 + t * 115; // radial dispersion
+      
+      // Introduce spiral warp math
+      const finalAngle = angle * 0.2 + arm + t * Math.PI * 1.5;
+      const x = centerX + Math.cos(finalAngle) * distance;
+      const y = centerY + Math.sin(finalAngle) * distance;
+      const r = Math.random() * 1.5 + 0.5;
+      const opacity = Math.random() * 0.7 + 0.3;
+      const speedOffset = Math.random() * 10 + 5; // Rotation offset
+
+      stars.push({ x, y, r, opacity, speedOffset });
+    }
+    return stars;
+  }, [customerUniverse]);
+
+  // Handle Step Advancement
+  const nextStep = () => {
+    if (step < 4) {
+      setStep((step + 1) as any);
+    } else if (step === 4) {
+      setStep(5);
+      startAIAnalysis();
+    }
+  };
+
+  const prevStep = () => {
+    if (step > 1) {
+      setStep((step - 1) as any);
+    }
+  };
+
+  // Run Onboarding analysis sequence
+  const startAIAnalysis = () => {
+    setIsAnalyzing(true);
+    setAnalysisProgress(0);
     setCalibLogs([]);
+    setShowReport(false);
 
     const steps = [
-      `Initializing neural framework for profile: "${selectedData.title}"...`,
-      `Polaris: Mapping customer DNA segments for ${selectedData.title} parameters...`,
-      `Vega: Adjusting conversion models for ${selectedData.primaryChannel} yield calculations...`,
-      `Nova: Formatting specialized content copywriting nodes...`,
-      `Luna: Calibrating Recovery Radar (Targeting: ${selectedData.challenge})...`,
-      `Atlas: Setting up outbound throttles on primary channels: ${selectedData.channels.join(", ")}...`,
-      `Synchronizing sandboxed customer records & order ledger...`,
-      `Personalization locked. ORBIT Core fully optimized.`
+      "Analyzing Brand DNA parameters...",
+      "Polaris studying customer cohort signals...",
+      "Luna scanning database growth opportunities...",
+      "Vega forecasting retention & conversion potential...",
+      "Nova identifying personalization engagement patterns...",
+      "Atlas building custom execution & campaign profiles...",
+      "Calibrating system boardroom models to business node...",
+      "Brand DNA successfully decoded. Report generated."
     ];
 
-    steps.forEach((step, index) => {
+    steps.forEach((log, index) => {
       setTimeout(() => {
-        setCalibLogs(prev => [...prev, step]);
+        setCalibLogs(prev => [...prev, log]);
         const progress = Math.round(((index + 1) / steps.length) * 100);
-        setLogProgress(progress);
+        setAnalysisProgress(progress);
         
         if (index === steps.length - 1) {
           setTimeout(() => {
-            // Apply personalization in context
-            personalizeForBusiness(selectedData.title);
-            onSetupComplete();
-          }, 1000);
+            // Apply contexts personalization based on category
+            personalizeForBusiness(businessType);
+            setIsAnalyzing(false);
+            setShowReport(true);
+          }, 800);
         }
-      }, (index + 1) * 750);
+      }, (index + 1) * 900);
     });
   };
 
+  // Calculated Report Values based on Category and Scale
+  const reportData = useMemo(() => {
+    const isEnterprise = businessType === "Enterprise";
+    const isJewellery = businessType === "Jewellery & Accessories";
+    const isFashion = businessType === "Fashion & Apparel";
+    const isBeauty = businessType === "Beauty & Skincare";
+    const isFood = businessType === "Food & Bakery";
+
+    // Dynamic metrics
+    const potRevenue = isEnterprise ? "₹3,80,000" 
+                     : isJewellery ? "₹45,000" 
+                     : isFashion ? "₹34,500" 
+                     : isBeauty ? "₹28,900" 
+                     : isFood ? "₹18,500"
+                     : "₹24,500";
+
+    const expectedMissionRevenue = isEnterprise ? "₹2,50,000" 
+                                 : isJewellery ? "₹32,000" 
+                                 : isFashion ? "₹12,000" 
+                                 : isBeauty ? "₹18,500" 
+                                 : isFood ? "₹8,900"
+                                 : "₹15,000";
+
+    const inactiveCount = isFood ? 28 : isBeauty ? 14 : isEnterprise ? 3 : isJewellery ? 6 : 12;
+    const leadsCount = isFood ? 32 : isBeauty ? 25 : isEnterprise ? 4 : isJewellery ? 9 : 17;
+    const vipCount = isEnterprise ? 2 : isJewellery ? 5 : isFashion ? 12 : 8;
+
+    const bestAudience = isFashion ? "Repeat Buyers" 
+                       : isBeauty ? "Slipping VIPs" 
+                       : isJewellery ? "Cart Abandoners" 
+                       : isEnterprise ? "High LTV Inactive" 
+                       : "New Signups";
+
+    const bestCampaign = isFashion ? "New Collection Drop" 
+                       : isBeauty ? "Serum Replenishment Alert" 
+                       : isFood ? "Weekend Brunch Boost" 
+                       : isJewellery ? "Private VIP Pre-sales" 
+                       : isEnterprise ? "License Seat Add-ons"
+                       : "Autonomous win-back";
+
+    const recommendedChannel = isFashion ? "RCS Cards" 
+                             : isBeauty || isFood ? "WhatsApp" 
+                             : isEnterprise ? "Email Gateway" 
+                             : "Multi-channel";
+
+    return {
+      potRevenue,
+      expectedMissionRevenue,
+      inactiveCount,
+      leadsCount,
+      vipCount,
+      bestAudience,
+      bestCampaign,
+      recommendedChannel,
+      healthScore: 82 + Math.floor(Math.random() * 12),
+      opportunityScore: 85 + Math.floor(Math.random() * 11)
+    };
+  }, [businessType]);
+
+  // Complete onboarding
+  const handleLaunch = (withMissionGoal?: string) => {
+    if (withMissionGoal) {
+      onSetupComplete(withMissionGoal);
+    } else {
+      onSetupComplete();
+    }
+  };
+
   return (
-    <div className={`relative min-h-screen space-grid flex flex-col items-center justify-center p-6 overflow-y-auto transition-colors duration-300 ${
+    <div className={`relative min-h-screen space-grid flex flex-col items-center justify-center p-4 md:p-6 overflow-y-auto transition-colors duration-300 ${
       isLight ? "bg-gray-50 text-gray-900" : "bg-[#050816] text-white"
     }`}>
-      {/* Scanlines Overlay */}
-      <div className={`pointer-events-none fixed inset-0 space-grid transition-opacity duration-300 ${isLight ? "opacity-30" : "opacity-60"}`} />
+      {/* Visual background overlays */}
+      <div className={`pointer-events-none fixed inset-0 space-grid transition-opacity duration-300 ${isLight ? "opacity-20" : "opacity-40"}`} />
       
-      {/* Ambient Radial Glow */}
-      <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] rounded-full pointer-events-none transition-opacity duration-300 ${
-        isLight ? "opacity-5" : "opacity-20"
+      {/* Swirling space glow */}
+      <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[750px] h-[750px] rounded-full pointer-events-none transition-opacity duration-300 ${
+        isLight ? "opacity-5" : "opacity-15"
       }`} 
         style={{
           background: `radial-gradient(circle, ${isLight ? "#3B82F6" : "#8B5CF6"} 0%, transparent 70%)`
         }} 
       />
 
-      {!isCalibrating ? (
-        <div className="relative w-full max-w-6xl flex flex-col items-center py-8">
-          {/* Header */}
-          <div className="text-center mb-10 space-y-3">
-            <span className={`font-mono text-[9px] tracking-[0.2em] uppercase border px-3 py-1 rounded-full ${
-              isLight 
-                ? "border-blue-500/30 bg-blue-500/5 text-blue-600 font-bold" 
-                : "border-orbit-blue/30 bg-orbit-blue/5 text-orbit-blue"
-            }`}>
-              SYSTEM ADAPTATION SEQUENCE
-            </span>
-            <h1 className="text-3xl md:text-5xl font-bold font-space tracking-tight">
-              Tell ORBIT About Your Business
-            </h1>
-            <p className={`text-xs md:text-sm max-w-2xl mx-auto leading-relaxed ${
-              isLight ? "text-gray-655" : "text-gray-400"
-            }`}>
-              We'll personalize your AI agents, insights, campaigns, and recommendations. Select your category to calibrate database records.
-            </p>
-          </div>
-
-          {/* Main Layout Split */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 w-full mb-10 items-stretch">
-            {/* Left side: Business Cards */}
-            <div className="lg:col-span-7 flex flex-col gap-3 max-h-[500px] overflow-y-auto pr-2 scrollbar-thin">
-              {BUSINESS_PROFILES.map((card) => {
-                const CardIcon = card.icon;
-                const isSelected = selectedProfile === card.id;
-                return (
-                  <button
-                    key={card.id}
-                    onClick={() => setSelectedProfile(card.id)}
-                    className={`p-4 rounded-xl text-left border backdrop-blur-md transition-all duration-300 flex items-center gap-4 group cursor-pointer ${
-                      isSelected
-                        ? isLight
-                          ? "border-blue-600 bg-blue-50/20 shadow-[0_4px_20px_rgba(59,130,246,0.1)]"
-                          : "border-orbit-blue bg-gray-900/90 shadow-orbit-glow"
-                        : isLight
-                          ? "border-gray-250 bg-white hover:border-gray-350 hover:bg-gray-50"
-                          : "border-gray-800 bg-gray-950/45 hover:border-gray-700 hover:bg-gray-950/70"
-                    }`}
-                  >
-                    <div className={`w-10 h-10 rounded-lg bg-gradient-to-tr ${card.color} flex items-center justify-center border shrink-0 group-hover:scale-105 transition-transform`}>
-                      <CardIcon size={16} />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex justify-between items-center gap-2">
-                        <h3 className="font-space text-sm font-bold truncate">{card.title}</h3>
-                        <span className={`font-mono text-[7px] border px-1.5 py-0.5 rounded uppercase ${
-                          isLight ? "border-gray-300 text-gray-500" : "border-gray-800 text-gray-600"
-                        }`}>{card.size.split(" ")[0]}</span>
-                      </div>
-                      <p className={`text-[10px] leading-relaxed truncate mt-0.5 ${isLight ? "text-gray-550" : "text-gray-400"}`}>{card.desc}</p>
-                    </div>
-                  </button>
-                );
-              })}
+      {/* Main Container Wizard */}
+      <div className="relative w-full max-w-5xl flex flex-col items-center py-6 z-10">
+        
+        {step < 5 && (
+          /* ════════════════════════════════════════
+              ONBOARDING WIZARD STEPS
+          ════════════════════════════════════════ */
+          <div className="w-full max-w-3xl flex flex-col items-center space-y-8">
+            {/* Header branding */}
+            <div className="text-center space-y-2">
+              <span className={`font-mono text-[9px] tracking-[0.25em] uppercase border px-3.5 py-1 rounded-full ${
+                isLight 
+                  ? "border-blue-500/30 bg-blue-500/5 text-blue-600 font-bold" 
+                  : "border-orbit-blue/30 bg-orbit-blue/5 text-orbit-blue"
+              }`}>
+                Brand DNA Initializer
+              </span>
+              <h1 className="text-2xl md:text-4xl font-bold font-space tracking-tight">
+                Let's Decode Your Brand DNA
+              </h1>
+              <p className={`text-[11px] md:text-xs max-w-xl mx-auto leading-relaxed uppercase font-mono tracking-wider ${
+                isLight ? "text-gray-500" : "text-gray-400"
+              }`}>
+                Understand Your Brand. Unlock Your Growth Potential.
+              </p>
             </div>
 
-            {/* Right side: AI Personalization Preview ( futuristic ) */}
-            <div className="lg:col-span-5 flex">
-              <div className={`w-full p-6 rounded-2xl border flex flex-col justify-between relative overflow-hidden backdrop-blur-md ${
-                isLight 
-                  ? "bg-white border-gray-200 shadow-xl" 
-                  : "bg-gray-900/30 border-gray-850 shadow-[0_0_30px_rgba(139,92,246,0.06)]"
-              }`}>
-                {/* Visual Accent */}
-                <div className={`absolute top-0 right-0 w-32 h-32 bg-gradient-to-br ${selectedData.color} opacity-20 blur-2xl pointer-events-none`} />
+            {/* Step Progress indicators */}
+            <div className="flex items-center gap-2 font-mono text-[8px] uppercase tracking-wider text-gray-550">
+              <span className={step === 1 ? "text-white font-bold" : ""}>01. Identity</span>
+              <ChevronRight size={10} className="opacity-40" />
+              <span className={step === 2 ? "text-white font-bold" : ""}>02. Universe</span>
+              <ChevronRight size={10} className="opacity-40" />
+              <span className={step === 3 ? "text-white font-bold" : ""}>03. Mission</span>
+              <ChevronRight size={10} className="opacity-40" />
+              <span className={step === 4 ? "text-white font-bold" : ""}>04. Personality</span>
+            </div>
+
+            {/* Step 1: Business Identity */}
+            {step === 1 && (
+              <div className="w-full orbit-panel p-5 md:p-6 space-y-6 animate-fade-in-up">
+                <div className="border-b border-gray-900 pb-3 flex items-center gap-2">
+                  <Cpu size={14} className="text-orbit-purple" />
+                  <h3 className="font-space text-sm font-bold uppercase tracking-wider">Business profile credentials</h3>
+                </div>
 
                 <div className="space-y-4">
-                  {/* Title Header */}
-                  <div className="border-b border-gray-800/40 pb-3 mb-2 flex items-center gap-3">
-                    <div className={`p-2 rounded-lg bg-gradient-to-tr ${selectedData.color} border flex items-center justify-center`}>
-                      <ProfileIcon size={16} />
+                  <div>
+                    <label className="font-mono text-[9px] text-gray-500 uppercase block mb-1">What is your brand name?</label>
+                    <input
+                      type="text"
+                      value={brandName}
+                      onChange={e => setBrandName(e.target.value)}
+                      placeholder="e.g. Moonlight Kurtis"
+                      className="w-full bg-gray-950 border border-gray-900 rounded-xl px-4 py-3 text-xs font-mono text-white focus:outline-none focus:border-orbit-blue/40"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {/* Business Type */}
+                    <div className="space-y-2">
+                      <label className="font-mono text-[9px] text-gray-500 uppercase block">Business category</label>
+                      <select
+                        value={businessType}
+                        onChange={e => setBusinessType(e.target.value as BusinessType)}
+                        className="w-full bg-gray-950 border border-gray-900 rounded-xl p-3 font-mono text-[10px] text-white focus:outline-none focus:border-orbit-blue/40"
+                      >
+                        <option value="Fashion & Apparel">Fashion & Apparel</option>
+                        <option value="Beauty & Skincare">Beauty & Skincare</option>
+                        <option value="Food & Bakery">Food & Bakery</option>
+                        <option value="Jewellery & Accessories">Jewellery & Accessories</option>
+                        <option value="D2C Brand">D2C Brand</option>
+                        <option value="Enterprise">Enterprise</option>
+                        <option value="Custom">Custom...</option>
+                      </select>
                     </div>
-                    <div>
-                      <span className="font-mono text-[8px] text-gray-500 uppercase tracking-wider block">AI CALIBRATION PREVIEW</span>
-                      <h4 className="font-space text-base font-bold">{selectedData.title}</h4>
+
+                    {/* Sales Channel */}
+                    <div className="space-y-2">
+                      <label className="font-mono text-[9px] text-gray-500 uppercase block">Primary sales channel</label>
+                      <select
+                        value={salesChannel}
+                        onChange={e => setSalesChannel(e.target.value as SalesChannel)}
+                        className="w-full bg-gray-950 border border-gray-900 rounded-xl p-3 font-mono text-[10px] text-white focus:outline-none focus:border-orbit-purple/40"
+                      >
+                        <option value="Instagram">Instagram</option>
+                        <option value="WhatsApp">WhatsApp</option>
+                        <option value="Website">Website</option>
+                        <option value="Offline Store">Offline Store</option>
+                        <option value="Marketplace">Marketplace</option>
+                        <option value="Multi-channel">Multi-channel</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Step 2: Customer Universe */}
+            {step === 2 && (
+              <div className="w-full grid grid-cols-1 md:grid-cols-12 gap-6 animate-fade-in-up items-center">
+                {/* Left controls selectors */}
+                <div className="md:col-span-6 orbit-panel p-5 md:p-6 space-y-4">
+                  <div className="border-b border-gray-900 pb-3 flex items-center gap-2">
+                    <Users size={14} className="text-orbit-blue" />
+                    <h3 className="font-space text-sm font-bold uppercase tracking-wider">Customer Universe Scale</h3>
+                  </div>
+                  
+                  <label className="font-mono text-[9px] text-gray-500 uppercase block">How many active customers do you currently have?</label>
+                  <div className="flex flex-col gap-2">
+                    {(["0–100", "100–500", "500–1000", "1000–5000", "5000+"] as CustomerUniverse[]).map((univ) => {
+                      const isSelected = customerUniverse === univ;
+                      return (
+                        <button
+                          key={univ}
+                          onClick={() => setCustomerUniverse(univ)}
+                          className={`w-full p-3 rounded-xl border text-left cursor-pointer transition-all ${
+                            isSelected 
+                              ? "border-orbit-blue bg-orbit-blue/10 text-white font-bold" 
+                              : "border-gray-900 bg-transparent text-gray-400 hover:border-gray-800"
+                          }`}
+                        >
+                          <div className="flex items-center justify-between font-mono text-xs">
+                            <span>{univ} customers</span>
+                            {isSelected && <div className="w-1.5 h-1.5 rounded-full bg-orbit-blue shadow-orbit-glow" />}
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Right concentric galaxy visualization */}
+                <div className="md:col-span-6 flex flex-col items-center justify-center py-6 orbit-panel relative overflow-hidden min-h-[300px]">
+                  <div className="absolute inset-0 bg-orbit-glow-blue opacity-5 pointer-events-none" />
+                  
+                  {/* Rotating Concentric SVG Galaxy */}
+                  <div className="relative w-64 h-64 flex items-center justify-center">
+                    {/* Concentric spin shells */}
+                    <div className="absolute inset-0 rounded-full border border-orbit-blue/5 animate-orbit-spin-slow" />
+                    <div className="absolute inset-6 rounded-full border border-dashed border-orbit-purple/10 animate-orbit-spin-reverse" />
+                    
+                    {/* SVG Canvas drawing Procedural star fields */}
+                    <svg 
+                      className="absolute inset-0 w-full h-full pointer-events-none" 
+                      viewBox="0 0 300 300"
+                    >
+                      <g className="animate-spin-slow origin-center">
+                        {galaxyStars.map((s, idx) => (
+                          <circle 
+                            key={idx} 
+                            cx={s.x} 
+                            cy={s.y} 
+                            r={s.r} 
+                            fill={idx % 3 === 0 ? "#8B5CF6" : idx % 2 === 0 ? "#3B82F6" : "#22C55E"} 
+                            opacity={s.opacity} 
+                            className="animate-pulse"
+                          />
+                        ))}
+                      </g>
+                    </svg>
+
+                    <div className="absolute inset-20 rounded-full bg-[#070b20]/45 border border-orbit-blue/35 flex flex-col items-center justify-center shadow-orbit-glow font-mono">
+                      <span className="text-[7px] text-gray-500 uppercase tracking-widest block">Universe size</span>
+                      <span className="text-sm font-bold text-white block mt-0.5">{customerUniverse}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Step 3: Growth Objective */}
+            {step === 3 && (
+              <div className="w-full orbit-panel p-5 md:p-6 space-y-4 animate-fade-in-up">
+                <div className="border-b border-gray-900 pb-3 flex items-center gap-2">
+                  <Target size={14} className="text-orbit-success" />
+                  <h3 className="font-space text-sm font-bold uppercase tracking-wider">Primary growth target</h3>
+                </div>
+
+                <label className="font-mono text-[9px] text-gray-500 uppercase block mb-1">What is your primary marketing goal?</label>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  {([
+                    "Increase Revenue", 
+                    "Reduce Churn", 
+                    "Increase Repeat Purchases", 
+                    "Acquire New Customers", 
+                    "Launch New Products", 
+                    "Improve Engagement"
+                  ] as GrowthObjective[]).map((obj) => {
+                    const isSelected = growthObjective === obj;
+                    return (
+                      <button
+                        key={obj}
+                        onClick={() => setGrowthObjective(obj)}
+                        className={`p-3.5 rounded-xl border text-left cursor-pointer transition-all ${
+                          isSelected 
+                            ? "border-orbit-success bg-orbit-success/10 text-white font-bold" 
+                            : "border-gray-900 bg-transparent text-gray-400 hover:border-gray-800"
+                        }`}
+                      >
+                        <span className="font-space text-xs font-bold block">{obj}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* Step 4: Growth Personality */}
+            {step === 4 && (
+              <div className="w-full space-y-4 animate-fade-in-up">
+                <div className="text-center">
+                  <label className="font-mono text-[9px] text-gray-500 uppercase tracking-widest block mb-2">Configure operative strategy card</label>
+                </div>
+                
+                <div className="grid grid-cols-1 sm:grid-cols-5 gap-3">
+                  {([
+                    { name: "Conservative", desc: "Focuses on budget management, maximum confidence thresholds, zero fatigue risk.", color: "border-blue-500/30" },
+                    { name: "Balanced", desc: "Maintains optimal dispatch frequency, mid-tier ROI yields, structured campaigns.", color: "border-cyan-500/30" },
+                    { name: "Aggressive", desc: "High frequency push notifications, massive conversions focus, higher churn risks.", color: "border-red-500/30" },
+                    { name: "Customer First", desc: "Maintains high personalization values, filters opt-outs, shields loyal buyers.", color: "border-orbit-purple/40 shadow-orbit-glow-purple" },
+                    { name: "Autopilot", desc: "Fully autonomous dispatch triggers. Agents execute win-backs and promotions automatically.", color: "border-orbit-success/30" }
+                  ] as { name: GrowthPersonality; desc: string; color: string }[]).map((card) => {
+                    const isSelected = growthPersonality === card.name;
+                    return (
+                      <button
+                        key={card.name}
+                        onClick={() => setGrowthPersonality(card.name)}
+                        className={`p-3 rounded-xl border text-left cursor-pointer flex flex-col justify-between min-h-[160px] transition-all bg-gray-950/20 backdrop-blur-sm ${
+                          isSelected 
+                            ? `border-opacity-100 ${card.color} bg-gray-900/60` 
+                            : "opacity-65 hover:opacity-95 hover:border-gray-850"
+                        }`}
+                      >
+                        <div className="flex items-center justify-between w-full">
+                          <span className="font-space text-xs font-bold text-white">{card.name}</span>
+                          {isSelected && <CheckCircle2 size={10} className="text-orbit-purple" />}
+                        </div>
+                        <p className="font-mono text-[8.5px] leading-relaxed text-gray-500 mt-2">{card.desc}</p>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* Wizard Navigation Footer Button Strip */}
+            <div className="w-full flex items-center justify-between pt-4 border-t border-gray-900">
+              <button
+                onClick={prevStep}
+                disabled={step === 1}
+                className="px-4 py-2.5 rounded-lg border border-gray-900 text-gray-500 font-mono text-[10px] uppercase cursor-pointer hover:border-gray-850 hover:text-gray-300 disabled:opacity-30 disabled:cursor-not-allowed"
+              >
+                Back
+              </button>
+              
+              <button
+                onClick={nextStep}
+                className="px-6 py-3.5 rounded-xl bg-gradient-to-r from-orbit-blue to-orbit-purple text-white font-mono text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5 hover:opacity-95 active:scale-95 duration-200 cursor-pointer shadow-orbit-glow"
+              >
+                <span>Continue</span>
+                <ArrowRight size={12} />
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Step 5: loader or Report presentation */}
+        {step === 5 && (
+          <div className="w-full max-w-4xl flex flex-col items-center">
+            
+            {isAnalyzing ? (
+              /* ════════════════════════════════════════
+                  AI ANALYSIS TELEMETRY LOADER
+              ════════════════════════════════════════ */
+              <div className="relative w-full max-w-lg bg-gray-900/85 backdrop-blur-md border border-gray-850 rounded-2xl p-6 sm:p-8 shadow-orbit-glow flex flex-col space-y-6 animate-pulse-slow">
+                <div className="flex items-center justify-between border-b border-gray-800 pb-4">
+                  <div className="flex items-center gap-3">
+                    <Loader2 size={16} className="text-orbit-purple animate-spin" />
+                    <span className="font-mono text-xs text-gray-400 uppercase tracking-widest">Decoding Brand DNA Sockets</span>
+                  </div>
+                  <span className="font-mono text-xs text-orbit-purple font-bold tabular-nums">{analysisProgress}%</span>
+                </div>
+
+                <div className="font-mono text-[10px] space-y-2.5 h-52 overflow-y-auto text-green-400 pr-2 scrollbar-thin">
+                  {calibLogs.map((log, idx) => (
+                    <div key={idx} className="flex gap-2 animate-fade-in-up">
+                      <span className="text-orbit-purple font-bold">&gt;</span>
+                      <span>{log}</span>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="w-full h-1 bg-gray-950 rounded-full overflow-hidden">
+                  <div 
+                    className="h-full bg-gradient-to-r from-orbit-blue to-orbit-purple rounded-full transition-all duration-300"
+                    style={{ width: `${analysisProgress}%` }}
+                  />
+                </div>
+
+                <div className="flex justify-between items-center text-gray-650 font-mono text-[9px] uppercase border-t border-gray-850 pt-4">
+                  <span>Model: adapt_dna.ts</span>
+                  <span className="animate-pulse">Studying marketing vectors...</span>
+                </div>
+              </div>
+            ) : showReport ? (
+              /* ════════════════════════════════════════
+                  BRAND DNA REPORT BRIEFING BOARD
+              ════════════════════════════════════════ */
+              <div className="w-full space-y-6 animate-fade-in-up">
+                
+                {/* Header status bar */}
+                <div className="text-center space-y-2 mb-2">
+                  <span className="font-mono text-[9px] text-orbit-success border border-orbit-success/30 px-3.5 py-1 rounded-full bg-orbit-success/5 uppercase font-bold tracking-widest">
+                    Your Brand DNA Has Been Decoded
+                  </span>
+                  <h1 className="text-2xl md:text-3xl font-bold font-space tracking-tight">
+                    Intelligence Briefing Profile
+                  </h1>
+                  <p className="text-[11px] text-gray-400 max-w-md mx-auto">
+                    ORBIT is now calibrated and personalized to your business. Let's inspect your growth assets.
+                  </p>
+                </div>
+
+                {/* Dashboard layout split */}
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                  
+                  {/* COLUMN 1: Brand DNA Report */}
+                  <div className="orbit-panel p-5 flex flex-col justify-between min-h-[300px]">
+                    <div className="border-b border-gray-900 pb-3">
+                      <span className="font-space text-xs font-bold uppercase tracking-wider text-white">Brand DNA Details</span>
+                    </div>
+
+                    <div className="flex-1 space-y-4 font-mono text-[10px] mt-4">
+                      <div>
+                        <span className="text-gray-550 block uppercase text-[8px]">Brand</span>
+                        <span className="text-white font-bold text-xs">{brandName}</span>
+                      </div>
+                      <div className="grid grid-cols-2 gap-2">
+                        <div>
+                          <span className="text-gray-550 block uppercase text-[8px]">Category</span>
+                          <span className="text-white font-bold">{businessType}</span>
+                        </div>
+                        <div>
+                          <span className="text-gray-550 block uppercase text-[8px]">Growth Style</span>
+                          <span className="text-white font-bold">{growthPersonality}</span>
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-2 gap-2">
+                        <div>
+                          <span className="text-gray-550 block uppercase text-[8px]">Primary Channel</span>
+                          <span className="text-white font-bold">{salesChannel}</span>
+                        </div>
+                        <div>
+                          <span className="text-gray-550 block uppercase text-[8px]">Universe size</span>
+                          <span className="text-white font-bold">{customerUniverse} stars</span>
+                        </div>
+                      </div>
+                      
+                      <div className="border-t border-gray-900/60 pt-3 flex items-center justify-between">
+                        <div>
+                          <span className="text-gray-550 block uppercase text-[8px]">Orbit health rating</span>
+                          <span className="text-xs font-bold text-orbit-success">{reportData.healthScore}/100</span>
+                        </div>
+                        <div className="w-16 h-1 bg-gray-950 rounded-full overflow-hidden shrink-0">
+                          <div className="h-full bg-orbit-success" style={{ width: `${reportData.healthScore}%` }} />
+                        </div>
+                      </div>
                     </div>
                   </div>
 
-                  {/* Structured Parameters */}
-                  <div className="space-y-3 font-mono text-[9px]">
-                    <div>
-                      <span className="text-gray-500 uppercase block">Primary Dispatch Channel</span>
-                      <span className="text-white font-bold text-xs flex items-center gap-1.5 mt-0.5">
-                        {selectedData.primaryChannel.includes("Instagram") && (
-                          <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-amber-500">
-                            <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
-                            <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
-                            <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
-                          </svg>
-                        )}
-                        {selectedData.primaryChannel.includes("WhatsApp") && <MessageCircle size={11} className="text-emerald-500" />}
-                        {selectedData.primaryChannel.includes("SMS") && <Layers size={11} className="text-yellow-400" />}
-                        {selectedData.primaryChannel.includes("RCS") && <Layers size={11} className="text-purple-400" />}
-                        {selectedData.primaryChannel.includes("Email") && <Mail size={11} className="text-blue-400" />}
-                        {selectedData.primaryChannel}
-                      </span>
+                  {/* COLUMN 2: AI Insights checklist */}
+                  <div className="orbit-panel p-5 flex flex-col min-h-[300px]">
+                    <div className="border-b border-gray-900 pb-3 mb-4">
+                      <span className="font-space text-xs font-bold uppercase tracking-wider text-white">Targeted AI Insights</span>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-3.5">
-                      <div>
-                        <span className="text-gray-500 uppercase block">Primary Opportunity</span>
-                        <span className="text-emerald-400 font-bold block mt-0.5">{selectedData.opportunity}</span>
+                    <div className="flex-1 space-y-3 font-mono text-[9px] text-gray-400">
+                      <div className="flex justify-between border-b border-gray-900/40 pb-1.5">
+                        <span>Best Audience Node:</span>
+                        <span className="text-white font-bold uppercase">{reportData.bestAudience}</span>
                       </div>
-                      <div>
-                        <span className="text-gray-500 uppercase block">Common Challenge</span>
-                        <span className="text-amber-500 font-bold block mt-0.5">{selectedData.challenge}</span>
+                      <div className="flex justify-between border-b border-gray-900/40 pb-1.5">
+                        <span>Highest Opportunity:</span>
+                        <span className="text-white font-bold uppercase">Abandoned Enquiries</span>
+                      </div>
+                      <div className="flex justify-between border-b border-gray-900/40 pb-1.5">
+                        <span>Optimal Campaign:</span>
+                        <span className="text-white font-bold uppercase truncate max-w-[120px]">{reportData.bestCampaign}</span>
+                      </div>
+                      <div className="flex justify-between border-b border-gray-900/40 pb-1.5">
+                        <span>Recommended Channel:</span>
+                        <span className="text-orbit-purple font-bold uppercase">{reportData.recommendedChannel}</span>
+                      </div>
+                      <div className="flex justify-between border-b border-gray-900/40 pb-1.5">
+                        <span>Predicted Growth Potential:</span>
+                        <span className="text-orbit-success font-bold uppercase">High</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Campaign Risk Level:</span>
+                        <span className="text-blue-400 font-bold uppercase">Low</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* COLUMN 3: Growth Opportunity Radar (Luna) */}
+                  <div className="orbit-panel p-5 flex flex-col justify-between min-h-[300px]">
+                    <div className="border-b border-gray-900 pb-3 flex items-center gap-1">
+                      <Activity size={12} className="text-pink-400" />
+                      <span className="font-space text-xs font-bold uppercase tracking-wider text-white">Growth Opportunity Radar</span>
+                    </div>
+
+                    <div className="flex-1 space-y-3.5 font-mono text-[10px] mt-4">
+                      <div className="flex justify-between">
+                        <span className="text-gray-550">Recoverable Revenue:</span>
+                        <span className="text-white font-bold">{reportData.potRevenue}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-550">Inactive Customers:</span>
+                        <span className="text-white font-bold">{reportData.inactiveCount}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-550">Abandoned Leads:</span>
+                        <span className="text-white font-bold">{reportData.leadsCount}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-550">VIP Customers:</span>
+                        <span className="text-white font-bold">{reportData.vipCount}</span>
+                      </div>
+                      
+                      <div className="border-t border-gray-900/60 pt-3 flex items-center justify-between">
+                        <span className="text-gray-550 uppercase text-[8px] font-bold">Opportunity score</span>
+                        <span className="font-space text-sm font-bold text-pink-400">{reportData.opportunityScore}/100</span>
+                      </div>
+                    </div>
+                    <span className="font-mono text-[7px] text-gray-650 uppercase tracking-widest text-center mt-2 block">Powered by Luna Agent</span>
+                  </div>
+
+                </div>
+
+                {/* BOTTOM: AI Recommended Launch Mission */}
+                <div className="orbit-panel p-5 grid grid-cols-1 md:grid-cols-3 gap-6 items-center border border-orbit-purple/20 bg-orbit-purple/5">
+                  <div className="md:col-span-2 space-y-2">
+                    <span className="font-mono text-[8px] text-orbit-purple border border-orbit-purple/30 bg-orbit-purple/5 px-2 py-0.5 rounded-full uppercase font-bold tracking-wider">
+                      Recommended Next Mission
+                    </span>
+                    <h3 className="font-space text-lg font-bold text-white uppercase tracking-tight">Recover Lost Revenue</h3>
+                    <p className="font-mono text-[9.5px] leading-relaxed text-gray-400">
+                      Luna has detected high-affinity checkout leaks. Launching this mission dispatches automated WhatsApp templates to recover up to <span className="text-orbit-success font-bold">{reportData.potRevenue}</span> in dormant cart assets.
+                    </p>
+                  </div>
+                  
+                  <div className="space-y-4 text-right">
+                    <div className="font-mono text-[10px] space-y-1">
+                      <div className="flex justify-between md:justify-end gap-4">
+                        <span className="text-gray-550">Expected Yield:</span>
+                        <span className="text-orbit-success font-bold">{reportData.potRevenue}</span>
+                      </div>
+                      <div className="flex justify-between md:justify-end gap-4">
+                        <span className="text-gray-550">Confidence Score:</span>
+                        <span className="text-white font-bold">91%</span>
                       </div>
                     </div>
 
-                    <div>
-                      <span className="text-gray-500 uppercase block">Database Scale</span>
-                      <span className="text-gray-300 font-bold block mt-0.5">{selectedData.size}</span>
-                    </div>
-
-                    <div className="border-t border-gray-800/50 pt-3">
-                      <span className="text-gray-500 uppercase tracking-wider block mb-2 font-bold">Recommended Missions</span>
-                      <div className="flex flex-col gap-1.5">
-                        {selectedData.missions.map((missionName) => (
-                          <div key={missionName} className="flex items-center gap-2 text-gray-300">
-                            <CheckCircle2 size={11} className="text-emerald-400" />
-                            <span>{missionName}</span>
-                          </div>
-                        ))}
-                      </div>
+                    <div className="flex gap-2.5 justify-end">
+                      <button
+                        onClick={() => handleLaunch()}
+                        className="px-4 py-3 border border-gray-800 bg-gray-950/40 text-gray-300 font-mono text-[9px] uppercase tracking-wider font-bold rounded-xl cursor-pointer hover:border-gray-750 transition-colors"
+                      >
+                        [Enter Command Center]
+                      </button>
+                      <button
+                        onClick={() => handleLaunch("Reduce Churn")}
+                        className="px-5 py-3 bg-gradient-to-r from-orbit-blue to-orbit-purple text-white font-mono text-[9px] uppercase tracking-widest font-bold rounded-xl cursor-pointer shadow-orbit-glow hover:opacity-95 duration-150 transition-opacity"
+                      >
+                        Start Mission
+                      </button>
                     </div>
                   </div>
                 </div>
 
-                {/* Configuration Action Button */}
-                <button
-                  onClick={handleStartCalibration}
-                  className={`w-full mt-6 py-3 rounded-xl text-xs font-mono font-bold tracking-widest uppercase flex items-center justify-center gap-2 transition-all cursor-pointer ${
-                    isLight
-                      ? "bg-blue-600 hover:bg-blue-700 text-white shadow-lg active:scale-95"
-                      : "bg-gradient-to-r from-orbit-blue to-orbit-purple text-white shadow-orbit-glow hover:opacity-90 active:scale-95 duration-200"
-                  }`}
-                >
-                  <Wand2 size={13} />
-                  Configure ORBIT Core
-                  <ArrowRight size={13} />
-                </button>
               </div>
-            </div>
-          </div>
-        </div>
-      ) : (
-        /* Calibration Logs Loading screen (Apple-style) */
-        <div className="relative w-full max-w-lg bg-gray-900/85 backdrop-blur-md border border-gray-800 rounded-2xl p-6 sm:p-8 shadow-orbit-glow flex flex-col space-y-6">
-          <div className="flex items-center justify-between border-b border-gray-800 pb-4">
-            <div className="flex items-center gap-3">
-              <Loader2 size={16} className="text-orbit-blue animate-spin" />
-              <span className="font-mono text-xs text-gray-400 uppercase tracking-widest">Calibrating Business Node</span>
-            </div>
-            <span className="font-mono text-xs text-orbit-blue font-bold tabular-nums">{logProgress}%</span>
-          </div>
+            ) : null}
 
-          <div className="font-mono text-[10px] space-y-2.5 h-52 overflow-y-auto text-green-400 pr-2 scrollbar-thin">
-            {calibLogs.map((log, idx) => (
-              <div key={idx} className="flex gap-2 animate-fade-in-up">
-                <span className="text-blue-500 font-bold">&gt;</span>
-                <span>{log}</span>
-              </div>
-            ))}
           </div>
+        )}
 
-          <div className="w-full h-1 bg-gray-950 rounded-full overflow-hidden">
-            <div 
-              className="h-full bg-gradient-to-r from-orbit-blue to-orbit-purple rounded-full transition-all duration-300"
-              style={{ width: `${logProgress}%` }}
-            />
-          </div>
-
-          <div className="flex justify-between items-center text-gray-500 font-mono text-[9px] uppercase border-t border-gray-800 pt-4">
-            <span>Core: adapt.ts</span>
-            <span className="animate-pulse">Locking segment clusters...</span>
-          </div>
-        </div>
-      )}
+      </div>
     </div>
   );
 };

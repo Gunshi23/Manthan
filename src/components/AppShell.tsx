@@ -1,7 +1,7 @@
 import React from "react";
 import { 
   Terminal, Activity, Star, Zap, Users, Mic, BarChart2, 
-  Settings, Moon, Sun, Radio, ChevronRight
+  Settings, Moon, Sun, Radio, ChevronRight, Cpu
 } from "lucide-react";
 import { useOrbit } from "../context/OrbitContext";
 
@@ -10,6 +10,7 @@ type Page =
   | "mission-control" 
   | "customer-galaxy" 
   | "growth-engine" 
+  | "future-simulator"
   | "agent-boardroom" 
   | "voice-console" 
   | "analytics" 
@@ -27,6 +28,7 @@ const navItems: { id: Page; icon: React.FC<any>; label: string; shortLabel: stri
   { id: "mission-control", icon: Activity, label: "Mission Control", shortLabel: "MCT" },
   { id: "customer-galaxy", icon: Star, label: "Customer Galaxy", shortLabel: "GLX" },
   { id: "growth-engine", icon: Zap, label: "Growth Engine", shortLabel: "GRW" },
+  { id: "future-simulator", icon: Cpu, label: "Future Simulator", shortLabel: "FUT" },
   { id: "agent-boardroom", icon: Users, label: "Agent Boardroom", shortLabel: "BRD" },
   { id: "voice-console", icon: Mic, label: "Voice Console", shortLabel: "VOX" },
   { id: "analytics", icon: BarChart2, label: "Orbit Analytics", shortLabel: "ANL" },

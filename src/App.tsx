@@ -13,9 +13,10 @@ import { AgentBoardroom } from './pages/AgentBoardroom';
 import { VoiceConsole } from './pages/VoiceConsole';
 import { OrbitAnalytics } from './pages/OrbitAnalytics';
 import { SystemConfiguration } from './pages/SystemConfiguration';
+import { FutureSimulator } from './pages/FutureSimulator';
 
 type AppStage = 'landing' | 'auth' | 'init' | 'profile-setup' | 'setup' | 'app';
-type AppPage = 'command-center' | 'mission-control' | 'customer-galaxy' | 'growth-engine' | 'agent-boardroom' | 'voice-console' | 'analytics' | 'system-config';
+type AppPage = 'command-center' | 'mission-control' | 'customer-galaxy' | 'growth-engine' | 'agent-boardroom' | 'voice-console' | 'analytics' | 'system-config' | 'future-simulator';
 
 function App() {
   const [stage, setStage] = useState<AppStage>('landing');
@@ -25,7 +26,14 @@ function App() {
   const handleEnterOS = () => setStage('auth');
   const handleLoginSuccess = () => setStage('init');
   const handleInitComplete = () => setStage('profile-setup');
-  const handleProfileComplete = () => setStage('setup');
+  const handleProfileComplete = (goal?: string) => {
+    if (goal) {
+      setMissionGoal(goal);
+      setStage('app');
+    } else {
+      setStage('setup');
+    }
+  };
   const handleSetupComplete = (goal: string) => {
     setMissionGoal(goal);
     setStage('app');
@@ -65,6 +73,7 @@ function App() {
       {activePage === 'voice-console' && <VoiceConsole />}
       {activePage === 'analytics' && <OrbitAnalytics />}
       {activePage === 'system-config' && <SystemConfiguration />}
+      {activePage === 'future-simulator' && <FutureSimulator />}
     </AppShell>
   );
 }
