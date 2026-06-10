@@ -3,19 +3,48 @@ import { getFirestore, Firestore } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
 
 export const defaultFirebaseConfig = {
-  apiKey: "AIzaSyAZgKPUAF7NuZH1jkWIeXaTXycMIJ-l5zA",
-  authDomain: "login-page-144f8.firebaseapp.com",
-  databaseURL: "https://login-page-144f8-default-rtdb.firebaseio.com",
-  projectId: "login-page-144f8",
-  storageBucket: "login-page-144f8.firebasestorage.app",
-  messagingSenderId: "672015601724",
-  appId: "1:672015601724:web:69d5421b6863b79c52f339",
-  measurementId: "G-2BD81KSQ4Z"
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY || "",
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || "",
+  databaseURL: import.meta.env.VITE_FIREBASE_DATABASE_URL || "",
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || "",
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || "",
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || "",
+  appId: import.meta.env.VITE_FIREBASE_APP_ID || "",
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID || ""
 };
 
-// Initialize default Firebase App
-const app = getApps().length === 0 ? initializeApp(defaultFirebaseConfig) : getApp();
-export const auth = getAuth(app);
+// Initialize default Firebase App safely
+let app: any;
+let auth: any;
+
+try {
+  if (defaultFirebaseConfig.apiKey && defaultFirebaseConfig.projectId) {
+    app = getApps().length === 0 ? initializeApp(defaultFirebaseConfig) : getApp();
+    auth = getAuth(app);
+  } else {
+    console.warn("Firebase credentials are not configured. Running with fallback mock authentication.");
+    // Dummy config to prevent firebase SDK crash during startup
+    const dummyConfig = {
+      apiKey: "placeholder-api-key",
+      authDomain: "placeholder-auth-domain",
+      projectId: "placeholder-project-id"
+    };
+    app = getApps().length === 0 ? initializeApp(dummyConfig) : getApp();
+    auth = getAuth(app);
+  }
+} catch (error) {
+  console.error("Firebase initialization failed:", error);
+  auth = {
+    currentUser: null,
+    onAuthStateChanged: (callback: any) => {
+      callback(null);
+      return () => {};
+    },
+    signOut: async () => {}
+  } as any;
+}
+
+export { auth };
 
 interface FirebaseConfig {
   firebaseKey?: string;
@@ -32,7 +61,7 @@ export function getDb(config?: FirebaseConfig): Firestore | null {
   const apiKey = config?.firebaseKey || defaultFirebaseConfig.apiKey;
   const projectId = config?.firebaseProjectId || defaultFirebaseConfig.projectId;
 
-  if (!apiKey || !projectId) {
+  if (!apiKey || !projectId || apiKey === "placeholder-api-key" || apiKey === "") {
     return null;
   }
 
@@ -49,7 +78,11 @@ export function getDb(config?: FirebaseConfig): Firestore | null {
         }, appName);
         firestoreInstance = getFirestore(customApp);
       } else {
-        firestoreInstance = getFirestore(app);
+        if (app && defaultFirebaseConfig.apiKey !== "placeholder-api-key") {
+          firestoreInstance = getFirestore(app);
+        } else {
+          return null;
+        }
       }
     }
     return firestoreInstance;

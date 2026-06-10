@@ -362,10 +362,10 @@ export const OrbitProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     const saved = localStorage.getItem("orbit_config");
     const parsed = saved ? JSON.parse(saved) : {};
     return {
-      geminiKey: parsed.geminiKey || "",
+      geminiKey: parsed.geminiKey || import.meta.env.VITE_GEMINI_API_KEY || "",
       deepgramKey: parsed.deepgramKey || "",
       elevenLabsKey: parsed.elevenLabsKey || "",
-      resendKey: parsed.resendKey || "",
+      resendKey: parsed.resendKey || import.meta.env.VITE_RESEND_API_KEY || "",
       simulationSpeed: parsed.simulationSpeed ?? 1,
       autonomousMode: parsed.autonomousMode ?? false,
       voiceSynthesis: parsed.voiceSynthesis ?? false,
