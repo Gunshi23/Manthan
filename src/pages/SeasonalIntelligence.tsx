@@ -3,6 +3,8 @@ import {
   Calendar, ChevronRight, ArrowRight, Compass
 } from "lucide-react";
 import { useOrbit } from "../context/OrbitContext";
+import { PageHeaderHUD } from "../components/PageHeaderHUD";
+import { AgentCardModal } from "../components/AgentCardModal";
 
 interface SeasonOpportunity {
   id: string;
@@ -19,6 +21,7 @@ interface SeasonOpportunity {
 export const SeasonalIntelligence: React.FC = () => {
   const { businessType, startMission } = useOrbit();
   const [currentTime, setCurrentTime] = useState(new Date());
+  const [selectedAgent, setSelectedAgent] = useState<"Polaris" | "Vega" | "Nova" | "Atlas" | "Luna" | null>(null);
 
   // Dynamic ticking countdown
   useEffect(() => {
@@ -136,15 +139,11 @@ export const SeasonalIntelligence: React.FC = () => {
       <main className="flex-1 flex flex-col p-4 lg:p-6 overflow-y-auto relative z-10 border-r border-gray-900">
         
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-gray-900 pb-4 mb-6">
-          <div>
-            <h1 className="font-space text-lg font-bold text-white tracking-tight flex items-center gap-2">
-              <Calendar className="text-orbit-blue animate-orbit-pulse" size={18} />
-              Seasonal Intelligence
-            </h1>
-            <p className="text-[10px] text-gray-400 font-mono">PROACTIVE FESTIVAL & HOLIDAY PROJECTIONS INDEX</p>
-          </div>
-        </div>
+        <PageHeaderHUD
+          title="Seasonal Intelligence"
+          subtitle="PROACTIVE FESTIVAL & HOLIDAY PROJECTIONS INDEX"
+          onSelectAgent={setSelectedAgent}
+        />
 
         {/* Live Active Countdown Timer Board */}
         <div className="orbit-panel p-5 md:p-6 mb-6 flex flex-col md:flex-row items-center justify-between gap-6 relative overflow-hidden">
@@ -280,6 +279,7 @@ export const SeasonalIntelligence: React.FC = () => {
         </div>
 
       </aside>
+      <AgentCardModal agent={selectedAgent} onClose={() => setSelectedAgent(null)} />
     </div>
   );
 };

@@ -3,6 +3,8 @@ import {
   Radio, ArrowRight, Sparkles, RefreshCw
 } from "lucide-react";
 import { useOrbit } from "../context/OrbitContext";
+import { PageHeaderHUD } from "../components/PageHeaderHUD";
+import { AgentCardModal } from "../components/AgentCardModal";
 
 interface OpportunityNode {
   id: string;
@@ -19,6 +21,7 @@ interface OpportunityNode {
 export const OpportunityRadar: React.FC = () => {
   const { lunaMetrics, businessType, startMission } = useOrbit();
   const [isScanning, setIsScanning] = useState(true);
+  const [selectedAgent, setSelectedAgent] = useState<"Polaris" | "Vega" | "Nova" | "Atlas" | "Luna" | null>(null);
 
   // Generate target coordinates procedurally based on category to make it feel organic
   const opportunityNodes = useMemo<OpportunityNode[]>(() => {
@@ -96,26 +99,23 @@ export const OpportunityRadar: React.FC = () => {
       <main className="flex-1 flex flex-col p-4 lg:p-6 overflow-y-auto relative z-10 border-r border-gray-900">
         
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-gray-900 pb-4 mb-6">
-          <div>
-            <h1 className="font-space text-lg font-bold text-white tracking-tight flex items-center gap-2">
-              <Radio className="text-pink-400 animate-pulse" size={18} />
-              Opportunity Radar
-            </h1>
-            <p className="text-[10px] text-gray-400 font-mono">CONTINUOUS REVENUE LEAK DETECTION NODE · POWERED BY LUNA</p>
-          </div>
-          
-          <button
-            onClick={() => {
-              setIsScanning(true);
-              setTimeout(() => setIsScanning(false), 2000);
-            }}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-950 border border-gray-900 rounded-lg text-gray-400 font-mono text-[9px] cursor-pointer hover:border-gray-800 hover:text-white transition-all"
-          >
-            <RefreshCw size={11} className={isScanning ? "animate-spin" : ""} />
-            <span>Scan Channels</span>
-          </button>
-        </div>
+        <PageHeaderHUD
+          title="Opportunity Radar"
+          subtitle="CONTINUOUS REVENUE LEAK DETECTION NODE · POWERED BY LUNA"
+          onSelectAgent={setSelectedAgent}
+          actions={
+            <button
+              onClick={() => {
+                setIsScanning(true);
+                setTimeout(() => setIsScanning(false), 2000);
+              }}
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-950 border border-gray-900 rounded-lg text-gray-450 font-mono text-[9px] cursor-pointer hover:border-gray-800 hover:text-white transition-all"
+            >
+              <RefreshCw size={11} className={isScanning ? "animate-spin" : ""} />
+              <span>Scan Channels</span>
+            </button>
+          }
+        />
 
         {/* Circular Radar Sweep visual */}
         <div className="flex-1 flex items-center justify-center min-h-[350px] relative">
@@ -310,6 +310,7 @@ export const OpportunityRadar: React.FC = () => {
         </div>
 
       </aside>
+      <AgentCardModal agent={selectedAgent} onClose={() => setSelectedAgent(null)} />
     </div>
   );
 };

@@ -7,6 +7,7 @@ import {
   Terminal 
 } from "lucide-react";
 import { AgentCardModal } from "../components/AgentCardModal";
+import { PageHeaderHUD } from "../components/PageHeaderHUD";
 
 /* ─────────────────────────────────────────────────────────────
    TYPES
@@ -634,29 +635,26 @@ Respond concisely for each agent's message in 1-2 sentences. Do not return any m
       <main className="flex-1 flex flex-col min-w-0 overflow-hidden relative z-10">
         
         {/* Workspace Title Header */}
-        <div className="shrink-0 px-6 py-4 border-b border-gray-800/60 flex items-center justify-between bg-gray-950/20">
-          <div>
-            <h1 className="font-space text-xl font-bold text-white tracking-tight flex items-center gap-2">
-              <Zap size={16} className="text-orbit-purple" />
-              Agent Boardroom
-            </h1>
-            <p className="font-mono text-[9px] text-gray-550 mt-0.5 uppercase tracking-widest">
-              Live AI Collaboration Chamber
-            </p>
-          </div>
-
-          <button
-            onClick={triggerBoardroomDebate}
-            disabled={debateActive}
-            className={`px-5 py-2.5 rounded-xl text-xs font-mono font-bold uppercase tracking-wider flex items-center gap-2 transition-all cursor-pointer ${
-              debateActive
-                ? "bg-gray-850 text-gray-550 border border-gray-800 cursor-not-allowed"
-                : "bg-gradient-to-r from-orbit-purple to-pink-500 text-white shadow-orbit-glow-purple hover:opacity-90 hover:scale-[1.02] active:scale-95 duration-200"
-            }`}
-          >
-            <Zap size={13} className={debateActive ? "animate-spin" : ""} />
-            {debateActive ? "Deliberations Active..." : "Initialize Executive Debate"}
-          </button>
+        <div className="shrink-0 px-6 pt-4 bg-gray-950/20">
+          <PageHeaderHUD
+            title="Agent Boardroom"
+            subtitle="LIVE AI COLLABORATION CHAMBER"
+            onSelectAgent={setSelectedAgent}
+            actions={
+              <button
+                onClick={triggerBoardroomDebate}
+                disabled={debateActive}
+                className={`px-5 py-2.5 rounded-xl text-xs font-mono font-bold uppercase tracking-wider flex items-center gap-2 transition-all cursor-pointer ${
+                  debateActive
+                    ? "bg-gray-850 text-gray-550 border border-gray-800 cursor-not-allowed"
+                    : "bg-gradient-to-r from-orbit-purple to-pink-500 text-white shadow-orbit-glow-purple hover:opacity-90 hover:scale-[1.02] active:scale-95 duration-200"
+                }`}
+              >
+                <Zap size={13} className={debateActive ? "animate-spin" : ""} />
+                {debateActive ? "Deliberations Active..." : "Initialize Executive Debate"}
+              </button>
+            }
+          />
         </div>
 
         {/* Center content container split: top roundtable, bottom scrolls */}

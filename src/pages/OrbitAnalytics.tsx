@@ -4,10 +4,13 @@ import {
   Sparkles, ArrowUpRight, CheckCircle2, AlertTriangle
 } from "lucide-react";
 import { useOrbit } from "../context/OrbitContext";
+import { PageHeaderHUD } from "../components/PageHeaderHUD";
+import { AgentCardModal } from "../components/AgentCardModal";
 
 export const OrbitAnalytics: React.FC = () => {
   const { campaigns, orders, customers, businessType } = useOrbit();
   const [activeTab, setActiveTab] = useState<"overview" | "funnel" | "diagnostics">("overview");
+  const [selectedAgent, setSelectedAgent] = useState<"Polaris" | "Vega" | "Nova" | "Atlas" | "Luna" | null>(null);
 
   /* Calculable parameters */
   const totalRevenue = orders.reduce((s, o) => s + o.amount, 0);
@@ -184,32 +187,29 @@ export const OrbitAnalytics: React.FC = () => {
       <main className="flex-1 flex flex-col min-w-0 overflow-y-auto relative z-10 p-6 space-y-6">
         
         {/* Title Header */}
-        <div className="flex items-center justify-between border-b border-gray-900 pb-4">
-          <div>
-            <h1 className="font-space text-2xl font-bold text-white tracking-tight flex items-center gap-2">
-              <BarChart2 className="text-blue-400" size={22} />
-              Orbit Analytics
-            </h1>
-            <p className="text-xs text-gray-400 font-mono mt-1">AI-GENERATED PERFORMANCE & DIRECTIVE REPORTS</p>
-          </div>
-          
-          {/* Section Navigation Tabs */}
-          <div className="flex items-center gap-1 bg-gray-950 p-1 rounded-xl border border-gray-900 font-mono text-[9px] font-bold">
-            {["overview", "funnel", "diagnostics"].map((tab) => (
-              <button
-                key={tab}
-                onClick={() => setActiveTab(tab as any)}
-                className={`px-3 py-1.5 rounded-lg cursor-pointer transition-all uppercase tracking-wider ${
-                  activeTab === tab 
-                    ? "bg-gray-850 text-white border border-gray-800 shadow" 
-                    : "text-gray-550 hover:text-gray-300"
-                }`}
-              >
-                {tab}
-              </button>
-            ))}
-          </div>
-        </div>
+        <PageHeaderHUD
+          title="Orbit Analytics"
+          subtitle="AI-GENERATED PERFORMANCE & DIRECTIVE REPORTS"
+          onSelectAgent={setSelectedAgent}
+          actions={
+            /* Section Navigation Tabs */
+            <div className="flex items-center gap-1 bg-gray-950 p-1 rounded-xl border border-gray-900 font-mono text-[9px] font-bold">
+              {["overview", "funnel", "diagnostics"].map((tab) => (
+                <button
+                  key={tab}
+                  onClick={() => setActiveTab(tab as any)}
+                  className={`px-3 py-1.5 rounded-lg cursor-pointer transition-all uppercase tracking-wider ${
+                    activeTab === tab 
+                      ? "bg-gray-850 text-white border border-gray-800 shadow" 
+                      : "text-gray-550 hover:text-gray-300"
+                  }`}
+                >
+                  {tab}
+                </button>
+              ))}
+            </div>
+          }
+        />
 
         {/* KPI Strip */}
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
@@ -386,6 +386,7 @@ export const OrbitAnalytics: React.FC = () => {
         </div>
 
       </main>
+      <AgentCardModal agent={selectedAgent} onClose={() => setSelectedAgent(null)} />
     </div>
   );
 };

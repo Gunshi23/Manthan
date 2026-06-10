@@ -1,11 +1,14 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import { 
-  BarChart2, Sparkles, Activity, ArrowRight, Compass
+  Sparkles, Activity, ArrowRight, Compass
 } from "lucide-react";
 import { useOrbit } from "../context/OrbitContext";
+import { PageHeaderHUD } from "../components/PageHeaderHUD";
+import { AgentCardModal } from "../components/AgentCardModal";
 
 export const CompetitorIntelligence: React.FC = () => {
   const { businessType, startMission } = useOrbit();
+  const [selectedAgent, setSelectedAgent] = useState<"Polaris" | "Vega" | "Nova" | "Atlas" | "Luna" | null>(null);
 
   // Dynamic industry benchmarks calibrated by category to feel completely personalized
   const benchmarks = useMemo(() => {
@@ -54,15 +57,11 @@ export const CompetitorIntelligence: React.FC = () => {
       <main className="flex-1 flex flex-col p-4 lg:p-6 overflow-y-auto relative z-10 border-r border-gray-900">
         
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-gray-900 pb-4 mb-6">
-          <div>
-            <h1 className="font-space text-lg font-bold text-white tracking-tight flex items-center gap-2">
-              <BarChart2 className="text-orbit-purple" size={18} />
-              Competitor Intelligence
-            </h1>
-            <p className="text-[10px] text-gray-400 font-mono">AI-POWERED MARKET SIGNAL & BRAND COMPARISON RADAR</p>
-          </div>
-        </div>
+        <PageHeaderHUD
+          title="Competitor Intelligence"
+          subtitle="AI-POWERED MARKET SIGNAL & BRAND COMPARISON RADAR"
+          onSelectAgent={setSelectedAgent}
+        />
 
         {/* Benchmarking callout banner */}
         <div className="orbit-panel p-5 mb-6 border-l-4 border-orbit-purple bg-gradient-to-r from-orbit-purple/10 to-transparent relative overflow-hidden">
@@ -213,6 +212,7 @@ export const CompetitorIntelligence: React.FC = () => {
         </div>
 
       </aside>
+      <AgentCardModal agent={selectedAgent} onClose={() => setSelectedAgent(null)} />
     </div>
   );
 };

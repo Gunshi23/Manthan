@@ -7,6 +7,7 @@ import {
   CheckCircle2, Play
 } from "lucide-react";
 import { AgentCardModal } from "../components/AgentCardModal";
+import { PageHeaderHUD } from "../components/PageHeaderHUD";
 
 /* ─── Animated Counter Hook ─────────────────────────────────── */
 function useCounter(target: number, duration = 1200, prefix = "", suffix = "") {
@@ -264,23 +265,7 @@ export const MissionControl: React.FC = () => {
   const totalPending = whatsappCampaigns.reduce((s, c) => s + (c.pendingCount ?? 0), 0);
   const deliveryRatePct = totalSent > 0 ? Math.round((totalDelivered / totalSent) * 100) : 100;
 
-  /* Live clock */
-  const [now, setNow] = useState(new Date());
-  useEffect(() => {
-    const t = setInterval(() => setNow(new Date()), 1000);
-    return () => clearInterval(t);
-  }, []);
-
-  /* Latency telemetry monitor values (last 12 measurements) */
-  const [latencyHistory, setLatencyHistory] = useState<number[]>(() =>
-    Array.from({ length: 12 }, () => 12 + Math.floor(Math.random() * 15))
-  );
-  useEffect(() => {
-    const t = setInterval(() => {
-      setLatencyHistory(prev => [...prev.slice(1), 10 + Math.floor(Math.random() * 20)]);
-    }, 1000);
-    return () => clearInterval(t);
-  }, []);
+  // Clock and latency history handled by PageHeaderHUD
 
   /* Interactive diagnostic ping simulator */
   const [pingLogs, setPingLogs] = useState<string[]>([]);
@@ -393,76 +378,20 @@ export const MissionControl: React.FC = () => {
       <div className="relative z-10 p-6 space-y-5">
 
         {/* ══════════════ HEADER ══════════════ */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div>
-            <div className="flex items-center gap-3 mb-1">
-              <div className="w-2 h-2 rounded-full bg-orbit-success animate-pulse" />
-              <span className={`font-mono text-[10px] tracking-[0.2em] uppercase ${isLight ? "text-emerald-600 font-bold" : "text-orbit-success"}`}>
-                All Systems Nominal
-              </span>
-            </div>
-            <div className="flex items-center gap-4">
-              <h1 className={`font-space text-3xl font-bold tracking-tight ${isLight ? "text-gray-900" : "text-white"}`}>
-                Mission Control
-              </h1>
-              <button
-                onClick={() => setIsWhatsAppModalOpen(true)}
-                className="px-4 py-2 rounded-xl bg-gradient-to-r from-orbit-success to-emerald-450 text-white font-mono text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5 hover:opacity-90 hover:scale-[1.02] active:scale-95 duration-200 cursor-pointer shadow-orbit-glow-green"
-              >
-                <Send size={11} />
-                Launch WhatsApp Campaign
-              </button>
-            </div>
-            <p className="text-xs text-gray-555 font-mono mt-0.5">
-              AUTONOMOUS OPERATIONS CENTER — ORBIT v4.81 VANGUARD
-            </p>
-          </div>
-
-          {/* Live clock + uptime + latency graph */}
-          <div className="flex items-center gap-4">
-            {/* Thread Latency mini-chart */}
-            <div className="flex items-end gap-0.5 h-6 shrink-0 border-l pl-3" style={{ borderColor: isLight ? "#e5e7eb" : "#1f2937" }}>
-              {latencyHistory.map((l, idx) => {
-                const pctHeight = (l / 40) * 100;
-                return (
-                  <div
-                    key={idx}
-                    className="w-1 bg-orbit-blue rounded-t-sm transition-all duration-300"
-                    style={{
-                      height: `${pctHeight}%`,
-                      opacity: 0.3 + (idx / 12) * 0.7,
-                    }}
-                    title={`Latency: ${l}ms`}
-                  />
-                );
-              })}
-            </div>
-
-            <div className="text-right hidden sm:block">
-              <div className={`font-mono text-xl font-bold tracking-widest tabular-nums ${isLight ? "text-gray-900" : "text-white"}`}>
-                {now.toLocaleTimeString("en-US", { hour12: false })}
-              </div>
-              <div className={`font-mono text-[9px] uppercase tracking-wider ${isLight ? "text-gray-400" : "text-gray-555"}`}>
-                {now.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })}
-              </div>
-            </div>
-            <div className="w-px h-10 hidden sm:block" style={{ backgroundColor: isLight ? "#e5e7eb" : "#1f2937" }} />
-            <div className="flex flex-col gap-1">
-              {["POLARIS", "VEGA", "NOVA", "ATLAS", "LUNA"].map((a, i) => (
-                <div 
-                  key={a} 
-                  onClick={() => setSelectedAgent(a.charAt(0) + a.slice(1).toLowerCase() as any)}
-                  className="flex items-center gap-1.5 cursor-pointer hover:opacity-80"
-                  title={`View ${a} premium card`}
-                >
-                  <span className="w-1.5 h-1.5 rounded-full bg-orbit-success animate-pulse"
-                    style={{ animationDelay: `${i * 0.3}s` }} />
-                  <span className={`font-mono text-[8px] uppercase tracking-wider ${isLight ? "text-gray-500" : "text-gray-400"}`}>{a}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
+        <PageHeaderHUD
+          title="Mission Control"
+          subtitle="AUTONOMOUS OPERATIONS CENTER — ORBIT v4.81 VANGUARD"
+          onSelectAgent={setSelectedAgent}
+          actions={
+            <button
+              onClick={() => setIsWhatsAppModalOpen(true)}
+              className="px-4 py-2 rounded-xl bg-gradient-to-r from-orbit-success to-emerald-450 text-white font-mono text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5 hover:opacity-90 hover:scale-[1.02] active:scale-95 duration-200 cursor-pointer shadow-orbit-glow-green"
+            >
+              <Send size={11} />
+              Launch WhatsApp Campaign
+            </button>
+          }
+        />
 
         {/* ══════════════ SECTION 1 — REVENUE OVERVIEW ══════════════ */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">

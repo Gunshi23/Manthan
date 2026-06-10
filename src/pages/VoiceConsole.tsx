@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { Mic, MicOff, Volume2, Play, VolumeX, Radio } from "lucide-react";
 import { useOrbit } from "../context/OrbitContext";
 import { AgentCardModal } from "../components/AgentCardModal";
+import { PageHeaderHUD } from "../components/PageHeaderHUD";
 
 interface VoiceLog {
   type: "user" | "orbit";
@@ -182,34 +183,31 @@ export const VoiceConsole: React.FC = () => {
       <main className="flex-1 flex flex-col min-w-0 overflow-hidden relative z-10 border-r border-gray-800/60">
         
         {/* Title Header */}
-        <div className="shrink-0 px-6 py-4 border-b border-gray-800/60 flex items-center justify-between bg-gray-950/20">
-          <div>
-            <h1 className="font-space text-xl font-bold text-white tracking-tight flex items-center gap-2">
-              <Mic size={18} className="text-blue-400" />
-              Voice Console
-            </h1>
-            <p className="font-mono text-[9px] text-gray-550 mt-0.5 uppercase tracking-widest">
-              Natural Language Voice Command Deck
-            </p>
-          </div>
-
-          <div className="flex items-center gap-2 font-mono text-[9px]">
-            {config.voiceSynthesis ? (
-              <span className="flex items-center gap-1.5 px-2.5 py-1 rounded bg-orbit-blue/10 border border-orbit-blue/30 text-orbit-blue">
-                <Volume2 size={11} /> SYNTHESIS ACTIVE
-              </span>
-            ) : (
-              <span className="flex items-center gap-1.5 px-2.5 py-1 rounded bg-gray-900 border border-gray-800 text-gray-500">
-                <VolumeX size={11} /> SYNTHESIS OFF
-              </span>
-            )}
-            <span className={`flex items-center gap-1.5 px-2.5 py-1 rounded border font-semibold ${
-              isListening ? "border-red-500/30 bg-red-500/10 text-red-400 animate-pulse" : "border-gray-800 bg-gray-900/40 text-gray-500"
-            }`}>
-              <span className={`w-1.5 h-1.5 rounded-full ${isListening ? "bg-red-500 animate-ping" : "bg-gray-650"}`} />
-              {isListening ? "LISTENING" : "STANDBY"}
-            </span>
-          </div>
+        <div className="shrink-0 px-6 pt-4 bg-gray-950/20">
+          <PageHeaderHUD
+            title="Voice Console"
+            subtitle="NATURAL LANGUAGE VOICE COMMAND DECK"
+            onSelectAgent={setSelectedAgent}
+            actions={
+              <div className="flex items-center gap-2 font-mono text-[9px]">
+                {config.voiceSynthesis ? (
+                  <span className="flex items-center gap-1.5 px-2.5 py-1 rounded bg-orbit-blue/10 border border-orbit-blue/30 text-orbit-blue">
+                    <Volume2 size={11} /> SYNTHESIS ACTIVE
+                  </span>
+                ) : (
+                  <span className="flex items-center gap-1.5 px-2.5 py-1 rounded bg-gray-900 border border-gray-800 text-gray-500">
+                    <VolumeX size={11} /> SYNTHESIS OFF
+                  </span>
+                )}
+                <span className={`flex items-center gap-1.5 px-2.5 py-1 rounded border font-semibold ${
+                  isListening ? "border-red-500/30 bg-red-500/10 text-red-400 animate-pulse" : "border-gray-800 bg-gray-900/40 text-gray-500"
+                }`}>
+                  <span className={`w-1.5 h-1.5 rounded-full ${isListening ? "bg-red-500 animate-ping" : "bg-gray-650"}`} />
+                  {isListening ? "LISTENING" : "STANDBY"}
+                </span>
+              </div>
+            }
+          />
         </div>
 
         {/* Interactive Voice Mode Sphere Canvas */}

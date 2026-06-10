@@ -5,6 +5,8 @@ import {
   Users, Terminal
 } from "lucide-react";
 import { useOrbit } from "../context/OrbitContext";
+import { PageHeaderHUD } from "../components/PageHeaderHUD";
+import { AgentCardModal } from "../components/AgentCardModal";
 
 type ChannelType = "Email" | "WhatsApp" | "SMS" | "RCS";
 type VariantType = "A" | "B";
@@ -74,6 +76,7 @@ export const GrowthEngine: React.FC = () => {
   const [goal, setGoal] = useState("Increase repeat purchases");
   const [content, setContent] = useState<ChannelTemplates>(INITIAL_TEMPLATES);
   const [isPreview, setIsPreview] = useState(false);
+  const [selectedAgent, setSelectedAgent] = useState<"Polaris" | "Vega" | "Nova" | "Atlas" | "Luna" | null>(null);
 
   /* AI loading & generation state */
   const [isGenerating, setIsGenerating] = useState(false);
@@ -320,7 +323,14 @@ export const GrowthEngine: React.FC = () => {
           CENTER PANEL — WORKSPACE & EDITOR
       ════════════════════════════════════════ */}
       <main className="flex-1 flex flex-col min-w-0 overflow-hidden relative z-10 border-r border-gray-800/60">
-        
+        <div className="shrink-0 px-6 pt-4 bg-gray-950/20">
+          <PageHeaderHUD
+            title="Growth Engine"
+            subtitle="AUTONOMOUS CAMPAIGN CONSTRUCTOR & COPYWRITING LAB"
+            onSelectAgent={setSelectedAgent}
+          />
+        </div>
+
         {/* Channel selector top bar */}
         <div className="shrink-0 p-3 bg-gray-950/20 border-b border-gray-900/60 grid grid-cols-4 gap-2">
           {(Object.entries(channelConfig) as [ChannelType, typeof channelConfig[ChannelType]][]).map(([ch, cfg]) => {
@@ -639,6 +649,7 @@ export const GrowthEngine: React.FC = () => {
         </div>
       </aside>
 
+      <AgentCardModal agent={selectedAgent} onClose={() => setSelectedAgent(null)} />
     </div>
   );
 };

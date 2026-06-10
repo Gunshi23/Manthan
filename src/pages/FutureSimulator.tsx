@@ -1,9 +1,11 @@
 import React, { useState, useEffect, useRef } from "react";
 import { 
   Cpu, Sparkles, Activity, Check, Send, 
-  RefreshCw, Play, ArrowRight, Brain, Compass
+  RefreshCw, Play, ArrowRight, Brain
 } from "lucide-react";
 import { useOrbit } from "../context/OrbitContext";
+import { PageHeaderHUD } from "../components/PageHeaderHUD";
+import { AgentCardModal } from "../components/AgentCardModal";
 import { callGeminiAPI, parseGeminiJson } from "../utils/gemini";
 
 // Types
@@ -44,6 +46,7 @@ interface ChatMessage {
 
 export const FutureSimulator: React.FC = () => {
   const { addAgentLog, config } = useOrbit();
+  const [selectedAgent, setSelectedAgent] = useState<"Polaris" | "Vega" | "Nova" | "Atlas" | "Luna" | null>(null);
   
   // Page mode: "variables" (custom inputs) vs "missions" (mission objectives)
   const [simulatorMode, setSimulatorMode] = useState<"variables" | "missions">("variables");
@@ -860,20 +863,19 @@ Context Campaign Strategy: "${selectedCampaignType}"`;
       <main className="flex-1 flex flex-col min-w-0 overflow-hidden relative z-10">
         
         {/* Top Header */}
-        <header className="p-4 border-b border-gray-900 flex items-center justify-between bg-gray-950/20">
-          <div>
-            <h1 className="font-space text-lg font-bold text-white tracking-tight flex items-center gap-2">
-              <Compass className="text-orbit-blue animate-orbit-pulse" size={18} />
-              Future Simulator
-            </h1>
-            <p className="text-[10px] text-gray-400 font-mono">PREDICT GROWTH BEFORE YOU LAUNCH · POWERED BY VEGA ENGINE</p>
-          </div>
-
-          <div className="flex items-center gap-2 font-mono text-[9px] px-3 py-1 bg-gray-950 rounded-lg border border-gray-900 text-gray-400">
-            <Activity size={10} className="text-orbit-success animate-pulse" />
-            <span>Telemetry Mode: Consolidated</span>
-          </div>
-        </header>
+        <div className="shrink-0 px-6 pt-4 bg-gray-950/20">
+          <PageHeaderHUD
+            title="Future Simulator"
+            subtitle="PREDICT GROWTH BEFORE YOU LAUNCH · POWERED BY VEGA ENGINE"
+            onSelectAgent={setSelectedAgent}
+            actions={
+              <div className="flex items-center gap-2 font-mono text-[9px] px-3 py-1.5 bg-gray-950 rounded-lg border border-gray-900 text-gray-500">
+                <Activity size={10} className="text-orbit-success animate-pulse" />
+                <span>Telemetry Mode: Consolidated</span>
+              </div>
+            }
+          />
+        </div>
 
         {/* Page Main Content Switcher */}
         <div className="flex-1 flex flex-col overflow-y-auto p-4 lg:p-6 space-y-6">
@@ -1359,6 +1361,7 @@ Context Campaign Strategy: "${selectedCampaignType}"`;
 
         </div>
       </main>
+      <AgentCardModal agent={selectedAgent} onClose={() => setSelectedAgent(null)} />
     </div>
   );
 };

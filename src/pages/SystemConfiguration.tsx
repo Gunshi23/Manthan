@@ -5,6 +5,7 @@ import {
 } from "lucide-react";
 import { useOrbit } from "../context/OrbitContext";
 import { AgentCardModal } from "../components/AgentCardModal";
+import { PageHeaderHUD } from "../components/PageHeaderHUD";
 
 interface ConfigSection {
   id: string;
@@ -150,6 +151,11 @@ export const SystemConfiguration: React.FC = () => {
 
       {/* Configuration Workspace */}
       <main className="flex-1 flex flex-col min-w-0 overflow-y-auto relative z-10 p-6 space-y-5">
+        <PageHeaderHUD
+          title="System Configuration"
+          subtitle="ORBIT CONTROL CENTER · PREFERENCES & KEY VALUATIONS"
+          onSelectAgent={setSelectedAgent}
+        />
         
         {/* Workspace Title Header */}
         <div className="border-b border-gray-900 pb-4">

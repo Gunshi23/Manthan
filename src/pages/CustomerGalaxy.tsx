@@ -3,8 +3,10 @@ import { useOrbit } from "../context/OrbitContext";
 import type { Customer } from "../context/OrbitContext";
 import { 
   X, TrendingDown, TrendingUp, Minus, ShoppingBag, Cpu, 
-  Search, SlidersHorizontal, Eye, Compass, Star, ZoomIn, ZoomOut 
+  Search, SlidersHorizontal, Eye, Compass, ZoomIn, ZoomOut 
 } from "lucide-react";
+import { PageHeaderHUD } from "../components/PageHeaderHUD";
+import { AgentCardModal } from "../components/AgentCardModal";
 
 /* ─────────────────────────────────────────────────────────────
    HELPERS & DUST GENERATOR
@@ -49,6 +51,7 @@ export const CustomerGalaxy: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [selected, setSelected] = useState<Customer | null>(null);
   const [hovered, setHovered] = useState<Customer | null>(null);
+  const [selectedAgent, setSelectedAgent] = useState<"Polaris" | "Vega" | "Nova" | "Atlas" | "Luna" | null>(null);
 
   /* Camera State */
   const [pan, setPan] = useState({ x: 0, y: 0 });
@@ -617,22 +620,18 @@ export const CustomerGalaxy: React.FC = () => {
       <main className="flex-1 flex flex-col min-w-0 overflow-hidden relative z-10">
         
         {/* Page title header */}
-        <div className="shrink-0 px-6 py-4 border-b border-gray-800/60 flex items-center justify-between bg-gray-950/20">
-          <div>
-            <h1 className="font-space text-xl font-bold text-white tracking-tight flex items-center gap-2">
-              <Star size={18} className="text-yellow-400 animate-pulse" />
-              Customer Galaxy
-            </h1>
-            <p className="font-mono text-[9px] text-gray-550 mt-0.5 uppercase tracking-widest">
-              Visualizing customer density clusters as constellations
-            </p>
-          </div>
-          <div className="flex items-center gap-3 font-mono text-[9px] text-gray-500">
-            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded bg-gray-900/30 border border-gray-800">
-              <Eye size={11} className="text-blue-400" />
-              <span>STARS VISIBLE: {filteredCustomers.length} / {customers.length}</span>
-            </div>
-          </div>
+        <div className="shrink-0 px-6 pt-4 bg-gray-950/20">
+          <PageHeaderHUD
+            title="Customer Galaxy"
+            subtitle="Visualizing customer density clusters as constellations"
+            onSelectAgent={setSelectedAgent}
+            actions={
+              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded bg-gray-900/30 border border-gray-800 font-mono text-[9px] text-gray-500">
+                <Eye size={11} className="text-blue-400" />
+                <span>STARS VISIBLE: {filteredCustomers.length} / {customers.length}</span>
+              </div>
+            }
+          />
         </div>
 
         {/* Canvas Workspace */}
@@ -876,6 +875,7 @@ export const CustomerGalaxy: React.FC = () => {
 
         </aside>
       )}
+      <AgentCardModal agent={selectedAgent} onClose={() => setSelectedAgent(null)} />
     </div>
   );
 };

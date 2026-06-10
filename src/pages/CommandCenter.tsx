@@ -7,6 +7,7 @@ import {
   ArrowRight, Play, TrendingUp, Shield, Cpu, Activity
 } from "lucide-react";
 import { AgentCardModal } from "../components/AgentCardModal";
+import { PageHeaderHUD } from "../components/PageHeaderHUD";
 
 /* ─────────────────────────────────────────────────────────────
    TYPES
@@ -326,48 +327,42 @@ export const CommandCenter: React.FC = () => {
       <main className="flex-1 flex flex-col min-w-0 overflow-hidden relative z-10">
 
         {/* ── CENTER HEADER ── */}
-        <div className="shrink-0 px-6 py-4 border-b border-gray-800/60 flex items-center justify-between bg-gray-950/30 backdrop-blur-md">
-          <div>
-            <h1 className="font-space text-xl font-bold text-white tracking-tight flex items-center gap-2">
-              <Cpu size={18} className="text-blue-400 animate-pulse" />
-              Command Center
-            </h1>
-            <p className="font-mono text-[9px] text-gray-500 mt-0.5 uppercase tracking-widest">
-              ORBIT BRAIN · AUTONOMOUS OPERATIONS NODE
-            </p>
-          </div>
-          <div className="flex items-center gap-4">
-            {/* HUD Diagnostic readout */}
-            <div className="hidden lg:flex items-center gap-4 font-mono text-[9px] text-gray-500 border border-gray-800/80 bg-gray-950/20 px-3 py-1.5 rounded-lg">
-              <div className="flex items-center gap-1">
-                <span className={`w-1.5 h-1.5 rounded-full animate-pulse ${config.geminiKey ? "bg-orbit-success" : "bg-red-500"}`} />
-                <span>COGNITIVE NODE: {config.geminiKey ? "ONLINE" : "OFFLINE"}</span>
-              </div>
-              <span className="text-gray-800">|</span>
-              <div className="flex items-center gap-1">
-                <span className="w-1.5 h-1.5 rounded-full bg-orbit-success animate-pulse" />
-                <span>CORE SYNC: NOMINAL</span>
-              </div>
-              <span className="text-gray-800">|</span>
-              <div>SYS TEMP: 32°C</div>
-              <span className="text-gray-800">|</span>
-              <div>THREAD: AUTONOMOUS</div>
-            </div>
+        <div className="shrink-0 px-6 pt-4 bg-gray-950/30 backdrop-blur-md">
+          <PageHeaderHUD
+            title="Command Center"
+            subtitle="ORBIT BRAIN · AUTONOMOUS OPERATIONS NODE"
+            onSelectAgent={setSelectedAgent}
+            actions={
+              <div className="flex items-center gap-4">
+                {/* HUD Diagnostic readout */}
+                <div className="hidden lg:flex items-center gap-4 font-mono text-[9px] text-gray-500 border border-gray-800/80 bg-gray-950/20 px-3 py-1.5 rounded-lg">
+                  <div className="flex items-center gap-1">
+                    <span className={`w-1.5 h-1.5 rounded-full animate-pulse ${config.geminiKey ? "bg-orbit-success" : "bg-red-500"}`} />
+                    <span>COGNITIVE NODE: {config.geminiKey ? "ONLINE" : "OFFLINE"}</span>
+                  </div>
+                  <span className="text-gray-800">|</span>
+                  <div className="flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-orbit-success animate-pulse" />
+                    <span>CORE SYNC: NOMINAL</span>
+                  </div>
+                </div>
 
-            {/* Live mission pill */}
-            {mission.isActive && (
-              <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-orbit-blue/30 bg-orbit-blue/10 font-mono text-[10px] text-orbit-blue">
-                <span className="w-1.5 h-1.5 rounded-full bg-orbit-blue animate-ping" />
-                MISSION ACTIVE
+                {/* Live mission pill */}
+                {mission.isActive && (
+                  <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-orbit-blue/30 bg-orbit-blue/10 font-mono text-[10px] text-orbit-blue">
+                    <span className="w-1.5 h-1.5 rounded-full bg-orbit-blue animate-ping" />
+                    MISSION ACTIVE
+                  </div>
+                )}
+                {mission.isActive && (
+                  <button onClick={cancelMission}
+                    className="p-1.5 rounded-lg border border-gray-800 hover:border-red-400/30 hover:bg-red-400/10 text-gray-500 hover:text-red-400 transition-all cursor-pointer">
+                    <X size={14} />
+                  </button>
+                )}
               </div>
-            )}
-            {mission.isActive && (
-              <button onClick={cancelMission}
-                className="p-1.5 rounded-lg border border-gray-800 hover:border-red-400/30 hover:bg-red-400/10 text-gray-500 hover:text-red-400 transition-all cursor-pointer">
-                <X size={14} />
-              </button>
-            )}
-          </div>
+            }
+          />
         </div>
 
         {/* ── SCROLLABLE CENTER CONTENT ── */}
