@@ -289,40 +289,37 @@ Only return the raw JSON.`;
 
 export async function generateOpportunityRadar(context: any) {
   try {
-    const sys = `You are the ORBIT Opportunity Detection Engine. You output prioritized customer segments that have recovery potential.
-Format your response as a list of opportunity items, represented as a single valid JSON object matching this schema exactly:
+    const sys = `You are the ORBIT Opportunity Detection Engine. Analyze the customer segments, campaign performance, and analytics metrics to identify high-yield growth opportunities.
+Format your response as a single valid JSON object matching this schema exactly:
 {
+  "totalPotentialRevenue": 45600,
+  "highestPriority": "Abandoned Cart Recovery",
   "opportunities": [
     {
-      "id": "opp_1",
-      "title": "Inactive Customer Win-back",
-      "cohort": "High-Value Inactive",
-      "description": "Re-engage top VIP tier spenders inactive for 60+ days.",
-      "potentialRevenue": 28400,
-      "opportunityScore": 92,
-      "recommendedChannel": "WhatsApp",
-      "confidence": "High"
-    },
-    {
-      "id": "opp_2",
-      "title": "Cart Abandonment Recovery",
-      "cohort": "Slipping Away",
-      "description": "Recover abandoned shopping carts over the last 14 days.",
-      "potentialRevenue": 14200,
-      "opportunityScore": 84,
-      "recommendedChannel": "Email",
-      "confidence": "Medium"
+      "id": "opp_cart_recovery",
+      "title": "Abandoned Cart Recovery",
+      "type": "Lead" | "Inactive" | "VIP" | "Prospect",
+      "description": "description text",
+      "potentialRevenue": 11919,
+      "confidence": 91,
+      "audienceSize": 17,
+      "priorityScore": 95,
+      "recommendedAction": "Recover Lost Revenue" | "Reduce Customer Churn" | "Increase Customer LTV" | "Acquire New Customers",
+      "reasoning": "detailed reasoning text of why this was found",
+      "color": "Green" | "Yellow" | "Red" | "Purple",
+      "angle": 45,
+      "distance": 65
     }
   ]
 }
-Only return the raw JSON object.`;
+Only return the raw JSON object. Do not include markdown code block formatting.`;
 
-    const prompt = `Generate revenue opportunity radar cards.`;
+    const prompt = `Business Context Data: ${JSON.stringify(context)}. Analyze this data to discover and prioritize revenue leaks and growth opportunities.`;
     const res = await callGeminiAPI(prompt, sys);
-    return parseGeminiJson(res, { opportunities: getMockOpportunities() });
+    return parseGeminiJson(res, getMockOpportunitiesPayload());
   } catch (error) {
     console.warn("generateOpportunityRadar failed, running fallback mock.", error);
-    return { opportunities: getMockOpportunities() };
+    return getMockOpportunitiesPayload();
   }
 }
 
@@ -442,37 +439,56 @@ function getMockBrandDNA(businessType: string, growthStyle: string) {
   };
 }
 
-function getMockOpportunities() {
-  return [
-    {
-      id: "opp_1",
-      title: "Dormant VIP Re-engagement",
-      cohort: "High-Value Inactive",
-      description: "Recover premium spenders inactive for 45+ days.",
-      potentialRevenue: 32000,
-      opportunityScore: 94,
-      recommendedChannel: "WhatsApp",
-      confidence: "High"
-    },
-    {
-      id: "opp_2",
-      title: "Cart Recovery Optimization",
-      cohort: "Slipping Away",
-      description: "Trigger automations on checkout leaks in the last 7 days.",
-      potentialRevenue: 15400,
-      opportunityScore: 88,
-      recommendedChannel: "Email",
-      confidence: "High"
-    },
-    {
-      id: "opp_3",
-      title: "Festive Cross-sell Campaign",
-      cohort: "Loyalists",
-      description: "Target repeat buyers with a festive collection early access.",
-      potentialRevenue: 42000,
-      opportunityScore: 85,
-      recommendedChannel: "RCS",
-      confidence: "Medium"
-    }
-  ];
+function getMockOpportunitiesPayload() {
+  return {
+    totalPotentialRevenue: 45600,
+    highestPriority: "Abandoned Cart Recovery",
+    opportunities: [
+      {
+        id: "opp_cart_recovery",
+        title: "Abandoned Cart Recovery",
+        type: "Lead",
+        description: "17 customer nodes left checkout with items.",
+        potentialRevenue: 11919,
+        confidence: 91,
+        audienceSize: 17,
+        priorityScore: 95,
+        recommendedAction: "Recover Lost Revenue",
+        reasoning: "Luna detected a 34% increase in abandoned checkout events over the last 7 days. Customers who abandoned carts have historically converted at 28% when contacted via WhatsApp within 24 hours.",
+        color: "Yellow",
+        angle: 45,
+        distance: 65
+      },
+      {
+        id: "opp_inactive_winback",
+        title: "Inactive Customer Win-back",
+        type: "Inactive",
+        description: "Re-engage top VIP tier spenders inactive for 60+ days.",
+        potentialRevenue: 15400,
+        confidence: 88,
+        audienceSize: 12,
+        priorityScore: 88,
+        recommendedAction: "Reduce Customer Churn",
+        reasoning: "These high-value accounts have churn risk scores over 75% due to 60+ days of dormancy, representing a total revenue leak of ₹15,400.",
+        color: "Purple",
+        angle: 160,
+        distance: 80
+      },
+      {
+        id: "opp_vip_early_access",
+        title: "VIP Early Access Opportunity",
+        type: "VIP",
+        description: "Reward top active VIP customers with early collection drops.",
+        potentialRevenue: 18281,
+        confidence: 94,
+        audienceSize: 8,
+        priorityScore: 92,
+        recommendedAction: "Increase Customer LTV",
+        reasoning: "Top loyalty tier customers exhibit positive feedback loops when engaged with early product releases, increasing LTV capacity.",
+        color: "Green",
+        angle: 290,
+        distance: 45
+      }
+    ]
+  };
 }

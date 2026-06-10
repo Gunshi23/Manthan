@@ -109,7 +109,7 @@ function App() {
       {activePage === 'analytics' && <OrbitAnalytics />}
       {activePage === 'system-config' && <SystemConfiguration />}
       {activePage === 'future-simulator' && <FutureSimulator />}
-      {activePage === 'opportunity-radar' && <OpportunityRadar />}
+      {activePage === 'opportunity-radar' && <OpportunityRadar onNavigate={setActivePage} />}
       {activePage === 'seasonal-intel' && <SeasonalIntelligence />}
       {activePage === 'competitor-intel' && <CompetitorIntelligence />}
     </AppShell>

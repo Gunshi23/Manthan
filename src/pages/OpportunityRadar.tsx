@@ -1,6 +1,6 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect, useRef } from "react";
 import { 
-  Radio, ArrowRight, Sparkles, RefreshCw
+  Radio, ArrowRight, Sparkles, RefreshCw, Terminal
 } from "lucide-react";
 import { useOrbit } from "../context/OrbitContext";
 import { PageHeaderHUD } from "../components/PageHeaderHUD";
@@ -8,82 +8,227 @@ import { AgentCardModal } from "../components/AgentCardModal";
 
 interface OpportunityNode {
   id: string;
-  name: string;
+  title: string;
   type: "Lead" | "Inactive" | "VIP" | "Prospect";
-  value: number;
-  count: number;
-  angle: number; // For radar plot
-  distance: number; // For radar plot (radius %)
-  details: string;
-  color: string;
+  description: string;
+  potentialRevenue: number;
+  confidence: number;
+  audienceSize: number;
+  priorityScore: number;
+  recommendedAction: "Recover Lost Revenue" | "Reduce Customer Churn" | "Increase Customer LTV" | "Acquire New Customers";
+  reasoning: string;
+  color: "Green" | "Yellow" | "Red" | "Purple";
+  angle: number;
+  distance: number;
 }
 
-export const OpportunityRadar: React.FC = () => {
-  const { lunaMetrics, businessType, startMission } = useOrbit();
-  const [isScanning, setIsScanning] = useState(true);
+interface OpportunityRadarProps {
+  onNavigate?: (page: any) => void;
+}
+
+export const OpportunityRadar: React.FC<OpportunityRadarProps> = ({ onNavigate }) => {
+  const { lunaMetrics, updateLunaMetrics, startMission } = useOrbit();
   const [selectedAgent, setSelectedAgent] = useState<"Polaris" | "Vega" | "Nova" | "Atlas" | "Luna" | null>(null);
 
-  // Generate target coordinates procedurally based on category to make it feel organic
-  const opportunityNodes = useMemo<OpportunityNode[]>(() => {
-    const isEnterprise = businessType === "Enterprise";
-    const isJewellery = businessType === "Jewellery & Accessories";
-    const baseRev = isEnterprise ? 380000 : isJewellery ? 45000 : 20550;
+  const [opportunitiesData, setOpportunitiesData] = useState<{
+    totalPotentialRevenue: number;
+    highestPriority: string;
+    opportunities: OpportunityNode[];
+  } | null>(null);
+  
+  const [isScanning, setIsScanning] = useState(false);
+  const [scanLogs, setScanLogs] = useState<string[]>([]);
+  const [selectedNodeId, setSelectedNodeId] = useState<string>("");
+  const [isLaunching, setIsLaunching] = useState(false);
+  const [launchStatus, setLaunchStatus] = useState("");
 
-    return [
+  const logsEndRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    logsEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [scanLogs, isScanning]);
+
+  const getFallbackPayload = (): {
+    totalPotentialRevenue: number;
+    highestPriority: string;
+    opportunities: OpportunityNode[];
+  } => ({
+    totalPotentialRevenue: 45600,
+    highestPriority: "Abandoned Cart Recovery",
+    opportunities: [
       {
-        id: "node_1",
-        name: "Abandoned checkout carts",
+        id: "opp_cart_recovery",
+        title: "Abandoned Cart Recovery",
         type: "Lead",
-        value: Math.round(baseRev * 0.58),
-        count: lunaMetrics.abandonedLeads,
+        description: "17 customer nodes left checkout with items.",
+        potentialRevenue: 11919,
+        confidence: 91,
+        audienceSize: 17,
+        priorityScore: 95,
+        recommendedAction: "Recover Lost Revenue",
+        reasoning: "Luna detected a 34% increase in abandoned checkout events over the last 7 days. Customers who abandoned carts have historically converted at 28% when contacted via WhatsApp within 24 hours.",
+        color: "Yellow",
         angle: 45,
-        distance: 65,
-        details: `${lunaMetrics.abandonedLeads} carts left with items. High conversion probability (91% confidence).`,
-        color: "text-amber-400 bg-amber-400"
+        distance: 65
       },
       {
-        id: "node_2",
-        name: "Slipping high-ltv accounts",
+        id: "opp_inactive_winback",
+        title: "Inactive Customer Win-back",
         type: "Inactive",
-        value: Math.round(baseRev * 0.42),
-        count: lunaMetrics.inactiveCustomers,
+        description: "Re-engage top VIP tier spenders inactive for 60+ days.",
+        potentialRevenue: 15400,
+        confidence: 88,
+        audienceSize: 12,
+        priorityScore: 88,
+        recommendedAction: "Reduce Customer Churn",
+        reasoning: "These high-value accounts have churn risk scores over 75% due to 60+ days of dormancy, representing a total revenue leak of ₹15,400.",
+        color: "Purple",
         angle: 160,
-        distance: 80,
-        details: `${lunaMetrics.inactiveCustomers} loyalists exhibiting severe activity declines (churn risk > 70%).`,
-        color: "text-orbit-purple bg-orbit-purple"
+        distance: 80
       },
       {
-        id: "node_3",
-        name: "Untapped VIP buying capacity",
+        id: "opp_vip_early_access",
+        title: "VIP Early Access Opportunity",
         type: "VIP",
-        value: Math.round(baseRev * 0.35),
-        count: isEnterprise ? 2 : isJewellery ? 5 : 8,
+        description: "Reward top active VIP customers with early collection drops.",
+        potentialRevenue: 18281,
+        confidence: 94,
+        audienceSize: 8,
+        priorityScore: 92,
+        recommendedAction: "Increase Customer LTV",
+        reasoning: "Top loyalty tier customers exhibit positive feedback loops when engaged with early product releases, increasing LTV capacity.",
+        color: "Green",
         angle: 290,
-        distance: 45,
-        details: `${isEnterprise ? 2 : isJewellery ? 5 : 8} VIP stars with high replenishment frequency signals.`,
-        color: "text-orbit-success bg-orbit-success"
-      },
-      {
-        id: "node_4",
-        name: "High-affinity signup enquiries",
-        type: "Prospect",
-        value: Math.round(baseRev * 0.2),
-        count: isEnterprise ? 4 : isJewellery ? 9 : 17,
-        angle: 110,
-        distance: 35,
-        details: "Social DM enquiries awaiting initial product campaign activation.",
-        color: "text-blue-400 bg-blue-400"
+        distance: 45
       }
+    ]
+  });
+
+  const performScan = async () => {
+    setIsScanning(true);
+    setScanLogs([]);
+    setSelectedNodeId("");
+    setOpportunitiesData(null);
+
+    const logs = [
+      "[Luna] Detecting revenue leaks across gateways...",
+      "[Polaris] Clustering affected target audiences...",
+      "[Vega] Computing ROI & conversion forecasts...",
+      "[Nova] Preparing copywriting templates...",
+      "[Atlas] Verifying queue status and dispatch nodes..."
     ];
-  }, [businessType, lunaMetrics]);
 
-  // Selected node detailed view
-  const [selectedNodeId, setSelectedNodeId] = useState<string>("node_1");
-  const selectedNode = opportunityNodes.find(n => n.id === selectedNodeId) || opportunityNodes[0];
+    const fetchPromise = fetch("/api/opportunities").then(async (res) => {
+      if (!res.ok) throw new Error(`HTTP Error ${res.status}`);
+      return res.json();
+    });
 
-  const handleLaunchCampaign = (goal: string) => {
+    try {
+      for (let i = 0; i < logs.length; i++) {
+        await new Promise(resolve => setTimeout(resolve, 800));
+        setScanLogs(prev => [...prev, `[System] Node ${i + 1}/5: ${logs[i]}`]);
+      }
+
+      const data = await fetchPromise;
+      setOpportunitiesData(data);
+      
+      if (data && data.opportunities) {
+        updateLunaMetrics({
+          recoverableRevenue: data.totalPotentialRevenue || 45600,
+          abandonedLeads: data.opportunities.filter((o: any) => o.type === "Lead").reduce((sum: number, o: any) => sum + (o.audienceSize || 0), 0),
+          inactiveCustomers: data.opportunities.filter((o: any) => o.type === "Inactive").reduce((sum: number, o: any) => sum + (o.audienceSize || 0), 0),
+          recoveryConfidence: Math.round(data.opportunities.reduce((sum: number, o: any) => sum + (o.confidence || 0), 0) / data.opportunities.length) || 90
+        });
+      }
+      
+      setScanLogs(prev => [...prev, "[System] Scan complete. 100% of channels mapped successfully."]);
+      setIsScanning(false);
+    } catch (err: any) {
+      console.warn("Scan failed, loading fallback metrics:", err);
+      const fallback = getFallbackPayload();
+      setOpportunitiesData(fallback);
+      
+      updateLunaMetrics({
+        recoverableRevenue: fallback.totalPotentialRevenue,
+        abandonedLeads: fallback.opportunities.filter(o => o.type === "Lead").reduce((sum, o) => sum + o.audienceSize, 0),
+        inactiveCustomers: fallback.opportunities.filter(o => o.type === "Inactive").reduce((sum, o) => sum + o.audienceSize, 0),
+        recoveryConfidence: 91
+      });
+      
+      setScanLogs(prev => [
+        ...prev, 
+        `[Warning] Backend service error: ${err.message || err}`,
+        "[System] Loaded default pre-computed opportunity registers."
+      ]);
+      setIsScanning(false);
+    }
+  };
+
+  useEffect(() => {
+    performScan();
+  }, []);
+
+  const opportunities = opportunitiesData?.opportunities || [];
+
+  const selectedNode = useMemo(() => {
+    return opportunities.find(n => n.id === selectedNodeId) || opportunities[0];
+  }, [opportunities, selectedNodeId]);
+
+  useEffect(() => {
+    if (opportunities.length > 0 && !selectedNodeId) {
+      setSelectedNodeId(opportunities[0].id);
+    }
+  }, [opportunities, selectedNodeId]);
+
+  const handleLaunchCampaign = async (goal: string) => {
+    setIsLaunching(true);
+    setLaunchStatus("Initializing core objectives...");
     startMission(goal);
-    alert(`Calibrated core objectives. Redirecting to Command Center to track "${goal}" mission progress!`);
+    
+    await new Promise(resolve => setTimeout(resolve, 800));
+    setLaunchStatus("Calibrating agent coordination pathways...");
+    await new Promise(resolve => setTimeout(resolve, 600));
+    setLaunchStatus("Redirecting dispatcher node...");
+    await new Promise(resolve => setTimeout(resolve, 400));
+    
+    setIsLaunching(false);
+    if (onNavigate) {
+      onNavigate("command-center");
+    }
+  };
+
+  const getColorClasses = (colorName: string) => {
+    switch (colorName) {
+      case "Red":
+        return {
+          text: "text-red-400",
+          bg: "bg-red-400",
+          border: "border-red-500/35",
+          glow: "shadow-orbit-glow-red bg-gradient-to-br from-[#0F172A] to-[#1E293B]"
+        };
+      case "Yellow":
+        return {
+          text: "text-amber-400",
+          bg: "bg-amber-400",
+          border: "border-amber-500/35",
+          glow: "shadow-orbit-glow-amber bg-gradient-to-br from-[#0F172A] to-[#1E293B]"
+        };
+      case "Green":
+        return {
+          text: "text-orbit-success",
+          bg: "bg-orbit-success",
+          border: "border-green-500/35",
+          glow: "shadow-orbit-glow-green bg-gradient-to-br from-[#0F172A] to-[#1E293B]"
+        };
+      case "Purple":
+      default:
+        return {
+          text: "text-orbit-purple",
+          bg: "bg-orbit-purple",
+          border: "border-purple-500/35",
+          glow: "shadow-orbit-glow-purple bg-gradient-to-br from-[#0F172A] to-[#1E293B]"
+        };
+    }
   };
 
   return (
@@ -105,17 +250,46 @@ export const OpportunityRadar: React.FC = () => {
           onSelectAgent={setSelectedAgent}
           actions={
             <button
-              onClick={() => {
-                setIsScanning(true);
-                setTimeout(() => setIsScanning(false), 2000);
-              }}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-950 border border-gray-900 rounded-lg text-gray-450 font-mono text-[9px] cursor-pointer hover:border-gray-800 hover:text-white transition-all"
+              onClick={performScan}
+              disabled={isScanning}
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-950 border border-gray-900 rounded-lg text-gray-450 font-mono text-[9px] cursor-pointer hover:border-gray-800 hover:text-white transition-all disabled:opacity-50"
             >
               <RefreshCw size={11} className={isScanning ? "animate-spin" : ""} />
               <span>Scan Channels</span>
             </button>
           }
         />
+
+        {/* Sleek Summary Ribbon */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6 mt-4 font-mono text-[9px]">
+          <div className="orbit-panel p-3 bg-gray-950/45 border border-gray-900 rounded-xl flex flex-col space-y-1 relative overflow-hidden text-left">
+            <span className="text-gray-550 text-[7.5px] uppercase tracking-wider">Recoverable Revenue</span>
+            <span className="text-orbit-success text-sm font-bold tracking-tight">
+              {opportunitiesData ? `₹${opportunitiesData.totalPotentialRevenue.toLocaleString()}` : "₹0"}
+            </span>
+            <div className="absolute top-1 right-2 w-1.5 h-1.5 rounded-full bg-orbit-success/40 animate-pulse" />
+          </div>
+          <div className="orbit-panel p-3 bg-gray-950/45 border border-gray-900 rounded-xl flex flex-col space-y-1 relative overflow-hidden text-left">
+            <span className="text-gray-550 text-[7.5px] uppercase tracking-wider">Active Nodes</span>
+            <span className="text-white text-sm font-bold tracking-tight">
+              {opportunitiesData ? `${opportunitiesData.opportunities.length} Nodes` : "0 Nodes"}
+            </span>
+          </div>
+          <div className="orbit-panel p-3 bg-gray-950/45 border border-gray-900 rounded-xl flex flex-col space-y-1 relative overflow-hidden text-left">
+            <span className="text-gray-550 text-[7.5px] uppercase tracking-wider">Highest Priority</span>
+            <span className="text-pink-400 text-sm font-bold tracking-tight uppercase truncate block max-w-full">
+              {opportunitiesData ? opportunitiesData.highestPriority : "Scanning..."}
+            </span>
+          </div>
+          <div className="orbit-panel p-3 bg-gray-950/45 border border-gray-900 rounded-xl flex flex-col space-y-1 relative overflow-hidden text-left">
+            <span className="text-gray-550 text-[7.5px] uppercase tracking-wider">Avg AI Confidence</span>
+            <span className="text-orbit-purple text-sm font-bold tracking-tight">
+              {opportunitiesData && opportunitiesData.opportunities.length > 0
+                ? `${Math.round(opportunitiesData.opportunities.reduce((acc, o) => acc + o.confidence, 0) / opportunitiesData.opportunities.length)}%` 
+                : "0%"}
+            </span>
+          </div>
+        </div>
 
         {/* Circular Radar Sweep visual */}
         <div className="flex-1 flex items-center justify-center min-h-[350px] relative">
@@ -140,7 +314,7 @@ export const OpportunityRadar: React.FC = () => {
             )}
 
             {/* Opportunity coordinate blips */}
-            {opportunityNodes.map((n) => {
+            {!isScanning && opportunities.map((n) => {
               // Convert polar coordinates to X/Y
               const rad = (n.angle * Math.PI) / 180;
               const radiusPixels = (n.distance / 100) * 160; // 160 is max radius (half of 320)
@@ -148,34 +322,83 @@ export const OpportunityRadar: React.FC = () => {
               const y = 160 + Math.sin(rad) * radiusPixels;
               
               const isSelected = selectedNodeId === n.id;
+              const colorConfig = getColorClasses(n.color);
               
               return (
                 <button
                   key={n.id}
                   onClick={() => setSelectedNodeId(n.id)}
-                  style={{ left: `${(x / 320) * 100}%`, top: `${(y / 320) * 100}%` }}
-                  className="absolute -translate-x-1/2 -translate-y-1/2 group cursor-pointer z-20 focus:outline-none"
+                  style={{ 
+                    left: `${(x / 320) * 100}%`, 
+                    top: `${(y / 320) * 100}%`,
+                    transform: `translate(-50%, -50%) scale(${0.8 + Math.min(1.2, (n.potentialRevenue / 30000) * 0.8)})`
+                  }}
+                  className="absolute group cursor-pointer z-20 focus:outline-none"
                 >
                   <span className={`absolute -inset-2.5 rounded-full border animate-ping ${
                     isSelected ? "border-pink-400 bg-pink-400/5 opacity-80" : "border-gray-800 opacity-20"
                   }`} style={{ animationDuration: '3s' }} />
                   <span className={`w-3.5 h-3.5 rounded-full border-2 border-[#050816] flex items-center justify-center transition-all ${
-                    isSelected ? "bg-pink-400 scale-125 shadow-[0_0_15px_rgba(236,72,153,0.6)]" : `${n.color.split(" ")[1]} hover:scale-110`
+                    isSelected ? "bg-pink-400 scale-125 shadow-[0_0_15px_rgba(236,72,153,0.6)]" : `${colorConfig.bg} hover:scale-110`
                   }`} />
                   
                   {/* Tooltip detail tag */}
-                  <span className="absolute left-5 top-0 bg-gray-950 border border-gray-900 rounded px-1.5 py-0.5 text-[8px] font-mono text-gray-400 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
-                    ₹{n.value.toLocaleString()} ({n.type})
+                  <span className="absolute left-5 top-0 bg-gray-950 border border-gray-900 rounded px-1.5 py-0.5 text-[8px] font-mono text-gray-400 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50">
+                    ₹{n.potentialRevenue.toLocaleString()} ({n.type})
                   </span>
                 </button>
               );
             })}
 
             {/* Telemetry labels around the radar */}
-            <div className="absolute top-1 left-1 font-mono text-[7px] text-gray-650">AZ: 045°</div>
-            <div className="absolute top-1 right-1 font-mono text-[7px] text-gray-650">RANGE: WIDE</div>
-            <div className="absolute bottom-1 left-1 font-mono text-[7px] text-gray-650">FREQ: 14.2GHz</div>
-            <div className="absolute bottom-1 right-1 font-mono text-[7px] text-gray-650">NODE: LUNA_RDR</div>
+            <div className="absolute top-1 left-1 font-mono text-[7px] text-gray-655">AZ: 045°</div>
+            <div className="absolute top-1 right-1 font-mono text-[7px] text-gray-655">RANGE: WIDE</div>
+            <div className="absolute bottom-1 left-1 font-mono text-[7px] text-gray-655">FREQ: 14.2GHz</div>
+            <div className="absolute bottom-1 right-1 font-mono text-[7px] text-gray-655">NODE: LUNA_RDR</div>
+          </div>
+        </div>
+
+        {/* Telemetry Console Log */}
+        <div className="mt-4 border border-gray-900 bg-gray-950/70 rounded-xl p-3 flex flex-col space-y-1 font-mono text-[9px] leading-relaxed select-none relative overflow-hidden">
+          <div className="absolute top-2 right-3 flex items-center gap-1.5">
+            <span className={`w-1.5 h-1.5 rounded-full ${isScanning ? "bg-amber-400 animate-ping" : "bg-orbit-success animate-pulse"}`} />
+            <span className="text-[7.5px] text-gray-550 uppercase tracking-widest">{isScanning ? "Scanning Channels" : "Telemetry Standby"}</span>
+          </div>
+          <div className="text-gray-500 font-bold border-b border-gray-900 pb-1.5 mb-1.5 flex items-center gap-1 text-left">
+            <Terminal size={11} className="text-pink-400" />
+            <span>CHANNEL DISCOVERY TELEMETRY CONSOLE</span>
+          </div>
+          
+          <div className="h-20 overflow-y-auto space-y-1 scrollbar-thin text-left pr-2">
+            {scanLogs.length === 0 ? (
+              <div className="text-gray-655 italic">System ready. Click "Scan Channels" to initiate detection.</div>
+            ) : (
+              scanLogs.map((log, idx) => {
+                let colorClass = "text-gray-450";
+                if (log.includes("[Warning]")) colorClass = "text-red-400";
+                else if (log.includes("[System]")) colorClass = "text-pink-400 font-bold";
+                else if (log.includes("[Luna]")) colorClass = "text-amber-400";
+                else if (log.includes("[Polaris]")) colorClass = "text-orbit-blue";
+                else if (log.includes("[Vega]")) colorClass = "text-orbit-purple";
+                else if (log.includes("[Nova]")) colorClass = "text-pink-400";
+                else if (log.includes("[Atlas]")) colorClass = "text-orbit-success";
+                
+                return (
+                  <div key={idx} className={`${colorClass} flex gap-1.5`}>
+                    <span className="text-gray-650 font-bold select-none">&gt;&gt;</span>
+                    <p className="flex-1 whitespace-pre-wrap">{log}</p>
+                  </div>
+                );
+              })
+            )}
+            {isScanning && (
+              <div className="flex gap-1.5 text-pink-400/70 text-[9px]">
+                <span className="text-gray-650 font-bold select-none">&gt;&gt;</span>
+                <span className="animate-pulse">Mapping digital coordinates...</span>
+                <span className="inline-block w-1 bg-pink-400 animate-pulse h-3" />
+              </div>
+            )}
+            <div ref={logsEndRef} />
           </div>
         </div>
       </main>
@@ -204,108 +427,137 @@ export const OpportunityRadar: React.FC = () => {
                 stroke="#EC4899" 
                 strokeWidth="6" 
                 strokeDasharray={2 * Math.PI * 46} 
-                strokeDashoffset={2 * Math.PI * 46 * (1 - lunaMetrics.opportunityScore / 100)} 
+                strokeDashoffset={2 * Math.PI * 46 * (1 - (lunaMetrics.opportunityScore || 85) / 100)} 
                 className="transition-all duration-1000"
               />
             </svg>
             <div className="absolute inset-0 flex flex-col items-center justify-center font-mono">
               <span className="text-[7px] text-gray-550 uppercase">Opportunity</span>
-              <span className="text-xl font-bold text-white tracking-tight">{lunaMetrics.opportunityScore}%</span>
+              <span className="text-xl font-bold text-white tracking-tight">{lunaMetrics.opportunityScore || 85}%</span>
               <span className="text-[7px] text-pink-400 font-bold uppercase mt-0.5">Optimal</span>
             </div>
           </div>
 
           <div className="grid grid-cols-2 gap-2 w-full text-left font-mono text-[9px] border-t border-gray-900 pt-3">
             <div>
-              <span className="text-gray-550 block text-[7px] uppercase">Recoverable Rev</span>
-              <span className="text-orbit-success font-bold">₹{lunaMetrics.recoverableRevenue.toLocaleString()}</span>
+              <span className="text-gray-555 block text-[7px] uppercase font-semibold">Recoverable Rev</span>
+              <span className="text-orbit-success font-bold">₹{(lunaMetrics.recoverableRevenue || 0).toLocaleString()}</span>
             </div>
             <div>
-              <span className="text-gray-550 block text-[7px] uppercase">Target Leaks</span>
-              <span className="text-white font-bold">{lunaMetrics.abandonedLeads + lunaMetrics.inactiveCustomers} nodes</span>
+              <span className="text-gray-555 block text-[7px] uppercase font-semibold">Target Leaks</span>
+              <span className="text-white font-bold">{(lunaMetrics.abandonedLeads || 0) + (lunaMetrics.inactiveCustomers || 0)} nodes</span>
             </div>
           </div>
         </div>
 
         {/* Selected blip node breakdown */}
-        <div className={`orbit-panel p-4 space-y-3.5 transition-all duration-300 border ${
-          selectedNode.type === "Lead" ? "border-amber-500/35 shadow-orbit-glow-amber bg-gradient-to-br from-[#0F172A] to-[#1E293B]" :
-          selectedNode.type === "Inactive" ? "border-purple-500/35 shadow-orbit-glow-purple bg-gradient-to-br from-[#0F172A] to-[#1E293B]" :
-          selectedNode.type === "VIP" ? "border-green-500/35 shadow-orbit-glow-green bg-gradient-to-br from-[#0F172A] to-[#1E293B]" :
-          "border-blue-500/35 shadow-orbit-glow-blue bg-gradient-to-br from-[#0F172A] to-[#1E293B]"
-        }`}>
-          <div className="border-b border-gray-900 pb-2.5">
-            <span className="font-mono text-[8px] text-gray-550 uppercase tracking-widest block">Opportunity Node Focus</span>
-            <h3 className="font-space text-xs font-bold text-white uppercase tracking-tight mt-0.5">{selectedNode.name}</h3>
-          </div>
+        {selectedNode ? (
+          <div className={`orbit-panel p-4 space-y-3.5 transition-all duration-300 border ${
+            getColorClasses(selectedNode.color).border
+          } bg-gradient-to-br from-[#0F172A] to-[#1E293B] shadow-lg rounded-xl text-left`}>
+            <div className="border-b border-gray-900/60 pb-2.5">
+              <span className="font-mono text-[8px] text-gray-550 uppercase tracking-widest block">Opportunity Node Focus</span>
+              <h3 className="font-space text-xs font-bold text-white uppercase tracking-tight mt-0.5">{selectedNode.title}</h3>
+            </div>
 
-          <div className="space-y-2.5 font-mono text-[9px]">
-            <div className="flex justify-between">
-              <span className="text-gray-500">Segment category:</span>
-              <span className="text-white font-bold uppercase">{selectedNode.type}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-gray-500">Node volume:</span>
-              <span className="text-white font-bold">{selectedNode.count} targets</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-gray-500">Potential revenue yield:</span>
-              <span className="text-orbit-success font-bold">₹{selectedNode.value.toLocaleString()}</span>
-            </div>
-            
-            <p className="text-gray-400 text-[8.5px] leading-relaxed border-t border-gray-900/60 pt-2.5 mt-2.5">
-              {selectedNode.details}
-            </p>
-          </div>
+            <div className="space-y-2.5 font-mono text-[9px]">
+              <div className="flex justify-between">
+                <span className="text-gray-500">Segment category:</span>
+                <span className="text-white font-bold uppercase">{selectedNode.type}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-500">Node volume:</span>
+                <span className="text-white font-bold">{selectedNode.audienceSize} targets</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-500">Potential revenue yield:</span>
+                <span className="text-orbit-success font-bold">₹{selectedNode.potentialRevenue.toLocaleString()}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-500">AI Confidence:</span>
+                <span className="text-pink-400 font-bold">{selectedNode.confidence}%</span>
+              </div>
+              
+              <p className="text-gray-450 text-[8.5px] leading-relaxed border-t border-gray-900/60 pt-2.5 mt-2.5">
+                {selectedNode.description}
+              </p>
 
-          <button
-            onClick={() => handleLaunchCampaign(
-              selectedNode.type === "Lead" ? "Recover Lost Revenue" :
-              selectedNode.type === "Inactive" ? "Reduce Customer Churn" :
-              selectedNode.type === "VIP" ? "Increase Customer LTV" : "Acquire New Customers"
-            )}
-            className="w-full py-2.5 bg-pink-500 hover:bg-pink-600 text-white font-mono text-[9px] font-bold uppercase tracking-widest rounded-xl transition-all flex items-center justify-center gap-1 cursor-pointer"
-          >
-            <span>Launch Recovery Mission</span>
-            <ArrowRight size={10} />
-          </button>
-        </div>
+              {/* WHY LUNA FOUND THIS */}
+              <div className="border-t border-gray-900/60 pt-2.5 mt-2.5">
+                <span className="font-bold text-white block mb-1 uppercase text-[8px] tracking-wider text-pink-400">Why Luna Found This:</span>
+                <p className="text-gray-450 text-[8.5px] leading-relaxed italic bg-black/20 p-2 rounded border border-gray-900">
+                  "{selectedNode.reasoning}"
+                </p>
+              </div>
+            </div>
+
+            <button
+              onClick={() => handleLaunchCampaign(selectedNode.recommendedAction)}
+              disabled={isLaunching}
+              className="w-full py-2.5 bg-pink-500 hover:bg-pink-600 text-white font-mono text-[9px] font-bold uppercase tracking-widest rounded-xl transition-all flex items-center justify-center gap-1 cursor-pointer disabled:opacity-50"
+            >
+              {isLaunching ? (
+                <span className="animate-pulse">{launchStatus}</span>
+              ) : (
+                <>
+                  <span>Launch Recovery Mission</span>
+                  <ArrowRight size={10} />
+                </>
+              )}
+            </button>
+          </div>
+        ) : (
+          <div className="orbit-panel p-4 text-center text-gray-550 font-mono text-[9.5px]">
+            No opportunity node focused. Run a scan to discover active nodes.
+          </div>
+        )}
 
         {/* AI Recommendations */}
-        <div className="orbit-panel p-4 space-y-3 flex-1">
-          <h3 className="font-space text-xs font-bold text-white uppercase tracking-wider flex items-center gap-1.5 border-b border-gray-900 pb-2">
+        <div className="orbit-panel p-4 space-y-3 flex-1 flex flex-col min-h-[220px]">
+          <h3 className="font-space text-xs font-bold text-white uppercase tracking-wider flex items-center gap-1.5 border-b border-gray-900 pb-2 shrink-0 text-left">
             <Sparkles size={12} className="text-orbit-purple" />
             Luna Actions
           </h3>
 
-          <div className="space-y-3">
-            {[
-              { title: "Recover Lost Leads", desc: "Launch auto recovery WhatsApp messages targeting cart abandonments.", yield: `₹${Math.round(lunaMetrics.recoverableRevenue * 0.58).toLocaleString()}`, conf: "91%" },
-              { title: "Launch Reactivation Campaign", desc: "Target high-value slipping accounts with customized DNA vouchers.", yield: `₹${Math.round(lunaMetrics.recoverableRevenue * 0.42).toLocaleString()}`, conf: "88%" },
-              { title: "Reward VIP Customers", desc: "Inject early access collection invites to maintain high LTV index.", yield: `₹${Math.round(lunaMetrics.recoverableRevenue * 0.35).toLocaleString()}`, conf: "94%" }
-            ].map((rec, i) => {
-              const borderGlowClass = 
-                i === 0 ? "border-amber-500/25 bg-amber-500/5 shadow-orbit-glow-amber text-amber-400" :
-                i === 1 ? "border-purple-500/25 bg-purple-500/5 shadow-orbit-glow-purple text-purple-400" :
-                "border-green-500/25 bg-green-500/5 shadow-orbit-glow-green text-green-400";
-              const labelColorClass =
-                i === 0 ? "text-amber-300 font-bold" :
-                i === 1 ? "text-purple-300 font-bold" :
-                "text-green-300 font-bold";
+          <div className="space-y-3 overflow-y-auto flex-1 pr-1 scrollbar-thin">
+            {opportunities.map((opp) => {
+              const colorConfig = getColorClasses(opp.color);
+              const isSelected = selectedNodeId === opp.id;
+              
               return (
-                <div key={i} className={`border p-2.5 rounded-lg space-y-1 font-mono text-[8.5px] bg-[#0F172A]/80 transition-all duration-300 hover:scale-[1.02] ${borderGlowClass}`}>
+                <div 
+                  key={opp.id} 
+                  onClick={() => setSelectedNodeId(opp.id)}
+                  className={`border p-2.5 rounded-lg space-y-1 font-mono text-[8.5px] bg-[#0F172A]/80 transition-all duration-300 hover:scale-[1.02] cursor-pointer text-left ${
+                    isSelected ? "border-pink-500/50 bg-pink-500/5 shadow-[0_0_10px_rgba(236,72,153,0.1)]" : `${colorConfig.border} hover:border-gray-800`
+                  }`}
+                >
                   <div className="flex items-center justify-between">
-                    <span className={`font-bold ${labelColorClass}`}>{rec.title}</span>
-                    <span className="text-orbit-success font-bold">{rec.yield}</span>
+                    <span className={`font-bold ${colorConfig.text}`}>{opp.title}</span>
+                    <span className="text-orbit-success font-bold">₹{opp.potentialRevenue.toLocaleString()}</span>
                   </div>
-                  <p className="text-gray-300 leading-normal">{rec.desc}</p>
+                  <p className="text-gray-300 leading-normal line-clamp-2">{opp.description}</p>
                   <div className="flex justify-between text-[7.5px] border-t border-[rgba(255,255,255,0.06)] pt-1 mt-1">
-                    <span className="text-gray-400">Confidence: {rec.conf}</span>
-                    <span className={`font-semibold hover:underline cursor-pointer ${labelColorClass}`} onClick={() => handleLaunchCampaign(rec.title)}>Launch Directive</span>
+                    <span className="text-gray-400">Confidence: {opp.confidence}%</span>
+                    <span 
+                      className={`font-semibold hover:underline cursor-pointer ${colorConfig.text}`} 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleLaunchCampaign(opp.recommendedAction);
+                      }}
+                    >
+                      Launch Directive
+                    </span>
                   </div>
                 </div>
               );
             })}
+            {opportunities.length === 0 && !isScanning && (
+              <div className="text-gray-655 italic text-center py-4">No recommendations available.</div>
+            )}
+            {isScanning && (
+              <div className="text-gray-655 italic text-center py-4 animate-pulse">Running AI analysis...</div>
+            )}
           </div>
         </div>
 
