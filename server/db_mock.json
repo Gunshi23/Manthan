@@ -2,36 +2,58 @@
   "opportunities": {
     "opp_1": {
       "id": "opp_1",
-      "title": "Dormant VIP Re-engagement",
-      "cohort": "High-Value Inactive",
-      "description": "Recover premium spenders inactive for 45+ days.",
-      "potentialRevenue": 32000,
-      "opportunityScore": 94,
-      "recommendedChannel": "WhatsApp",
+      "title": "High-Value Churn Prevention",
+      "cohort": "At-Risk VIP Subscribers",
+      "description": "Proactively engage VIP subscribers (annual plans, high usage) showing signs of reduced engagement or upcoming renewal in the next 30 days.",
+      "potentialRevenue": 35000,
+      "opportunityScore": 95,
+      "recommendedChannel": "Personalized Email",
       "confidence": "High",
-      "updatedAt": "2026-06-10T06:23:59.704Z"
+      "updatedAt": "2026-06-10T06:29:40.069Z"
     },
     "opp_2": {
       "id": "opp_2",
-      "title": "Cart Recovery Optimization",
-      "cohort": "Slipping Away",
-      "description": "Trigger automations on checkout leaks in the last 7 days.",
-      "potentialRevenue": 15400,
+      "title": "New Customer Second Purchase Drive",
+      "cohort": "Recent First-Time Buyers",
+      "description": "Encourage a second purchase from customers who made their first purchase 15-30 days ago and haven't returned.",
+      "potentialRevenue": 22000,
       "opportunityScore": 88,
       "recommendedChannel": "Email",
-      "confidence": "High",
-      "updatedAt": "2026-06-10T06:23:59.705Z"
+      "confidence": "Medium",
+      "updatedAt": "2026-06-10T06:29:40.070Z"
     },
     "opp_3": {
       "id": "opp_3",
-      "title": "Festive Cross-sell Campaign",
-      "cohort": "Loyalists",
-      "description": "Target repeat buyers with a festive collection early access.",
-      "potentialRevenue": 42000,
+      "title": "Underutilized Premium Feature Adoption",
+      "cohort": "Core Users Missing Key Features",
+      "description": "Target users of a SaaS product who consistently use core features but haven't adopted premium or high-value features available in their plan.",
+      "potentialRevenue": 41000,
+      "opportunityScore": 90,
+      "recommendedChannel": "In-App Messaging",
+      "confidence": "High",
+      "updatedAt": "2026-06-10T06:29:40.070Z"
+    },
+    "opp_4": {
+      "id": "opp_4",
+      "title": "Expired Service Re-activation",
+      "cohort": "Lapsed Service Users",
+      "description": "Reach out to customers whose service subscriptions expired 30-90 days ago but showed high engagement prior to lapse.",
+      "potentialRevenue": 29500,
       "opportunityScore": 85,
-      "recommendedChannel": "RCS",
+      "recommendedChannel": "SMS",
       "confidence": "Medium",
-      "updatedAt": "2026-06-10T06:23:59.705Z"
+      "updatedAt": "2026-06-10T06:29:40.070Z"
+    },
+    "opp_5": {
+      "id": "opp_5",
+      "title": "High-Value Product Browsers",
+      "cohort": "Intent-Rich Shoppers",
+      "description": "Re-engage users who viewed high-margin products multiple times in the last 48 hours but did not add to cart or purchase.",
+      "potentialRevenue": 18500,
+      "opportunityScore": 82,
+      "recommendedChannel": "Personalized Email, Retargeting Ads",
+      "confidence": "Medium",
+      "updatedAt": "2026-06-10T06:29:37.998Z"
     }
   },
   "brand_dna": {

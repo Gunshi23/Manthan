@@ -9,7 +9,7 @@ async function callGeminiAPI(
     throw new Error("Gemini API key is not configured on the backend.");
   }
 
-  const model = "gemini-1.5-flash"; // standard stable model
+  const model = "gemini-2.5-flash"; // standard stable model
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${GEMINI_API_KEY}`;
 
   const requestBody: any = {
