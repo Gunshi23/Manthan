@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { LandingPage } from './pages/LandingPage';
 import { AuthFlow } from './pages/AuthFlow';
 import { OrbitInitialization } from './pages/OrbitInitialization';
@@ -17,6 +17,8 @@ import { FutureSimulator } from './pages/FutureSimulator';
 import { OpportunityRadar } from './pages/OpportunityRadar';
 import { SeasonalIntelligence } from './pages/SeasonalIntelligence';
 import { CompetitorIntelligence } from './pages/CompetitorIntelligence';
+import { auth } from './services/firebase';
+import { onAuthStateChanged, signOut } from 'firebase/auth';
 
 type AppStage = 'landing' | 'auth' | 'init' | 'profile-setup' | 'setup' | 'app';
 type AppPage = 'command-center' | 'mission-control' | 'customer-galaxy' | 'growth-engine' | 'agent-boardroom' | 'voice-console' | 'analytics' | 'system-config' | 'future-simulator' | 'opportunity-radar' | 'seasonal-intel' | 'competitor-intel';
@@ -26,9 +28,28 @@ function App() {
   const [activePage, setActivePage] = useState<AppPage>('command-center');
   const [missionGoal, setMissionGoal] = useState<string>('');
 
-  const handleEnterOS = () => setStage('auth');
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setStage(prev => (prev === 'landing' || prev === 'auth') ? 'init' : prev);
+      } else {
+        setStage(prev => (prev !== 'landing' && prev !== 'auth') ? 'landing' : prev);
+      }
+    });
+    return unsubscribe;
+  }, []);
+
+  const handleEnterOS = () => {
+    if (auth.currentUser) {
+      setStage('init');
+    } else {
+      setStage('auth');
+    }
+  };
+
   const handleLoginSuccess = () => setStage('init');
   const handleInitComplete = () => setStage('profile-setup');
+  
   const handleProfileComplete = (goal?: string) => {
     if (goal) {
       setMissionGoal(goal);
@@ -37,9 +58,19 @@ function App() {
       setStage('setup');
     }
   };
+
   const handleSetupComplete = (goal: string) => {
     setMissionGoal(goal);
     setStage('app');
+  };
+
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+    } catch (err) {
+      console.error("Firebase SignOut error:", err);
+    }
+    setStage('landing');
   };
 
   if (stage === 'landing') {
@@ -67,6 +98,7 @@ function App() {
       activePage={activePage}
       onNavigate={(page) => setActivePage(page as AppPage)}
       missionGoal={missionGoal}
+      onLogout={handleLogout}
     >
       {activePage === 'command-center' && <CommandCenter />}
       {activePage === 'mission-control' && <MissionControl />}

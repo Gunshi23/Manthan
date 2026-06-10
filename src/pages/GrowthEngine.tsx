@@ -68,7 +68,7 @@ const channelConfig: Record<ChannelType, { icon: React.FC<any>; color: string; b
 };
 
 export const GrowthEngine: React.FC = () => {
-  const { startMission } = useOrbit();
+  const { startMission, launchMissionCampaign, mission } = useOrbit();
   const [activeChannel, setActiveChannel] = useState<ChannelType>("Email");
   const [activeVariant, setActiveVariant] = useState<VariantType>("A");
   const [goal, setGoal] = useState("Increase repeat purchases");
@@ -618,8 +618,12 @@ export const GrowthEngine: React.FC = () => {
 
           <button
             onClick={() => {
-              // start simulation or dispatch campaign in context
-              alert(`Campaign dispatched successfully via ${activeChannel}! Check Mission Control to track live engagements.`);
+              if (mission.isActive && mission.step === "ready") {
+                launchMissionCampaign(activeChannel);
+                alert(`Campaign dispatched successfully via ${activeChannel}! Check Mission Control to track live engagements.`);
+              } else {
+                alert(`Please click "AI Generate Campaign" first to target customer cohorts and prepare the dispatch copy.`);
+              }
             }}
             className="w-full py-3 rounded-xl bg-gradient-to-r from-orbit-success to-emerald-400 text-white font-mono text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 hover:opacity-90 hover:scale-[1.02] active:scale-95 duration-200 cursor-pointer shadow-orbit-glow-green"
           >

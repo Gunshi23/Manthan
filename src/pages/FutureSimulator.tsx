@@ -4,6 +4,7 @@ import {
   RefreshCw, Play, ArrowRight, Brain, Compass
 } from "lucide-react";
 import { useOrbit } from "../context/OrbitContext";
+import { callGeminiAPI, parseGeminiJson } from "../utils/gemini";
 
 // Types
 type AudienceType = "VIP Customers" | "Inactive Customers" | "Repeat Buyers" | "New Customers" | "Custom Segment";
@@ -42,7 +43,7 @@ interface ChatMessage {
 }
 
 export const FutureSimulator: React.FC = () => {
-  const { addAgentLog } = useOrbit();
+  const { addAgentLog, config } = useOrbit();
   
   // Page mode: "variables" (custom inputs) vs "missions" (mission objectives)
   const [simulatorMode, setSimulatorMode] = useState<"variables" | "missions">("variables");
@@ -89,9 +90,9 @@ export const FutureSimulator: React.FC = () => {
       confidence: 91,
       roi: "2.8x",
       risk: "Low",
-      colorClass: "from-blue-500/20 to-cyan-500/20",
-      borderClass: "border-blue-550/40",
-      bgGlowClass: "rgba(59, 130, 246, 0.1)",
+      colorClass: "from-blue-500/15 to-blue-555/5",
+      borderClass: "border-blue-550/40 hover:border-blue-450/60 shadow-orbit-glow-blue",
+      bgGlowClass: "rgba(59, 130, 246, 0.08)",
       textAccentClass: "text-blue-400",
       recs: ["Low churn risk", "Guaranteed steady returns", "Best for budget conservation"]
     },
@@ -105,10 +106,10 @@ export const FutureSimulator: React.FC = () => {
       confidence: 87,
       roi: "4.8x",
       risk: "Low",
-      colorClass: "from-orbit-purple/35 to-orbit-blue/35 bg-orbit-purple/5",
-      borderClass: "border-orbit-purple/50 shadow-orbit-glow-purple",
-      bgGlowClass: "rgba(139, 92, 246, 0.15)",
-      textAccentClass: "text-orbit-purple",
+      colorClass: "from-green-500/20 to-emerald-500/20 bg-green-500/5",
+      borderClass: "border-green-500/40 hover:border-green-400/70 shadow-orbit-glow-green animate-glow-pulse",
+      bgGlowClass: "rgba(34, 197, 94, 0.15)",
+      textAccentClass: "text-green-400",
       recs: ["Highest ROI balance", "Optimized audience engagement", "Negligible churn risk bump"]
     },
     C: {
@@ -121,10 +122,10 @@ export const FutureSimulator: React.FC = () => {
       confidence: 69,
       roi: "6.2x",
       risk: "High",
-      colorClass: "from-red-500/20 to-orange-500/20",
-      borderClass: "border-red-500/30",
-      bgGlowClass: "rgba(239, 68, 68, 0.08)",
-      textAccentClass: "text-red-400",
+      colorClass: "from-purple-500/15 to-violet-500/5 bg-purple-500/5",
+      borderClass: "border-purple-500/30 hover:border-purple-400/50 shadow-orbit-glow-purple",
+      bgGlowClass: "rgba(139, 92, 246, 0.08)",
+      textAccentClass: "text-purple-400",
       recs: ["Maximum revenue potential", "High fatigue risk", "Requires premium copywriting failovers"]
     }
   });
@@ -277,8 +278,8 @@ export const FutureSimulator: React.FC = () => {
         confidence: confA,
         roi: roiMultiplier(revA),
         risk: "Low",
-        colorClass: "from-blue-500/10 to-cyan-500/10",
-        borderClass: "border-blue-500/30 hover:border-blue-400/50",
+        colorClass: "from-blue-500/15 to-blue-555/5",
+        borderClass: "border-blue-550/40 hover:border-blue-450/60 shadow-orbit-glow-blue",
         bgGlowClass: "rgba(59, 130, 246, 0.08)",
         textAccentClass: "text-blue-400",
         recs: [
@@ -297,10 +298,10 @@ export const FutureSimulator: React.FC = () => {
         confidence: confB,
         roi: roiMultiplier(revB),
         risk: selectedChannel === "WhatsApp" && timeScale > 1 ? "Medium" : "Low",
-        colorClass: "from-orbit-purple/20 to-orbit-blue/20 bg-orbit-purple/5",
-        borderClass: "border-orbit-purple/40 hover:border-orbit-purple/70 shadow-orbit-glow-purple",
-        bgGlowClass: "rgba(139, 92, 246, 0.12)",
-        textAccentClass: "text-orbit-purple",
+        colorClass: "from-green-500/20 to-emerald-500/20 bg-green-500/5",
+        borderClass: "border-green-500/40 hover:border-green-400/70 shadow-orbit-glow-green animate-glow-pulse",
+        bgGlowClass: "rgba(34, 197, 94, 0.15)",
+        textAccentClass: "text-green-400",
         recs: [
           "Vega identified: Optimal balance of conversion yields versus opt-out rates.",
           `High performance channel allocation using ${selectedChannel} nodes.`,
@@ -317,10 +318,10 @@ export const FutureSimulator: React.FC = () => {
         confidence: confC,
         roi: roiMultiplier(revC),
         risk: "High",
-        colorClass: "from-red-500/10 to-orange-500/10",
-        borderClass: "border-red-500/20 hover:border-red-400/40",
-        bgGlowClass: "rgba(239, 68, 68, 0.06)",
-        textAccentClass: "text-red-400",
+        colorClass: "from-purple-500/15 to-violet-500/5 bg-purple-500/5",
+        borderClass: "border-purple-500/30 hover:border-purple-400/50 shadow-orbit-glow-purple",
+        bgGlowClass: "rgba(139, 92, 246, 0.08)",
+        textAccentClass: "text-purple-400",
         recs: [
           "Risk of high opt-out rates (estimated 12-18% cohort friction).",
           "Accelerated purchase cycles may trigger customer fatigue.",
@@ -373,7 +374,7 @@ export const FutureSimulator: React.FC = () => {
   };
 
   // Handle What If Chat queries
-  const handleWhatIfSubmit = (e?: React.FormEvent, customQuery?: string) => {
+  const handleWhatIfSubmit = async (e?: React.FormEvent, customQuery?: string) => {
     if (e) e.preventDefault();
     const queryText = customQuery || chatInput;
     if (!queryText.trim() || isChatTyping) return;
@@ -389,77 +390,120 @@ export const FutureSimulator: React.FC = () => {
     setChatInput("");
     setIsChatTyping(true);
 
-    // Process simulation output based on text query content
-    setTimeout(() => {
-      let revenue = 48000;
-      let audienceSize = 84;
-      let conversion = 14;
-      let confidence = 89;
-      let replyText = "";
+    let geminiResponse: any = null;
 
-      const lowerQuery = queryText.toLowerCase();
+    if (config.geminiKey) {
+      try {
+        const systemPrompt = `You are Vega, the AI Predictive Analytics Agent for ORBIT. The user has set up their business (category: "${selectedAudience}").
+They are querying a growth timeline mutation or what-if scenario in the Future Simulator: "${queryText}".
+Formulate your response as a valid JSON object matching this schema exactly:
+{
+  "replyText": "your detailed predictive analysis response speech here...",
+  "stats": {
+    "revenue": number (estimated yield, e.g. 24000),
+    "audienceSize": number (affected audience size, e.g. 50),
+    "conversion": number (estimated conversion rate in %, e.g. 15),
+    "confidence": number (confidence level in %, e.g. 88)
+  }
+}
+Return ONLY the raw JSON object. Do not write markdown tags or extra explanations.`;
 
-      if (lowerQuery.includes("vip")) {
-        audienceSize = 24;
-        conversion = 21;
-        revenue = Math.round(audienceSize * 2500 * (conversion / 100));
-        confidence = 92;
-        replyText = "Targeting only VIP customers reduces campaign volume but maximizes conversion velocity. Churn risk decreases to near zero due to high brand loyalty. Vega recommends Email or RCS cards to protect premium branding.";
-      } else if (lowerQuery.includes("whatsapp") || lowerQuery.includes("whats app")) {
-        audienceSize = 65;
-        conversion = 16;
-        revenue = Math.round(audienceSize * 1400 * (conversion / 100));
-        confidence = 88;
-        replyText = "Transitioning campaigns to WhatsApp nodes increases open rates by 35% compared to Email. Conversational replies can act as direct checkout gateways. Warning: excessive frequency will cause opt-out spikes.";
-      } else if (lowerQuery.includes("diwali") || lowerQuery.includes("festival") || lowerQuery.includes("holiday")) {
-        audienceSize = 80;
-        conversion = 19;
-        revenue = Math.round(audienceSize * 2200 * (conversion / 100));
-        confidence = 83;
-        replyText = "Launching during a major holiday/festival boosts consumer intent by 2x. Competition in advertising nodes is high. Vega recommends a multi-channel failover plan starting 3 days early with high-incentive VIP drops.";
-      } else if (lowerQuery.includes("discount") || lowerQuery.includes("offer") || lowerQuery.includes("20%") || lowerQuery.includes("25%")) {
-        audienceSize = 80;
-        conversion = 18;
-        revenue = Math.round(audienceSize * 1500 * 0.8 * (conversion / 100));
-        confidence = 86;
-        replyText = "Increasing the discount from 10% to 20%+ triggers a conversion spike of 1.5x. However, product margin collapses by 22%. Vega suggests limiting high discounts to Slipping Away VIPs rather than New Signups.";
-      } else if (lowerQuery.includes("inactive") || lowerQuery.includes("dormant")) {
-        audienceSize = 18;
-        conversion = 9;
-        revenue = Math.round(audienceSize * 1800 * (conversion / 100));
-        confidence = 79;
-        replyText = "Targeting inactive customer nodes requires a Reactivation creative template. Expected open rate is lower (32%), but converting even 1-2 accounts restores substantial Lifetime Value (LTV).";
-      } else if (lowerQuery.includes("frequency") || lowerQuery.includes("twice") || lowerQuery.includes("every day")) {
-        audienceSize = 80;
-        conversion = 14;
-        revenue = Math.round(audienceSize * 1600 * 1.35 * (conversion / 100));
-        confidence = 61;
-        replyText = "Increasing campaign frequency drives short-term clicks but triggers aggressive churn warnings. Long-term projection shows a 24% customer decay rate over 90 days. Not recommended unless utilizing high-value VIP channels.";
-      } else {
-        // Fallback generic analysis
-        audienceSize = 54;
-        conversion = 11;
-        revenue = Math.round(audienceSize * 1600 * (conversion / 100));
-        confidence = 85;
-        replyText = "Vega recalculated simulation parameters. Running this custom query creates a mid-tier performance pathway. ROI yield remains stable at 3.4x with minimal channel resistance.";
+        const userPrompt = `Query: "${queryText}"
+Context Audience: "${selectedAudience}"
+Context Channel: "${selectedChannel}"
+Context Offer: "${selectedOffer}"
+Context Campaign Strategy: "${selectedCampaignType}"`;
+
+        const resText = await callGeminiAPI(userPrompt, systemPrompt, config.geminiKey);
+        geminiResponse = parseGeminiJson(resText, null);
+      } catch (err) {
+        console.warn("Future Simulator Vega Chat query failed:", err);
       }
+    }
 
+    if (geminiResponse) {
       const vegaMsg: ChatMessage = {
         sender: "vega",
-        text: replyText,
+        text: geminiResponse.replyText || "Vega recalibrated simulation parameters.",
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        stats: {
-          revenue,
-          audienceSize,
-          conversion,
-          confidence
-        }
+        stats: geminiResponse.stats
       };
-
       setChatHistory(prev => [...prev, vegaMsg]);
       setIsChatTyping(false);
       addAgentLog("Vega", `What-if scenario query resolved: ${queryText}`, "thought");
-    }, 1800);
+    } else {
+      // Process simulation output based on text query content
+      setTimeout(() => {
+        let revenue = 48000;
+        let audienceSize = 84;
+        let conversion = 14;
+        let confidence = 89;
+        let replyText = "";
+
+        const lowerQuery = queryText.toLowerCase();
+
+        if (lowerQuery.includes("vip")) {
+          audienceSize = 24;
+          conversion = 21;
+          revenue = Math.round(audienceSize * 2500 * (conversion / 100));
+          confidence = 92;
+          replyText = "Targeting only VIP customers reduces campaign volume but maximizes conversion velocity. Churn risk decreases to near zero due to high brand loyalty. Vega recommends Email or RCS cards to protect premium branding.";
+        } else if (lowerQuery.includes("whatsapp") || lowerQuery.includes("whats app")) {
+          audienceSize = 65;
+          conversion = 16;
+          revenue = Math.round(audienceSize * 1400 * (conversion / 100));
+          confidence = 88;
+          replyText = "Transitioning campaigns to WhatsApp nodes increases open rates by 35% compared to Email. Conversational replies can act as direct checkout gateways. Warning: excessive frequency will cause opt-out spikes.";
+        } else if (lowerQuery.includes("diwali") || lowerQuery.includes("festival") || lowerQuery.includes("holiday")) {
+          audienceSize = 80;
+          conversion = 19;
+          revenue = Math.round(audienceSize * 2200 * (conversion / 100));
+          confidence = 83;
+          replyText = "Launching during a major holiday/festival boosts consumer intent by 2x. Competition in advertising nodes is high. Vega recommends a multi-channel failover plan starting 3 days early with high-incentive VIP drops.";
+        } else if (lowerQuery.includes("discount") || lowerQuery.includes("offer") || lowerQuery.includes("20%") || lowerQuery.includes("25%")) {
+          audienceSize = 80;
+          conversion = 18;
+          revenue = Math.round(audienceSize * 1500 * 0.8 * (conversion / 100));
+          confidence = 86;
+          replyText = "Increasing the discount from 10% to 20%+ triggers a conversion spike of 1.5x. However, product margin collapses by 22%. Vega suggests limiting high discounts to Slipping Away VIPs rather than New Signups.";
+        } else if (lowerQuery.includes("inactive") || lowerQuery.includes("dormant")) {
+          audienceSize = 18;
+          conversion = 9;
+          revenue = Math.round(audienceSize * 1800 * (conversion / 100));
+          confidence = 79;
+          replyText = "Targeting inactive customer nodes requires a Reactivation creative template. Expected open rate is lower (32%), but converting even 1-2 accounts restores substantial Lifetime Value (LTV).";
+        } else if (lowerQuery.includes("frequency") || lowerQuery.includes("twice") || lowerQuery.includes("every day")) {
+          audienceSize = 80;
+          conversion = 14;
+          revenue = Math.round(audienceSize * 1600 * 1.35 * (conversion / 100));
+          confidence = 61;
+          replyText = "Increasing campaign frequency drives short-term clicks but triggers aggressive churn warnings. Long-term projection shows a 24% customer decay rate over 90 days. Not recommended unless utilizing high-value VIP channels.";
+        } else {
+          // Fallback generic analysis
+          audienceSize = 54;
+          conversion = 11;
+          revenue = Math.round(audienceSize * 1600 * (conversion / 100));
+          confidence = 85;
+          replyText = "Vega recalculated simulation parameters. Running this custom query creates a mid-tier performance pathway. ROI yield remains stable at 3.4x with minimal channel resistance.";
+        }
+
+        const vegaMsg: ChatMessage = {
+          sender: "vega",
+          text: replyText,
+          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          stats: {
+            revenue,
+            audienceSize,
+            conversion,
+            confidence
+          }
+        };
+
+        setChatHistory(prev => [...prev, vegaMsg]);
+        setIsChatTyping(false);
+        addAgentLog("Vega", `What-if scenario query resolved: ${queryText}`, "thought");
+      }, 1800);
+    }
   };
 
   // Mock Graph Data points coordinates for SVG drawing
@@ -994,11 +1038,11 @@ export const FutureSimulator: React.FC = () => {
                         <div className="space-y-3.5">
                           {/* Header badge details */}
                           <div className="flex items-center justify-between">
-                            <span className="font-space text-xs font-black text-white uppercase tracking-tight">{t.name}</span>
-                            <span className={`font-mono text-[8px] font-bold px-2 py-0.5 rounded border uppercase ${
-                              t.id === "A" ? "border-blue-500/20 bg-blue-500/5 text-blue-400" :
-                              t.id === "B" ? "border-orbit-purple/30 bg-orbit-purple/5 text-orbit-purple" :
-                              "border-red-500/20 bg-red-500/5 text-red-400"
+                            <span className="font-space text-xs font-bold text-white uppercase tracking-tight">{t.name}</span>
+                            <span className={`font-mono text-[8.5px] font-bold px-2 py-0.5 rounded border uppercase ${
+                              t.id === "A" ? "border-blue-500/30 bg-blue-500/10 text-blue-400" :
+                              t.id === "B" ? "border-green-500/30 bg-green-500/10 text-green-400" :
+                              "border-purple-500/30 bg-purple-500/10 text-purple-400"
                             }`}>
                               {t.badge}
                             </span>
@@ -1084,28 +1128,31 @@ export const FutureSimulator: React.FC = () => {
                         d={graphData.pathA} 
                         fill="none" 
                         stroke="#3B82F6" 
-                        strokeWidth="1" 
+                        strokeWidth="1.5" 
                         strokeDasharray="4,4" 
-                        className={`transition-opacity duration-300 ${selectedTimeline === "A" ? "opacity-100 stroke-[1.5]" : "opacity-35"}`} 
+                        className={`transition-opacity duration-300 ${selectedTimeline === "A" ? "opacity-100 stroke-[2]" : "opacity-45"}`} 
+                        style={{ filter: selectedTimeline === "A" ? "drop-shadow(0 0 4px #3B82F6)" : "" }}
                       />
                       
                       {/* Path C (Aggressive) */}
                       <path 
                         d={graphData.pathC} 
                         fill="none" 
-                        stroke="#EF4444" 
-                        strokeWidth="1" 
+                        stroke="#8B5CF6" 
+                        strokeWidth="1.5" 
                         strokeDasharray="4,4" 
-                        className={`transition-opacity duration-300 ${selectedTimeline === "C" ? "opacity-100 stroke-[1.5]" : "opacity-35"}`} 
+                        className={`transition-opacity duration-300 ${selectedTimeline === "C" ? "opacity-100 stroke-[2]" : "opacity-45"}`} 
+                        style={{ filter: selectedTimeline === "C" ? "drop-shadow(0 0 6px #8B5CF6)" : "" }}
                       />
 
                       {/* Path B (Recommended) - Bold and Glowing */}
                       <path 
                         d={graphData.pathB} 
                         fill="none" 
-                        stroke="#8B5CF6" 
+                        stroke="#22C55E" 
                         strokeWidth="2.5" 
-                        className={`transition-opacity duration-300 ${selectedTimeline === "B" ? "opacity-100" : "opacity-35"}`} 
+                        className={`transition-opacity duration-300 ${selectedTimeline === "B" ? "opacity-100 stroke-[3]" : "opacity-45"}`} 
+                        style={{ filter: "drop-shadow(0 0 8px #22C55E)" }}
                       />
 
                       {/* Interactive plot points on the curve focus */}
@@ -1142,7 +1189,7 @@ export const FutureSimulator: React.FC = () => {
                   <div className="flex-1 space-y-4 font-mono text-[10px]">
                     {/* Vega Header details */}
                     <div className="flex items-start gap-2.5 p-2 bg-gray-950/50 border border-gray-900 rounded-xl">
-                      <div className="w-8 h-8 rounded-full bg-orbit-purple/15 flex items-center justify-center border border-orbit-purple/30 text-orbit-purple font-space font-black text-xs shrink-0">V</div>
+                      <div className="w-8 h-8 rounded-full bg-orbit-purple/15 flex items-center justify-center border border-orbit-purple/30 text-orbit-purple font-space font-bold text-xs shrink-0">V</div>
                       <div>
                         <span className="font-bold text-white block uppercase text-[8px] tracking-wider">Vega analytics agent</span>
                         <p className="text-[10px] text-gray-400 leading-normal mt-0.5">
@@ -1235,7 +1282,7 @@ export const FutureSimulator: React.FC = () => {
                     return (
                       <div key={index} className={`flex gap-3 items-start ${isVega ? "" : "justify-end"}`}>
                         {isVega && (
-                          <div className="w-6 h-6 rounded-full bg-orbit-blue/15 border border-orbit-blue/40 text-orbit-blue font-space font-black text-[10px] flex items-center justify-center shrink-0">
+                          <div className="w-6 h-6 rounded-full bg-orbit-blue/15 border border-orbit-blue/40 text-orbit-blue font-space font-bold text-[10px] flex items-center justify-center shrink-0">
                             V
                           </div>
                         )}
@@ -1275,7 +1322,7 @@ export const FutureSimulator: React.FC = () => {
 
                   {isChatTyping && (
                     <div className="flex gap-3 items-start">
-                      <div className="w-6 h-6 rounded-full bg-orbit-blue/15 border border-orbit-blue/40 text-orbit-blue font-space font-black text-[10px] flex items-center justify-center shrink-0">
+                      <div className="w-6 h-6 rounded-full bg-orbit-blue/15 border border-orbit-blue/40 text-orbit-blue font-space font-bold text-[10px] flex items-center justify-center shrink-0">
                         V
                       </div>
                       <div className="p-3 bg-gray-950/50 border border-gray-900 rounded-2xl flex items-center gap-1">

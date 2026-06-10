@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useOrbit } from "../context/OrbitContext";
+import { callGeminiAPI, parseGeminiJson } from "../utils/gemini";
 import { 
   Zap, MessageSquare, Cpu, Users, BarChart2, Sparkles, 
   Radio, CheckCircle2, Activity, ChevronDown, ChevronUp, 
@@ -220,7 +221,7 @@ const AGENT_META = {
    AGENT BOARDROOM
 ───────────────────────────────────────────────────────────── */
 export const AgentBoardroom: React.FC = () => {
-  const { addAgentLog } = useOrbit();
+  const { addAgentLog, config, businessType } = useOrbit();
   const [selectedScenario, setSelectedScenario] = useState(0);
   const [debateActive, setDebateActive] = useState(false);
   const [debateMsgs, setDebateMsgs] = useState<BoardroomMessage[]>([]);
@@ -255,7 +256,7 @@ export const AgentBoardroom: React.FC = () => {
   };
 
   /* Initialize Debate Scenario */
-  const triggerBoardroomDebate = () => {
+  const triggerBoardroomDebate = async () => {
     if (debateActive) return;
     
     const scenario = SCENARIOS[selectedScenario];
@@ -274,53 +275,261 @@ export const AgentBoardroom: React.FC = () => {
     addTelemetry(`BOARDROOM DIRECTIVE INITIATED: ${scenario.name}`);
     addTelemetry("Connecting neural executive nodes...");
 
-    scenario.script.forEach((msg, i) => {
-      // Step interval of 2.8s per agent speak
-      setTimeout(() => {
-        const timestamped: BoardroomMessage = {
-          ...msg,
-          timestamp: new Date().toLocaleTimeString()
-        };
-        
-        setDebateMsgs(prev => [...prev, timestamped]);
-        setActiveSpeaker(msg.agent);
-        addAgentLog(msg.agent, msg.message, "chat");
+    try {
+      const wait = (ms: number) => new Promise(res => setTimeout(res, ms));
 
-        // trigger consensus checklist markings
-        if (msg.agent === "Polaris") {
-          setConsensus(c => ({ ...c, segmentFound: true }));
-          addTelemetry("Polaris mapping complete. Target cohort locked.");
-        }
-        if (msg.agent === "Luna") {
-          setConsensus(c => ({ ...c, leaksRecovered: true }));
-          addTelemetry("Luna completed leakage audit. Recovery sequences prepared.");
-        }
-        if (msg.agent === "Vega") {
-          setConsensus(c => ({ ...c, roiForecasted: true }));
-          addTelemetry("Vega forecasting yield parameters. ROI curves calculated.");
-        }
-        if (msg.agent === "Nova") {
-          setConsensus(c => ({ ...c, copyGenerated: true }));
-          addTelemetry("Nova assembled personalization tokens. Copy compiled.");
-        }
-        if (msg.agent === "Atlas") {
-          setConsensus(c => ({ ...c, dispatchArmed: true }));
-          addTelemetry("Atlas clearing delivery buffers. Dispatch window scheduled.");
-        }
+      let consolidatedResult: any = null;
+      let geminiError: string | null = null;
 
-        // Auto-expand reasoning for the latest message
-        setOpenReasoning(prev => ({ ...prev, [i]: true }));
+      if (config.geminiKey) {
+        addTelemetry("Querying Gemini to generate unified boardroom debate consensus...");
+        try {
+          const sys = `You are the ORBIT Neural Boardroom coordinator. Simulate a debate among 5 AI agents for the business scenario.
+The agents are:
+- Polaris (Audience Intelligence): Analyzes cohorts and identifies target groups.
+- Luna (Recovery): Audits transaction logs, customer records, and identifies leakages.
+- Vega (Predictive Analytics): Forecasts yields, ROI, and models conversion curves.
+- Nova (Campaign Creator): Designs creative drops, copy variations, and messaging layouts.
+- Atlas (Operations Dispatch): Verifies API channels, routes delivery pathways, and arms dispatch.
 
-        // last message completion
-        if (i === scenario.script.length - 1) {
-          setTimeout(() => {
-            setActiveSpeaker(null);
-            setDebateActive(false);
-            addTelemetry("Boardroom consensus reached. Operational directive armed.");
-          }, 2200);
+Format your response as a single valid JSON object containing exactly the responses for all 5 agents matching this schema:
+{
+  "Polaris": { "message": "speech in character as a professional, analytical data engineer", "confidence": 95, "reasoning": "deep reasoning", "stats": "cohort stats" },
+  "Luna": { "message": "speech in character as a proactive growth recovery specialist", "confidence": 93, "reasoning": "deep reasoning", "stats": "leakage stats" },
+  "Vega": { "message": "speech in character as a quantitative economist", "confidence": 89, "reasoning": "deep reasoning", "stats": "roi stats" },
+  "Nova": { "message": "speech in character as a creative copywriter", "confidence": 91, "reasoning": "deep reasoning", "stats": "creative stats" },
+  "Atlas": { "message": "speech in character as an operations manager", "confidence": 96, "reasoning": "deep reasoning", "stats": "dispatch status" }
+}
+Respond concisely for each agent's message in 1-2 sentences. Do not return any markdown code block formatting. Only return the raw JSON object.`;
+
+          const prompt = `Executive Agenda Scenario: "${scenario.name}". Scenario Description: "${scenario.description}". Business type: "${businessType}". Initiate debate.`;
+          const res = await callGeminiAPI(prompt, sys, config.geminiKey);
+          consolidatedResult = parseGeminiJson<any>(res, null);
+          if (!consolidatedResult) {
+            throw new Error("Failed to parse Gemini debate response as JSON.");
+          }
+        } catch (err: any) {
+          console.error("Boardroom consolidated Gemini API failed:", err);
+          geminiError = err.message || String(err);
         }
-      }, i * 3200);
-    });
+      }
+
+      if (config.geminiKey && geminiError) {
+        addTelemetry(`Error: Gemini Boardroom Debate failed: ${geminiError}`);
+        setDebateActive(false);
+        setActiveSpeaker(null);
+        return;
+      }
+
+      if (!config.geminiKey) {
+        addTelemetry("Running debate in simulated script mode (no Gemini key).");
+      }
+
+      // 1. Polaris turn (Audience Intelligence)
+      setActiveSpeaker("Polaris");
+      addTelemetry("Polaris scanning customer cohorts...");
+      await wait(1000);
+
+      let polarisMsg = "";
+      let polarisStats = "Cohort Mapped";
+      let polarisConf = 94;
+      let polarisReason = "";
+
+      if (consolidatedResult?.Polaris) {
+        const pData = consolidatedResult.Polaris;
+        polarisMsg = pData.message || "";
+        polarisConf = pData.confidence || 94;
+        polarisReason = pData.reasoning || "";
+        polarisStats = pData.stats || "Cohort Mapped";
+      } else {
+        const fallback = scenario.script.find(s => s.agent === "Polaris") || SCENARIOS[0].script[0];
+        polarisMsg = fallback.message;
+        polarisConf = fallback.confidence;
+        polarisReason = fallback.reasoning;
+        polarisStats = fallback.stats || "Scanned";
+      }
+
+      const polarisLog: BoardroomMessage = {
+        agent: "Polaris",
+        message: polarisMsg,
+        confidence: polarisConf,
+        reasoning: polarisReason,
+        stats: polarisStats,
+        timestamp: new Date().toLocaleTimeString()
+      };
+      setDebateMsgs(prev => [...prev, polarisLog]);
+      addAgentLog("Polaris", polarisMsg, "chat");
+      setConsensus(c => ({ ...c, segmentFound: true }));
+      setOpenReasoning(prev => ({ ...prev, 0: prev[0] ?? true }));
+      addTelemetry("Polaris mapping complete. Target cohort locked.");
+      await wait(1500);
+
+      // 2. Luna turn (Growth Recovery Agent)
+      setActiveSpeaker("Luna");
+      addTelemetry("Luna auditing transaction leakages...");
+      await wait(1000);
+
+      let lunaMsg = "";
+      let lunaStats = "Leaks Audited";
+      let lunaConf = 93;
+      let lunaReason = "";
+
+      if (consolidatedResult?.Luna) {
+        const lData = consolidatedResult.Luna;
+        lunaMsg = lData.message || "";
+        lunaConf = lData.confidence || 93;
+        lunaReason = lData.reasoning || "";
+        lunaStats = lData.stats || "Leaks Audited";
+      } else {
+        const fallback = scenario.script.find(s => s.agent === "Luna") || SCENARIOS[3].script[1];
+        lunaMsg = fallback.message;
+        lunaConf = fallback.confidence;
+        lunaReason = fallback.reasoning;
+        lunaStats = fallback.stats || "Leaks audited";
+      }
+
+      const lunaLog: BoardroomMessage = {
+        agent: "Luna",
+        message: lunaMsg,
+        confidence: lunaConf,
+        reasoning: lunaReason,
+        stats: lunaStats,
+        timestamp: new Date().toLocaleTimeString()
+      };
+      setDebateMsgs(prev => [...prev, lunaLog]);
+      addAgentLog("Luna", lunaMsg, "chat");
+      setConsensus(c => ({ ...c, leaksRecovered: true }));
+      setOpenReasoning(prev => ({ ...prev, 1: prev[1] ?? true }));
+      addTelemetry("Luna completed leakage audit.");
+      await wait(1500);
+
+      // 3. Vega turn (Predictive Analytics)
+      setActiveSpeaker("Vega");
+      addTelemetry("Vega calculating quantitative models...");
+      await wait(1000);
+
+      let vegaMsg = "";
+      let vegaStats = "ROI Predicted";
+      let vegaConf = 89;
+      let vegaReason = "";
+
+      if (consolidatedResult?.Vega) {
+        const vData = consolidatedResult.Vega;
+        vegaMsg = vData.message || "";
+        vegaConf = vData.confidence || 89;
+        vegaReason = vData.reasoning || "";
+        vegaStats = vData.stats || "ROI Predicted";
+      } else {
+        const fallback = scenario.script.find(s => s.agent === "Vega") || SCENARIOS[0].script[1];
+        vegaMsg = fallback.message;
+        vegaConf = fallback.confidence;
+        vegaReason = fallback.reasoning;
+        vegaStats = fallback.stats || "Yield predicted";
+      }
+
+      const vegaLog: BoardroomMessage = {
+        agent: "Vega",
+        message: vegaMsg,
+        confidence: vegaConf,
+        reasoning: vegaReason,
+        stats: vegaStats,
+        timestamp: new Date().toLocaleTimeString()
+      };
+      setDebateMsgs(prev => [...prev, vegaLog]);
+      addAgentLog("Vega", vegaMsg, "chat");
+      setConsensus(c => ({ ...c, roiForecasted: true }));
+      setOpenReasoning(prev => ({ ...prev, 2: prev[2] ?? true }));
+      addTelemetry("Vega forecasting yield parameters completed.");
+      await wait(1500);
+
+      // 4. Nova turn (Campaign Creator)
+      setActiveSpeaker("Nova");
+      addTelemetry("Nova generating content templates...");
+      await wait(1000);
+
+      let novaMsg = "";
+      let novaStats = "Creative Drops Compiled";
+      let novaConf = 91;
+      let novaReason = "";
+
+      if (consolidatedResult?.Nova) {
+        const nData = consolidatedResult.Nova;
+        novaMsg = nData.message || "";
+        novaConf = nData.confidence || 91;
+        novaReason = nData.reasoning || "";
+        novaStats = nData.stats || "Creative Drops Compiled";
+      } else {
+        const fallback = scenario.script.find(s => s.agent === "Nova") || SCENARIOS[0].script[2];
+        novaMsg = fallback.message;
+        novaConf = fallback.confidence;
+        novaReason = fallback.reasoning;
+        novaStats = fallback.stats || "Creatives compiled";
+      }
+
+      const novaLog: BoardroomMessage = {
+        agent: "Nova",
+        message: novaMsg,
+        confidence: novaConf,
+        reasoning: novaReason,
+        stats: novaStats,
+        timestamp: new Date().toLocaleTimeString()
+      };
+      setDebateMsgs(prev => [...prev, novaLog]);
+      addAgentLog("Nova", novaMsg, "chat");
+      setConsensus(c => ({ ...c, copyGenerated: true }));
+      setOpenReasoning(prev => ({ ...prev, 3: prev[3] ?? true }));
+      addTelemetry("Nova creative compilation complete.");
+      await wait(1500);
+
+      // 5. Atlas turn (Operations Dispatch)
+      setActiveSpeaker("Atlas");
+      addTelemetry("Atlas mapping dispatch routes...");
+      await wait(1000);
+
+      let atlasMsg = "";
+      let atlasStats = "Dispatch Armed";
+      let atlasConf = 96;
+      let atlasReason = "";
+
+      if (consolidatedResult?.Atlas) {
+        const aData = consolidatedResult.Atlas;
+        atlasMsg = aData.message || "";
+        atlasConf = aData.confidence || 96;
+        atlasReason = aData.reasoning || "";
+        atlasStats = aData.stats || "Dispatch Armed";
+      } else {
+        const fallback = scenario.script.find(s => s.agent === "Atlas") || SCENARIOS[0].script[3];
+        atlasMsg = fallback.message;
+        atlasConf = fallback.confidence;
+        atlasReason = fallback.reasoning;
+        atlasStats = fallback.stats || "Armed";
+      }
+
+      const atlasLog: BoardroomMessage = {
+        agent: "Atlas",
+        message: atlasMsg,
+        confidence: atlasConf,
+        reasoning: atlasReason,
+        stats: atlasStats,
+        timestamp: new Date().toLocaleTimeString()
+      };
+      setDebateMsgs(prev => [...prev, atlasLog]);
+      addAgentLog("Atlas", atlasMsg, "chat");
+      setConsensus(c => ({ ...c, dispatchArmed: true }));
+      setOpenReasoning(prev => ({ ...prev, 4: prev[4] ?? true }));
+      addTelemetry("Atlas routing checks complete.");
+
+      await wait(1000);
+      setActiveSpeaker(null);
+      setDebateActive(false);
+      addTelemetry("Boardroom consensus reached. Operational directive armed.");
+
+    } catch (err: any) {
+      console.error("Boardroom debate loop failed:", err);
+      setDebateActive(false);
+      setActiveSpeaker(null);
+      addTelemetry(`Debate failed: ${err.message || err}`);
+    }
   };
 
   const toggleReasoning = (idx: number) => {
@@ -458,9 +667,9 @@ export const AgentBoardroom: React.FC = () => {
             <div className="absolute inset-0 radar-dots opacity-20" />
             
             {/* Pulsing Core center glow */}
-            <div className="absolute w-20 h-20 rounded-full border border-purple-500/10 bg-purple-500/5 flex items-center justify-center animate-orbit-pulse">
-              <div className="w-12 h-12 rounded-full bg-orbit-purple/10 border border-orbit-purple/20 flex items-center justify-center">
-                <Cpu size={16} className="text-orbit-purple animate-pulse" />
+            <div className="absolute w-24 h-24 rounded-full border border-purple-500/25 bg-purple-500/10 flex items-center justify-center animate-orbit-pulse shadow-orbit-glow-purple">
+              <div className="w-14 h-14 rounded-full bg-orbit-purple/15 border border-orbit-purple/30 flex items-center justify-center">
+                <Cpu size={18} className="text-white animate-pulse" />
               </div>
             </div>
 
@@ -485,7 +694,8 @@ export const AgentBoardroom: React.FC = () => {
                   x2="120"
                   y2="120"
                   stroke="url(#laserGrad)"
-                  strokeWidth="2"
+                  strokeWidth="3.5"
+                  style={{ filter: `drop-shadow(0 0 8px ${AGENT_META[activeSpeaker].color})` }}
                   className="animate-pulse"
                 />
               )}
@@ -616,11 +826,22 @@ export const AgentBoardroom: React.FC = () => {
                   </div>
 
                   {/* Speech Bubble */}
-                  <div className={`p-4 rounded-xl border ${meta.border} ${meta.bg} relative`}>
-                    <p className="text-xs font-inter text-gray-200 leading-relaxed">{msg.message}</p>
+                  <div
+                    className={`p-4 rounded-xl border transition-all duration-300 relative ${
+                      activeSpeaker === msg.agent && idx === debateMsgs.length - 1
+                        ? "bg-[#1E293B] border-opacity-100 shadow-md"
+                        : "bg-[#0F172A] border-[rgba(255,255,255,0.06)] opacity-85"
+                    }`}
+                    style={{
+                      borderLeft: `4px solid ${meta.color}`,
+                      borderColor: activeSpeaker === msg.agent && idx === debateMsgs.length - 1 ? meta.color : undefined,
+                      boxShadow: activeSpeaker === msg.agent && idx === debateMsgs.length - 1 ? `0 0 25px ${meta.color}25` : undefined
+                    }}
+                  >
+                    <p className={`text-xs font-inter leading-relaxed ${activeSpeaker === msg.agent && idx === debateMsgs.length - 1 ? "text-white font-medium" : "text-gray-200"}`}>{msg.message}</p>
                     
                     {/* Glowing highlight point */}
-                    <span className="absolute top-3 left-3 w-1 h-1 rounded-full animate-ping" style={{ backgroundColor: meta.color }} />
+                    <span className="absolute top-3 right-3 w-1.5 h-1.5 rounded-full animate-ping" style={{ backgroundColor: meta.color }} />
                   </div>
 
                   {/* Expandable Reasoning Accordion */}

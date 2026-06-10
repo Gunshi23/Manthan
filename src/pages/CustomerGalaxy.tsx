@@ -80,10 +80,10 @@ export const CustomerGalaxy: React.FC = () => {
   const [preferredChannel, setPreferredChannel] = useState<string>("All");
 
   const segmentColors: Record<Customer["segment"], string> = {
-    "Loyalists": "#3B82F6",
-    "Slipping Away": "#EF4444",
+    "Loyalists": "#22C55E",
+    "Slipping Away": "#EC4899",
     "High-Value Inactive": "#F59E0B",
-    "New Signups": "#8B5CF6",
+    "New Signups": "#3B82F6",
   };
 
   /* Initial Camera Centering */
@@ -749,25 +749,26 @@ export const CustomerGalaxy: React.FC = () => {
           RIGHT PANEL — STAR INSPECTOR / DNA
       ════════════════════════════════════════ */}
       {selected && (
-        <aside className="w-80 shrink-0 flex flex-col border-l border-gray-800/60 bg-gray-950/85 backdrop-blur-xl p-5 space-y-4 overflow-y-auto relative z-10 animate-fade-in-up">
+        <aside className="w-80 shrink-0 flex flex-col border-l border-[rgba(255,255,255,0.08)] bg-[#1E293B]/95 backdrop-blur-xl p-5 space-y-4 overflow-y-auto relative z-10 animate-fade-in-up">
           {/* Header */}
-          <div className="flex items-start justify-between border-b border-gray-900 pb-3">
+          <div className="flex items-start justify-between border-b border-[rgba(255,255,255,0.08)] pb-3">
             <div>
               <h2 className="font-space text-base font-bold text-white tracking-tight leading-snug">{selected.name}</h2>
-              <span className="font-mono text-[9px] text-gray-500">{selected.email}</span>
+              <span className="font-mono text-[9px] text-gray-400">{selected.email}</span>
             </div>
             <button
               onClick={() => setSelected(null)}
-              className="p-1 rounded-lg border border-gray-850 hover:border-gray-700 text-gray-500 hover:text-white transition-colors cursor-pointer"
+              className="p-1 rounded-lg border border-[rgba(255,255,255,0.08)] hover:border-gray-700 text-gray-500 hover:text-white transition-colors cursor-pointer"
             >
               <X size={13} />
             </button>
           </div>
 
           {/* Segment Badge */}
-          <div className="flex items-center gap-2 bg-gray-900/20 border border-gray-900 p-2 rounded-lg">
-            <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: segmentColors[selected.segment] }} />
-            <span className="font-mono text-xs font-bold uppercase" style={{ color: segmentColors[selected.segment] }}>
+          <div className="flex items-center gap-2 p-2.5 rounded-xl border animate-shimmer"
+               style={{ backgroundColor: `${segmentColors[selected.segment]}12`, borderColor: `${segmentColors[selected.segment]}25` }}>
+            <span className="w-2.5 h-2.5 rounded-full animate-pulse" style={{ backgroundColor: segmentColors[selected.segment] }} />
+            <span className="font-mono text-xs font-bold uppercase animate-pulse" style={{ color: segmentColors[selected.segment] }}>
               {selected.segment}
             </span>
           </div>
@@ -780,9 +781,9 @@ export const CustomerGalaxy: React.FC = () => {
               { label: "Churn Risk Score", value: `${selected.churnRisk}%` },
               { label: "Preferred Node", value: selected.preferredChannel },
             ].map((kpi, i) => (
-              <div key={i} className="bg-gray-900/25 border border-gray-900 rounded-xl p-3 shadow-sm">
-                <span className="font-mono text-[8px] text-gray-500 uppercase tracking-wider block">{kpi.label}</span>
-                <span className="font-space text-sm font-bold text-white mt-1 block">{kpi.value}</span>
+              <div key={i} className="bg-[#0F172A] border border-[rgba(255,255,255,0.08)] hover:border-[rgba(255,255,255,0.15)] rounded-xl p-3.5 shadow-sm transition-all duration-300">
+                <span className="font-mono text-[8.5px] text-gray-400 uppercase tracking-wider block">{kpi.label}</span>
+                <span className="font-space text-base font-bold text-white mt-1 block">{kpi.value}</span>
               </div>
             ))}
           </div>

@@ -3,7 +3,8 @@ import { useOrbit } from "../context/OrbitContext";
 import {
   TrendingUp, Target, Zap, Shield, Radio,
   Activity, ChevronUp, ChevronDown, Cpu,
-  ArrowUpRight, Layers, Star
+  ArrowUpRight, Layers, Star, Send, X,
+  CheckCircle2, Play
 } from "lucide-react";
 import { AgentCardModal } from "../components/AgentCardModal";
 
@@ -222,9 +223,46 @@ function makeTickerEvent(): TickerEvent {
 }
 
 export const MissionControl: React.FC = () => {
-  const { campaigns, orders, agentLogs, growthScore, networkHealth, revenueGoal, theme, lunaMetrics } = useOrbit();
+  const { 
+    campaigns, orders, agentLogs, growthScore, networkHealth, 
+    revenueGoal, theme, lunaMetrics, mission, startMission, 
+    launchMissionCampaign, cancelMission, customers 
+  } = useOrbit();
   const isLight = theme === "executive";
   const [selectedAgent, setSelectedAgent] = useState<"Polaris" | "Vega" | "Nova" | "Atlas" | "Luna" | null>(null);
+
+  const [atlasTab, setAtlasTab] = useState<"dashboard" | "feed">("dashboard");
+  const [isWhatsAppModalOpen, setIsWhatsAppModalOpen] = useState(false);
+  const [selectedTemplate, setSelectedTemplate] = useState<"recovery" | "vip" | "festival">("recovery");
+  const [selectedCohort, setSelectedCohort] = useState<"Slipping Away" | "Loyalists" | "New Signups" | "High-Value Inactive">("Slipping Away");
+
+  const WHATSAPP_TEMPLATES = {
+    recovery: {
+      label: "Recovery Campaign",
+      body: "Hi {{name}} 👋\n\nWe noticed you haven't visited recently.\n\nHere's an exclusive offer for you."
+    },
+    vip: {
+      label: "VIP Campaign",
+      body: "Hi {{name}} 🌟\n\nAs one of our valued customers, you get early access to our latest collection."
+    },
+    festival: {
+      label: "Festival Campaign",
+      body: "Happy Diwali ✨\n\nCelebrate with exclusive festive offers."
+    }
+  };
+
+  const handleLaunchWhatsApp = async () => {
+    const templateLabel = WHATSAPP_TEMPLATES[selectedTemplate].label;
+    const goal = `Autonomous ${templateLabel} for ${selectedCohort} segment`;
+    startMission(goal);
+  };
+
+  const whatsappCampaigns = campaigns.filter(c => c.channel === "WhatsApp");
+  const totalSent = whatsappCampaigns.reduce((s, c) => s + c.sentCount, 0);
+  const totalDelivered = whatsappCampaigns.reduce((s, c) => s + (c.deliveredCount ?? 0), 0);
+  const totalFailed = whatsappCampaigns.reduce((s, c) => s + (c.failedCount ?? 0), 0);
+  const totalPending = whatsappCampaigns.reduce((s, c) => s + (c.pendingCount ?? 0), 0);
+  const deliveryRatePct = totalSent > 0 ? Math.round((totalDelivered / totalSent) * 100) : 100;
 
   /* Live clock */
   const [now, setNow] = useState(new Date());
@@ -363,10 +401,19 @@ export const MissionControl: React.FC = () => {
                 All Systems Nominal
               </span>
             </div>
-            <h1 className={`font-space text-3xl font-bold tracking-tight ${isLight ? "text-gray-900" : "text-white"}`}>
-              Mission Control
-            </h1>
-            <p className="text-xs text-gray-550 font-mono mt-0.5">
+            <div className="flex items-center gap-4">
+              <h1 className={`font-space text-3xl font-bold tracking-tight ${isLight ? "text-gray-900" : "text-white"}`}>
+                Mission Control
+              </h1>
+              <button
+                onClick={() => setIsWhatsAppModalOpen(true)}
+                className="px-4 py-2 rounded-xl bg-gradient-to-r from-orbit-success to-emerald-450 text-white font-mono text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5 hover:opacity-90 hover:scale-[1.02] active:scale-95 duration-200 cursor-pointer shadow-orbit-glow-green"
+              >
+                <Send size={11} />
+                Launch WhatsApp Campaign
+              </button>
+            </div>
+            <p className="text-xs text-gray-555 font-mono mt-0.5">
               AUTONOMOUS OPERATIONS CENTER — ORBIT v4.81 VANGUARD
             </p>
           </div>
@@ -458,7 +505,7 @@ export const MissionControl: React.FC = () => {
             },
             {
               label: "Growth Score",
-              value: `${growCounter}`,
+              value: `${(parseFloat(growCounter) / 10).toFixed(1)}`,
               raw: growthScore,
               goal: 100,
               color: "#EC4899",
@@ -471,29 +518,39 @@ export const MissionControl: React.FC = () => {
           ].map((card, i) => {
             const Icon = card.icon;
             const pct = Math.min(100, Math.round((card.raw / card.goal) * 100));
+            const isDominant = card.label === "Revenue Achieved" || card.label === "Growth Score" || card.label === "Forecast Revenue";
+            
             return (
               <div
                 key={i}
-                className={`relative rounded-xl border p-5 flex flex-col gap-3 overflow-hidden transition-all duration-300 ${
+                className={`relative rounded-xl border p-5 flex flex-col gap-3.5 overflow-hidden transition-all duration-300 ${
                   isLight
                     ? "bg-white border-gray-200 shadow-[0_4px_20px_rgba(0,0,0,0.02)] hover:border-gray-300"
-                    : "bg-gray-900/50 border-gray-800/80 hover:border-gray-700"
+                    : isDominant
+                      ? "bg-gradient-to-br from-[#0F172A] to-[#1E293B] border-[rgba(255,255,255,0.12)] hover:border-[rgba(255,255,255,0.22)] animate-glow-pulse"
+                      : "bg-[#0F172A]/70 border-[rgba(255,255,255,0.06)] hover:border-[rgba(255,255,255,0.15)] opacity-85 hover:opacity-100"
                 }`}
-                style={{ boxShadow: isLight ? undefined : `0 0 30px ${card.glow}` }}
+                style={{
+                  boxShadow: isLight
+                    ? undefined
+                    : isDominant
+                      ? `0 0 35px ${card.glow}, inset 0 0 15px rgba(255,255,255,0.01)`
+                      : `0 0 15px ${card.glow}`
+                }}
               >
                 {/* Top row */}
                 <div className="flex items-center justify-between">
-                  <span className={`font-mono text-[9px] uppercase tracking-widest ${isLight ? "text-gray-500" : "text-gray-400"}`}>{card.label}</span>
-                  <Icon size={13} style={{ color: card.color }} />
+                  <span className={`font-mono text-[9.5px] uppercase tracking-[0.15em] ${isLight ? "text-gray-550" : "text-gray-400"}`}>{card.label}</span>
+                  <Icon size={14} style={{ color: card.color }} />
                 </div>
 
                 {/* Value */}
                 <div>
-                  <span className="font-space text-2xl font-bold tabular-nums" style={{ color: card.color }}>
+                  <span className="font-space text-2xl lg:text-3xl font-bold tracking-tight tabular-nums" style={{ color: card.color }}>
                     {card.value}
                   </span>
                   {card.label === "Growth Score" && (
-                    <span className="font-space text-2xl font-bold" style={{ color: card.color }}> /100</span>
+                    <span className={`font-space text-xs lg:text-sm font-semibold ml-1.5 ${isLight ? "text-gray-500" : "text-gray-400"}`}> /100</span>
                   )}
                 </div>
 
@@ -501,7 +558,7 @@ export const MissionControl: React.FC = () => {
                 <div className="flex items-center gap-1.5">
                   {card.up === true && <ChevronUp size={12} className="text-orbit-success" />}
                   {card.up === false && <ChevronDown size={12} className="text-red-400" />}
-                  <span className={`font-mono text-[10px] ${card.up === true ? "text-orbit-success" : card.up === false ? "text-red-400" : isLight ? "text-gray-500" : "text-gray-500"}`}>
+                  <span className={`font-mono text-[10.5px] font-semibold ${card.up === true ? "text-orbit-success" : card.up === false ? "text-red-400" : isLight ? "text-gray-500" : "text-gray-500"}`}>
                     {card.delta}
                   </span>
                 </div>
@@ -509,22 +566,22 @@ export const MissionControl: React.FC = () => {
                 {/* Sparkline */}
                 {card.spark && (
                   <div className="mt-auto">
-                    <Sparkline values={card.spark} color={card.color} height={36} />
+                    <Sparkline values={card.spark} color={card.color} height={38} />
                   </div>
                 )}
 
                 {/* Progress bar */}
                 {card.label !== "Growth Score" && (
-                  <div className={`w-full h-0.5 rounded-full overflow-hidden ${isLight ? "bg-gray-200" : "bg-gray-800"}`}>
+                  <div className={`w-full h-1 rounded-full overflow-hidden ${isLight ? "bg-gray-200" : "bg-gray-800"}`}>
                     <div
                       className="h-full rounded-full transition-all duration-1000"
-                      style={{ width: `${pct}%`, backgroundColor: card.color }}
+                      style={{ width: `${pct}%`, backgroundColor: card.color, boxShadow: `0 0 8px ${card.color}` }}
                     />
                   </div>
                 )}
 
                 {/* Corner glow */}
-                <div className={`absolute -top-8 -right-8 w-24 h-24 rounded-full pointer-events-none transition-opacity duration-300 ${isLight ? "opacity-10" : "opacity-20"}`}
+                <div className={`absolute -top-8 -right-8 w-24 h-24 rounded-full pointer-events-none transition-opacity duration-300 ${isLight ? "opacity-10" : "opacity-15"}`}
                   style={{ background: `radial-gradient(circle, ${card.color}, transparent)` }} />
               </div>
             );
@@ -604,16 +661,17 @@ export const MissionControl: React.FC = () => {
           {/* ── SECTION 3 — NETWORK HEALTH + SECTION 5 FORECAST ── */}
           <div className="flex flex-col gap-4">
             {/* Network Health */}
-            <div className={`rounded-xl border p-5 flex flex-col gap-4 ${
-              isLight ? "bg-white border-gray-200 shadow-sm" : "bg-gray-900/50 border-gray-800/80 backdrop-blur-md"
-            }`}>
-              <div className={`flex items-center justify-between border-b pb-3 ${isLight ? "border-gray-150" : "border-gray-800"}`}>
+            <div className={`rounded-xl border p-5 flex flex-col gap-4 transition-all duration-300 ${
+              isLight ? "bg-white border-gray-200 shadow-sm" : "bg-gradient-to-br from-[#0F172A] to-[#1E293B] border-[rgba(34,197,94,0.25)] backdrop-blur-md"
+            }`}
+            style={{ boxShadow: isLight ? undefined : "0 0 30px rgba(34, 197, 94, 0.15), inset 0 0 10px rgba(34, 197, 94, 0.02)" }}>
+              <div className={`flex items-center justify-between border-b pb-3 ${isLight ? "border-gray-150" : "border-[rgba(255,255,255,0.06)]"}`}>
                 <div className="flex items-center gap-2">
-                  <Shield size={13} className="text-orbit-success" />
+                  <Shield size={13} className="text-orbit-success animate-pulse" />
                   <span className={`font-space text-sm font-bold uppercase tracking-wider ${isLight ? "text-gray-900" : "text-white"}`}>Orbit Network Health</span>
                 </div>
-                <span className={`font-mono text-[9px] px-2 py-0.5 rounded-full border ${
-                  isLight ? "text-emerald-700 border-emerald-200 bg-emerald-50" : "text-orbit-success border-orbit-success/30 bg-orbit-success/5"
+                <span className={`font-mono text-[9.5px] font-bold px-2 py-0.5 rounded-full border ${
+                  isLight ? "text-emerald-700 border-emerald-200 bg-emerald-50" : "text-orbit-success border-orbit-success/30 bg-orbit-success/5 animate-pulse"
                 }`}>
                   {networkHealth}% UPTIME
                 </span>
@@ -763,14 +821,32 @@ export const MissionControl: React.FC = () => {
             </div>
           </div>
 
-          {/* ── SECTION 4 — LIVE DISPATCH FEED ── */}
-          <div className={`rounded-xl border p-5 flex flex-col gap-3 ${
+          {/* ── SECTION 4 — LIVE DISPATCH & ATLAS DELIVERY ── */}
+          <div className={`rounded-xl border p-5 flex flex-col gap-4 min-h-[460px] ${
             isLight ? "bg-white border-gray-200 shadow-sm" : "bg-gray-900/50 border-gray-800/80 backdrop-blur-md"
           }`}>
             <div className={`flex items-center justify-between border-b pb-3 ${isLight ? "border-gray-150" : "border-gray-800"}`}>
-              <div className="flex items-center gap-2">
-                <Radio size={13} className="text-orbit-success animate-pulse" />
-                <span className={`font-space text-sm font-bold uppercase tracking-wider ${isLight ? "text-gray-900" : "text-white"}`}>Live Dispatch Feed</span>
+              <div className="flex gap-4 font-space font-bold text-xs uppercase">
+                <button
+                  onClick={() => setAtlasTab("dashboard")}
+                  className={`pb-1 border-b-2 cursor-pointer transition-colors ${
+                    atlasTab === "dashboard"
+                      ? "border-orbit-success text-white"
+                      : "border-transparent text-gray-500 hover:text-gray-300"
+                  }`}
+                >
+                  Atlas Delivery
+                </button>
+                <button
+                  onClick={() => setAtlasTab("feed")}
+                  className={`pb-1 border-b-2 cursor-pointer transition-colors ${
+                    atlasTab === "feed"
+                      ? "border-orbit-success text-white"
+                      : "border-transparent text-gray-500 hover:text-gray-300"
+                  }`}
+                >
+                  Live Dispatch Feed
+                </button>
               </div>
               <div className={`flex items-center gap-1.5 font-mono text-[9px] ${isLight ? "text-emerald-700 font-bold" : "text-orbit-success"}`}>
                 <span className="w-1.5 h-1.5 rounded-full bg-orbit-success animate-ping" />
@@ -778,61 +854,133 @@ export const MissionControl: React.FC = () => {
               </div>
             </div>
 
-            {/* Aggregate totals */}
-            <div className="grid grid-cols-5 gap-1">
-              {(["sent","delivered","opened","clicked","purchased"] as const).map(type => {
-                const cfg = TYPE_CONFIG[type];
-                const count = ticker.filter(t => t.type === type).length;
-                return (
-                  <div key={type} className={`flex flex-col items-center gap-0.5 rounded-lg p-1.5 border ${isLight ? "bg-gray-50 border-gray-150" : "bg-gray-950/40 border-gray-800"}`}>
-                    <span className={`font-mono text-[8px] uppercase tracking-wider ${cfg.color}`}>{cfg.icon}</span>
-                    <span className={`font-space text-xs font-bold ${isLight ? "text-gray-900" : "text-white"}`}>{count}</span>
+            {atlasTab === "dashboard" ? (
+              <div className="flex-1 flex flex-col gap-4 font-mono text-xs">
+                <div className="grid grid-cols-2 gap-3">
+                  <div className={`p-3 rounded-lg border ${isLight ? "bg-gray-55 border-gray-150" : "bg-gray-950/40 border-gray-800"}`}>
+                    <span className="text-[8px] text-gray-500 uppercase block mb-1">Messages Sent</span>
+                    <span className={`text-xl font-bold font-space ${isLight ? "text-gray-900" : "text-white"}`}>{totalSent}</span>
                   </div>
-                );
-              })}
-            </div>
+                  <div className={`p-3 rounded-lg border ${isLight ? "bg-gray-55 border-gray-150" : "bg-gray-950/40 border-gray-800"}`}>
+                    <span className="text-[8px] text-gray-500 uppercase block mb-1">Delivery Rate</span>
+                    <span className="text-xl font-bold text-orbit-success font-space">{deliveryRatePct}%</span>
+                  </div>
+                </div>
 
-            {/* Scrolling events */}
-            <div className="flex-1 overflow-hidden relative min-h-0" style={{ maxHeight: 320 }}>
-              <div className="space-y-1.5 overflow-y-auto h-full pr-1 scrollbar-thin">
-                {ticker.map((evt, i) => {
-                  const cfg = TYPE_CONFIG[evt.type];
-                  return (
-                    <div
-                      key={evt.id}
-                      className={`flex items-center gap-2.5 p-2 rounded-lg border transition-all ${
-                        isLight ? "bg-gray-50 border-gray-150 hover:border-gray-200" : "bg-gray-950/40 border-gray-800/50 hover:border-gray-700"
-                      }`}
-                      style={{
-                        animationName: i === 0 ? "fadeInUp" : undefined,
-                        animationDuration: "0.4s",
-                        animationFillMode: "both",
-                      }}
-                    >
-                      <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${cfg.dot}`} />
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-1.5">
-                          <span className={`font-mono text-[9px] font-bold truncate ${isLight ? "text-gray-800" : "text-white"}`}>{evt.name}</span>
-                          <span className={`font-mono text-[8px] font-bold uppercase tracking-wider ${cfg.color}`}>
-                            {cfg.label}
-                          </span>
-                        </div>
-                        <div className={`font-mono text-[8px] truncate ${isLight ? "text-gray-500" : "text-gray-650"}`}>{evt.campaign}</div>
-                      </div>
-                      <div className="text-right shrink-0">
-                        {evt.amount && (
-                          <span className="font-mono text-[9px] text-orbit-success font-bold">+₹{evt.amount.toLocaleString()}</span>
-                        )}
-                        <span className={`font-mono text-[8px] block ${isLight ? "text-gray-550" : "text-gray-650"}`}>{evt.ts}</span>
-                      </div>
+                <div className="grid grid-cols-3 gap-2">
+                  <div className={`p-2 rounded-lg border text-center ${isLight ? "bg-gray-55 border-gray-150" : "bg-gray-950/40 border-gray-800"}`}>
+                    <span className="text-[7px] text-gray-550 block uppercase mb-0.5">Delivered</span>
+                    <span className="text-xs font-bold text-orbit-success">{totalDelivered}</span>
+                  </div>
+                  <div className={`p-2 rounded-lg border text-center ${isLight ? "bg-gray-55 border-gray-150" : "bg-gray-950/40 border-gray-800"}`}>
+                    <span className="text-[7px] text-gray-555 block uppercase mb-0.5">Failed</span>
+                    <span className="text-xs font-bold text-red-400">{totalFailed}</span>
+                  </div>
+                  <div className={`p-2 rounded-lg border text-center ${isLight ? "bg-gray-55 border-gray-150" : "bg-gray-950/40 border-gray-800"}`}>
+                    <span className="text-[7px] text-gray-550 block uppercase mb-0.5">Pending</span>
+                    <span className="text-xs font-bold text-blue-405">{totalPending}</span>
+                  </div>
+                </div>
+
+                <div className="space-y-1">
+                  <div className="flex justify-between text-[8px] text-gray-500 uppercase">
+                    <span>Overall Delivery Health</span>
+                    <span>{deliveryRatePct}%</span>
+                  </div>
+                  <div className={`w-full h-1.5 rounded-full overflow-hidden ${isLight ? "bg-gray-200" : "bg-gray-800"}`}>
+                    <div className="h-full bg-orbit-success rounded-full" style={{ width: `${deliveryRatePct}%` }} />
+                  </div>
+                </div>
+
+                <div className={`mt-auto p-3 rounded-lg border flex-1 overflow-y-auto max-h-[140px] ${
+                  isLight ? "bg-gray-55 border-gray-150" : "bg-gray-955/30 border-gray-850"
+                }`}>
+                  <span className="text-[8px] text-gray-500 uppercase block border-b border-gray-800/40 pb-1 mb-1.5 font-bold">WhatsApp Dispatch Channels</span>
+                  {whatsappCampaigns.length === 0 ? (
+                    <p className="text-center py-6 text-gray-600 text-[10px]">[ NO ACTIVE WHATSAPP CHANNELS ]</p>
+                  ) : (
+                    <div className="space-y-1.5">
+                      {whatsappCampaigns.map(c => {
+                        const pct = c.sentCount > 0 ? Math.round(((c.deliveredCount ?? 0) / c.sentCount) * 100) : 0;
+                        return (
+                          <div key={c.id} className="flex flex-col gap-1 text-[9.5px] border-b border-gray-900/30 pb-1.5">
+                            <div className="flex justify-between items-center font-bold">
+                              <span className="text-gray-300 truncate max-w-[150px]">{c.name}</span>
+                              <span className={`${
+                                c.status === "Completed" || c.status === "Delivered" ? "text-orbit-success" :
+                                c.status === "Failed" ? "text-red-400" : "text-blue-400 animate-pulse"
+                              }`}>{c.status}</span>
+                            </div>
+                            <div className="flex justify-between items-center text-[8px] text-gray-500">
+                              <span>Sent: {c.sentCount} · Del: {c.deliveredCount} · Fail: {c.failedCount}</span>
+                              <span>{pct}%</span>
+                            </div>
+                          </div>
+                        );
+                      })}
                     </div>
-                  );
-                })}
+                  )}
+                </div>
               </div>
-              {/* Fade out at bottom */}
-              <div className="absolute bottom-0 left-0 right-0 h-8 pointer-events-none"
-                style={{ background: isLight ? "linear-gradient(to bottom, transparent, rgba(255,255,255,0.9))" : "linear-gradient(to bottom, transparent, rgba(17,24,39,0.9))" }} />
-            </div>
+            ) : (
+              <div className="flex-1 flex flex-col gap-3 min-h-[360px]">
+                {/* Aggregate totals */}
+                <div className="grid grid-cols-5 gap-1 shrink-0">
+                  {(["sent","delivered","opened","clicked","purchased"] as const).map(type => {
+                    const cfg = TYPE_CONFIG[type];
+                    const count = ticker.filter(t => t.type === type).length;
+                    return (
+                      <div key={type} className={`flex flex-col items-center gap-0.5 rounded-lg p-1.5 border ${isLight ? "bg-gray-50 border-gray-150" : "bg-gray-950/40 border-gray-800"}`}>
+                        <span className={`font-mono text-[8px] uppercase tracking-wider ${cfg.color}`}>{cfg.icon}</span>
+                        <span className={`font-space text-xs font-bold ${isLight ? "text-gray-900" : "text-white"}`}>{count}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {/* Scrolling events */}
+                <div className="flex-1 overflow-hidden relative min-h-0" style={{ maxHeight: 320 }}>
+                  <div className="space-y-1.5 overflow-y-auto h-full pr-1 scrollbar-thin">
+                    {ticker.map((evt, i) => {
+                      const cfg = TYPE_CONFIG[evt.type];
+                      return (
+                        <div
+                          key={evt.id}
+                          className={`flex items-center gap-2.5 p-2 rounded-lg border transition-all ${
+                            isLight ? "bg-gray-50 border-gray-150 hover:border-gray-200" : "bg-gray-950/40 border-gray-800/50 hover:border-gray-700"
+                          }`}
+                          style={{
+                            animationName: i === 0 ? "fadeInUp" : undefined,
+                            animationDuration: "0.4s",
+                            animationFillMode: "both",
+                          }}
+                        >
+                          <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${cfg.dot}`} />
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-1.5">
+                              <span className={`font-mono text-[9px] font-bold truncate ${isLight ? "text-gray-800" : "text-white"}`}>{evt.name}</span>
+                              <span className={`font-mono text-[8px] font-bold uppercase tracking-wider ${cfg.color}`}>
+                                {cfg.label}
+                              </span>
+                            </div>
+                            <div className={`font-mono text-[8px] truncate ${isLight ? "text-gray-500" : "text-gray-650"}`}>{evt.campaign}</div>
+                          </div>
+                          <div className="text-right shrink-0">
+                            {evt.amount && (
+                              <span className="font-mono text-[9px] text-orbit-success font-bold">+₹{evt.amount.toLocaleString()}</span>
+                            )}
+                            <span className={`font-mono text-[8px] block ${isLight ? "text-gray-550" : "text-gray-655"}`}>{evt.ts}</span>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                  {/* Fade out at bottom */}
+                  <div className="absolute bottom-0 left-0 right-0 h-8 pointer-events-none"
+                    style={{ background: isLight ? "linear-gradient(to bottom, transparent, rgba(255,255,255,0.9))" : "linear-gradient(to bottom, transparent, rgba(17,24,39,0.9))" }} />
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
@@ -858,12 +1006,15 @@ export const MissionControl: React.FC = () => {
               return (
                 <div
                   key={agent.name}
-                  className={`relative rounded-xl border p-5 flex flex-col gap-3 overflow-hidden transition-all duration-500 ${
+                  className={`relative rounded-xl border p-5 flex flex-col gap-3.5 overflow-hidden transition-all duration-500 ${
                     isLight
                       ? "bg-gray-50 border-gray-150 hover:border-gray-250 hover:bg-gray-100/30"
-                      : `${agent.border} ${agent.bg} ${agent.glow}`
+                      : "bg-[#0F172A] hover:bg-[#1E293B] border-[rgba(255,255,255,0.08)] hover:border-white/15"
                   }`}
-                  style={isLight ? undefined : { boxShadow: `0 0 20px ${agent.color}25` }}
+                  style={isLight ? undefined : {
+                    borderLeft: `4px solid ${agent.color}`,
+                    boxShadow: `0 0 25px ${agent.color}15, inset 0 0 10px ${agent.color}02`
+                  }}
                 >
                   {/* Header */}
                   <div className="flex items-center justify-between">
@@ -961,12 +1112,12 @@ export const MissionControl: React.FC = () => {
             <button
               onClick={handlePingTest}
               disabled={isPingRunning}
-              className={`px-2.5 py-1 rounded border font-mono text-[9px] font-bold uppercase transition-all flex items-center gap-1.5 cursor-pointer ${
+              className={`px-3 py-1.5 rounded-lg border font-mono text-[9px] font-bold uppercase tracking-wider transition-all flex items-center gap-1.5 cursor-pointer ${
                 isPingRunning
-                  ? "border-yellow-500/40 bg-yellow-500/10 text-yellow-400 animate-pulse"
+                  ? "border-yellow-500/50 bg-yellow-500/20 text-yellow-400 shadow-orbit-glow-amber animate-pulse"
                   : isLight
                     ? "border-gray-200 bg-white text-gray-700 hover:bg-gray-150"
-                    : "border-gray-800 bg-gray-950 text-gray-300 hover:border-gray-700 hover:text-white"
+                    : "border-[rgba(255,255,255,0.12)] bg-[#0F172A] text-gray-300 hover:border-orbit-blue/50 hover:text-white hover:shadow-orbit-glow-blue"
               }`}
             >
               <Activity size={10} className={isPingRunning ? "animate-spin" : ""} />
@@ -990,6 +1141,169 @@ export const MissionControl: React.FC = () => {
       </div>
 
       <AgentCardModal agent={selectedAgent} onClose={() => setSelectedAgent(null)} />
+
+      {/* ════════════════════════════════════════
+          LAUNCH WHATSAPP CAMPAIGN MODAL
+      ════════════════════════════════════════ */}
+      {isWhatsAppModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-fade-in animate-duration-200">
+          <div className={`w-full max-w-lg rounded-2xl border p-6 space-y-4 shadow-2xl relative overflow-hidden transition-all ${
+            isLight ? "bg-white border-gray-200 text-gray-900" : "bg-[#0c0f20]/95 border-gray-800 text-white"
+          }`}>
+            <div className="absolute inset-0 space-grid opacity-10 pointer-events-none" />
+            
+            {/* Header */}
+            <div className="flex justify-between items-center border-b border-gray-800/60 pb-3">
+              <div className="flex items-center gap-2">
+                <Radio className="text-orbit-success animate-pulse" size={16} />
+                <h3 className="font-space text-base font-bold uppercase tracking-wider">Launch WhatsApp Campaign</h3>
+              </div>
+              <button onClick={() => { setIsWhatsAppModalOpen(false); cancelMission(); }} className="text-gray-500 hover:text-gray-305 cursor-pointer">
+                <X size={16} />
+              </button>
+            </div>
+
+            {!mission.isActive ? (
+              // Setup Phase
+              <div className="space-y-4 font-mono text-[11px]">
+                {/* Cohort Selector */}
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-gray-405 uppercase tracking-wider block">Target Cohort Segment</label>
+                  <select
+                    value={selectedCohort}
+                    onChange={e => setSelectedCohort(e.target.value as any)}
+                    className="w-full bg-gray-950 border border-gray-800 rounded-lg p-2.5 text-xs text-white focus:outline-none focus:border-blue-500/50"
+                  >
+                    <option value="Slipping Away">Slipping Away ({customers.filter(c => c.segment === "Slipping Away").length} targets)</option>
+                    <option value="Loyalists">Loyalists ({customers.filter(c => c.segment === "Loyalists").length} targets)</option>
+                    <option value="New Signups">New Signups ({customers.filter(c => c.segment === "New Signups").length} targets)</option>
+                    <option value="High-Value Inactive">High-Value Inactive ({customers.filter(c => c.segment === "High-Value Inactive").length} targets)</option>
+                  </select>
+                </div>
+
+                {/* Template Selector */}
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-gray-405 uppercase tracking-wider block">Campaign Template</label>
+                  <div className="grid grid-cols-3 gap-2">
+                    {(Object.keys(WHATSAPP_TEMPLATES) as Array<keyof typeof WHATSAPP_TEMPLATES>).map(key => (
+                      <button
+                        key={key}
+                        type="button"
+                        onClick={() => setSelectedTemplate(key)}
+                        className={`py-2 px-1 rounded-lg border text-center font-bold text-[9px] uppercase transition-all cursor-pointer ${
+                          selectedTemplate === key
+                            ? "border-orbit-success bg-orbit-success/15 text-orbit-success"
+                            : "border-gray-800 bg-gray-950 text-gray-400 hover:border-gray-700"
+                        }`}
+                      >
+                        {WHATSAPP_TEMPLATES[key].label.split(" ")[0]}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Live Preview */}
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-gray-405 uppercase tracking-wider block">Message Live Preview</label>
+                  <div className="w-full bg-[#1b2532] rounded-xl p-3 border border-gray-800 relative">
+                    <div className="bg-[#005d4b] text-white rounded-xl p-3 text-[10px] leading-relaxed whitespace-pre-line shadow-sm">
+                      {WHATSAPP_TEMPLATES[selectedTemplate].body.replace("{{name}}", "Arjun")}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Estimate KPIs */}
+                <div className="p-3 bg-gray-950/40 rounded-xl border border-gray-900 grid grid-cols-3 gap-2 text-center">
+                  <div>
+                    <span className="text-[7px] text-gray-550 uppercase block">Audience Size</span>
+                    <span className="text-xs font-bold text-white">{customers.filter(c => c.segment === selectedCohort).length} stars</span>
+                  </div>
+                  <div>
+                    <span className="text-[7px] text-gray-550 uppercase block">Expected ROI</span>
+                    <span className="text-xs font-bold text-orbit-success">4.8x</span>
+                  </div>
+                  <div>
+                    <span className="text-[7px] text-gray-550 uppercase block">Expected Yield</span>
+                    <span className="text-xs font-bold text-white">₹{(customers.filter(c => c.segment === selectedCohort).length * 750).toLocaleString()}</span>
+                  </div>
+                </div>
+
+                {/* Launch action */}
+                <button
+                  onClick={handleLaunchWhatsApp}
+                  className="w-full py-3 rounded-xl bg-gradient-to-r from-orbit-success to-emerald-450 text-white font-mono text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 hover:opacity-90 hover:scale-[1.02] active:scale-95 duration-200 cursor-pointer shadow-orbit-glow-green"
+                >
+                  <Play size={12} />
+                  Assemble & Generate Campaign
+                </button>
+              </div>
+            ) : (
+              // Agent Run Phase & Launch Sequence
+              <div className="space-y-4">
+                <div className="flex flex-col gap-2">
+                  <div className="flex items-center justify-between text-xs font-mono">
+                    <span className="text-gray-300 font-bold">
+                      {mission.step === "analyzing" ? "Polaris clustering cohorts..." :
+                       mission.step === "segmenting" ? "Luna auditing opportunity leakage..." :
+                       mission.step === "predicting" ? "Vega modeling conversion probability..." :
+                       mission.step === "generating" ? "Nova generating campaign copies..." :
+                       mission.step === "ready" ? "Atlas operational dispatch ready" :
+                       "Dispatching..."}
+                    </span>
+                    <span className="text-orbit-blue font-bold">
+                      {mission.step === "analyzing" ? "20%" :
+                       mission.step === "segmenting" ? "40%" :
+                       mission.step === "predicting" ? "60%" :
+                       mission.step === "generating" ? "80%" : "100%"}
+                    </span>
+                  </div>
+                  <div className="w-full h-1.5 bg-gray-900 rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-gradient-to-r from-orbit-blue to-orbit-purple transition-all duration-500"
+                      style={{
+                        width: mission.step === "analyzing" ? "20%" :
+                               mission.step === "segmenting" ? "40%" :
+                               mission.step === "predicting" ? "60%" :
+                               mission.step === "generating" ? "80%" : "100%"
+                      }}
+                    />
+                  </div>
+                </div>
+
+                {/* Agent Boardroom Dialogue ticker in Modal */}
+                <div className="bg-black/60 border border-gray-900 rounded-xl p-3 h-32 overflow-y-auto font-mono text-[9px] text-gray-400 space-y-2">
+                  <p className="text-orbit-success font-bold">&gt; ORBIT AGENTS ONLINE & Deliberating...</p>
+                  {agentLogs.slice(0, 4).reverse().map((log, i) => (
+                    <div key={i} className="border-l-2 pl-2" style={{ borderColor: log.agent === "Polaris" ? "#3b82f6" : log.agent === "Vega" ? "#8b5cf6" : log.agent === "Nova" ? "#ec4899" : log.agent === "Atlas" ? "#22c55e" : "#f59e0b" }}>
+                      <span className="font-bold text-white uppercase">{log.agent}:</span> {log.message}
+                    </div>
+                  ))}
+                </div>
+
+                {mission.step === "ready" && (
+                  <div className="space-y-3 font-mono">
+                    <div className="p-3 bg-orbit-success/5 border border-orbit-success/20 rounded-xl text-[10px] text-orbit-success flex items-center gap-2">
+                      <CheckCircle2 size={14} />
+                      <span>Campaign layout generated. Atlas delivery gateway is armed.</span>
+                    </div>
+
+                    <button
+                      onClick={() => {
+                        launchMissionCampaign("WhatsApp");
+                        setIsWhatsAppModalOpen(false);
+                      }}
+                      className="w-full py-3 rounded-xl bg-gradient-to-r from-orbit-success to-emerald-450 text-white text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 hover:opacity-90 hover:scale-[1.02] active:scale-95 duration-200 cursor-pointer shadow-orbit-glow-green"
+                    >
+                      <Send size={12} />
+                      Arm & Dispatch Campaign
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -1,4 +1,7 @@
-import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
+import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from "react";
+import { callGeminiAPI, parseGeminiJson } from "../utils/gemini";
+import { sendCampaign } from "../services/twilioService";
+import { sendEmailCampaign } from "../services/resendService";
 
 // Theme types
 export type ThemeMode = "command-center" | "executive";
@@ -30,7 +33,7 @@ export interface Campaign {
   goal: string;
   description: string;
   channel: "Email" | "WhatsApp" | "SMS" | "RCS";
-  status: "Draft" | "Running" | "Completed";
+  status: "Draft" | "Running" | "Completed" | "Queued" | "Sending" | "Delivered" | "Failed";
   sentCount: number;
   deliveredCount: number;
   openedCount: number;
@@ -38,6 +41,10 @@ export interface Campaign {
   purchaseCount: number;
   revenueGenerated: number;
   createdAt: string;
+  failedCount?: number;
+  pendingCount?: number;
+  messageId?: string;
+  missionId?: string;
 }
 
 // Order Interface
@@ -78,6 +85,8 @@ export interface SystemConfig {
   simulationSpeed: number; // 1 = normal, 2 = fast, 5 = hyper
   autonomousMode: boolean;
   voiceSynthesis: boolean;
+  firebaseKey?: string;
+  firebaseProjectId?: string;
 }
 
 // Active Mission State
@@ -95,6 +104,7 @@ export interface MissionState {
     RCS?: { title: string; body: string; mediaUrl: string };
   };
   selectedChannel: "Email" | "WhatsApp" | "SMS" | "RCS";
+  boardroomDialogue?: { agent: "Polaris" | "Luna" | "Vega" | "Nova" | "Atlas"; message: string }[];
 }
 
 interface OrbitContextType {
@@ -350,14 +360,17 @@ export const OrbitProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   const [config, setConfig] = useState<SystemConfig>(() => {
     const saved = localStorage.getItem("orbit_config");
-    return saved ? JSON.parse(saved) : {
-      geminiKey: "",
-      deepgramKey: "",
-      elevenLabsKey: "",
-      resendKey: "",
-      simulationSpeed: 1,
-      autonomousMode: false,
-      voiceSynthesis: false
+    const parsed = saved ? JSON.parse(saved) : {};
+    return {
+      geminiKey: parsed.geminiKey || "",
+      deepgramKey: parsed.deepgramKey || "",
+      elevenLabsKey: parsed.elevenLabsKey || "",
+      resendKey: parsed.resendKey || "",
+      simulationSpeed: parsed.simulationSpeed ?? 1,
+      autonomousMode: parsed.autonomousMode ?? false,
+      voiceSynthesis: parsed.voiceSynthesis ?? false,
+      firebaseKey: parsed.firebaseKey || "",
+      firebaseProjectId: parsed.firebaseProjectId || ""
     };
   });
 
@@ -382,6 +395,8 @@ export const OrbitProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       recoveryConfidence: 91
     };
   });
+
+  const launchMissionCampaignRef = useRef<any>(null);
 
   // Keep track of statistics
   const [revenueGoal] = useState(250000);
@@ -634,24 +649,117 @@ export const OrbitProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     // Step 1: Core analysis
     addAgentLog("System", `Initiating mission: ${goal}`, "thought");
     await wait(1500);
-    addAgentLog("Polaris", "Analyzing customer database graph. Searching for matching demographic signals.", "action");
-    
-    // Step 2: Polaris finds audience
-    await wait(2000);
+
     let targetSegment: Customer["segment"] = "Loyalists";
     let filterMsg = "";
-    if (goal.toLowerCase().includes("churn")) {
-      targetSegment = "Slipping Away";
-      filterMsg = "found 18 customers showing severe retention risks (churn score > 75%).";
-    } else if (goal.toLowerCase().includes("repeat") || goal.toLowerCase().includes("purchase")) {
-      targetSegment = "Loyalists";
-      filterMsg = "identified 24 high-affinity repeat buyers with organic-preferred tags.";
-    } else if (goal.toLowerCase().includes("ltv")) {
-      targetSegment = "High-Value Inactive";
-      filterMsg = "flagged 14 high-ltv dormant accounts with untapped buying capacity.";
+    let recoveredCount = 0;
+    let recoveredValue = 0;
+    let confidence = 90;
+    let lunaMsg = "";
+    let predictedRoi = 4.2;
+    let predictedRevenue = 35000;
+    let vegaMsg = "";
+    let selectedChannel: Campaign["channel"] = "WhatsApp";
+    let copy = {
+      Email: { subject: "", body: "" },
+      WhatsApp: { body: "" },
+      SMS: { body: "" },
+      RCS: { title: "", body: "", mediaUrl: "" }
+    };
+    let bRoomDialogue: any[] = [];
+
+    let consolidatedResult: any = null;
+    let geminiError: string | null = null;
+
+    if (config.geminiKey) {
+      try {
+        const sys = `You are the ORBIT Growth Engine, coordinating 5 AI agents to plan and generate a growth campaign for the business objective.
+The agents are:
+- Polaris (Audience Intelligence): Chooses one segment from ["Loyalists", "Slipping Away", "High-Value Inactive", "New Signups"] and explains findings.
+- Luna (Recovery): Audits leakage, specifies recoverableRevenue (number), inactiveCustomers (number), abandonedLeads (number), recoveryConfidence (number), and a detailed recovery explanation.
+- Vega (Predictive ROI): Computes predictedRoi (number), predictedRevenue (number), and a detailed forecast explanation.
+- Nova (Campaign Creator): Generates copy for Email (subject, body), WhatsApp (body), SMS (body), and RCS (title, body, mediaUrl).
+- Atlas (Operations): Chooses one channel from ["Email", "WhatsApp", "SMS", "RCS"] and explains the dispatch routing.
+
+Format your response as a single valid JSON object matching this schema exactly:
+{
+  "Polaris": {
+    "segment": "Loyalists" | "Slipping Away" | "High-Value Inactive" | "New Signups",
+    "explanation": "your explanation"
+  },
+  "Luna": {
+    "recoverableRevenue": 12000,
+    "inactiveCustomers": 12,
+    "abandonedLeads": 15,
+    "recoveryConfidence": 92,
+    "explanation": "your explanation"
+  },
+  "Vega": {
+    "predictedRoi": 4.2,
+    "predictedRevenue": 35000,
+    "explanation": "your explanation"
+  },
+  "Nova": {
+    "Email": { "subject": "...", "body": "..." },
+    "WhatsApp": { "body": "..." },
+    "SMS": { "body": "..." },
+    "RCS": { "title": "...", "body": "...", "mediaUrl": "..." }
+  },
+  "Atlas": {
+    "selectedChannel": "Email" | "WhatsApp" | "SMS" | "RCS",
+    "explanation": "your explanation"
+  }
+}
+Do not return any markdown code block formatting. Only return the raw JSON object.`;
+
+        const prompt = `Business Objective Goal: "${goal}". Business Category: "${businessType}". Coordinate the campaign plan.`;
+        addAgentLog("System", "Querying Gemini API to run multi-agent campaign simulation...", "action");
+        const res = await callGeminiAPI(prompt, sys, config.geminiKey);
+        consolidatedResult = parseGeminiJson<any>(res, null);
+        if (!consolidatedResult) {
+          throw new Error("Failed to parse Gemini response as JSON.");
+        }
+      } catch (err: any) {
+        console.error("Gemini consolidated execution failed:", err);
+        geminiError = err.message || String(err);
+      }
+    }
+
+    if (config.geminiKey && geminiError) {
+      addAgentLog("System", `Gemini API Call Failed: ${geminiError}`, "result");
+      cancelMission();
+      return;
+    }
+
+    if (!config.geminiKey) {
+      addAgentLog("System", "Running campaign planning in simulated fallback mode (no Gemini key).", "thought");
+    }
+
+    // Step 2: Polaris finds audience
+    setMission(prev => ({ ...prev, step: "analyzing" }));
+    addAgentLog("Polaris", "Analyzing customer database graph. Searching for matching demographic signals.", "action");
+    await wait(1500);
+
+    if (consolidatedResult?.Polaris) {
+      const pData = consolidatedResult.Polaris;
+      if (pData.segment && ["Loyalists", "Slipping Away", "High-Value Inactive", "New Signups"].includes(pData.segment)) {
+        targetSegment = pData.segment as Customer["segment"];
+      }
+      filterMsg = pData.explanation || `identified customers in segment: ${targetSegment}`;
     } else {
-      targetSegment = "New Signups";
-      filterMsg = "collated 22 first-time signups awaiting initial product campaign activation.";
+      if (goal.toLowerCase().includes("churn")) {
+        targetSegment = "Slipping Away";
+        filterMsg = "found 18 customers showing severe retention risks (churn score > 75%).";
+      } else if (goal.toLowerCase().includes("repeat") || goal.toLowerCase().includes("purchase")) {
+        targetSegment = "Loyalists";
+        filterMsg = "identified 24 high-affinity repeat buyers with organic-preferred tags.";
+      } else if (goal.toLowerCase().includes("ltv")) {
+        targetSegment = "High-Value Inactive";
+        filterMsg = "flagged 14 high-ltv dormant accounts with untapped buying capacity.";
+      } else {
+        targetSegment = "New Signups";
+        filterMsg = "collated 22 first-time signups awaiting initial product campaign activation.";
+      }
     }
 
     const cohort = customers.filter(c => c.segment === targetSegment);
@@ -661,124 +769,198 @@ export const OrbitProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       audienceCount: cohort.length
     }));
     
-    addAgentLog("Polaris", `Filtering complete. Target cohort: ${targetSegment}. ${filterMsg}`, "chat");
+    addAgentLog("Polaris", `Demographic segmentation complete. Target segment: ${targetSegment}. ${filterMsg}`, "chat");
+    bRoomDialogue.push({ agent: "Polaris", text: `I have mapped ${cohort.length} targets in the ${targetSegment} segment. ${filterMsg}` });
+    await wait(1500);
 
     // Step 2.5: Luna searches for leaks
-    await wait(1800);
-    let recoveredCount = 0;
-    let recoveredValue = 0;
-    let confidence = 85 + Math.floor(Math.random() * 12);
-    if (goal.toLowerCase().includes("churn") || goal.toLowerCase().includes("retention")) {
-      recoveredCount = 12;
-      recoveredValue = 8500;
-      addAgentLog("Luna", `Detected ${recoveredCount} inactive VIP customer nodes. Predicted reactivation rate: 14%. Estimated recovery revenue: ₹${recoveredValue.toLocaleString()}.`, "action");
-      setLunaMetrics(prev => ({
-        ...prev,
-        inactiveCustomers: recoveredCount,
+    addAgentLog("Luna", "Initiating leakage and dormancy audits on targets...", "action");
+    await wait(1500);
+
+    if (consolidatedResult?.Luna) {
+      const lData = consolidatedResult.Luna;
+      recoveredCount = lData.inactiveCustomers || lData.abandonedLeads || 10;
+      recoveredValue = lData.recoverableRevenue || 12000;
+      confidence = lData.recoveryConfidence || 90;
+      lunaMsg = lData.explanation || `Detected opportunities with potential recovered revenue: ₹${recoveredValue.toLocaleString()}.`;
+      
+      setLunaMetrics({
+        inactiveCustomers: lData.inactiveCustomers || 12,
+        abandonedLeads: lData.abandonedLeads || 17,
         recoverableRevenue: recoveredValue,
         recoveryConfidence: confidence,
-        opportunityScore: Math.min(100, Math.max(0, prev.opportunityScore + 2))
-      }));
+        opportunityScore: Math.min(100, Math.max(0, 88 + Math.floor(Math.random() * 5)))
+      });
     } else {
-      recoveredCount = 17;
-      recoveredValue = 12000;
-      addAgentLog("Luna", `Detected ${recoveredCount} abandoned Instagram & web checkout enquiries. High purchase affinity confirmed (${confidence}% confidence). Potential recovered revenue: ₹${recoveredValue.toLocaleString()}.`, "action");
-      setLunaMetrics(prev => ({
-        ...prev,
-        abandonedLeads: recoveredCount,
-        recoverableRevenue: recoveredValue,
-        recoveryConfidence: confidence,
-        opportunityScore: Math.min(100, Math.max(0, prev.opportunityScore + 3))
-      }));
+      if (goal.toLowerCase().includes("churn") || goal.toLowerCase().includes("retention")) {
+        recoveredCount = 12;
+        recoveredValue = 8500;
+        lunaMsg = `Detected ${recoveredCount} inactive VIP customer nodes. Predicted reactivation rate: 14%. Estimated recovery revenue: ₹${recoveredValue.toLocaleString()}.`;
+        setLunaMetrics(prev => ({
+          ...prev,
+          inactiveCustomers: recoveredCount,
+          recoverableRevenue: recoveredValue,
+          recoveryConfidence: confidence,
+          opportunityScore: Math.min(100, Math.max(0, prev.opportunityScore + 2))
+        }));
+      } else {
+        recoveredCount = 17;
+        recoveredValue = 12000;
+        lunaMsg = `Detected ${recoveredCount} abandoned Instagram & web checkout enquiries. High purchase affinity confirmed (${confidence}% confidence). Potential recovered revenue: ₹${recoveredValue.toLocaleString()}.`;
+        setLunaMetrics(prev => ({
+          ...prev,
+          abandonedLeads: recoveredCount,
+          recoverableRevenue: recoveredValue,
+          recoveryConfidence: confidence,
+          opportunityScore: Math.min(100, Math.max(0, prev.opportunityScore + 3))
+        }));
+      }
     }
+    addAgentLog("Luna", lunaMsg, "chat");
+    bRoomDialogue.push({ agent: "Luna", text: lunaMsg });
+    await wait(1500);
 
     // Step 3: Vega predicts ROI
-    await wait(2000);
     setMission(prev => ({
       ...prev,
       step: "predicting"
     }));
     addAgentLog("Vega", `Starting conversion forecast for ${cohort.length} targets. Simulating ROI curves.`, "action");
-    
-    await wait(1800);
-    const predictedRoi = 3.5 + Math.random() * 2.8;
-    const predictedRevenue = Math.round(cohort.length * 280 * (1 + Math.random() * 0.4));
+    await wait(1500);
+
+    if (consolidatedResult?.Vega) {
+      const vData = consolidatedResult.Vega;
+      predictedRoi = vData.predictedRoi || 4.2;
+      predictedRevenue = vData.predictedRevenue || 35000;
+      vegaMsg = vData.explanation || `Forecast: Channel yield optimal. Expected revenue: ₹${predictedRevenue.toLocaleString()}. Predicted ROI: ${predictedRoi.toFixed(1)}x.`;
+    } else {
+      predictedRoi = 3.5 + Math.random() * 2.8;
+      predictedRevenue = Math.round(cohort.length * 280 * (1 + Math.random() * 0.4));
+      predictedRoi = parseFloat(predictedRoi.toFixed(2));
+      vegaMsg = `Forecast: Channel yield optimal. Expected revenue: ₹${predictedRevenue.toLocaleString()}. Predicted ROI: ${predictedRoi.toFixed(1)}x. Preferred channel: WhatsApp.`;
+    }
     
     setMission(prev => ({
       ...prev,
       predictedRoi: parseFloat(predictedRoi.toFixed(2)),
       predictedRevenue
     }));
-    addAgentLog("Vega", `Forecast: Channel yield optimal. Expected revenue: ₹${predictedRevenue.toLocaleString()}. Predicted ROI: ${predictedRoi.toFixed(1)}x. Preferred channel: WhatsApp.`, "chat");
+    addAgentLog("Vega", vegaMsg, "chat");
+    bRoomDialogue.push({ agent: "Vega", text: vegaMsg });
+    await wait(1500);
 
     // Step 4: Nova generates content
-    await wait(2200);
     setMission(prev => ({
       ...prev,
       step: "generating"
     }));
-    addAgentLog("Nova", "Spinning content generation engine. Assembling custom visual copywriting nodes.", "action");
+    addAgentLog("Nova", "Spinning content generation engine. Assembling custom copywriting nodes.", "action");
+    await wait(1500);
 
-    await wait(2000);
-    const copy = {
-      Email: {
-        subject: `Exclusive Access: Elevate Your Setup with Orbit Core`,
-        body: `Hello {{name}},\n\nYour journey with ORBIT is just beginning. As one of our select targets, we are opening up access to the all-new Cyberwear Implant upgrades. \n\nGet yours today with priority shipping.\n\nBest regards,\nOrbit Intelligence Network`
-      },
-      WhatsApp: {
-        body: `⚡ *ORBIT ALERT* ⚡\nHey {{name}}, ready to upgrade your setup? Get exclusive pre-launch access to the Quantum Deck. Reply *YES* to claim. Free priority shipping included.`
-      },
-      SMS: {
-        body: `ORBIT: Hi {{name}}, get exclusive pre-sale access to the new Quantum Implants. Order now at: https://orbit.io/q-deck`
-      },
-      RCS: {
-        title: "Exclusive Launch Access",
-        body: "Hey {{name}}, Vega predicted you would love this. Elevate your setup today with the Cyberwear Implant v4. Interactive booking inside.",
-        mediaUrl: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=400&q=80"
+    if (consolidatedResult?.Nova) {
+      const nData = consolidatedResult.Nova;
+      if (nData.Email) copy.Email = nData.Email;
+      if (nData.WhatsApp) copy.WhatsApp = nData.WhatsApp;
+      if (nData.SMS) copy.SMS = nData.SMS;
+      if (nData.RCS) copy.RCS = nData.RCS;
+    }
+
+    if (!copy.Email.body) {
+      let whatsAppBody = `⚡ *ORBIT ALERT* ⚡\nHey {{name}}, ready to upgrade your setup? Get exclusive pre-launch access to the Quantum Deck. Reply *YES* to claim. Free priority shipping included.`;
+      const gLower = goal.toLowerCase();
+      if (gLower.includes("recovery") || gLower.includes("churn") || gLower.includes("slipping") || gLower.includes("inactive") || gLower.includes("win-back")) {
+        whatsAppBody = `Hi {{name}} 👋\n\nWe noticed you haven't visited recently.\n\nHere's an exclusive offer for you.`;
+      } else if (gLower.includes("vip") || gLower.includes("loyal") || gLower.includes("repeat") || gLower.includes("value")) {
+        whatsAppBody = `Hi {{name}} 🌟\n\nAs one of our valued customers, you get early access to our latest collection.`;
+      } else if (gLower.includes("festival") || gLower.includes("diwali") || gLower.includes("holiday")) {
+        whatsAppBody = `Happy Diwali ✨\n\nCelebrate with exclusive festive offers.`;
       }
-    };
 
-    let selectedChannel: Campaign["channel"] = "WhatsApp";
-    if (targetSegment === "High-Value Inactive") selectedChannel = "Email";
-    else if (targetSegment === "New Signups") selectedChannel = "RCS";
-    else if (targetSegment === "Loyalists") selectedChannel = "WhatsApp";
+      copy = {
+        Email: {
+          subject: `Exclusive Access: Elevate Your Setup with Orbit Core`,
+          body: `Hello {{name}},\n\nYour journey with ORBIT is just beginning. As one of our select targets, we are opening up access to the all-new Cyberwear Implant upgrades. \n\nGet yours today with priority shipping.\n\nBest regards,\nOrbit Intelligence Network`
+        },
+        WhatsApp: {
+          body: whatsAppBody
+        },
+        SMS: {
+          body: `ORBIT: Hi {{name}}, get exclusive pre-sale access to the new Quantum Implants. Order now at: https://orbit.io/q-deck`
+        },
+        RCS: {
+          title: "Exclusive Launch Access",
+          body: "Hey {{name}}, Vega predicted you would love this. Elevate your setup today with the Cyberwear Implant v4. Interactive booking inside.",
+          mediaUrl: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=400&q=80"
+        }
+      };
+    }
+
+    addAgentLog("Nova", "Marketing copies generated across channels (WhatsApp, Email, SMS, RCS). Content hyper-personalized using DNA tags.", "chat");
+    bRoomDialogue.push({ agent: "Nova", text: `I have generated dynamic copies across Email, WhatsApp, SMS, and RCS channels, personalized using DNA tags.` });
+    await wait(1500);
+
+    // Step 5: Atlas verifies delivery routes and optimal channel
+    addAgentLog("Atlas", "Analyzing delivery nodes and selecting optimal dispatch channels...", "action");
+    await wait(1500);
+
+    let atlasMsg = "";
+
+    if (consolidatedResult?.Atlas) {
+      const aData = consolidatedResult.Atlas;
+      if (aData.selectedChannel && ["Email", "WhatsApp", "SMS", "RCS"].includes(aData.selectedChannel)) {
+        selectedChannel = aData.selectedChannel as Campaign["channel"];
+      }
+      atlasMsg = aData.explanation || `Optimal delivery channel verified: ${selectedChannel}. Dispatch queues scheduled.`;
+    } else {
+      if (targetSegment === "High-Value Inactive") selectedChannel = "Email";
+      else if (targetSegment === "New Signups") selectedChannel = "RCS";
+      else if (targetSegment === "Loyalists") selectedChannel = "WhatsApp";
+      atlasMsg = `Optimal delivery channel verified: ${selectedChannel}. Dispatch buffers armed.`;
+    }
+
+    addAgentLog("Atlas", atlasMsg, "chat");
+    bRoomDialogue.push({ agent: "Atlas", text: atlasMsg });
 
     setMission(prev => ({
       ...prev,
       step: "ready",
       generatedContent: copy,
-      selectedChannel
+      selectedChannel,
+      boardroomDialogue: bRoomDialogue
     }));
 
-    addAgentLog("Nova", "Marketing copies generated across channels (WhatsApp, Email, SMS, RCS). Content hyper-personalized using DNA tags.", "chat");
-    addAgentLog("Atlas", "Analyzing delivery nodes. Channels optimized. Verification flags cleared. Awaiting launch confirmation.", "chat");
+    addAgentLog("System", "Campaign preparation completed. Directives ready for dispatch.", "thought");
     
     // In autonomous mode, auto-dispatch immediately
     if (config.autonomousMode) {
       await wait(1500);
       addAgentLog("Atlas", "[Autonomous Mode Activated] Dispatching campaign automatically.", "action");
-      launchMissionCampaign(selectedChannel);
+      launchMissionCampaignRef.current?.(selectedChannel);
     }
-  }, [customers, config.simulationSpeed, config.autonomousMode, addAgentLog]);
+  }, [customers, config, addAgentLog, businessType, cancelMission]);
 
   // Launch simulated campaign and run engagement loops
   const launchMissionCampaign = useCallback(async (channel: "Email" | "WhatsApp" | "SMS" | "RCS") => {
     if (!mission.isActive) return;
 
+    const campaignId = `camp_${Date.now()}`;
     const newCampaign: Campaign = {
-      id: `camp_${Date.now()}`,
+      id: campaignId,
       name: `${mission.goal} - Autonomous Loop`,
       goal: mission.goal,
       description: `Targeting ${mission.audienceCount} customers via ${channel}.`,
       channel,
-      status: "Running",
+      status: channel === "WhatsApp" ? "Queued" : "Running",
       sentCount: mission.audienceCount,
       deliveredCount: 0,
       openedCount: 0,
       clickedCount: 0,
       purchaseCount: 0,
       revenueGenerated: 0,
-      createdAt: new Date().toISOString()
+      createdAt: new Date().toISOString(),
+      failedCount: 0,
+      pendingCount: mission.audienceCount,
+      missionId: campaignId
     };
 
     setCampaigns(prev => [newCampaign, ...prev]);
@@ -787,52 +969,12 @@ export const OrbitProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       step: "dispatched"
     }));
 
-    addAgentLog("Atlas", `Campaign dispatched successfully via ${channel}. Initializing tracking webhook nodes...`, "action");
+    addAgentLog("Atlas", `Campaign dispatched via ${channel}. Initializing routing gateways...`, "action");
 
-    // Close the mission state after some seconds and let it run in the background
     const speedMultiplier = config.simulationSpeed;
     const wait = (ms: number) => new Promise(res => setTimeout(res, ms / speedMultiplier));
 
-    await wait(3000);
-    // Remove the mission focus overlay so the user can look at the dashboards
-    setMission(prev => ({
-      ...prev,
-      isActive: false,
-      step: "idle"
-    }));
-    setActiveMissionsCount(0);
-
-    // Simulate engagement callbacks (Sent -> Delivered -> Opened -> Clicked -> Purchased)
-    // We will update this campaign state step by step in the campaigns list!
-    const targetId = newCampaign.id;
-    const totalTargets = newCampaign.sentCount;
-
-    // Delivery Simulation
-    await wait(2000);
-    const delCount = Math.round(totalTargets * (0.95 + Math.random() * 0.05));
-    setCampaigns(prev => prev.map(c => c.id === targetId ? { ...c, deliveredCount: delCount } : c));
-    addAgentLog("System", `Webhook triggered: ${delCount} messages DELIVERED for campaign ${newCampaign.name}.`, "action");
-
-    // Open/Read Simulation
-    await wait(3000);
-    const opCount = Math.round(delCount * (0.65 + Math.random() * 0.25));
-    setCampaigns(prev => prev.map(c => c.id === targetId ? { ...c, openedCount: opCount } : c));
-    addAgentLog("System", `Webhook triggered: ${opCount} messages OPENED for campaign ${newCampaign.name}.`, "action");
-
-    // Click/Engagement Simulation
-    await wait(3000);
-    const clCount = Math.round(opCount * (0.35 + Math.random() * 0.35));
-    setCampaigns(prev => prev.map(c => c.id === targetId ? { ...c, clickedCount: clCount } : c));
-    addAgentLog("System", `Webhook triggered: ${clCount} link clicks recorded for campaign ${newCampaign.name}.`, "action");
-
-    // Purchase / Conversion Simulation
-    await wait(4000);
-    const purCount = Math.round(clCount * (0.15 + Math.random() * 0.25));
-    const revenue = purCount * (500 + Math.floor(Math.random() * 1000));
-    
-    setCampaigns(prev => prev.map(c => c.id === targetId ? { ...c, purchaseCount: purCount, revenueGenerated: revenue, status: "Completed" } : c));
-    
-    // Add real orders to the order ledger for these purchasers!
+    // Find the current target cohort
     const matchingCohort = customers.filter(c => {
       if (mission.goal.toLowerCase().includes("churn")) return c.segment === "Slipping Away";
       if (mission.goal.toLowerCase().includes("repeat") || mission.goal.toLowerCase().includes("purchase")) return c.segment === "Loyalists";
@@ -840,47 +982,322 @@ export const OrbitProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       return c.segment === "New Signups";
     });
 
-    const newOrdersList: Order[] = [];
-    for (let i = 0; i < Math.min(purCount, matchingCohort.length); i++) {
-      const targetCust = matchingCohort[i];
-      
-      // Update customer DNA, churnRisk & ltv in the database
-      setCustomers(prevCustomers => prevCustomers.map(cust => {
-        if (cust.id === targetCust.id) {
-          const newPurchaseCount = cust.purchaseCount + 1;
-          const newLtv = cust.ltv + 600 + Math.floor(Math.random() * 500);
-          const newRisk = Math.max(5, Math.round(cust.churnRisk - (20 + Math.random() * 20)));
-          return {
-            ...cust,
-            purchaseCount: newPurchaseCount,
-            ltv: newLtv,
-            churnRisk: newRisk,
-            churnTrend: "down" as const,
-            predictedNextPurchase: `In ${2 + Math.floor(Math.random() * 4)} weeks`
-          };
+    if (channel === "WhatsApp") {
+      // Live WhatsApp Campaign Run
+      const templateBody = mission.generatedContent.WhatsApp?.body || "Hello from ORBIT";
+      const firebaseConfig = {
+        firebaseKey: config.firebaseKey,
+        firebaseProjectId: config.firebaseProjectId
+      };
+
+      const recipients = matchingCohort.map(c => ({ phone: c.phone, name: c.name }));
+
+      // Close the mission overlay so the dashboard is visible
+      await wait(1500);
+      setMission(prev => ({ ...prev, isActive: false, step: "idle" }));
+      setActiveMissionsCount(0);
+
+      addAgentLog("Atlas", `Atlas routing campaign to Twilio WhatsApp Sandbox for ${recipients.length} numbers.`, "action");
+
+      // Execute twilio send campaign
+      const result = await sendCampaign(
+        campaignId,
+        campaignId,
+        recipients,
+        templateBody,
+        firebaseConfig,
+        (index, status, info) => {
+          // Dynamic progress callback updates state in real-time
+          setCampaigns(prev => prev.map(c => {
+            if (c.id === campaignId) {
+              const delivered = status === "Delivered" ? (c.deliveredCount ?? 0) + 1 : (c.deliveredCount ?? 0);
+              const failed = status === "Failed" ? (c.failedCount ?? 0) + 1 : (c.failedCount ?? 0);
+              const pending = recipients.length - (delivered + failed);
+              const finalStatus = pending === 0 ? (failed === recipients.length ? "Failed" : "Completed") : "Sending";
+              return {
+                ...c,
+                status: finalStatus,
+                deliveredCount: delivered,
+                failedCount: failed,
+                pendingCount: pending
+              };
+            }
+            return c;
+          }));
+
+          if (status === "Failed") {
+            addAgentLog("Atlas", `Message fail [${recipients[index].name}]: ${info}`, "thought");
+          } else if (status === "Delivered") {
+            addAgentLog("System", `Delivered to ${recipients[index].name} [SID: ${info}]`, "thought");
+          }
         }
-        return cust;
+      );
+
+      const delCount = result.dispatchedCount;
+      const failCount = result.failedCount;
+
+      addAgentLog("Atlas", `Twilio dispatch completed. Sent: ${delCount}, Failed: ${failCount}`, "chat");
+
+      // Trigger Simulated Conversions for Delivered Messages
+      if (delCount > 0) {
+        await wait(2000);
+        const opCount = Math.round(delCount * (0.75 + Math.random() * 0.15));
+        setCampaigns(prev => prev.map(c => c.id === campaignId ? { ...c, openedCount: opCount } : c));
+        addAgentLog("System", `Webhook: ${opCount} messages opened.`, "action");
+
+        await wait(2000);
+        const clCount = Math.round(opCount * (0.4 + Math.random() * 0.2));
+        setCampaigns(prev => prev.map(c => c.id === campaignId ? { ...c, clickedCount: clCount } : c));
+        addAgentLog("System", `Webhook: ${clCount} click events recorded.`, "action");
+
+        await wait(3000);
+        const purCount = Math.max(1, Math.round(clCount * (0.2 + Math.random() * 0.2)));
+        const revenue = purCount * (500 + Math.floor(Math.random() * 1000));
+
+        setCampaigns(prev => prev.map(c => c.id === campaignId ? { 
+          ...c, 
+          purchaseCount: purCount, 
+          revenueGenerated: revenue,
+          status: "Completed" 
+        } : c));
+
+        // Add real orders to the order ledger for these purchasers!
+        const newOrdersList: Order[] = [];
+        for (let i = 0; i < Math.min(purCount, matchingCohort.length); i++) {
+          const targetCust = matchingCohort[i];
+          
+          setCustomers(prevCustomers => prevCustomers.map(cust => {
+            if (cust.id === targetCust.id) {
+              const newPurchaseCount = cust.purchaseCount + 1;
+              const newLtv = cust.ltv + Math.round(revenue / purCount);
+              const newRisk = Math.max(5, Math.round(cust.churnRisk - (20 + Math.random() * 20)));
+              return {
+                ...cust,
+                purchaseCount: newPurchaseCount,
+                ltv: newLtv,
+                churnRisk: newRisk,
+                churnTrend: "down" as const,
+                predictedNextPurchase: `In ${2 + Math.floor(Math.random() * 4)} weeks`
+              };
+            }
+            return cust;
+          }));
+
+          newOrdersList.push({
+            id: `ord_${Date.now()}_${i}`,
+            customerId: targetCust.id,
+            customerName: targetCust.name,
+            amount: Math.round(revenue / purCount),
+            date: new Date().toISOString().split("T")[0],
+            product: "WhatsApp Checkout Conversion",
+            channel: "WhatsApp"
+          });
+        }
+
+        setOrders(prev => [...newOrdersList, ...prev]);
+        setGrowthScore(prev => parseFloat((prev + 1.0 + Math.random() * 0.5).toFixed(1)));
+        addAgentLog("Atlas", `Campaign ${mission.goal} conversions tracked. Converted: ${purCount} VIPs. Yield: ₹${revenue.toLocaleString()}`, "chat");
+        addAgentLog("Vega", `Customer Churn Risk re-computed. Churn trend is DOWN.`, "chat");
+      }
+    } else if (channel === "Email") {
+      // Live Resend Email Campaign Run
+      const templateBody = mission.generatedContent.Email?.body || "Hello from ORBIT";
+      const subject = mission.generatedContent.Email?.subject || "Hello World";
+      const firebaseConfig = {
+        firebaseKey: config.firebaseKey,
+        firebaseProjectId: config.firebaseProjectId
+      };
+
+      const recipients = matchingCohort.map(c => ({ email: c.email, name: c.name }));
+
+      // Close the mission overlay so the dashboard is visible
+      await wait(1500);
+      setMission(prev => ({ ...prev, isActive: false, step: "idle" }));
+      setActiveMissionsCount(0);
+
+      addAgentLog("Atlas", `Atlas routing campaign to Resend Email service for ${recipients.length} emails.`, "action");
+
+      // Execute resend send campaign
+      const result = await sendEmailCampaign(
+        campaignId,
+        campaignId,
+        recipients,
+        subject,
+        templateBody,
+        config.resendKey,
+        firebaseConfig,
+        (index, status, info) => {
+          // Dynamic progress callback updates state in real-time
+          setCampaigns(prev => prev.map(c => {
+            if (c.id === campaignId) {
+              const delivered = status === "Delivered" ? (c.deliveredCount ?? 0) + 1 : (c.deliveredCount ?? 0);
+              const failed = status === "Failed" ? (c.failedCount ?? 0) + 1 : (c.failedCount ?? 0);
+              const pending = recipients.length - (delivered + failed);
+              const finalStatus = pending === 0 ? (failed === recipients.length ? "Failed" : "Completed") : "Sending";
+              return {
+                ...c,
+                status: finalStatus,
+                deliveredCount: delivered,
+                failedCount: failed,
+                pendingCount: pending
+              };
+            }
+            return c;
+          }));
+
+          if (status === "Failed") {
+            addAgentLog("Atlas", `Email fail [${recipients[index].name}]: ${info}`, "thought");
+          } else if (status === "Delivered") {
+            addAgentLog("System", `Delivered to ${recipients[index].name} [ID: ${info}]`, "thought");
+          }
+        }
+      );
+
+      const delCount = result.dispatchedCount;
+      const failCount = result.failedCount;
+
+      addAgentLog("Atlas", `Resend dispatch completed. Sent: ${delCount}, Failed: ${failCount}`, "chat");
+
+      // Trigger Simulated Conversions for Delivered Messages
+      if (delCount > 0) {
+        await wait(2000);
+        const opCount = Math.round(delCount * (0.55 + Math.random() * 0.15));
+        setCampaigns(prev => prev.map(c => c.id === campaignId ? { ...c, openedCount: opCount } : c));
+        addAgentLog("System", `Webhook: ${opCount} email opens tracked.`, "action");
+
+        await wait(2000);
+        const clCount = Math.round(opCount * (0.25 + Math.random() * 0.15));
+        setCampaigns(prev => prev.map(c => c.id === campaignId ? { ...c, clickedCount: clCount } : c));
+        addAgentLog("System", `Webhook: ${clCount} click events recorded.`, "action");
+
+        await wait(3000);
+        const purCount = Math.max(1, Math.round(clCount * (0.15 + Math.random() * 0.15)));
+        const revenue = purCount * (800 + Math.floor(Math.random() * 1200));
+
+        setCampaigns(prev => prev.map(c => c.id === campaignId ? { 
+          ...c, 
+          purchaseCount: purCount, 
+          revenueGenerated: revenue,
+          status: "Completed" 
+        } : c));
+
+        // Add real orders to the order ledger for these purchasers!
+        const newOrdersList: Order[] = [];
+        for (let i = 0; i < Math.min(purCount, matchingCohort.length); i++) {
+          const targetCust = matchingCohort[i];
+          
+          setCustomers(prevCustomers => prevCustomers.map(cust => {
+            if (cust.id === targetCust.id) {
+              const newPurchaseCount = cust.purchaseCount + 1;
+              const newLtv = cust.ltv + Math.round(revenue / purCount);
+              const newRisk = Math.max(5, Math.round(cust.churnRisk - (15 + Math.random() * 15)));
+              return {
+                ...cust,
+                purchaseCount: newPurchaseCount,
+                ltv: newLtv,
+                churnRisk: newRisk,
+                churnTrend: "down" as const,
+                predictedNextPurchase: `In ${2 + Math.floor(Math.random() * 4)} weeks`
+              };
+            }
+            return cust;
+          }));
+
+          newOrdersList.push({
+            id: `ord_${Date.now()}_${i}`,
+            customerId: targetCust.id,
+            customerName: targetCust.name,
+            amount: Math.round(revenue / purCount),
+            date: new Date().toISOString().split("T")[0],
+            product: "Email Checkout Conversion",
+            channel: "Email"
+          });
+        }
+
+        setOrders(prev => [...newOrdersList, ...prev]);
+        setGrowthScore(prev => parseFloat((prev + 0.8 + Math.random() * 0.4).toFixed(1)));
+        addAgentLog("Atlas", `Campaign ${mission.goal} conversions tracked. Converted: ${purCount} VIPs. Yield: ₹${revenue.toLocaleString()}`, "chat");
+        addAgentLog("Vega", `Customer Churn Risk re-computed. Churn trend is DOWN.`, "chat");
+      }
+    } else {
+      // Simulated Run for Other Channels (SMS, RCS)
+      await wait(3000);
+      setMission(prev => ({
+        ...prev,
+        isActive: false,
+        step: "idle"
       }));
+      setActiveMissionsCount(0);
 
-      // Create order
-      newOrdersList.push({
-        id: `ord_${Date.now()}_${i}`,
-        customerId: targetCust.id,
-        customerName: targetCust.name,
-        amount: Math.round(revenue / purCount),
-        date: new Date().toISOString().split("T")[0],
-        product: "Neural Upgrade Pack",
-        channel: channel
-      });
+      const targetId = campaignId;
+      const totalTargets = mission.audienceCount;
+
+      // Delivery Simulation
+      await wait(2000);
+      const delCount = Math.round(totalTargets * (0.95 + Math.random() * 0.05));
+      setCampaigns(prev => prev.map(c => c.id === targetId ? { ...c, status: "Sending", deliveredCount: delCount, pendingCount: totalTargets - delCount } : c));
+      addAgentLog("System", `Webhook triggered: ${delCount} messages DELIVERED for campaign.`, "action");
+
+      // Open/Read Simulation
+      await wait(3000);
+      const opCount = Math.round(delCount * (0.65 + Math.random() * 0.25));
+      setCampaigns(prev => prev.map(c => c.id === targetId ? { ...c, openedCount: opCount } : c));
+      addAgentLog("System", `Webhook triggered: ${opCount} messages OPENED for campaign.`, "action");
+
+      // Click/Engagement Simulation
+      await wait(3000);
+      const clCount = Math.round(opCount * (0.35 + Math.random() * 0.35));
+      setCampaigns(prev => prev.map(c => c.id === targetId ? { ...c, clickedCount: clCount } : c));
+      addAgentLog("System", `Webhook triggered: ${clCount} link clicks recorded for campaign.`, "action");
+
+      // Purchase / Conversion Simulation
+      await wait(4000);
+      const purCount = Math.round(clCount * (0.15 + Math.random() * 0.25));
+      const revenue = purCount * (500 + Math.floor(Math.random() * 1000));
+      
+      setCampaigns(prev => prev.map(c => c.id === targetId ? { ...c, purchaseCount: purCount, revenueGenerated: revenue, status: "Completed" } : c));
+      
+      const newOrdersList: Order[] = [];
+      for (let i = 0; i < Math.min(purCount, matchingCohort.length); i++) {
+        const targetCust = matchingCohort[i];
+        
+        setCustomers(prevCustomers => prevCustomers.map(cust => {
+          if (cust.id === targetCust.id) {
+            const newPurchaseCount = cust.purchaseCount + 1;
+            const newLtv = cust.ltv + 600 + Math.floor(Math.random() * 500);
+            const newRisk = Math.max(5, Math.round(cust.churnRisk - (20 + Math.random() * 20)));
+            return {
+              ...cust,
+              purchaseCount: newPurchaseCount,
+              ltv: newLtv,
+              churnRisk: newRisk,
+              churnTrend: "down" as const,
+              predictedNextPurchase: `In ${2 + Math.floor(Math.random() * 4)} weeks`
+            };
+          }
+          return cust;
+        }));
+
+        newOrdersList.push({
+          id: `ord_${Date.now()}_${i}`,
+          customerId: targetCust.id,
+          customerName: targetCust.name,
+          amount: Math.round(revenue / purCount),
+          date: new Date().toISOString().split("T")[0],
+          product: "Neural Upgrade Pack",
+          channel: channel
+        });
+      }
+
+      setOrders(prev => [...newOrdersList, ...prev]);
+      setGrowthScore(prev => parseFloat((prev + 0.8 + Math.random() * 0.6).toFixed(1)));
+      addAgentLog("Atlas", `Campaign execution complete. Converted purchases: ${purCount}. Total Yield: ₹${revenue.toLocaleString()}.`, "chat");
+      addAgentLog("Vega", `Re-evaluating client portfolios. Overall customer Churn Probability has dropped by 3.8% across segments.`, "chat");
     }
+  }, [mission, customers, config, addAgentLog]);
 
-    setOrders(prev => [...newOrdersList, ...prev]);
-    
-    // Update global dashboard items
-    setGrowthScore(prev => parseFloat((prev + 0.8 + Math.random() * 0.6).toFixed(1)));
-    addAgentLog("Atlas", `Campaign ${newCampaign.name} execution complete. Converted purchases: ${purCount}. Total Yield: ₹${revenue.toLocaleString()}.`, "chat");
-    addAgentLog("Vega", `Re-evaluating client portfolios. Overall customer Churn Probability has dropped by 3.8% across segments.`, "chat");
-  }, [mission, customers, config.simulationSpeed, addAgentLog]);
+  launchMissionCampaignRef.current = launchMissionCampaign;
+
 
   // Perform a background random simulation step (simulating steady growth traffic)
   const runSimulationStep = useCallback(() => {

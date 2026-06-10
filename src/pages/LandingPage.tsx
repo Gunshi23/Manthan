@@ -1,12 +1,15 @@
-import React from "react";
-import { Sparkles, Terminal, ArrowRight } from "lucide-react";
+import React, { useState } from "react";
+import { Sparkles, Terminal, ArrowRight, Play, Activity } from "lucide-react";
 import { motion } from "framer-motion";
+import { GuidedDemoModal } from "../components/GuidedDemoModal";
 
 interface LandingPageProps {
   onEnterOS: () => void;
 }
 
 export const LandingPage: React.FC<LandingPageProps> = ({ onEnterOS }) => {
+  const [isDemoOpen, setIsDemoOpen] = useState(false);
+
   return (
     <div className="relative min-h-screen bg-orbit-bg overflow-hidden space-grid flex flex-col justify-between">
       {/* Background glowing blobs */}
@@ -76,15 +79,107 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnterOS }) => {
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.8, delay: 0.3 }}
-          className="flex flex-col sm:flex-row gap-4 mb-20"
+          className="flex flex-col sm:flex-row gap-4 mb-16"
         >
           <button
             onClick={onEnterOS}
-            className="group px-8 py-4 rounded-xl bg-gradient-to-r from-orbit-blue to-orbit-purple text-sm font-semibold text-white shadow-orbit-glow hover:shadow-orbit-glow-purple transition-all duration-300 flex items-center justify-center gap-2"
+            className="group px-8 py-4 rounded-xl bg-gradient-to-r from-orbit-blue to-orbit-purple text-sm font-semibold text-white shadow-orbit-glow hover:shadow-orbit-glow-purple transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer"
           >
             Initialize Command Center
             <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
           </button>
+          
+          <button
+            onClick={() => setIsDemoOpen(true)}
+            className="group px-8 py-4 rounded-xl border border-orbit-blue/30 bg-[#0F172A]/85 hover:bg-[#1E293B] text-sm font-semibold text-white transition-all duration-300 flex items-center justify-center gap-2 shadow-orbit-glow-inset hover:border-orbit-blue/60 cursor-pointer"
+          >
+            <Play size={14} className="fill-current text-orbit-blue group-hover:scale-110 transition-transform" />
+            Watch ORBIT In Action
+          </button>
+        </motion.div>
+
+        {/* Guided Demo Showcase Card */}
+        <motion.div
+          initial={{ opacity: 0, y: 40 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.35 }}
+          className="w-full bg-[#0F172A]/60 border border-white/10 rounded-2xl p-8 backdrop-blur-md mb-20 relative overflow-hidden shadow-2xl flex flex-col md:flex-row items-center justify-between gap-8 group"
+        >
+          <div className="absolute top-0 right-0 w-80 h-80 bg-orbit-glow-blue opacity-[0.06] filter blur-3xl pointer-events-none" />
+          <div className="absolute bottom-0 left-0 w-80 h-80 bg-orbit-glow-purple opacity-[0.06] filter blur-3xl pointer-events-none" />
+
+          {/* Left panel text */}
+          <div className="text-left max-w-md space-y-4">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-orbit-blue/30 bg-orbit-blue/5 text-[10px] font-mono text-orbit-blue uppercase tracking-wider">
+              <Activity size={10} className="animate-pulse" />
+              Autonomous Preview
+            </div>
+            
+            <h2 className="text-2xl md:text-3xl font-bold font-space text-white leading-tight">
+              A Complete Agent Organization. <br />
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-orbit-blue to-orbit-purple">
+                Running in Unison.
+              </span>
+            </h2>
+            
+            <p className="text-xs text-gray-400 font-mono leading-relaxed">
+              Witness how ORBIT links audience mapping, copywriting, ROI simulations, and final campaign dispatching. See our agents align live in the boardroom in under 60 seconds.
+            </p>
+
+            <button
+              onClick={() => setIsDemoOpen(true)}
+              className="mt-2 group px-5 py-2.5 rounded-lg bg-orbit-blue/15 border border-orbit-blue/40 text-xs font-mono text-orbit-blue hover:bg-orbit-blue hover:text-white transition-all flex items-center gap-2 shadow-orbit-glow-inset cursor-pointer"
+            >
+              <Play size={12} className="fill-current text-orbit-blue" />
+              Watch ORBIT In Action
+            </button>
+          </div>
+
+          {/* Right panel: Futuristic Glass Interface Preview */}
+          <div className="relative flex-1 w-full max-w-sm rounded-xl border border-white/10 bg-[#050816]/70 p-5 shadow-lg space-y-4 select-none overflow-hidden h-52 flex flex-col justify-between">
+            <div className="flex justify-between items-center border-b border-white/5 pb-2">
+              <span className="text-[9px] font-mono text-gray-550 uppercase tracking-widest">Autonomous simulation node</span>
+              <span className="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse" />
+            </div>
+
+            {/* Simulated mini HUD view */}
+            <div className="space-y-2.5 text-left">
+              <div className="flex items-center justify-between text-[10px] font-mono">
+                <span className="text-gray-400 font-bold">Target Cohort</span>
+                <span className="text-white font-bold">150 Repeat Buyers</span>
+              </div>
+              <div className="flex items-center justify-between text-[10px] font-mono">
+                <span className="text-gray-400 font-bold">Yield Strategy</span>
+                <span className="text-green-400 font-bold">Recommended Timeline</span>
+              </div>
+              
+              {/* Agent mini avatars grid */}
+              <div className="flex gap-2.5 pt-2 border-t border-white/5">
+                {["P", "L", "V", "N", "A"].map((agentLetter, i) => {
+                  const colors = ["#3B82F6", "#F59E0B", "#8B5CF6", "#EC4899", "#22C55E"];
+                  return (
+                    <div 
+                      key={i}
+                      className="w-6 h-6 rounded-md border flex items-center justify-center text-[9px] font-space font-bold bg-[#0F172A]"
+                      style={{ borderColor: colors[i], color: colors[i], boxShadow: `0 0 8px ${colors[i]}15` }}
+                    >
+                      {agentLetter}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Glowing CTA overlay inside mockup */}
+            <div className="absolute inset-0 bg-[#050816]/65 backdrop-blur-[2px] flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+              <button
+                onClick={() => setIsDemoOpen(true)}
+                className="px-4 py-2 rounded-lg bg-white text-black font-space font-bold text-xs uppercase tracking-wide shadow-md hover:scale-105 transition-transform cursor-pointer"
+              >
+                Launch Guided Tour
+              </button>
+            </div>
+          </div>
         </motion.div>
 
         {/* Agent Cards Section */}
@@ -146,6 +241,12 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnterOS }) => {
           <a href="#" className="hover:text-white transition-colors">SECURE LINK</a>
         </div>
       </footer>
+
+      <GuidedDemoModal
+        isOpen={isDemoOpen}
+        onClose={() => setIsDemoOpen(false)}
+        onEnterOS={onEnterOS}
+      />
     </div>
   );
 };

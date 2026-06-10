@@ -348,13 +348,25 @@ export const SystemConfiguration: React.FC = () => {
                 <CheckCircle2 size={15} className="text-blue-400 shrink-0 mt-0.5" />
                 <div className="font-mono text-[10px]">
                   <p className="font-bold text-white uppercase tracking-wider">Local Sandbox Mode Enabled</p>
-                  <p className="text-gray-500 mt-1 leading-relaxed">
+                  <p className="text-gray-550 mt-1 leading-relaxed">
                     Local Storage stores campaign variables, transaction histories, and agent logs in current session boundaries. API Keys will trigger live sync.
                   </p>
                 </div>
               </div>
-              <InputField label="Firebase Key" value="" onChange={() => {}} placeholder="AIzaSy..." secret />
-              <InputField label="Firebase Project ID" value="" onChange={() => {}} placeholder="orbit-os-..." secret />
+              <InputField
+                label="Firebase Key"
+                value={config.firebaseKey || ""}
+                onChange={v => updateConfig({ firebaseKey: v })}
+                placeholder="AIzaSy..."
+                secret
+              />
+              <InputField
+                label="Firebase Project ID"
+                value={config.firebaseProjectId || ""}
+                onChange={v => updateConfig({ firebaseProjectId: v })}
+                placeholder="orbit-os-..."
+                secret
+              />
             </div>
           )}
 

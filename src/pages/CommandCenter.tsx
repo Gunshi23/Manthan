@@ -116,7 +116,7 @@ const StepIndicator: React.FC<{ status: ReasoningStep["status"]; color: string }
 export const CommandCenter: React.FC = () => {
   const {
     mission, startMission, launchMissionCampaign, cancelMission,
-    agentLogs, customers, campaigns
+    agentLogs, customers, campaigns, config, lunaMetrics
   } = useOrbit();
 
   /* selected agent profile card state */
@@ -175,7 +175,7 @@ export const CommandCenter: React.FC = () => {
       ts: s.ts || new Date().toLocaleTimeString(),
       metric: s.id === "s1" ? `${customers.length} analyzed` :
               s.id === "s2" ? `${mission.audienceCount} targets found` :
-              s.id === "s3" ? `₹12,000 recoverable` :
+              s.id === "s3" ? `₹${lunaMetrics.recoverableRevenue.toLocaleString()} recoverable` :
               s.id === "s4" ? `₹${mission.predictedRevenue.toLocaleString()} forecast` :
               s.id === "s5" ? "4 variants ready" :
               s.id === "s6" ? `${mission.selectedChannel} selected` : s.metric,
@@ -339,6 +339,11 @@ export const CommandCenter: React.FC = () => {
           <div className="flex items-center gap-4">
             {/* HUD Diagnostic readout */}
             <div className="hidden lg:flex items-center gap-4 font-mono text-[9px] text-gray-500 border border-gray-800/80 bg-gray-950/20 px-3 py-1.5 rounded-lg">
+              <div className="flex items-center gap-1">
+                <span className={`w-1.5 h-1.5 rounded-full animate-pulse ${config.geminiKey ? "bg-orbit-success" : "bg-red-500"}`} />
+                <span>COGNITIVE NODE: {config.geminiKey ? "ONLINE" : "OFFLINE"}</span>
+              </div>
+              <span className="text-gray-800">|</span>
               <div className="flex items-center gap-1">
                 <span className="w-1.5 h-1.5 rounded-full bg-orbit-success animate-pulse" />
                 <span>CORE SYNC: NOMINAL</span>
@@ -513,14 +518,14 @@ export const CommandCenter: React.FC = () => {
                         </div>
 
                         <div
-                          className={`p-3 rounded-xl border transition-all duration-500 ${
+                          className={`p-4 rounded-xl border transition-all duration-500 ${
                             step.status === "running"
-                              ? `${meta.border} ${meta.bg}`
+                              ? "bg-[#1E293B]"
                               : step.status === "done"
-                                ? "border-gray-800 bg-gray-900/30"
-                                : "border-gray-800/50 bg-transparent"
+                                ? "border-[rgba(255,255,255,0.08)] bg-[#0F172A]/80 shadow-sm"
+                                : "border-[rgba(255,255,255,0.04)] bg-transparent opacity-45"
                           }`}
-                          style={step.status === "running" ? { boxShadow: `0 0 15px ${meta.glow}` } : {}}
+                          style={step.status === "running" ? { borderColor: meta.color, boxShadow: `0 0 25px ${meta.color}40` } : {}}
                         >
                           <div className="flex items-start justify-between gap-3">
                             <div className="flex items-center gap-2 flex-1">
@@ -537,9 +542,14 @@ export const CommandCenter: React.FC = () => {
                                     {step.agent}
                                   </span>
                                 </div>
-                                {step.status !== "pending" && (
-                                  <p className="font-mono text-[9px] text-gray-400 mt-0.5 leading-relaxed">{step.detail}</p>
-                                )}
+                                {step.status !== "pending" && (() => {
+                                  const agentLog = agentLogs.find(l => l.agent === step.agent);
+                                  return (
+                                    <p className="font-mono text-[9px] text-gray-400 mt-0.5 leading-relaxed">
+                                      {agentLog ? agentLog.message : step.detail}
+                                    </p>
+                                  );
+                                })()}
                               </div>
                             </div>
                             <div className="text-right shrink-0">
@@ -606,9 +616,9 @@ export const CommandCenter: React.FC = () => {
         </div>
 
         {/* ── INPUT BAR ── */}
-        <div className="shrink-0 px-6 py-4 border-t border-gray-800/60 bg-gray-950/60 backdrop-blur-md relative z-10">
+        <div className="shrink-0 px-6 py-4 border-t border-[rgba(255,255,255,0.08)] bg-[#050816]/90 backdrop-blur-md relative z-10">
           <div
-            className="flex items-end gap-3 rounded-2xl border border-gray-700/60 bg-gray-900/60 p-3 transition-all duration-200 focus-within:border-orbit-blue/40 focus-within:shadow-[0_0_20px_rgba(59,130,246,0.08)]"
+            className="flex items-end gap-3 rounded-2xl border border-[rgba(255,255,255,0.12)] bg-[#0F172A]/85 p-3.5 transition-all duration-200 focus-within:border-orbit-blue/50 focus-within:shadow-[0_0_20px_rgba(59,130,246,0.15)]"
           >
             {isListening ? (
               <div className="flex-1 flex items-center gap-3 px-2 h-10 animate-pulse">
@@ -655,10 +665,10 @@ export const CommandCenter: React.FC = () => {
               <button
                 onClick={() => handleSubmit(inputVal)}
                 disabled={!inputVal.trim()}
-                className={`flex items-center gap-2 px-4 py-2 rounded-xl font-mono text-[11px] font-bold uppercase tracking-wider transition-all cursor-pointer ${
+                className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-mono text-[11px] font-bold uppercase tracking-wider transition-all cursor-pointer ${
                   inputVal.trim()
-                    ? "bg-gradient-to-r from-orbit-blue to-orbit-purple text-white shadow-[0_0_20px_rgba(59,130,246,0.3)] hover:opacity-90 active:scale-95"
-                    : "bg-gray-850 text-gray-600 cursor-not-allowed border border-gray-800/40"
+                    ? "bg-gradient-to-r from-orbit-blue to-orbit-purple text-white shadow-[0_0_20px_rgba(59,130,246,0.4)] hover:shadow-[0_0_20px_rgba(139,92,246,0.5)] hover:opacity-90 active:scale-95"
+                    : "bg-[#162032] text-gray-650 cursor-not-allowed border border-[rgba(255,255,255,0.04)]"
                 }`}
               >
                 <Send size={13} />
@@ -690,8 +700,16 @@ export const CommandCenter: React.FC = () => {
             return (
               <div
                 key={log.id}
-                className={`p-3 rounded-xl border transition-all ${meta.border} ${meta.bg} hover:shadow-[0_0_15px_rgba(255,255,255,0.02)]`}
-                style={i === 0 ? { animation: "fadeInUp 0.35s ease both" } : {}}
+                className={`p-3.5 rounded-xl border transition-all hover:bg-[#1E293B] ${
+                  i === 0
+                    ? "bg-[#1E293B] border-[rgba(255,255,255,0.12)] shadow-md"
+                    : "bg-[#0F172A] border-[rgba(255,255,255,0.06)]"
+                }`}
+                style={{
+                  borderLeft: `3px solid ${meta.color}`,
+                  boxShadow: i === 0 ? `0 0 20px ${meta.color}18` : undefined,
+                  animation: i === 0 ? "fadeInUp 0.35s ease both" : undefined
+                }}
               >
                 <div className="flex items-center justify-between gap-2 mb-1.5">
                   <div className="flex items-center gap-1.5">
@@ -783,12 +801,12 @@ const MissionBanner: React.FC<{
 
   return (
     <div
-      className="rounded-2xl border border-orbit-blue/25 bg-gradient-to-r from-orbit-blue/10 to-orbit-purple/10 p-5 relative overflow-hidden"
-      style={{ boxShadow: "0 0 40px rgba(59,130,246,0.12)" }}
+      className="rounded-2xl border border-orbit-blue/40 bg-gradient-to-r from-orbit-blue/15 via-[#0F172A] to-orbit-purple/15 p-6 relative overflow-hidden transition-all duration-300"
+      style={{ boxShadow: "0 0 45px rgba(59,130,246,0.22)" }}
     >
       {/* Background glow sweep */}
       <div className="absolute inset-0 pointer-events-none"
-        style={{ background: "linear-gradient(135deg, rgba(59,130,246,0.05) 0%, transparent 60%)" }} />
+        style={{ background: "linear-gradient(135deg, rgba(59,130,246,0.08) 0%, transparent 60%)" }} />
 
       <div className="relative flex flex-col gap-4">
         {/* Header row */}
@@ -1081,7 +1099,7 @@ const LaunchSequence: React.FC<{
           </>
         ) : (
           <div className="flex-1 py-3 rounded-xl border border-orbit-success/40 bg-orbit-success/10 flex items-center justify-center gap-3">
-            <span className="font-space text-2xl font-black text-orbit-success tabular-nums animate-ping">
+            <span className="font-space text-2xl font-bold text-orbit-success tabular-nums animate-ping">
               {countdown > 0 ? countdown : "🚀"}
             </span>
             <span className="font-mono text-[10px] text-orbit-success uppercase tracking-wider animate-pulse">

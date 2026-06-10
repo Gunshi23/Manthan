@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
-import { Shield, Eye, EyeOff, Lock, User, Cpu } from "lucide-react";
+import { Shield, Eye, EyeOff, Lock, User, Cpu, UserPlus } from "lucide-react";
+import { auth } from "../services/firebase";
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from "firebase/auth";
 
 interface AuthFlowProps {
   onLoginSuccess: () => void;
@@ -7,8 +9,10 @@ interface AuthFlowProps {
 }
 
 export const AuthFlow: React.FC<AuthFlowProps> = ({ onLoginSuccess, onBack }) => {
-  const [username, setUsername] = useState("admin@orbit.io");
-  const [password, setPassword] = useState("••••••••");
+  const [mode, setMode] = useState<"login" | "signup">("login");
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [bootStep, setBootStep] = useState(0);
   const [logs, setLogs] = useState<string[]>([]);
@@ -27,27 +31,94 @@ export const AuthFlow: React.FC<AuthFlowProps> = ({ onLoginSuccess, onBack }) =>
       const timer = setTimeout(() => {
         setLogs(prev => [...prev, initialLogs[bootStep]]);
         setBootStep(prev => prev + 1);
-      }, 500);
+      }, 300);
       return () => clearTimeout(timer);
     }
   }, [bootStep]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoggingIn(true);
-    
-    // Simulate encryption verification and boot loading
-    setLogs(prev => [
-      ...prev,
-      `LOG: VERIFYING OPERATOR ACCESS FOR: ${username.toUpperCase()}`,
-      "LOG: AUTHENTICATING DEEP LEARNING SCHEMAS...",
-      "LOG: BIO-SIGNATURE MATCH CONFIRMED.",
-      "LOG: ACCESS GRANTED. INITIALIZING CORE BOOT..."
-    ]);
+    if (isLoggingIn) return;
 
-    setTimeout(() => {
-      onLoginSuccess();
-    }, 2000);
+    if (mode === "signup" && password !== confirmPassword) {
+      setLogs(prev => [...prev, "ERR: CRYPTO MISMATCH - PASSCODES DO NOT COMPARE."]);
+      return;
+    }
+
+    setIsLoggingIn(true);
+    const opEmail = username.trim();
+
+    if (mode === "login") {
+      setLogs(prev => [
+        ...prev,
+        `LOG: VERIFYING OPERATOR ACCESS FOR: ${opEmail.toUpperCase()}`,
+        "LOG: AUTHENTICATING DEEP LEARNING SCHEMAS..."
+      ]);
+
+      try {
+        await signInWithEmailAndPassword(auth, opEmail, password);
+        setLogs(prev => [
+          ...prev,
+          "LOG: BIO-SIGNATURE MATCH CONFIRMED.",
+          "LOG: ACCESS GRANTED. INITIALIZING CORE BOOT..."
+        ]);
+        setTimeout(() => {
+          onLoginSuccess();
+        }, 1500);
+      } catch (err: any) {
+        let cleanErr = err.message || "Unknown error";
+        if (err.code === "auth/invalid-credential") {
+          cleanErr = "Invalid Operator Credentials.";
+        } else if (err.code === "auth/invalid-email") {
+          cleanErr = "Invalid Email Schema Format.";
+        }
+        setLogs(prev => [
+          ...prev,
+          `ERR: ACCESS PROTOCOL VIOLATED - ${cleanErr.toUpperCase()}`
+        ]);
+        setIsLoggingIn(false);
+      }
+    } else {
+      setLogs(prev => [
+        ...prev,
+        `LOG: GENERATING NEW OPERATOR NODE FOR: ${opEmail.toUpperCase()}`,
+        "LOG: SEEDING CRYPTO KEYS TO VAULT..."
+      ]);
+
+      try {
+        await createUserWithEmailAndPassword(auth, opEmail, password);
+        setLogs(prev => [
+          ...prev,
+          "LOG: OPERATOR REGISTRATION REGISTERED.",
+          "LOG: NEW OPERATOR KEY GENERATED. LOADING OS PORTAL..."
+        ]);
+        setTimeout(() => {
+          onLoginSuccess();
+        }, 1500);
+      } catch (err: any) {
+        let cleanErr = err.message || "Unknown error";
+        if (err.code === "auth/email-already-in-use") {
+          cleanErr = "Operator Key ID already registered.";
+        } else if (err.code === "auth/weak-password") {
+          cleanErr = "Passcode security index too low (min 6 characters).";
+        } else if (err.code === "auth/invalid-email") {
+          cleanErr = "Invalid Email Schema Format.";
+        }
+        setLogs(prev => [
+          ...prev,
+          `ERR: OPERATOR REGISTRATION FAILURE - ${cleanErr.toUpperCase()}`
+        ]);
+        setIsLoggingIn(false);
+      }
+    }
+  };
+
+  const handleToggleMode = () => {
+    if (isLoggingIn) return;
+    setMode(prev => (prev === "login" ? "signup" : "login"));
+    setUsername("");
+    setPassword("");
+    setConfirmPassword("");
   };
 
   return (
@@ -63,24 +134,29 @@ export const AuthFlow: React.FC<AuthFlowProps> = ({ onLoginSuccess, onBack }) =>
         <div className="flex items-center justify-between border-b border-gray-800 pb-4 mb-6">
           <div className="flex items-center gap-2">
             <Cpu size={16} className="text-orbit-blue animate-spin-slow" />
-            <span className="font-mono text-xs text-gray-400">ORBIT SECURE SHELL v4.81</span>
+            <span className="font-mono text-xs text-gray-400">
+              ORBIT SECURE SHELL {mode === "login" ? "v4.81-LOGIN" : "v4.81-REGISTER"}
+            </span>
           </div>
           <button 
             onClick={onBack}
-            className="text-[10px] font-mono text-gray-500 hover:text-white transition-colors uppercase"
+            className="text-[10px] font-mono text-gray-550 hover:text-white transition-colors uppercase cursor-pointer"
           >
             [ Cancel Boot ]
           </button>
         </div>
 
         {/* Live Terminal logs */}
-        <div className="w-full bg-black/70 rounded-lg p-4 font-mono text-[11px] text-green-500 border border-gray-800 h-36 overflow-y-auto mb-6 flex flex-col gap-1.5 scrollbar-thin">
-          {logs.map((log, index) => (
-            <div key={index} className="flex gap-1.5 leading-relaxed">
-              <span className="text-blue-400 select-none">&gt;</span>
-              <span>{log}</span>
-            </div>
-          ))}
+        <div className="w-full bg-black/70 rounded-lg p-4 font-mono text-[11px] text-green-500 border border-gray-805 h-36 overflow-y-auto mb-6 flex flex-col gap-1.5 scrollbar-thin">
+          {logs.map((log, index) => {
+            const isError = log.startsWith("ERR:");
+            return (
+              <div key={index} className={`flex gap-1.5 leading-relaxed ${isError ? "text-red-400 font-bold" : ""}`}>
+                <span className={`${isError ? "text-red-500" : "text-blue-400"} select-none`}>&gt;</span>
+                <span>{log}</span>
+              </div>
+            );
+          })}
           {bootStep < initialLogs.length && (
             <div className="flex gap-1.5 items-center">
               <span className="text-blue-400 select-none">&gt;</span>
@@ -101,7 +177,7 @@ export const AuthFlow: React.FC<AuthFlowProps> = ({ onLoginSuccess, onBack }) =>
                 disabled={isLoggingIn}
                 value={username}
                 onChange={e => setUsername(e.target.value)}
-                className="w-full pl-10 pr-4 py-2.5 rounded-lg bg-gray-900 border border-gray-800 text-xs font-mono text-white focus:outline-none focus:border-orbit-blue transition-colors focus:shadow-orbit-glow-inset"
+                className="w-full pl-10 pr-4 py-2.5 rounded-lg bg-gray-950 border border-gray-850 text-xs font-mono text-white focus:outline-none focus:border-orbit-blue transition-colors focus:shadow-orbit-glow-inset"
                 placeholder="operator@orbit.io"
               />
             </div>
@@ -117,23 +193,41 @@ export const AuthFlow: React.FC<AuthFlowProps> = ({ onLoginSuccess, onBack }) =>
                 disabled={isLoggingIn}
                 value={password}
                 onChange={e => setPassword(e.target.value)}
-                className="w-full pl-10 pr-12 py-2.5 rounded-lg bg-gray-900 border border-gray-800 text-xs font-mono text-white focus:outline-none focus:border-orbit-blue transition-colors focus:shadow-orbit-glow-inset"
-                placeholder="Enter passcode"
+                className="w-full pl-10 pr-12 py-2.5 rounded-lg bg-gray-950 border border-gray-855 text-xs font-mono text-white focus:outline-none focus:border-orbit-blue transition-colors focus:shadow-orbit-glow-inset"
+                placeholder="••••••••"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white transition-colors"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white transition-colors cursor-pointer"
               >
                 {showPassword ? <EyeOff size={14} /> : <Eye size={14} />}
               </button>
             </div>
           </div>
 
+          {mode === "signup" && (
+            <div className="flex flex-col gap-1.5">
+              <label className="font-mono text-[10px] text-gray-400 uppercase tracking-wider">CONFIRM SECURE PASSCODE</label>
+              <div className="relative">
+                <Lock size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-500" />
+                <input
+                  type={showPassword ? "text" : "password"}
+                  required
+                  disabled={isLoggingIn}
+                  value={confirmPassword}
+                  onChange={e => setConfirmPassword(e.target.value)}
+                  className="w-full pl-10 pr-12 py-2.5 rounded-lg bg-gray-950 border border-gray-855 text-xs font-mono text-white focus:outline-none focus:border-orbit-blue transition-colors focus:shadow-orbit-glow-inset"
+                  placeholder="••••••••"
+                />
+              </div>
+            </div>
+          )}
+
           {/* Verification check panel */}
-          <div className="flex items-center gap-2 border border-gray-800 bg-gray-950/40 rounded-lg p-3 my-2">
+          <div className="flex items-center gap-2 border border-gray-805 bg-gray-950/40 rounded-lg p-3 my-2">
             <Shield size={16} className="text-orbit-blue animate-pulse" />
-            <span className="font-mono text-[9px] text-gray-500 uppercase leading-snug">
+            <span className="font-mono text-[9px] text-gray-550 uppercase leading-snug">
               Encrypted under military-grade SHA-512 nodes. Biometric mapping activated.
             </span>
           </div>
@@ -141,14 +235,36 @@ export const AuthFlow: React.FC<AuthFlowProps> = ({ onLoginSuccess, onBack }) =>
           <button
             type="submit"
             disabled={isLoggingIn || bootStep < initialLogs.length}
-            className={`w-full py-3 rounded-lg text-xs font-mono font-semibold uppercase tracking-widest text-white transition-all ${
+            className={`w-full py-3 rounded-lg text-xs font-mono font-semibold uppercase tracking-widest text-white transition-all cursor-pointer ${
               isLoggingIn || bootStep < initialLogs.length
-                ? "bg-gray-800 border border-gray-700 text-gray-500 cursor-not-allowed"
+                ? "bg-gray-800 border border-gray-750 text-gray-500 cursor-not-allowed"
                 : "bg-orbit-blue hover:bg-orbit-blue/90 shadow-orbit-glow active:scale-95 border border-orbit-blue/30"
             }`}
           >
-            {isLoggingIn ? "Decrypting Portals..." : "Verify Access"}
+            {isLoggingIn 
+              ? (mode === "login" ? "Decrypting Portals..." : "Creating Node...") 
+              : (mode === "login" ? "Verify Access" : "Initialize Account")}
           </button>
+
+          <div className="text-center mt-2 border-t border-gray-850 pt-4">
+            <button
+              type="button"
+              onClick={handleToggleMode}
+              className="font-mono text-[10px] text-gray-400 hover:text-orbit-blue transition-colors cursor-pointer uppercase flex items-center justify-center gap-1.5 mx-auto"
+            >
+              {mode === "login" ? (
+                <>
+                  <UserPlus size={11} />
+                  Need an operator account? [ Initialize Node ]
+                </>
+              ) : (
+                <>
+                  <User size={11} />
+                  Already have a node? [ Sign In Operator ]
+                </>
+              )}
+            </button>
+          </div>
         </form>
       </div>
     </div>

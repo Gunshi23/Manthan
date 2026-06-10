@@ -228,7 +228,12 @@ export const OpportunityRadar: React.FC = () => {
         </div>
 
         {/* Selected blip node breakdown */}
-        <div className="orbit-panel p-4 space-y-3.5">
+        <div className={`orbit-panel p-4 space-y-3.5 transition-all duration-300 border ${
+          selectedNode.type === "Lead" ? "border-amber-500/35 shadow-orbit-glow-amber bg-gradient-to-br from-[#0F172A] to-[#1E293B]" :
+          selectedNode.type === "Inactive" ? "border-purple-500/35 shadow-orbit-glow-purple bg-gradient-to-br from-[#0F172A] to-[#1E293B]" :
+          selectedNode.type === "VIP" ? "border-green-500/35 shadow-orbit-glow-green bg-gradient-to-br from-[#0F172A] to-[#1E293B]" :
+          "border-blue-500/35 shadow-orbit-glow-blue bg-gradient-to-br from-[#0F172A] to-[#1E293B]"
+        }`}>
           <div className="border-b border-gray-900 pb-2.5">
             <span className="font-mono text-[8px] text-gray-550 uppercase tracking-widest block">Opportunity Node Focus</span>
             <h3 className="font-space text-xs font-bold text-white uppercase tracking-tight mt-0.5">{selectedNode.name}</h3>
@@ -278,19 +283,29 @@ export const OpportunityRadar: React.FC = () => {
               { title: "Recover Lost Leads", desc: "Launch auto recovery WhatsApp messages targeting cart abandonments.", yield: `₹${Math.round(lunaMetrics.recoverableRevenue * 0.58).toLocaleString()}`, conf: "91%" },
               { title: "Launch Reactivation Campaign", desc: "Target high-value slipping accounts with customized DNA vouchers.", yield: `₹${Math.round(lunaMetrics.recoverableRevenue * 0.42).toLocaleString()}`, conf: "88%" },
               { title: "Reward VIP Customers", desc: "Inject early access collection invites to maintain high LTV index.", yield: `₹${Math.round(lunaMetrics.recoverableRevenue * 0.35).toLocaleString()}`, conf: "94%" }
-            ].map((rec, i) => (
-              <div key={i} className="bg-black/30 border border-gray-900 p-2.5 rounded-lg space-y-1 font-mono text-[8.5px]">
-                <div className="flex items-center justify-between">
-                  <span className="font-bold text-white">{rec.title}</span>
-                  <span className="text-orbit-success font-bold">{rec.yield}</span>
+            ].map((rec, i) => {
+              const borderGlowClass = 
+                i === 0 ? "border-amber-500/25 bg-amber-500/5 shadow-orbit-glow-amber text-amber-400" :
+                i === 1 ? "border-purple-500/25 bg-purple-500/5 shadow-orbit-glow-purple text-purple-400" :
+                "border-green-500/25 bg-green-500/5 shadow-orbit-glow-green text-green-400";
+              const labelColorClass =
+                i === 0 ? "text-amber-300 font-bold" :
+                i === 1 ? "text-purple-300 font-bold" :
+                "text-green-300 font-bold";
+              return (
+                <div key={i} className={`border p-2.5 rounded-lg space-y-1 font-mono text-[8.5px] bg-[#0F172A]/80 transition-all duration-300 hover:scale-[1.02] ${borderGlowClass}`}>
+                  <div className="flex items-center justify-between">
+                    <span className={`font-bold ${labelColorClass}`}>{rec.title}</span>
+                    <span className="text-orbit-success font-bold">{rec.yield}</span>
+                  </div>
+                  <p className="text-gray-300 leading-normal">{rec.desc}</p>
+                  <div className="flex justify-between text-[7.5px] border-t border-[rgba(255,255,255,0.06)] pt-1 mt-1">
+                    <span className="text-gray-400">Confidence: {rec.conf}</span>
+                    <span className={`font-semibold hover:underline cursor-pointer ${labelColorClass}`} onClick={() => handleLaunchCampaign(rec.title)}>Launch Directive</span>
+                  </div>
                 </div>
-                <p className="text-gray-500 leading-normal">{rec.desc}</p>
-                <div className="flex justify-between text-[7.5px] text-gray-650 border-t border-gray-900/60 pt-1 mt-1">
-                  <span>Confidence: {rec.conf}</span>
-                  <span className="text-orbit-purple font-semibold hover:underline cursor-pointer" onClick={() => handleLaunchCampaign(rec.title)}>Launch Directive</span>
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
 

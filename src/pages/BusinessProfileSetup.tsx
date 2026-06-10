@@ -3,6 +3,7 @@ import {
   Cpu, Users, Target, ChevronRight, Loader2, Activity, CheckCircle2, ArrowRight
 } from "lucide-react";
 import { useOrbit } from "../context/OrbitContext";
+import { callGeminiAPI, parseGeminiJson } from "../utils/gemini";
 
 interface BusinessProfileSetupProps {
   onSetupComplete: (goal?: string) => void;
@@ -16,7 +17,7 @@ type GrowthObjective = "Increase Revenue" | "Reduce Churn" | "Increase Repeat Pu
 type GrowthPersonality = "Conservative" | "Balanced" | "Aggressive" | "Customer First" | "Autopilot";
 
 export const BusinessProfileSetup: React.FC<BusinessProfileSetupProps> = ({ onSetupComplete }) => {
-  const { personalizeForBusiness, theme } = useOrbit();
+  const { personalizeForBusiness, theme, config } = useOrbit();
   const isLight = theme === "executive";
 
   // Wizard Steps: 1 = Identity, 2 = Customer Universe, 3 = Objective, 4 = Personality, 5 = Analyzing / Report
@@ -35,9 +36,9 @@ export const BusinessProfileSetup: React.FC<BusinessProfileSetupProps> = ({ onSe
   const [analysisProgress, setAnalysisProgress] = useState(0);
   const [calibLogs, setCalibLogs] = useState<string[]>([]);
   const [showReport, setShowReport] = useState(false);
+  const [apiReportData, setApiReportData] = useState<any>(null);
 
   // procedural generation of stars coordinates for the customer galaxy
-  // memorized so it doesn't flicker on hover state changes, only changes when selection changes
   const galaxyStars = useMemo(() => {
     const starCounts = {
       "0–100": 25,
@@ -53,21 +54,17 @@ export const BusinessProfileSetup: React.FC<BusinessProfileSetupProps> = ({ onSe
     const centerY = 150;
 
     for (let i = 0; i < count; i++) {
-      // Spiral distribution
       const angle = Math.random() * Math.PI * 2;
-      
-      // Arm factor for spiral arms (2 arms)
       const arm = Math.floor(Math.random() * 2) * Math.PI;
       const t = Math.random();
-      const distance = 12 + t * 115; // radial dispersion
+      const distance = 12 + t * 115;
       
-      // Introduce spiral warp math
       const finalAngle = angle * 0.2 + arm + t * Math.PI * 1.5;
       const x = centerX + Math.cos(finalAngle) * distance;
       const y = centerY + Math.sin(finalAngle) * distance;
       const r = Math.random() * 1.5 + 0.5;
       const opacity = Math.random() * 0.7 + 0.3;
-      const speedOffset = Math.random() * 10 + 5; // Rotation offset
+      const speedOffset = Math.random() * 10 + 5;
 
       stars.push({ x, y, r, opacity, speedOffset });
     }
@@ -91,11 +88,12 @@ export const BusinessProfileSetup: React.FC<BusinessProfileSetupProps> = ({ onSe
   };
 
   // Run Onboarding analysis sequence
-  const startAIAnalysis = () => {
+  const startAIAnalysis = async () => {
     setIsAnalyzing(true);
     setAnalysisProgress(0);
     setCalibLogs([]);
     setShowReport(false);
+    setApiReportData(null);
 
     const steps = [
       "Analyzing Brand DNA parameters...",
@@ -108,25 +106,64 @@ export const BusinessProfileSetup: React.FC<BusinessProfileSetupProps> = ({ onSe
       "Brand DNA successfully decoded. Report generated."
     ];
 
-    steps.forEach((log, index) => {
-      setTimeout(() => {
-        setCalibLogs(prev => [...prev, log]);
-        const progress = Math.round(((index + 1) / steps.length) * 100);
-        setAnalysisProgress(progress);
-        
-        if (index === steps.length - 1) {
-          setTimeout(() => {
-            // Apply contexts personalization based on category
-            personalizeForBusiness(businessType);
-            setIsAnalyzing(false);
-            setShowReport(true);
-          }, 800);
-        }
-      }, (index + 1) * 900);
-    });
+    let currentStep = 0;
+    const logTimer = setInterval(() => {
+      if (currentStep < steps.length) {
+        setCalibLogs(prev => [...prev, steps[currentStep]]);
+        currentStep++;
+        setAnalysisProgress(Math.round((currentStep / steps.length) * 100));
+      } else {
+        clearInterval(logTimer);
+      }
+    }, 450);
+
+    let geminiReport: any = null;
+    if (config.geminiKey) {
+      try {
+        const systemPrompt = `You are the ORBIT AI Organization Decoded Node. Analyze the user's business onboarding profile and generate a custom Brand DNA report.
+Format your response as a valid JSON object matching this schema exactly:
+{
+  "potRevenue": "₹X,XX,XXX" (Estimated recoverable revenue from leakages, e.g. "₹34,500"),
+  "expectedMissionRevenue": "₹X,XX,XXX" (Expected yield of the recommended mission, e.g. "₹12,000"),
+  "inactiveCount": number (number of inactive VIP customer profiles found, e.g. 12),
+  "leadsCount": number (number of abandoned checkout leads found, e.g. 17),
+  "vipCount": number (number of loyal VIP customers, e.g. 8),
+  "bestAudience": "string" (Recommended best audience cohort, e.g. "Repeat Buyers"),
+  "bestCampaign": "string" (Optimal campaign strategy variant, e.g. "New Collection Drop"),
+  "recommendedChannel": "string" (Recommended primary communication channel, e.g. "RCS Cards"),
+  "healthScore": number (overall database/brand health rating from 1 to 100, e.g. 88),
+  "opportunityScore": number (opportunity score from 1 to 100, e.g. 91),
+  "recommendedMissionName": "string" (Recommended next campaign mission goal, e.g. "Recover Lost Revenue"),
+  "recommendedMissionDescription": "string" (Brief summary explaining the mission goal and channel, e.g. "Luna has detected high-affinity checkout leaks...")
+}
+Return ONLY the raw JSON. Do not write markdown tags or extra explanations.`;
+
+        const userPrompt = `Brand Name: "${brandName}"
+Category: "${businessType}"
+Channel: "${salesChannel}"
+Universe Scale: "${customerUniverse}"
+Goal: "${growthObjective}"
+Style: "${growthPersonality}"`;
+
+        const resText = await callGeminiAPI(userPrompt, systemPrompt, config.geminiKey);
+        geminiReport = parseGeminiJson(resText, null);
+      } catch (err) {
+        console.warn("Gemini Onboarding Decoding failed:", err);
+      }
+    }
+
+    await new Promise(res => setTimeout(res, steps.length * 450 + 100));
+
+    if (geminiReport) {
+      setApiReportData(geminiReport);
+    }
+    
+    personalizeForBusiness(businessType);
+    setIsAnalyzing(false);
+    setShowReport(true);
   };
 
-  // Calculated Report Values based on Category and Scale
+  // Calculated Report Values based on Category and Scale (Local fallback)
   const reportData = useMemo(() => {
     const isEnterprise = businessType === "Enterprise";
     const isJewellery = businessType === "Jewellery & Accessories";
@@ -185,6 +222,31 @@ export const BusinessProfileSetup: React.FC<BusinessProfileSetupProps> = ({ onSe
     };
   }, [businessType]);
 
+  // Merge report values from API if available, otherwise local static memo
+  const activeReport = useMemo(() => {
+    if (apiReportData) {
+      return {
+        potRevenue: apiReportData.potRevenue || "₹24,500",
+        expectedMissionRevenue: apiReportData.expectedMissionRevenue || "₹15,000",
+        inactiveCount: apiReportData.inactiveCount ?? 12,
+        leadsCount: apiReportData.leadsCount ?? 17,
+        vipCount: apiReportData.vipCount ?? 8,
+        bestAudience: apiReportData.bestAudience || "New Signups",
+        bestCampaign: apiReportData.bestCampaign || "Autonomous win-back",
+        recommendedChannel: apiReportData.recommendedChannel || "WhatsApp",
+        healthScore: apiReportData.healthScore || 85,
+        opportunityScore: apiReportData.opportunityScore || 88,
+        recommendedMissionName: apiReportData.recommendedMissionName || "Recover Lost Revenue",
+        recommendedMissionDescription: apiReportData.recommendedMissionDescription || `Luna has detected high-affinity checkout leaks. Launching this mission dispatches automated templates to recover up to ${apiReportData.potRevenue || "₹24,500"} in dormant cart assets.`
+      };
+    }
+    return {
+      ...reportData,
+      recommendedMissionName: "Recover Lost Revenue",
+      recommendedMissionDescription: `Luna has detected high-affinity checkout leaks. Launching this mission dispatches automated ${businessType === "Fashion & Apparel" ? "RCS Cards" : "WhatsApp"} templates to recover up to ${reportData.potRevenue} in dormant cart assets.`
+    };
+  }, [apiReportData, reportData, businessType]);
+
   // Complete onboarding
   const handleLaunch = (withMissionGoal?: string) => {
     if (withMissionGoal) {
@@ -231,7 +293,7 @@ export const BusinessProfileSetup: React.FC<BusinessProfileSetupProps> = ({ onSe
                 Let's Decode Your Brand DNA
               </h1>
               <p className={`text-[11px] md:text-xs max-w-xl mx-auto leading-relaxed uppercase font-mono tracking-wider ${
-                isLight ? "text-gray-500" : "text-gray-400"
+                isLight ? "text-gray-555" : "text-gray-400"
               }`}>
                 Understand Your Brand. Unlock Your Growth Potential.
               </p>
@@ -318,7 +380,7 @@ export const BusinessProfileSetup: React.FC<BusinessProfileSetupProps> = ({ onSe
                     <h3 className="font-space text-sm font-bold uppercase tracking-wider">Customer Universe Scale</h3>
                   </div>
                   
-                  <label className="font-mono text-[9px] text-gray-500 uppercase block">How many active customers do you currently have?</label>
+                  <label className="font-mono text-[9px] text-gray-550 uppercase block">How many active customers do you currently have?</label>
                   <div className="flex flex-col gap-2">
                     {(["0–100", "100–500", "500–1000", "1000–5000", "5000+"] as CustomerUniverse[]).map((univ) => {
                       const isSelected = customerUniverse === univ;
@@ -346,13 +408,10 @@ export const BusinessProfileSetup: React.FC<BusinessProfileSetupProps> = ({ onSe
                 <div className="md:col-span-6 flex flex-col items-center justify-center py-6 orbit-panel relative overflow-hidden min-h-[300px]">
                   <div className="absolute inset-0 bg-orbit-glow-blue opacity-5 pointer-events-none" />
                   
-                  {/* Rotating Concentric SVG Galaxy */}
                   <div className="relative w-64 h-64 flex items-center justify-center">
-                    {/* Concentric spin shells */}
                     <div className="absolute inset-0 rounded-full border border-orbit-blue/5 animate-orbit-spin-slow" />
                     <div className="absolute inset-6 rounded-full border border-dashed border-orbit-purple/10 animate-orbit-spin-reverse" />
                     
-                    {/* SVG Canvas drawing Procedural star fields */}
                     <svg 
                       className="absolute inset-0 w-full h-full pointer-events-none" 
                       viewBox="0 0 300 300"
@@ -389,7 +448,7 @@ export const BusinessProfileSetup: React.FC<BusinessProfileSetupProps> = ({ onSe
                   <h3 className="font-space text-sm font-bold uppercase tracking-wider">Primary growth target</h3>
                 </div>
 
-                <label className="font-mono text-[9px] text-gray-500 uppercase block mb-1">What is your primary marketing goal?</label>
+                <label className="font-mono text-[9px] text-gray-550 uppercase block mb-1">What is your primary marketing goal?</label>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   {([
                     "Increase Revenue", 
@@ -422,7 +481,7 @@ export const BusinessProfileSetup: React.FC<BusinessProfileSetupProps> = ({ onSe
             {step === 4 && (
               <div className="w-full space-y-4 animate-fade-in-up">
                 <div className="text-center">
-                  <label className="font-mono text-[9px] text-gray-500 uppercase tracking-widest block mb-2">Configure operative strategy card</label>
+                  <label className="font-mono text-[9px] text-gray-550 uppercase tracking-widest block mb-2">Configure operative strategy card</label>
                 </div>
                 
                 <div className="grid grid-cols-1 sm:grid-cols-5 gap-3">
@@ -448,7 +507,7 @@ export const BusinessProfileSetup: React.FC<BusinessProfileSetupProps> = ({ onSe
                           <span className="font-space text-xs font-bold text-white">{card.name}</span>
                           {isSelected && <CheckCircle2 size={10} className="text-orbit-purple" />}
                         </div>
-                        <p className="font-mono text-[8.5px] leading-relaxed text-gray-500 mt-2">{card.desc}</p>
+                        <p className="font-mono text-[8.5px] leading-relaxed text-gray-550 mt-2">{card.desc}</p>
                       </button>
                     );
                   })}
@@ -572,10 +631,10 @@ export const BusinessProfileSetup: React.FC<BusinessProfileSetupProps> = ({ onSe
                       <div className="border-t border-gray-900/60 pt-3 flex items-center justify-between">
                         <div>
                           <span className="text-gray-550 block uppercase text-[8px]">Orbit health rating</span>
-                          <span className="text-xs font-bold text-orbit-success">{reportData.healthScore}/100</span>
+                          <span className="text-xs font-bold text-orbit-success">{activeReport.healthScore}/100</span>
                         </div>
                         <div className="w-16 h-1 bg-gray-950 rounded-full overflow-hidden shrink-0">
-                          <div className="h-full bg-orbit-success" style={{ width: `${reportData.healthScore}%` }} />
+                          <div className="h-full bg-orbit-success" style={{ width: `${activeReport.healthScore}%` }} />
                         </div>
                       </div>
                     </div>
@@ -590,7 +649,7 @@ export const BusinessProfileSetup: React.FC<BusinessProfileSetupProps> = ({ onSe
                     <div className="flex-1 space-y-3 font-mono text-[9px] text-gray-400">
                       <div className="flex justify-between border-b border-gray-900/40 pb-1.5">
                         <span>Best Audience Node:</span>
-                        <span className="text-white font-bold uppercase">{reportData.bestAudience}</span>
+                        <span className="text-white font-bold uppercase">{activeReport.bestAudience}</span>
                       </div>
                       <div className="flex justify-between border-b border-gray-900/40 pb-1.5">
                         <span>Highest Opportunity:</span>
@@ -598,11 +657,11 @@ export const BusinessProfileSetup: React.FC<BusinessProfileSetupProps> = ({ onSe
                       </div>
                       <div className="flex justify-between border-b border-gray-900/40 pb-1.5">
                         <span>Optimal Campaign:</span>
-                        <span className="text-white font-bold uppercase truncate max-w-[120px]">{reportData.bestCampaign}</span>
+                        <span className="text-white font-bold uppercase truncate max-w-[120px]">{activeReport.bestCampaign}</span>
                       </div>
                       <div className="flex justify-between border-b border-gray-900/40 pb-1.5">
                         <span>Recommended Channel:</span>
-                        <span className="text-orbit-purple font-bold uppercase">{reportData.recommendedChannel}</span>
+                        <span className="text-orbit-purple font-bold uppercase">{activeReport.recommendedChannel}</span>
                       </div>
                       <div className="flex justify-between border-b border-gray-900/40 pb-1.5">
                         <span>Predicted Growth Potential:</span>
@@ -625,27 +684,27 @@ export const BusinessProfileSetup: React.FC<BusinessProfileSetupProps> = ({ onSe
                     <div className="flex-1 space-y-3.5 font-mono text-[10px] mt-4">
                       <div className="flex justify-between">
                         <span className="text-gray-550">Recoverable Revenue:</span>
-                        <span className="text-white font-bold">{reportData.potRevenue}</span>
+                        <span className="text-white font-bold">{activeReport.potRevenue}</span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-gray-550">Inactive Customers:</span>
-                        <span className="text-white font-bold">{reportData.inactiveCount}</span>
+                        <span className="text-white font-bold">{activeReport.inactiveCount}</span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-gray-550">Abandoned Leads:</span>
-                        <span className="text-white font-bold">{reportData.leadsCount}</span>
+                        <span className="text-white font-bold">{activeReport.leadsCount}</span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-gray-550">VIP Customers:</span>
-                        <span className="text-white font-bold">{reportData.vipCount}</span>
+                        <span className="text-white font-bold">{activeReport.vipCount}</span>
                       </div>
                       
                       <div className="border-t border-gray-900/60 pt-3 flex items-center justify-between">
                         <span className="text-gray-550 uppercase text-[8px] font-bold">Opportunity score</span>
-                        <span className="font-space text-sm font-bold text-pink-400">{reportData.opportunityScore}/100</span>
+                        <span className="font-space text-sm font-bold text-pink-400">{activeReport.opportunityScore}/100</span>
                       </div>
                     </div>
-                    <span className="font-mono text-[7px] text-gray-650 uppercase tracking-widest text-center mt-2 block">Powered by Luna Agent</span>
+                    <span className="font-mono text-[7px] text-gray-655 uppercase tracking-widest text-center mt-2 block">Powered by Luna Agent</span>
                   </div>
 
                 </div>
@@ -656,20 +715,20 @@ export const BusinessProfileSetup: React.FC<BusinessProfileSetupProps> = ({ onSe
                     <span className="font-mono text-[8px] text-orbit-purple border border-orbit-purple/30 bg-orbit-purple/5 px-2 py-0.5 rounded-full uppercase font-bold tracking-wider">
                       Recommended Next Mission
                     </span>
-                    <h3 className="font-space text-lg font-bold text-white uppercase tracking-tight">Recover Lost Revenue</h3>
+                    <h3 className="font-space text-lg font-bold text-white uppercase tracking-tight">{activeReport.recommendedMissionName}</h3>
                     <p className="font-mono text-[9.5px] leading-relaxed text-gray-400">
-                      Luna has detected high-affinity checkout leaks. Launching this mission dispatches automated WhatsApp templates to recover up to <span className="text-orbit-success font-bold">{reportData.potRevenue}</span> in dormant cart assets.
+                      {activeReport.recommendedMissionDescription}
                     </p>
                   </div>
                   
                   <div className="space-y-4 text-right">
                     <div className="font-mono text-[10px] space-y-1">
                       <div className="flex justify-between md:justify-end gap-4">
-                        <span className="text-gray-550">Expected Yield:</span>
-                        <span className="text-orbit-success font-bold">{reportData.potRevenue}</span>
+                        <span className="text-gray-555">Expected Yield:</span>
+                        <span className="text-orbit-success font-bold">{activeReport.expectedMissionRevenue}</span>
                       </div>
                       <div className="flex justify-between md:justify-end gap-4">
-                        <span className="text-gray-550">Confidence Score:</span>
+                        <span className="text-gray-555">Confidence Score:</span>
                         <span className="text-white font-bold">91%</span>
                       </div>
                     </div>
@@ -682,7 +741,7 @@ export const BusinessProfileSetup: React.FC<BusinessProfileSetupProps> = ({ onSe
                         [Enter Command Center]
                       </button>
                       <button
-                        onClick={() => handleLaunch("Reduce Churn")}
+                        onClick={() => handleLaunch(activeReport.recommendedMissionName)}
                         className="px-5 py-3 bg-gradient-to-r from-orbit-blue to-orbit-purple text-white font-mono text-[9px] uppercase tracking-widest font-bold rounded-xl cursor-pointer shadow-orbit-glow hover:opacity-95 duration-150 transition-opacity"
                       >
                         Start Mission
