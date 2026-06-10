@@ -3,7 +3,7 @@ import { db } from "../config/firebase";
 import { callGeminiAPI, parseGeminiJson } from "../services/geminiService";
 
 const router = Router();
-const SERPAPI_KEY = "c651acad2d064eaff62fa3d8a1868d44732b537a7cef0faea2d83c9dac12a01b";
+const SERPAPI_KEY = process.env.SERPAPI_KEY || "";
 
 // Helper for HTTP requests with 3-second timeout
 async function fetchWithTimeout(url: string, options: any = {}, timeout = 3000) {
