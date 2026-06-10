@@ -495,6 +495,33 @@ export const OrbitProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           const oppData = await oppRes.json();
           console.log("Opportunities loaded from backend database:", oppData.length);
         }
+
+        // Load customers
+        const custRes = await fetch("/api/customers");
+        if (custRes.ok) {
+          const custData = await custRes.json();
+          if (custData && custData.length > 0) {
+            setCustomers(custData);
+          }
+        }
+
+        // Load orders
+        const ordRes = await fetch("/api/orders");
+        if (ordRes.ok) {
+          const ordData = await ordRes.json();
+          if (ordData && ordData.length > 0) {
+            setOrders(ordData);
+          }
+        }
+
+        // Load agent logs
+        const logsRes = await fetch("/api/agent-logs");
+        if (logsRes.ok) {
+          const logsData = await logsRes.json();
+          if (logsData && logsData.length > 0) {
+            setAgentLogs(logsData);
+          }
+        }
       } catch (err) {
         console.warn("Failed to synchronize with backend APIs. Running in client-side fallback mode.", err);
       }

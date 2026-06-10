@@ -9,7 +9,8 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "server": "tsx server/index.ts",
-    "db:seed": "tsx server/seed.ts"
+    "db:seed": "tsx server/seed.ts",
+    "seed": "tsx scripts/seedFirestore.ts"
   },
   "dependencies": {
     "canvas-confetti": "^1.9.4",

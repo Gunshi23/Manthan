@@ -14,6 +14,9 @@ import campaignsRouter from "./routes/campaigns";
 import opportunitiesRouter from "./routes/opportunities";
 import brandDnaRouter from "./routes/brandDna";
 import analyticsRouter from "./routes/analytics";
+import customersRouter from "./routes/customers";
+import ordersRouter from "./routes/orders";
+import agentLogsRouter from "./routes/agentLogs";
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -46,6 +49,9 @@ app.use("/api/campaigns", campaignsRouter);
 app.use("/api/opportunities", opportunitiesRouter);
 app.use("/api/brand-dna", brandDnaRouter);
 app.use("/api/analytics", analyticsRouter);
+app.use("/api/customers", customersRouter);
+app.use("/api/orders", ordersRouter);
+app.use("/api/agent-logs", agentLogsRouter);
 
 // Start server
 if (process.env.NODE_ENV !== "production") {
