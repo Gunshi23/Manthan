@@ -17,31 +17,59 @@ export const defaultFirebaseConfig = {
 let app: any;
 let auth: any;
 
-try {
-  if (defaultFirebaseConfig.apiKey && defaultFirebaseConfig.projectId) {
-    app = getApps().length === 0 ? initializeApp(defaultFirebaseConfig) : getApp();
-    auth = getAuth(app);
-  } else {
-    console.warn("Firebase credentials are not configured. Running with fallback mock authentication.");
-    // Dummy config to prevent firebase SDK crash during startup
-    const dummyConfig = {
-      apiKey: "placeholder-api-key",
-      authDomain: "placeholder-auth-domain",
-      projectId: "placeholder-project-id"
-    };
-    app = getApps().length === 0 ? initializeApp(dummyConfig) : getApp();
-    auth = getAuth(app);
-  }
-} catch (error) {
-  console.error("Firebase initialization failed:", error);
+const useMockAuth = typeof window !== "undefined" && (
+  localStorage.getItem("orbit_use_mock_auth") === "true" ||
+  !defaultFirebaseConfig.apiKey ||
+  !defaultFirebaseConfig.projectId
+);
+
+if (useMockAuth) {
+  console.warn("Running ORBIT in Sandbox Mode with mock authentication.");
   auth = {
-    currentUser: null,
+    currentUser: { email: "operator@orbit.io", uid: "mock-operator-uid" },
     onAuthStateChanged: (callback: any) => {
-      callback(null);
-      return () => {};
+      // Immediate callback invocation to simulate signed-in user
+      const timer = setTimeout(() => {
+        callback({ email: "operator@orbit.io", uid: "mock-operator-uid" });
+      }, 50);
+      return () => clearTimeout(timer);
     },
-    signOut: async () => {}
+    signOut: async () => {
+      if (typeof window !== "undefined") {
+        localStorage.removeItem("orbit_use_mock_auth");
+        setTimeout(() => {
+          window.location.reload();
+        }, 100);
+      }
+    }
   } as any;
+} else {
+  try {
+    if (defaultFirebaseConfig.apiKey && defaultFirebaseConfig.projectId) {
+      app = getApps().length === 0 ? initializeApp(defaultFirebaseConfig) : getApp();
+      auth = getAuth(app);
+    } else {
+      // Fallback fallback (should be covered by useMockAuth but here for TS/safety)
+      auth = {
+        currentUser: null,
+        onAuthStateChanged: (callback: any) => {
+          callback(null);
+          return () => {};
+        },
+        signOut: async () => {}
+      } as any;
+    }
+  } catch (error) {
+    console.error("Firebase initialization failed:", error);
+    auth = {
+      currentUser: null,
+      onAuthStateChanged: (callback: any) => {
+        callback(null);
+        return () => {};
+      },
+      signOut: async () => {}
+    } as any;
+  }
 }
 
 export { auth };

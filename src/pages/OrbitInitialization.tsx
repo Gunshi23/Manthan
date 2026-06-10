@@ -39,8 +39,9 @@ export const OrbitInitialization: React.FC<OrbitInitializationProps> = ({ onComp
     }, 55);
 
     // Logging trigger
+    const timeouts: number[] = [];
     steps.forEach((step, idx) => {
-      void setTimeout(() => {
+      const t = window.setTimeout(() => {
         setLogs(prev => [...prev, step.text]);
         if (step.type === "check") {
           setCompletedLines(prev => {
@@ -50,15 +51,16 @@ export const OrbitInitialization: React.FC<OrbitInitializationProps> = ({ onComp
           });
         }
       }, step.delay);
+      timeouts.push(t);
     });
 
-    const completionTimer = setTimeout(() => {
+    const completionTimer = window.setTimeout(() => {
       onComplete();
     }, 6200);
 
     return () => {
       clearInterval(interval);
-      steps.forEach((_, idx) => clearTimeout(idx));
+      timeouts.forEach(t => clearTimeout(t));
       clearTimeout(completionTimer);
     };
   }, []);

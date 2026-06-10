@@ -121,6 +121,19 @@ export const AuthFlow: React.FC<AuthFlowProps> = ({ onLoginSuccess, onBack }) =>
     setConfirmPassword("");
   };
 
+  const handleLocalBypass = () => {
+    localStorage.setItem("orbit_use_mock_auth", "true");
+    setIsLoggingIn(true);
+    setLogs(prev => [
+      ...prev,
+      "LOG: BIO-SIGNATURE BYPASS REQUESTED.",
+      "LOG: INITIALIZING SECURE LOCAL SANDBOX ENVIRONMENT..."
+    ]);
+    setTimeout(() => {
+      window.location.reload();
+    }, 1000);
+  };
+
   return (
     <div className="relative min-h-screen bg-orbit-bg space-grid flex flex-col items-center justify-center p-4">
       {/* Laser grids / scans */}
@@ -246,7 +259,7 @@ export const AuthFlow: React.FC<AuthFlowProps> = ({ onLoginSuccess, onBack }) =>
               : (mode === "login" ? "Verify Access" : "Initialize Account")}
           </button>
 
-          <div className="text-center mt-2 border-t border-gray-850 pt-4">
+          <div className="text-center mt-2 border-t border-gray-850 pt-4 flex flex-col gap-2">
             <button
               type="button"
               onClick={handleToggleMode}
@@ -263,6 +276,14 @@ export const AuthFlow: React.FC<AuthFlowProps> = ({ onLoginSuccess, onBack }) =>
                   Already have a node? [ Sign In Operator ]
                 </>
               )}
+            </button>
+
+            <button
+              type="button"
+              onClick={handleLocalBypass}
+              className="font-mono text-[9px] text-pink-500 hover:text-pink-400 transition-colors cursor-pointer uppercase flex items-center justify-center gap-1.5 mx-auto animate-pulse mt-1"
+            >
+              [ Run in Local Sandbox Mode (Offline Bypass) ]
             </button>
           </div>
         </form>
