@@ -102,9 +102,31 @@ export const AppShell: React.FC<ShellProps> = ({ activePage, onNavigate, childre
     let action: { label: string; page: Page } | undefined;
     let geminiSuccess = false;
 
-    if (config.geminiKey) {
-      try {
-        const systemPrompt = `You are Orbit Copilot, a co-founder AI assistant for ORBIT. You have access to the user's business metadata (category: "${businessType}").
+    // Try to run Copilot response on the Express backend
+    try {
+      const response = await fetch("/api/copilot", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: query })
+      });
+      if (response.ok) {
+        const parsed = await response.json();
+        if (parsed && parsed.replyText) {
+          replyText = parsed.replyText;
+          if (parsed.action && parsed.action.label && parsed.action.page) {
+            action = parsed.action;
+          }
+          geminiSuccess = true;
+        }
+      } else {
+        throw new Error(`HTTP Error ${response.status}`);
+      }
+    } catch (err: any) {
+      console.warn("Backend copilot failed. Falling back to client-side logic:", err);
+      
+      if (config.geminiKey) {
+        try {
+          const systemPrompt = `You are Orbit Copilot, a co-founder AI assistant for ORBIT. You have access to the user's business metadata (category: "${businessType}").
 Respond to the user's query about their business or campaigns in a concise, professional, growth-focused tone, speaking as their AI co-founder partner.
 Suggest a next action step if appropriate, which we can map to a dashboard page in ORBIT.
 Format your response as a valid JSON object matching this schema:
@@ -118,18 +140,19 @@ Format your response as a valid JSON object matching this schema:
 Note: the "action" field is optional. Only include it if there is a highly relevant dashboard page to navigate to.
 Return ONLY the raw JSON object. Do not include markdown tags or extra explanations.`;
 
-        const userPrompt = `User Query: "${query}"`;
-        const resText = await callGeminiAPI(userPrompt, systemPrompt, config.geminiKey);
-        const parsed = parseGeminiJson<{ replyText: string; action?: { label: string; page: Page } } | null>(resText, null);
-        if (parsed && parsed.replyText) {
-          replyText = parsed.replyText;
-          if (parsed.action && parsed.action.label && parsed.action.page) {
-            action = parsed.action;
+          const userPrompt = `User Query: "${query}"`;
+          const resText = await callGeminiAPI(userPrompt, systemPrompt, config.geminiKey);
+          const parsed = parseGeminiJson<{ replyText: string; action?: { label: string; page: Page } } | null>(resText, null);
+          if (parsed && parsed.replyText) {
+            replyText = parsed.replyText;
+            if (parsed.action && parsed.action.label && parsed.action.page) {
+              action = parsed.action;
+            }
+            geminiSuccess = true;
           }
-          geminiSuccess = true;
+        } catch (clientErr) {
+          console.warn("Gemini API error in client-side Orbit Copilot fallback:", clientErr);
         }
-      } catch (err) {
-        console.warn("Gemini API error in Orbit Copilot:", err);
       }
     }
 

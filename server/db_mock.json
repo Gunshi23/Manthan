@@ -1,0 +1,138 @@
+{
+  "opportunities": {
+    "opp_1": {
+      "id": "opp_1",
+      "title": "Dormant VIP Re-engagement",
+      "cohort": "High-Value Inactive",
+      "description": "Recover premium spenders inactive for 45+ days.",
+      "potentialRevenue": 32000,
+      "opportunityScore": 94,
+      "recommendedChannel": "WhatsApp",
+      "confidence": "High",
+      "updatedAt": "2026-06-10T06:19:44.526Z"
+    },
+    "opp_2": {
+      "id": "opp_2",
+      "title": "Cart Recovery Optimization",
+      "cohort": "Slipping Away",
+      "description": "Trigger automations on checkout leaks in the last 7 days.",
+      "potentialRevenue": 15400,
+      "opportunityScore": 88,
+      "recommendedChannel": "Email",
+      "confidence": "High",
+      "updatedAt": "2026-06-10T06:19:44.527Z"
+    },
+    "opp_3": {
+      "id": "opp_3",
+      "title": "Festive Cross-sell Campaign",
+      "cohort": "Loyalists",
+      "description": "Target repeat buyers with a festive collection early access.",
+      "potentialRevenue": 42000,
+      "opportunityScore": 85,
+      "recommendedChannel": "RCS",
+      "confidence": "Medium",
+      "updatedAt": "2026-06-10T06:19:44.528Z"
+    }
+  },
+  "brand_dna": {
+    "dna_1781072406421": {
+      "id": "dna_1781072406421",
+      "createdAt": "2026-06-10T06:20:06.421Z",
+      "businessType": "Fashion & Apparel",
+      "growthStyle": "High Growth",
+      "customerUniverse": 1250,
+      "growthPotential": "High",
+      "orbitHealth": 88,
+      "recommendedMissions": [
+        "Recover slipping Q2 buyers",
+        "Launch premium checkout drops",
+        "Scale VIP LTV thresholds"
+      ]
+    }
+  },
+  "missions": {
+    "miss_1781072454917": {
+      "id": "miss_1781072454917",
+      "goal": "Recover Lost Revenue",
+      "createdAt": "2026-06-10T06:20:54.917Z",
+      "Polaris": {
+        "segment": "High-Value Inactive",
+        "explanation": "Polaris isolated 14 top-spending accounts who have not ordered in the past 60 days."
+      },
+      "Luna": {
+        "recoverableRevenue": 12500,
+        "inactiveCustomers": 12,
+        "abandonedLeads": 8,
+        "recoveryConfidence": 94,
+        "explanation": "Luna scanned checkout logs and found slippage in high-ltv billing loops."
+      },
+      "Vega": {
+        "predictedRoi": 4.8,
+        "predictedRevenue": 38500,
+        "explanation": "Vega calculated target reactivation coefficients. Expecting 4.8x ROI yield."
+      },
+      "Nova": {
+        "Email": {
+          "subject": "Early Access Pre-sale Launch: Custom Upgrades",
+          "body": "Hi {{name}},\n\nGet exclusive priority access to the latest collections at ORBIT.\n\nWarm regards,\nORBIT Operations"
+        },
+        "WhatsApp": {
+          "body": "👋 Hi *{{name}}*! Get pre-sale access to our top updates. Free shipping today. Reply *YES* to claim."
+        },
+        "SMS": {
+          "body": "ORBIT: Hi {{name}}, early access pre-sale is live! Shop now at https://orbit.io"
+        },
+        "RCS": {
+          "title": "Priority Offer Access",
+          "body": "Hey {{name}}, get pre-sale access to the new collection. Priority delivery active.",
+          "mediaUrl": "https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=400&q=80"
+        }
+      },
+      "Atlas": {
+        "selectedChannel": "WhatsApp",
+        "explanation": "Atlas selected WhatsApp as the channel with highest target engagement preference."
+      },
+      "recommendation": {
+        "summary": "Deploy a high-frequency WhatsApp win-back loop targeting VIP spenders.",
+        "confidenceScore": 92,
+        "estimatedTimeframe": "14 Days"
+      }
+    }
+  },
+  "mission_updates": {
+    "doc_jm3lr6843r": {
+      "missionId": "miss_1781072454917",
+      "status": "Queued",
+      "timestamp": "2026-06-10T06:20:54.918Z"
+    }
+  },
+  "agent_logs": {
+    "br_1781072469421": {
+      "id": "br_1781072469421",
+      "goal": "Recover Lost Revenue",
+      "createdAt": "2026-06-10T06:21:09.421Z",
+      "messages": [
+        {
+          "agent": "Polaris",
+          "text": "I have segmented High-Value Inactive cohort as the ideal targets. Polaris isolated 14 top-spending accounts who have not ordered in the past 60 days."
+        },
+        {
+          "agent": "Luna",
+          "text": "I support this focus. Luna scanned checkout logs and found slippage in high-ltv billing loops. Est Revenue: ₹12,500"
+        },
+        {
+          "agent": "Vega",
+          "text": "Target ROI looks highly viable. Reactivation forecasts indicate 4.8x returns yield. Expected Revenue: ₹38,500."
+        },
+        {
+          "agent": "Nova",
+          "text": "I have compiled responsive marketing assets for WhatsApp templates. Personalization handles are armed."
+        },
+        {
+          "agent": "Atlas",
+          "text": "Gateways verified. Selected channel: WhatsApp. Dispatch buffers are ready for deployment."
+        }
+      ]
+    }
+  }
+}

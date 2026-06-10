@@ -460,6 +460,48 @@ export const OrbitProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     localStorage.setItem("orbit_business_type", businessType);
   }, [businessType]);
 
+  // Sync state with backend APIs on mount
+  useEffect(() => {
+    async function loadBackendData() {
+      try {
+        const healthRes = await fetch("/api/health");
+        if (!healthRes.ok) throw new Error("Backend offline");
+        const health = await healthRes.json();
+        if (health.status !== "online") throw new Error("Backend status invalid");
+
+        console.log("Connected to ORBIT Backend. Fetching state...");
+
+        // Load campaigns
+        const campRes = await fetch("/api/campaigns");
+        if (campRes.ok) {
+          const campData = await campRes.json();
+          if (campData && campData.length > 0) {
+            setCampaigns(campData);
+          }
+        }
+
+        // Load brand DNA to sync profile
+        const brandRes = await fetch("/api/brand-dna");
+        if (brandRes.ok) {
+          const brandData = await brandRes.json();
+          if (brandData && brandData.businessType) {
+            setBusinessType(brandData.businessType);
+          }
+        }
+
+        // Load opportunities
+        const oppRes = await fetch("/api/opportunities");
+        if (oppRes.ok) {
+          const oppData = await oppRes.json();
+          console.log("Opportunities loaded from backend database:", oppData.length);
+        }
+      } catch (err) {
+        console.warn("Failed to synchronize with backend APIs. Running in client-side fallback mode.", err);
+      }
+    }
+    loadBackendData();
+  }, []);
+
   const updateLunaMetrics = useCallback((metrics: Partial<LunaMetrics>) => {
     setLunaMetrics(prev => ({ ...prev, ...metrics }));
   }, []);
@@ -467,6 +509,15 @@ export const OrbitProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const personalizeForBusiness = useCallback((type: string) => {
     setBusinessType(type);
     
+    // Sync Brand DNA to backend
+    fetch("/api/brand-dna", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ businessType: type, growthStyle: "High Growth" })
+    }).catch(err => {
+      console.warn("Backend Brand DNA sync failed:", err);
+    });
+
     // Regenerate data specific to business type
     const newCustomers = generateMockCustomers(type);
     const newOrders = generateMockOrders(newCustomers, type);
@@ -671,9 +722,26 @@ export const OrbitProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     let consolidatedResult: any = null;
     let geminiError: string | null = null;
 
-    if (config.geminiKey) {
-      try {
-        const sys = `You are the ORBIT Growth Engine, coordinating 5 AI agents to plan and generate a growth campaign for the business objective.
+    // Try to run mission generation on the Express backend
+    try {
+      addAgentLog("System", "Initiating AI Mission Plan generation on backend...", "action");
+      const res = await fetch("/api/autonomous-mission", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ goal, businessType })
+      });
+      if (res.ok) {
+        consolidatedResult = await res.json();
+        addAgentLog("System", "Backend mission plan generated successfully.", "result");
+      } else {
+        throw new Error(`HTTP Error ${res.status}`);
+      }
+    } catch (err: any) {
+      console.warn("Backend autonomous-mission failed. Falling back to client-side logic:", err);
+      
+      if (config.geminiKey) {
+        try {
+          const sys = `You are the ORBIT Growth Engine, coordinating 5 AI agents to plan and generate a growth campaign for the business objective.
 The agents are:
 - Polaris (Audience Intelligence): Chooses one segment from ["Loyalists", "Slipping Away", "High-Value Inactive", "New Signups"] and explains findings.
 - Luna (Recovery): Audits leakage, specifies recoverableRevenue (number), inactiveCustomers (number), abandonedLeads (number), recoveryConfidence (number), and a detailed recovery explanation.
@@ -712,27 +780,19 @@ Format your response as a single valid JSON object matching this schema exactly:
 }
 Do not return any markdown code block formatting. Only return the raw JSON object.`;
 
-        const prompt = `Business Objective Goal: "${goal}". Business Category: "${businessType}". Coordinate the campaign plan.`;
-        addAgentLog("System", "Querying Gemini API to run multi-agent campaign simulation...", "action");
-        const res = await callGeminiAPI(prompt, sys, config.geminiKey);
-        consolidatedResult = parseGeminiJson<any>(res, null);
-        if (!consolidatedResult) {
-          throw new Error("Failed to parse Gemini response as JSON.");
+          const prompt = `Business Objective Goal: "${goal}". Business Category: "${businessType}". Coordinate the campaign plan.`;
+          addAgentLog("System", "Querying Gemini API directly from client...", "action");
+          const clientRes = await callGeminiAPI(prompt, sys, config.geminiKey);
+          consolidatedResult = parseGeminiJson<any>(clientRes, null);
+        } catch (clientErr: any) {
+          console.error("Client Gemini execution failed:", clientErr);
+          geminiError = clientErr.message || String(clientErr);
         }
-      } catch (err: any) {
-        console.error("Gemini consolidated execution failed:", err);
-        geminiError = err.message || String(err);
       }
     }
 
-    if (config.geminiKey && geminiError) {
-      addAgentLog("System", `Gemini API Call Failed: ${geminiError}`, "result");
-      cancelMission();
-      return;
-    }
-
-    if (!config.geminiKey) {
-      addAgentLog("System", "Running campaign planning in simulated fallback mode (no Gemini key).", "thought");
+    if (geminiError) {
+      addAgentLog("System", `Direct Gemini API Call Failed: ${geminiError}`, "result");
     }
 
     // Step 2: Polaris finds audience
@@ -921,6 +981,23 @@ Do not return any markdown code block formatting. Only return the raw JSON objec
     addAgentLog("Atlas", atlasMsg, "chat");
     bRoomDialogue.push({ agent: "Atlas", text: atlasMsg });
 
+    // Retrieve boardroom dialogue sequence from Express backend
+    try {
+      const boardroomRes = await fetch("/api/boardroom", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ goal, missionPlan: consolidatedResult })
+      });
+      if (boardroomRes.ok) {
+        const brData = await boardroomRes.json();
+        if (brData && brData.messages) {
+          bRoomDialogue = brData.messages;
+        }
+      }
+    } catch (brErr) {
+      console.warn("Backend boardroom API failed. Falling back to local dialogue construction:", brErr);
+    }
+
     setMission(prev => ({
       ...prev,
       step: "ready",
@@ -980,6 +1057,21 @@ Do not return any markdown code block formatting. Only return the raw JSON objec
       if (mission.goal.toLowerCase().includes("repeat") || mission.goal.toLowerCase().includes("purchase")) return c.segment === "Loyalists";
       if (mission.goal.toLowerCase().includes("ltv")) return c.segment === "High-Value Inactive";
       return c.segment === "New Signups";
+    });
+
+    // Launch campaign dispatch asynchronously on Express backend
+    fetch("/api/campaigns/launch", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        channel,
+        audience: matchingCohort.map(c => ({ phone: c.phone, email: c.email, name: c.name })),
+        template: channel === "WhatsApp" ? (mission.generatedContent.WhatsApp?.body || "") : (mission.generatedContent.Email?.body || ""),
+        missionId: campaignId,
+        subject: mission.generatedContent.Email?.subject || "Special Offer from ORBIT"
+      })
+    }).catch(err => {
+      console.warn("Backend campaign dispatch failed to run:", err);
     });
 
     if (channel === "WhatsApp") {
