@@ -1,6 +1,11 @@
-import * as admin from "firebase-admin";
+import { initializeApp, cert } from "firebase-admin";
+import { getFirestore } from "firebase-admin/firestore";
+import { getAuth } from "firebase-admin/auth";
 import * as fs from "fs";
 import * as path from "path";
+import * as dotenv from "dotenv";
+
+dotenv.config();
 
 const projectId = process.env.FIREBASE_PROJECT_ID || process.env.VITE_FIREBASE_PROJECT_ID || "login-page-144f8";
 const clientEmail = process.env.FIREBASE_CLIENT_EMAIL;
@@ -233,15 +238,15 @@ class MockQuerySnapshot {
 if (isFirebaseConfigured) {
   try {
     const formattedPrivateKey = privateKey!.replace(/\\n/g, "\n");
-    admin.initializeApp({
-      credential: admin.credential.cert({
+    const app = initializeApp({
+      credential: cert({
         projectId,
         clientEmail,
         privateKey: formattedPrivateKey
       })
     });
-    db = admin.firestore();
-    auth = admin.auth();
+    db = getFirestore(app);
+    auth = getAuth(app);
     console.log("Firebase Admin successfully initialized with production credentials.");
   } catch (error) {
     console.error("Failed to initialize Firebase Admin, falling back to mock database:", error);

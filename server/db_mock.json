@@ -2,36 +2,36 @@
   "opportunities": {
     "opp_1": {
       "id": "opp_1",
-      "title": "High-Value Churn Prevention",
-      "cohort": "At-Risk VIP Subscribers",
-      "description": "Proactively engage VIP subscribers (annual plans, high usage) showing signs of reduced engagement or upcoming renewal in the next 30 days.",
-      "potentialRevenue": 35000,
-      "opportunityScore": 95,
-      "recommendedChannel": "Personalized Email",
+      "title": "Dormant VIP Re-engagement",
+      "cohort": "High-Value Inactive",
+      "description": "Recover premium spenders inactive for 45+ days.",
+      "potentialRevenue": 32000,
+      "opportunityScore": 94,
+      "recommendedChannel": "WhatsApp",
       "confidence": "High",
-      "updatedAt": "2026-06-10T06:29:40.069Z"
+      "updatedAt": "2026-06-10T06:47:38.415Z"
     },
     "opp_2": {
       "id": "opp_2",
-      "title": "New Customer Second Purchase Drive",
-      "cohort": "Recent First-Time Buyers",
-      "description": "Encourage a second purchase from customers who made their first purchase 15-30 days ago and haven't returned.",
-      "potentialRevenue": 22000,
+      "title": "Cart Recovery Optimization",
+      "cohort": "Slipping Away",
+      "description": "Trigger automations on checkout leaks in the last 7 days.",
+      "potentialRevenue": 15400,
       "opportunityScore": 88,
       "recommendedChannel": "Email",
-      "confidence": "Medium",
-      "updatedAt": "2026-06-10T06:29:40.070Z"
+      "confidence": "High",
+      "updatedAt": "2026-06-10T06:47:38.417Z"
     },
     "opp_3": {
       "id": "opp_3",
-      "title": "Underutilized Premium Feature Adoption",
-      "cohort": "Core Users Missing Key Features",
-      "description": "Target users of a SaaS product who consistently use core features but haven't adopted premium or high-value features available in their plan.",
-      "potentialRevenue": 41000,
-      "opportunityScore": 90,
-      "recommendedChannel": "In-App Messaging",
-      "confidence": "High",
-      "updatedAt": "2026-06-10T06:29:40.070Z"
+      "title": "Festive Cross-sell Campaign",
+      "cohort": "Loyalists",
+      "description": "Target repeat buyers with a festive collection early access.",
+      "potentialRevenue": 42000,
+      "opportunityScore": 85,
+      "recommendedChannel": "RCS",
+      "confidence": "Medium",
+      "updatedAt": "2026-06-10T06:47:38.418Z"
     },
     "opp_4": {
       "id": "opp_4",
@@ -83,7 +83,7 @@
         "Launch premium checkout drops",
         "Scale VIP LTV thresholds"
       ],
-      "createdAt": "2026-06-10T06:23:59.703Z"
+      "createdAt": "2026-06-10T06:47:38.412Z"
     }
   },
   "missions": {
