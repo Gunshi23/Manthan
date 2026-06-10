@@ -9,7 +9,7 @@
       "opportunityScore": 94,
       "recommendedChannel": "WhatsApp",
       "confidence": "High",
-      "updatedAt": "2026-06-10T06:19:44.526Z"
+      "updatedAt": "2026-06-10T06:23:59.704Z"
     },
     "opp_2": {
       "id": "opp_2",
@@ -20,7 +20,7 @@
       "opportunityScore": 88,
       "recommendedChannel": "Email",
       "confidence": "High",
-      "updatedAt": "2026-06-10T06:19:44.527Z"
+      "updatedAt": "2026-06-10T06:23:59.705Z"
     },
     "opp_3": {
       "id": "opp_3",
@@ -31,7 +31,7 @@
       "opportunityScore": 85,
       "recommendedChannel": "RCS",
       "confidence": "Medium",
-      "updatedAt": "2026-06-10T06:19:44.528Z"
+      "updatedAt": "2026-06-10T06:23:59.705Z"
     }
   },
   "brand_dna": {
@@ -48,6 +48,20 @@
         "Launch premium checkout drops",
         "Scale VIP LTV thresholds"
       ]
+    },
+    "dna_default": {
+      "id": "dna_default",
+      "businessType": "Fashion & Apparel",
+      "growthStyle": "High Growth",
+      "customerUniverse": 1250,
+      "growthPotential": "High",
+      "orbitHealth": 88,
+      "recommendedMissions": [
+        "Recover slipping Q2 buyers",
+        "Launch premium checkout drops",
+        "Scale VIP LTV thresholds"
+      ],
+      "createdAt": "2026-06-10T06:23:59.703Z"
     }
   },
   "missions": {
@@ -133,6 +147,165 @@
           "text": "Gateways verified. Selected channel: WhatsApp. Dispatch buffers are ready for deployment."
         }
       ]
+    }
+  },
+  "customers": {
+    "cust_1": {
+      "id": "cust_1",
+      "name": "Aarav Mehta",
+      "email": "aarav.mehta@galaxy.net",
+      "phone": "+919876543210",
+      "segment": "Loyalists",
+      "ltv": 45000,
+      "purchaseCount": 8,
+      "churnRisk": 12,
+      "churnTrend": "stable"
+    },
+    "cust_2": {
+      "id": "cust_2",
+      "name": "Ananya Sharma",
+      "email": "ananya.sharma@galaxy.net",
+      "phone": "+918979660550",
+      "segment": "Slipping Away",
+      "ltv": 32000,
+      "purchaseCount": 5,
+      "churnRisk": 78,
+      "churnTrend": "up"
+    },
+    "cust_3": {
+      "id": "cust_3",
+      "name": "Vihaan Patel",
+      "email": "vihaan.patel@galaxy.net",
+      "phone": "+919560123456",
+      "segment": "High-Value Inactive",
+      "ltv": 58000,
+      "purchaseCount": 11,
+      "churnRisk": 84,
+      "churnTrend": "up"
+    },
+    "cust_4": {
+      "id": "cust_4",
+      "name": "Diya Iyer",
+      "email": "diya.iyer@galaxy.net",
+      "phone": "+919810012345",
+      "segment": "New Signups",
+      "ltv": 0,
+      "purchaseCount": 0,
+      "churnRisk": 25,
+      "churnTrend": "stable"
+    },
+    "cust_5": {
+      "id": "cust_5",
+      "name": "Kabir Singh",
+      "email": "kabir.singh@galaxy.net",
+      "phone": "+919999012345",
+      "segment": "Loyalists",
+      "ltv": 38000,
+      "purchaseCount": 7,
+      "churnRisk": 18,
+      "churnTrend": "down"
+    },
+    "cust_6": {
+      "id": "cust_6",
+      "name": "Isha Gupta",
+      "email": "isha.gupta@galaxy.net",
+      "phone": "+919877112233",
+      "segment": "Slipping Away",
+      "ltv": 18000,
+      "purchaseCount": 3,
+      "churnRisk": 72,
+      "churnTrend": "up"
+    },
+    "cust_7": {
+      "id": "cust_7",
+      "name": "Arjun Reddy",
+      "email": "arjun.reddy@galaxy.net",
+      "phone": "+918800112233",
+      "segment": "High-Value Inactive",
+      "ltv": 62000,
+      "purchaseCount": 12,
+      "churnRisk": 80,
+      "churnTrend": "stable"
+    },
+    "cust_8": {
+      "id": "cust_8",
+      "name": "Riya Sen",
+      "email": "riya.sen@galaxy.net",
+      "phone": "+919955887766",
+      "segment": "New Signups",
+      "ltv": 1200,
+      "purchaseCount": 1,
+      "churnRisk": 30,
+      "churnTrend": "down"
+    }
+  },
+  "campaigns": {
+    "camp_1": {
+      "id": "camp_1",
+      "name": "Q2 Win-back Initiative",
+      "goal": "Reduce Churn",
+      "description": "Re-engage dormant premium accounts with custom credits drops.",
+      "channel": "WhatsApp",
+      "status": "Completed",
+      "sentCount": 154,
+      "deliveredCount": 151,
+      "openedCount": 142,
+      "clickedCount": 68,
+      "purchaseCount": 22,
+      "revenueGenerated": 34500,
+      "createdAt": "2026-05-12T10:00:00Z"
+    },
+    "camp_2": {
+      "id": "camp_2",
+      "name": "Quantum Implants Cross-sell",
+      "goal": "Increase Repeat Purchases",
+      "description": "Promoting Neural Implants v2 upgrades to existing tech enthusiasts.",
+      "channel": "Email",
+      "status": "Completed",
+      "sentCount": 430,
+      "deliveredCount": 428,
+      "openedCount": 310,
+      "clickedCount": 189,
+      "purchaseCount": 45,
+      "revenueGenerated": 82000,
+      "createdAt": "2026-05-28T09:15:00Z"
+    }
+  },
+  "analytics": {
+    "an_2026-06-05": {
+      "date": "2026-06-05",
+      "revenue": 24500,
+      "purchases": 18,
+      "conversionRate": 11.2,
+      "createdAt": "2026-06-05T00:00:00.000Z"
+    },
+    "an_2026-06-06": {
+      "date": "2026-06-06",
+      "revenue": 32000,
+      "purchases": 24,
+      "conversionRate": 12.8,
+      "createdAt": "2026-06-06T00:00:00.000Z"
+    },
+    "an_2026-06-07": {
+      "date": "2026-06-07",
+      "revenue": 28000,
+      "purchases": 20,
+      "conversionRate": 10.5,
+      "createdAt": "2026-06-07T00:00:00.000Z"
+    },
+    "an_2026-06-08": {
+      "date": "2026-06-08",
+      "revenue": 41000,
+      "purchases": 31,
+      "conversionRate": 14.1,
+      "createdAt": "2026-06-08T00:00:00.000Z"
+    },
+    "an_2026-06-09": {
+      "date": "2026-06-09",
+      "revenue": 38500,
+      "purchases": 29,
+      "conversionRate": 13.2,
+      "createdAt": "2026-06-09T00:00:00.000Z"
     }
   }
 }
