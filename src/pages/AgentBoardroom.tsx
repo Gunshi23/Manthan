@@ -316,10 +316,8 @@ Respond concisely for each agent's message in 1-2 sentences. Do not return any m
       }
 
       if (config.geminiKey && geminiError) {
-        addTelemetry(`Error: Gemini Boardroom Debate failed: ${geminiError}`);
-        setDebateActive(false);
-        setActiveSpeaker(null);
-        return;
+        addTelemetry(`Gemini unavailable (${geminiError}). Falling back to scripted simulation mode.`);
+        // Don't abort — fall through to scripted messages below
       }
 
       if (!config.geminiKey) {

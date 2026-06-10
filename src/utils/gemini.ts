@@ -21,8 +21,8 @@ export async function callGeminiAPI(
     throw new Error("Gemini API key is not configured.");
   }
 
-  // Use the specified model - gemini-3.5-flash
-  const model = "gemini-3.5-flash";
+  // Use the specified model - gemini-2.0-flash
+  const model = "gemini-2.0-flash";
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
 
   const requestBody: any = {

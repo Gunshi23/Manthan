@@ -22,7 +22,7 @@ class MockFirestore {
   private data: Record<string, Record<string, any>> = {};
 
   constructor() {
-    this.filepath = path.join(process.cwd(), "server/db_mock.json");
+    this.filepath = path.join(__dirname, "../db_mock.json");
     this.load();
   }
 
