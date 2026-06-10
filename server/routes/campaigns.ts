@@ -118,6 +118,41 @@ router.get("/", async (req, res) => {
   }
 });
 
+// POST /api/campaigns (save a newly generated campaign)
+router.post("/", async (req, res) => {
+  try {
+    const { name, goal, channel, targetSegment, audienceSize, predictedRevenue, predictedRoi, copy, subject, status } = req.body;
+    const campaignId = "camp_" + Date.now();
+    const doc = {
+      id: campaignId,
+      name: name || goal || "Growth Engine Campaign",
+      goal: goal || "",
+      channel: channel || "WhatsApp",
+      targetSegment: targetSegment || "Loyalists",
+      audienceSize: audienceSize || 0,
+      predictedRevenue: predictedRevenue || 0,
+      predictedRoi: predictedRoi || 0,
+      copy: copy || "",
+      subject: subject || "",
+      status: status || "Draft",
+      sentCount: 0,
+      deliveredCount: 0,
+      openedCount: 0,
+      clickedCount: 0,
+      purchaseCount: 0,
+      revenueGenerated: 0,
+      createdAt: new Date().toISOString(),
+      description: goal || "",
+    };
+    await db.collection("campaigns").doc(campaignId).set(doc);
+    res.status(201).json({ success: true, campaignId, ...doc });
+  } catch (error: any) {
+    console.error("Campaign save error:", error);
+    res.status(500).json({ error: error.message || "Failed to save campaign" });
+  }
+});
+
+
 // GET /api/campaigns/templates
 router.get("/templates", (req, res) => {
   const templates = [
