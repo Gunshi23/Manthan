@@ -1,16 +1,17 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useOrbit } from "../context/OrbitContext";
 import {
-  TrendingUp, Target, Zap, Shield, Radio,
-  Activity, ChevronUp, ChevronDown, Cpu,
-  ArrowUpRight, Layers, Star, Send, X,
-  CheckCircle2, Play
+  TrendingUp, Target, Zap, Shield,
+  Activity, ChevronUp, Cpu,
+  Layers, X, Play, Pause, RefreshCw, Plus, 
+  Trash2, Copy, FileText, Database,
+  Flame, BarChart3
 } from "lucide-react";
 import { AgentCardModal } from "../components/AgentCardModal";
 import { PageHeaderHUD } from "../components/PageHeaderHUD";
 
 /* ─── Animated Counter Hook ─────────────────────────────────── */
-function useCounter(target: number, duration = 1200, prefix = "", suffix = "") {
+function useCounter(target: number, duration = 1000, prefix = "", suffix = "") {
   const [value, setValue] = useState(0);
   const startRef = useRef<number | null>(null);
   const rafRef = useRef<number | undefined>(undefined);
@@ -71,1169 +72,1423 @@ const Sparkline: React.FC<{ values: number[]; color: string; height?: number }> 
 
 /* ─── Radial Gauge Component ────────────────────────────────── */
 const RadialGauge: React.FC<{ value: number; max?: number; color: string; label: string; size?: number; isLight?: boolean }> = ({
-  value, max = 100, color, label, size = 90, isLight = false
+  value, max = 100, color, label, size = 80, isLight = false
 }) => {
   const r = (size - 12) / 2;
   const circ = 2 * Math.PI * r;
   const pct = Math.min(value / max, 1);
   const dash = pct * circ;
   return (
-    <div className="flex flex-col items-center gap-2">
+    <div className="flex flex-col items-center gap-1.5">
       <div className="relative" style={{ width: size, height: size }}>
         <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} className="-rotate-90 overflow-visible">
-          {/* Track */}
-          <circle cx={size/2} cy={size/2} r={r} fill="none" stroke={isLight ? "rgba(0,0,0,0.08)" : "rgba(255,255,255,0.05)"} strokeWidth="8" />
-          {/* Progress */}
+          <circle cx={size/2} cy={size/2} r={r} fill="none" stroke={isLight ? "rgba(0,0,0,0.08)" : "rgba(255,255,255,0.05)"} strokeWidth="6" />
           <circle
             cx={size/2} cy={size/2} r={r}
             fill="none"
             stroke={color}
-            strokeWidth="8"
+            strokeWidth="6"
             strokeLinecap="round"
             strokeDasharray={`${dash} ${circ}`}
-            style={{ filter: `drop-shadow(0 0 6px ${color})`, transition: "stroke-dasharray 1.2s ease" }}
+            style={{ filter: `drop-shadow(0 0 4px ${color})`, transition: "stroke-dasharray 1.2s ease" }}
           />
         </svg>
         <div className="absolute inset-0 flex items-center justify-center rotate-90">
-          <span className={`font-space font-bold text-sm ${isLight ? "text-gray-900" : "text-white"}`}>{value}%</span>
+          <span className={`font-space font-bold text-xs ${isLight ? "text-gray-900" : "text-white"}`}>{value}%</span>
         </div>
       </div>
-      <span className={`font-mono text-[9px] uppercase tracking-widest text-center ${isLight ? "text-gray-600" : "text-gray-400"}`}>{label}</span>
+      <span className={`font-mono text-[8px] uppercase tracking-widest text-center ${isLight ? "text-gray-600" : "text-gray-400"}`}>{label}</span>
     </div>
   );
 };
 
-/* ─── Live Ticker Row ───────────────────────────────────────── */
-interface TickerEvent {
-  id: string;
-  type: "sent" | "delivered" | "opened" | "clicked" | "purchased";
-  name: string;
-  campaign: string;
-  amount?: number;
-  ts: string;
-}
-
-const TYPE_CONFIG = {
-  sent:      { label: "SENT",      color: "text-gray-400",        dot: "bg-gray-500",        icon: "→" },
-  delivered: { label: "DELIVERED", color: "text-orbit-blue",      dot: "bg-orbit-blue",      icon: "✓" },
-  opened:    { label: "OPENED",    color: "text-orbit-purple",    dot: "bg-orbit-purple",    icon: "👁" },
-  clicked:   { label: "CLICKED",   color: "text-yellow-400",      dot: "bg-yellow-400",      icon: "⚡" },
-  purchased: { label: "PURCHASED", color: "text-orbit-success",   dot: "bg-orbit-success",   icon: "✦" },
+/* ─── Agent Info ────────────────────────────────────────────── */
+const AGENT_CONFIG = {
+  Polaris: { color: "#3B82F6", role: "Audience Intelligence" },
+  Luna: { color: "#F59E0B", role: "Opportunity Detection" },
+  Vega: { color: "#8B5CF6", role: "Revenue Forecasting" },
+  Nova: { color: "#EC4899", role: "Campaign Generator" },
+  Atlas: { color: "#22C55E", role: "Campaign Dispatch" }
 };
 
-/* ─── Agent Config ──────────────────────────────────────────── */
-const AGENTS = [
-  {
-    name: "Polaris",
-    role: "Audience Intelligence",
-    color: "#3B82F6",
-    border: "border-blue-500/30",
-    bg: "bg-blue-500/5",
-    glow: "shadow-[0_0_20px_rgba(59,130,246,0.15)]",
-    tasks: [
-      "Clustering 432 inactive segments",
-      "Running cohort similarity analysis",
-      "Mapping behavioral DNA signatures",
-      "Flagging 18 VIP churn risks",
-    ],
-    confidence: 94,
-  },
-  {
-    name: "Nova",
-    role: "Campaign Creator",
-    color: "#EC4899",
-    border: "border-pink-400/30",
-    bg: "bg-pink-400/5",
-    glow: "shadow-[0_0_20px_rgba(236,72,153,0.15)]",
-    tasks: [
-      "Drafting WhatsApp personalization copy",
-      "A/B testing subject lines",
-      "Generating RCS rich card variants",
-      "Injecting DNA tokens into templates",
-    ],
-    confidence: 91,
-  },
-  {
-    name: "Vega",
-    role: "Predictive Analytics",
-    color: "#8B5CF6",
-    border: "border-violet-500/30",
-    bg: "bg-violet-500/5",
-    glow: "shadow-[0_0_20px_rgba(139,92,246,0.15)]",
-    tasks: [
-      "Forecasting Q3 revenue trajectory",
-      "Computing churn probability deltas",
-      "Running 60-feature regression model",
-      "Calculating optimal send-time windows",
-    ],
-    confidence: 88,
-  },
-  {
-    name: "Atlas",
-    role: "Operations Dispatch",
-    color: "#22C55E",
-    border: "border-green-500/30",
-    bg: "bg-green-500/5",
-    glow: "shadow-[0_0_20px_rgba(34,197,94,0.15)]",
-    tasks: [
-      "Routing 654 messages via WhatsApp",
-      "Monitoring delivery node latency",
-      "Load balancing channel throughput",
-      "Processing webhook event stream",
-    ],
-    confidence: 96,
-  },
-  {
-    name: "Luna",
-    role: "Growth Recovery Agent",
-    color: "#F59E0B",
-    border: "border-amber-500/30",
-    bg: "bg-amber-500/5",
-    glow: "shadow-[0_0_20px_rgba(245,158,11,0.15)]",
-    tasks: [
-      "Scanning customer universe...",
-      "Analyzing engagement signals...",
-      "Detecting revenue leaks...",
-      "Building recovery audiences...",
-      "Campaign recovery ready...",
-    ],
-    confidence: 93,
-  },
-];
-
-const NAMES = ["Arjun S.", "Priya M.", "Rahul K.", "Neha V.", "Kabir R.", "Sara J.", "Dev P.", "Aisha B.", "Marcus L.", "Elena D."];
-const CAMPAIGNS = ["Q2 Win-back", "Quantum Cross-sell", "New Signup Flow", "LTV Booster", "Loyalty Loop"];
-
-function makeTickerEvent(): TickerEvent {
-  const types: TickerEvent["type"][] = ["sent", "delivered", "opened", "clicked", "purchased"];
-  const weights = [0.2, 0.35, 0.25, 0.12, 0.08];
-  const r = Math.random();
-  let cum = 0, chosenType = types[0];
-  for (let i = 0; i < types.length; i++) {
-    cum += weights[i];
-    if (r < cum) { chosenType = types[i]; break; }
-  }
-  return {
-    id: `evt_${Date.now()}_${Math.random()}`,
-    type: chosenType,
-    name: NAMES[Math.floor(Math.random() * NAMES.length)],
-    campaign: CAMPAIGNS[Math.floor(Math.random() * CAMPAIGNS.length)],
-    amount: chosenType === "purchased" ? 400 + Math.floor(Math.random() * 1600) : undefined,
-    ts: new Date().toLocaleTimeString("en-US", { hour12: false, hour: "2-digit", minute: "2-digit", second: "2-digit" }),
-  };
-}
-
 export const MissionControl: React.FC = () => {
-  const { 
-    campaigns, orders, agentLogs, growthScore, networkHealth, 
-    revenueGoal, theme, lunaMetrics, mission, startMission, 
-    launchMissionCampaign, cancelMission, customers 
+  const {
+    campaigns, orders, agentLogs, growthScore, networkHealth,
+    revenueGoal, theme, lunaMetrics, customers, addAgentLog,
+    missions, refreshMissions, updateMissionStatus, duplicateMission, deleteMission
   } = useOrbit();
+  
   const isLight = theme === "executive";
   const [selectedAgent, setSelectedAgent] = useState<"Polaris" | "Vega" | "Nova" | "Atlas" | "Luna" | null>(null);
 
-  const [atlasTab, setAtlasTab] = useState<"dashboard" | "feed">("dashboard");
-  const [isWhatsAppModalOpen, setIsWhatsAppModalOpen] = useState(false);
-  const [selectedTemplate, setSelectedTemplate] = useState<"recovery" | "vip" | "festival">("recovery");
-  const [selectedCohort, setSelectedCohort] = useState<"Slipping Away" | "Loyalists" | "New Signups" | "High-Value Inactive">("Slipping Away");
+  // Timeframe selector state for KPIs
+  const [kpiTimeframe, setKpiTimeframe] = useState<"Today" | "This Week" | "This Month">("This Month");
 
-  const WHATSAPP_TEMPLATES = {
-    recovery: {
-      label: "Recovery Campaign",
-      body: "Hi {{name}} 👋\n\nWe noticed you haven't visited recently.\n\nHere's an exclusive offer for you."
-    },
-    vip: {
-      label: "VIP Campaign",
-      body: "Hi {{name}} 🌟\n\nAs one of our valued customers, you get early access to our latest collection."
-    },
-    festival: {
-      label: "Festival Campaign",
-      body: "Happy Diwali ✨\n\nCelebrate with exclusive festive offers."
+  // Opportunities State
+  const [opportunities, setOpportunities] = useState<any[]>([]);
+  const [isOppsLoading, setIsOppsLoading] = useState(false);
+
+  // Executive Briefing State
+  const [briefing, setBriefing] = useState<string>("");
+  const [isBriefingLoading, setIsBriefingLoading] = useState(false);
+
+  // Custom Mission Creator Modal/State
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [customGoal, setCustomGoal] = useState("");
+  const [isGeneratingMission, setIsGeneratingMission] = useState(false);
+
+  // Real-Time Execution Pipeline State
+  const [pipelineState, setPipelineState] = useState<{
+    active: boolean;
+    currentStep: "Polaris" | "Luna" | "Vega" | "Nova" | "Atlas" | "idle";
+    logs: string[];
+    progress: number;
+    missionId?: string;
+    missionGoal?: string;
+    completedSteps: string[];
+    generatedCampaignId?: string;
+  }>({
+    active: false,
+    currentStep: "idle",
+    logs: [],
+    progress: 0,
+    completedSteps: []
+  });
+
+  // Selected Mission Details Modal
+  const [selectedMission, setSelectedMission] = useState<any | null>(null);
+
+  // scrolling Agent Activity ticker state
+  const [activityTicker, setActivityTicker] = useState<string[]>([]);
+
+  // Demo Mode State
+  const [demoMode, setDemoMode] = useState<boolean>(false);
+  const demoIntervalRef = useRef<any>(null);
+
+  // Load and refresh initial data
+  useEffect(() => {
+    fetchOpportunities();
+    fetchBriefing();
+    refreshMissions();
+  }, []);
+
+  // Poll for list updates
+  useEffect(() => {
+    const timer = setInterval(() => {
+      refreshMissions();
+    }, 8000);
+    return () => clearInterval(timer);
+  }, [refreshMissions]);
+
+  // Activity Ticker scrolling entries generator
+  useEffect(() => {
+    const defaultActivities = [
+      "Polaris clustered 145 repeat buyers based on LTV spikes",
+      "Nova generated personalized RCS Rich Card draft variants",
+      "Vega calculated 4.8x ROI forecast coefficients on slipping cohort",
+      "Atlas dispatched 120 checkout drops via Twilio gateway",
+      "Luna detected an abandoned cart leakage cluster in segment",
+      "Polaris mapped 24 VIP customer churn threats to system dashboard",
+      "Luna audited payment gateway leakage logs for 8 leads",
+      "Vega projected ₹42,500 revenue window in 30-day forecast",
+      "Nova injected brand DNA tokens into Diwali creative template"
+    ];
+
+    setActivityTicker(defaultActivities);
+
+    const logTimer = setInterval(() => {
+      if (agentLogs.length > 0) {
+        const randomLog = agentLogs[Math.floor(Math.random() * agentLogs.length)];
+        const text = `${randomLog.agent}: ${randomLog.message}`;
+        setActivityTicker(prev => [text, ...prev].slice(0, 25));
+      }
+    }, 4000);
+
+    return () => clearInterval(logTimer);
+  }, [agentLogs]);
+
+  // Fetch opportunities aggregation endpoint
+  const fetchOpportunities = async () => {
+    setIsOppsLoading(true);
+    try {
+      const res = await fetch("/api/opportunities");
+      if (res.ok) {
+        const data = await res.json();
+        setOpportunities(data.opportunities || []);
+      }
+    } catch (e) {
+      console.warn("Failed to retrieve opportunities:", e);
+    } finally {
+      setIsOppsLoading(false);
     }
   };
 
-  const handleLaunchWhatsApp = async () => {
-    const templateLabel = WHATSAPP_TEMPLATES[selectedTemplate].label;
-    const goal = `Autonomous ${templateLabel} for ${selectedCohort} segment`;
-    startMission(goal);
+  // Fetch AI Briefing
+  const fetchBriefing = async () => {
+    setIsBriefingLoading(true);
+    try {
+      const res = await fetch("/api/analytics/briefing");
+      if (res.ok) {
+        const data = await res.json();
+        setBriefing(data.briefing);
+      }
+    } catch (e) {
+      console.warn("Briefing error:", e);
+    } finally {
+      setIsBriefingLoading(false);
+    }
   };
 
-  const whatsappCampaigns = campaigns.filter(c => c.channel === "WhatsApp");
-  const totalSent = whatsappCampaigns.reduce((s, c) => s + c.sentCount, 0);
-  const totalDelivered = whatsappCampaigns.reduce((s, c) => s + (c.deliveredCount ?? 0), 0);
-  const totalFailed = whatsappCampaigns.reduce((s, c) => s + (c.failedCount ?? 0), 0);
-  const totalPending = whatsappCampaigns.reduce((s, c) => s + (c.pendingCount ?? 0), 0);
-  const deliveryRatePct = totalSent > 0 ? Math.round((totalDelivered / totalSent) * 100) : 100;
+  // Timeframe calculation logic for KPIs
+  const computeKPIMetrics = () => {
+    const now = new Date();
+    const todayStr = now.toISOString().split("T")[0];
+    const msInDay = 24 * 60 * 60 * 1000;
 
-  // Clock and latency history handled by PageHeaderHUD
+    let targetOrders = orders;
+    let targetCampaigns = campaigns;
+    let trendMultiplier = 1.0;
 
-  /* Interactive diagnostic ping simulator */
-  const [pingLogs, setPingLogs] = useState<string[]>([]);
-  const [isPingRunning, setIsPingRunning] = useState(false);
-  const [pingStep, setPingStep] = useState(0);
+    if (kpiTimeframe === "Today") {
+      targetOrders = orders.filter(o => o.date === todayStr);
+      targetCampaigns = campaigns.filter(c => c.createdAt && c.createdAt.split("T")[0] === todayStr);
+      trendMultiplier = 0.85; // Simulated ratio today vs yesterday
+    } else if (kpiTimeframe === "This Week") {
+      targetOrders = orders.filter(o => {
+        const oDate = new Date(o.date);
+        return (now.getTime() - oDate.getTime()) <= 7 * msInDay;
+      });
+      targetCampaigns = campaigns.filter(c => {
+        if (!c.createdAt) return false;
+        const cDate = new Date(c.createdAt);
+        return (now.getTime() - cDate.getTime()) <= 7 * msInDay;
+      });
+      trendMultiplier = 1.14;
+    } else {
+      // Month
+      targetOrders = orders.filter(o => {
+        const oDate = new Date(o.date);
+        return (now.getTime() - oDate.getTime()) <= 30 * msInDay;
+      });
+      targetCampaigns = campaigns.filter(c => {
+        if (!c.createdAt) return false;
+        const cDate = new Date(c.createdAt);
+        return (now.getTime() - cDate.getTime()) <= 30 * msInDay;
+      });
+      trendMultiplier = 1.28;
+    }
 
-  const handlePingTest = () => {
-    if (isPingRunning) return;
-    setIsPingRunning(true);
-    setPingStep(1);
-    setPingLogs(prev => [`[${new Date().toLocaleTimeString()}] INITIATING ROUTER DIRECTORY PING...`, ...prev]);
+    const achieved = targetOrders.reduce((s, o) => s + o.amount, 0);
+    const completedCamps = targetCampaigns.filter(c => c.status === "Completed");
+    const campaignsCount = targetCampaigns.length;
+
+    // Projected/Forecast calculations
+    const forecast = Math.round(achieved * trendMultiplier);
     
-    // Step 1: Ping Polaris
-    setTimeout(() => {
-      setPingLogs(prev => [`[${new Date().toLocaleTimeString()}] POLARIS -> PING OK (RTT: 4.2ms)`, ...prev]);
-      setPingStep(2);
-    }, 500);
+    // Dynamic Growth score computed from conversion ratios
+    const totalSent = completedCamps.reduce((s, c) => s + c.sentCount, 0);
+    const totalPurchased = completedCamps.reduce((s, c) => s + c.purchaseCount, 0);
+    const conversionAvg = totalSent > 0 ? (totalPurchased / totalSent) * 100 : 22.4;
+    const computedGrowth = Math.min(99.8, Math.max(45, Math.round(growthScore * 10 + (conversionAvg - 22))));
 
-    // Step 2: Nova
-    setTimeout(() => {
-      setPingLogs(prev => [`[${new Date().toLocaleTimeString()}] NOVA -> PING OK (RTT: 5.8ms)`, ...prev]);
-      setPingStep(3);
-    }, 1000);
+    // Fallbacks if Today has zero data
+    const finalAchieved = achieved || (kpiTimeframe === "Today" ? 14500 : achieved);
+    const finalForecast = forecast || (kpiTimeframe === "Today" ? 18200 : forecast);
 
-    // Step 3: Vega
-    setTimeout(() => {
-      setPingLogs(prev => [`[${new Date().toLocaleTimeString()}] VEGA -> PING OK (RTT: 7.1ms)`, ...prev]);
-      setPingStep(4);
-    }, 1500);
-
-    // Step 4: Ping Atlas
-    setTimeout(() => {
-      setPingLogs(prev => [`[${new Date().toLocaleTimeString()}] ATLAS -> PING OK (RTT: 3.9ms)`, ...prev]);
-      setPingStep(5);
-    }, 2000);
-
-    // Step 5: Ping Luna
-    setTimeout(() => {
-      setPingLogs(prev => [`[${new Date().toLocaleTimeString()}] LUNA -> PING OK (RTT: 4.8ms)`, ...prev]);
-      setPingStep(6);
-    }, 2500);
-
-    // Step 6: Finished
-    setTimeout(() => {
-      setPingLogs(prev => [`[${new Date().toLocaleTimeString()}] DIAGNOSTICS NOMINAL. COGNITIVE LEDGER SYNCED.`, ...prev]);
-      setIsPingRunning(false);
-      setPingStep(0);
-    }, 3000);
+    return {
+      achieved: finalAchieved,
+      goal: Math.round(revenueGoal / (kpiTimeframe === "Today" ? 30 : kpiTimeframe === "This Week" ? 4.2 : 1)),
+      forecast: finalForecast,
+      growth: parseFloat((computedGrowth / 10).toFixed(1)),
+      campaignsCount
+    };
   };
 
-  /* Ticker feed */
-  const [ticker, setTicker] = useState<TickerEvent[]>(() =>
-    Array.from({ length: 8 }, makeTickerEvent)
-  );
+  const kpis = computeKPIMetrics();
+
+  const achievedCounter = useCounter(kpis.achieved, 800, "₹");
+  const goalCounter = useCounter(kpis.goal, 800, "₹");
+  const forecastCounter = useCounter(kpis.forecast, 800, "₹");
+  const growthCounter = useCounter(Math.round(kpis.growth * 10), 800, "", "");
+
+  /* ─── Real-Time Mission Execution Flow ─── */
+  const triggerExecutionPipeline = async (goal: string, targetChannel: "Email" | "WhatsApp" | "SMS" | "RCS" = "WhatsApp") => {
+    if (pipelineState.active) return;
+
+    setPipelineState({
+      active: true,
+      currentStep: "Polaris",
+      logs: [`[${new Date().toLocaleTimeString()}] Polaris: Initializing segment analysis for goal "${goal}"`],
+      progress: 10,
+      missionGoal: goal,
+      completedSteps: []
+    });
+
+    const sleep = (ms: number) => new Promise(res => setTimeout(res, ms));
+
+    // 1. Polaris step
+    await sleep(2000);
+    const pMsg = `Polaris: Segment mapped. Isolated 18 dormant customers with LTV records > ₹8,000.`;
+    addAgentLog("Polaris", pMsg, "action");
+    setPipelineState(prev => ({
+      ...prev,
+      currentStep: "Luna",
+      progress: 30,
+      logs: [...prev.logs, `[${new Date().toLocaleTimeString()}] ${pMsg}`],
+      completedSteps: [...prev.completedSteps, "Polaris"]
+    }));
+
+    // 2. Luna step
+    await sleep(2000);
+    const lMsg = `Luna: Leakage audit complete. Detected cart drop opportunity: Potential recovery revenue: ₹12,500.`;
+    addAgentLog("Luna", lMsg, "action");
+    setPipelineState(prev => ({
+      ...prev,
+      currentStep: "Vega",
+      progress: 50,
+      logs: [...prev.logs, `[${new Date().toLocaleTimeString()}] ${lMsg}`],
+      completedSteps: [...prev.completedSteps, "Luna"]
+    }));
+
+    // 3. Vega step
+    await sleep(2000);
+    const vMsg = `Vega: Projected ROI: 4.8x. Predicted baseline conversion yield: 28% for channel ${targetChannel}.`;
+    addAgentLog("Vega", vMsg, "thought");
+    setPipelineState(prev => ({
+      ...prev,
+      currentStep: "Nova",
+      progress: 70,
+      logs: [...prev.logs, `[${new Date().toLocaleTimeString()}] ${vMsg}`],
+      completedSteps: [...prev.completedSteps, "Vega"]
+    }));
+
+    // 4. Nova step
+    await sleep(2000);
+    const nMsg = `Nova: Generated personalized campaign copy. Subject: "Upgrade Orbit", Body: "Claim 15% off checkouts".`;
+    addAgentLog("Nova", nMsg, "chat");
+    
+    // Save generated campaign mock/record to backend API
+    let campaignId = "";
+    try {
+      const saveRes = await fetch("/api/campaigns", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: goal,
+          goal: goal,
+          channel: targetChannel,
+          targetSegment: "Slipping Away",
+          audienceSize: 18,
+          predictedRevenue: 12500,
+          predictedRoi: 4.8,
+          copy: "Hi {{name}}, complete your booking today for 15% off. Limit window active.",
+          status: "Running"
+        })
+      });
+      if (saveRes.ok) {
+        const savedCamp = await saveRes.json();
+        campaignId = savedCamp.campaignId;
+      }
+    } catch (e) {
+      console.warn("Failed to create campaign record:", e);
+    }
+
+    setPipelineState(prev => ({
+      ...prev,
+      currentStep: "Atlas",
+      progress: 90,
+      logs: [...prev.logs, `[${new Date().toLocaleTimeString()}] ${nMsg}`, `[${new Date().toLocaleTimeString()}] Atlas: Gateway channels validated. Initiating Twilio/Resend dispatch queue...`],
+      completedSteps: [...prev.completedSteps, "Nova"],
+      generatedCampaignId: campaignId
+    }));
+
+    // 5. Atlas step
+    await sleep(2500);
+    
+    // Trigger simulated webhook conversions and finalize campaign on backend
+    if (campaignId) {
+      try {
+        await fetch("/api/campaigns/launch", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            channel: targetChannel,
+            audience: [{ phone: "+919876543210", email: "target@orbit.io", name: "Arjun S." }],
+            template: "Hi Arjun, complete your booking today.",
+            missionId: campaignId
+          })
+        });
+      } catch (err) {
+        console.warn("Launch trigger failed:", err);
+      }
+    }
+
+    const aMsg = `Atlas: Campaign dispatch successful. Sent: 18 messages. Webhooks online for delivery events.`;
+    addAgentLog("Atlas", aMsg, "result");
+    
+    // Save generated mission history record to backend
+    try {
+      await fetch("/api/autonomous-mission", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          goal: goal,
+          businessType: "Fashion & Retail",
+          Polaris: { segment: "Slipping Away", explanation: "Mapped 18 targets" },
+          Luna: { recoverableRevenue: 12500, inactiveCustomers: 18, abandonedLeads: 8, recoveryConfidence: 91, explanation: "Opportunity active" },
+          Vega: { predictedRoi: 4.8, predictedRevenue: 12500, explanation: "Calculated yields" },
+          Nova: { Email: { subject: "Orbit Promo", body: "15% off" }, WhatsApp: { body: "Promo drop" }, SMS: { body: "Orbit drop" }, RCS: { title: "Orbit Promo", body: "Glow update", mediaUrl: "" } },
+          Atlas: { selectedChannel: targetChannel, explanation: "Dispatch gates armed" },
+          status: "Completed",
+          recommendation: { summary: "Rerun campaigns weekly", confidenceScore: 92 }
+        })
+      });
+    } catch (e) {
+      console.warn("Failed to log mission:", e);
+    }
+
+    setPipelineState(prev => ({
+      ...prev,
+      currentStep: "idle",
+      progress: 100,
+      logs: [...prev.logs, `[${new Date().toLocaleTimeString()}] ${aMsg}`, `[${new Date().toLocaleTimeString()}] System: Mission completed successfully.`],
+      completedSteps: [...prev.completedSteps, "Atlas"]
+    }));
+
+    // Trigger lists refresh
+    fetchOpportunities();
+    refreshMissions();
+    fetchBriefing();
+
+    await sleep(2000);
+    setPipelineState(prev => ({ ...prev, active: false }));
+  };
+
+  /* ─── Autonomous Demo Mode Loop ─── */
+  const toggleDemoMode = () => {
+    if (demoMode) {
+      // Turn off
+      setDemoMode(false);
+      if (demoIntervalRef.current) {
+        clearInterval(demoIntervalRef.current);
+        demoIntervalRef.current = null;
+      }
+      addAgentLog("System", "Autonomous Demo Mode Deactivated.", "thought");
+    } else {
+      // Turn on
+      setDemoMode(true);
+      addAgentLog("System", "Autonomous Demo Mode Activated. Starting operations...", "thought");
+      
+      const goals = [
+        "Recover Abandoned Carts",
+        "VIP Loyalty Campaign",
+        "Festival Launch Campaign",
+        "Win-back Dormant Customers",
+        "Cross-sell Existing Buyers"
+      ];
+      const channels: Array<"Email" | "WhatsApp" | "SMS" | "RCS">[] = [["WhatsApp"], ["Email"], ["RCS"], ["SMS"]];
+
+      let idx = 0;
+      const executeNextDemoMission = () => {
+        const selectedGoal = goals[idx % goals.length];
+        const selectedChannel = channels[idx % channels.length][0];
+        idx++;
+        triggerExecutionPipeline(selectedGoal, selectedChannel);
+      };
+
+      // Execute first immediately
+      executeNextDemoMission();
+
+      // Trigger next campaign every 15 seconds
+      demoIntervalRef.current = setInterval(() => {
+        executeNextDemoMission();
+      }, 16000);
+    }
+  };
+
   useEffect(() => {
-    const t = setInterval(() => {
-      setTicker(prev => [makeTickerEvent(), ...prev].slice(0, 30));
-    }, 1800);
-    return () => clearInterval(t);
+    return () => {
+      if (demoIntervalRef.current) clearInterval(demoIntervalRef.current);
+    };
   }, []);
 
-  /* Agent task rotation */
-  const [agentTaskIdx, setAgentTaskIdx] = useState([0, 0, 0, 0, 0]);
-  useEffect(() => {
-    const t = setInterval(() => {
-      setAgentTaskIdx(prev => prev.map((idx, i) => (idx + 1) % AGENTS[i].tasks.length));
-    }, 3500);
-    return () => clearInterval(t);
-  }, []);
+  // Launch Opportunity action handler
+  const handleLaunchOpportunity = (opp: any) => {
+    triggerExecutionPipeline(opp.title, opp.type === "VIP" ? "Email" : "WhatsApp");
+  };
 
-  /* Sparkline data */
-  const [spark] = useState(() => ({
-    revenue: Array.from({ length: 14 }, (_, i) => 40000 + i * 6000 + Math.random() * 8000),
-    growth:  Array.from({ length: 14 }, (_, i) => 60 + i * 2 + Math.random() * 5),
-  }));
+  // Autonomous New Mission Planner (Calls backend)
+  const handleGenerateNewMission = async () => {
+    setIsGeneratingMission(true);
+    try {
+      const res = await fetch("/api/autonomous-mission", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          goal: "Autonomous Revenue Recovery Planner",
+          businessType: "Fashion & Apparel"
+        })
+      });
+      if (res.ok) {
+        const data = await res.json();
+        addAgentLog("System", `Generated autonomous mission: "${data.goal}"`, "result");
+        refreshMissions();
+      }
+    } catch (e) {
+      console.warn("Failed to generate mission:", e);
+    } finally {
+      setIsGeneratingMission(false);
+    }
+  };
 
-  /* Computed metrics */
-  const totalRevenue = orders.reduce((s, o) => s + o.amount, 0);
-  const completedCamps = campaigns.filter(c => c.status === "Completed");
-  const runningCamps   = campaigns.filter(c => c.status === "Running");
-  const forecastRevenue = Math.round(totalRevenue * 1.28);
+  // Export Report file downloader
+  const handleExportReport = () => {
+    const reportData = {
+      timestamp: new Date().toISOString(),
+      kpis,
+      campaigns,
+      orders,
+      lunaMetrics
+    };
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(reportData, null, 2));
+    const dlAnchor = document.createElement("a");
+    dlAnchor.setAttribute("href", dataStr);
+    dlAnchor.setAttribute("download", `orbit_control_report_${Date.now()}.json`);
+    document.body.appendChild(dlAnchor);
+    dlAnchor.click();
+    dlAnchor.remove();
+    addAgentLog("System", "Exported operational control report.", "thought");
+  };
 
-  const deliveryRate = completedCamps.length
-    ? Math.round(completedCamps.reduce((s, c) => s + (c.sentCount ? ((c as any).deliveredCount ?? c.sentCount * 0.96) / c.sentCount : 0), 0) / completedCamps.length * 100) : 96;
-  const openRate = completedCamps.length
-    ? Math.round(completedCamps.reduce((s, c) => s + (c.sentCount ? c.openedCount / c.sentCount : 0), 0) / completedCamps.length * 100) : 71;
-  const convRate = completedCamps.length
-    ? Math.round(completedCamps.reduce((s, c) => s + (c.clickedCount ? c.purchaseCount / c.clickedCount : 0), 0) / completedCamps.length * 100) : 22;
+  // Duplicate, pause/resume, and archive/delete mission hooks
+  const handlePauseMission = async (id: string) => {
+    await updateMissionStatus(id, "Paused");
+  };
 
-  /* Animated counter targets */
-  const revCounter   = useCounter(totalRevenue, 1400, "₹");
-  const goalCounter  = useCounter(revenueGoal, 1000, "₹");
-  const foreCounter  = useCounter(forecastRevenue, 1600, "₹");
-  const growCounter  = useCounter(Math.round(growthScore * 10), 900, "", "");
+  const handleResumeMission = async (id: string) => {
+    await updateMissionStatus(id, "Running");
+  };
+
+  const handleArchiveMission = async (id: string) => {
+    await deleteMission(id);
+  };
+
+  const handleDuplicateMission = async (id: string) => {
+    await duplicateMission(id);
+  };
+
+  // Atlas Delivery Stats Computations
+  const totalSentCount = campaigns.reduce((s, c) => s + c.sentCount, 0);
+  const totalDeliveredCount = campaigns.reduce((s, c) => s + (c.deliveredCount || 0), 0);
+  const totalOpenedCount = campaigns.reduce((s, c) => s + (c.openedCount || 0), 0);
+  const totalClickedCount = campaigns.reduce((s, c) => s + (c.clickedCount || 0), 0);
+  const totalConvertedCount = campaigns.reduce((s, c) => s + (c.purchaseCount || 0), 0);
+  const totalFailedCount = campaigns.reduce((s, c) => s + (c.failedCount || 0), 0);
+  const totalPendingCount = campaigns.reduce((s, c) => s + (c.pendingCount || 0), 0);
+  const totalCampaignRevenue = campaigns.reduce((s, c) => s + (c.revenueGenerated || 0), 0);
+
+  // Revenue Attribution calculations
+  const revenueBySegment = {
+    Loyalists: orders.filter(o => customers.find(c => c.id === o.customerId)?.segment === "Loyalists").reduce((s, o) => s + o.amount, 0),
+    SlippingAway: orders.filter(o => customers.find(c => c.id === o.customerId)?.segment === "Slipping Away").reduce((s, o) => s + o.amount, 0),
+    HighValueInactive: orders.filter(o => customers.find(c => c.id === o.customerId)?.segment === "High-Value Inactive").reduce((s, o) => s + o.amount, 0),
+    NewSignups: orders.filter(o => customers.find(c => c.id === o.customerId)?.segment === "New Signups").reduce((s, o) => s + o.amount, 0)
+  };
+
+  const revenueByChannel = {
+    WhatsApp: orders.filter(o => o.channel === "WhatsApp").reduce((s, o) => s + o.amount, 0),
+    Email: orders.filter(o => o.channel === "Email").reduce((s, o) => s + o.amount, 0),
+    SMS: orders.filter(o => o.channel === "SMS").reduce((s, o) => s + o.amount, 0),
+    RCS: orders.filter(o => o.channel === "RCS").reduce((s, o) => s + o.amount, 0)
+  };
+
+  const totalSegmentRev = Object.values(revenueBySegment).reduce((s, v) => s + v, 0) || 1;
+  const totalChannelRev = Object.values(revenueByChannel).reduce((s, v) => s + v, 0) || 1;
+
+  // Mission Health System Calculations
+  const averageROI = campaigns.length > 0 ? parseFloat((campaigns.reduce((s, c) => s + (c.predictedRoi || 4.2), 0) / campaigns.length).toFixed(1)) : 4.2;
+  const averageConversion = totalSentCount > 0 ? parseFloat(((totalConvertedCount / totalSentCount) * 100).toFixed(1)) : 22.4;
+  const successRate = campaigns.length > 0 ? Math.round((campaigns.filter(c => c.status === "Completed").length / campaigns.length) * 100) : 92;
+  const healthScore = Math.round((successRate * 0.4) + (averageConversion * 1.5) + (networkHealth * 0.3));
 
   return (
-    <div className={`flex-1 min-h-0 overflow-y-auto relative transition-colors duration-300 ${isLight ? "bg-gray-50/50" : "bg-[#050816]"}`}>
+    <div className={`flex-1 min-h-0 overflow-y-auto relative transition-colors duration-300 ${isLight ? "bg-gray-50" : "bg-[#050816]"}`}>
+      {/* Background Matrix overlays */}
+      <div className="pointer-events-none absolute inset-0 space-grid opacity-35 z-0" />
+      <div className="pointer-events-none absolute inset-0 bg-orbit-glow-blue opacity-15 z-0" />
 
-      {/* ── AMBIENT GLOWS ── */}
-      <div className="pointer-events-none fixed inset-0 overflow-hidden">
-        <div className={`absolute top-0 left-1/4 w-96 h-96 rounded-full transition-opacity duration-300 ${isLight ? "opacity-5" : "opacity-20"}`}
-          style={{ background: "radial-gradient(circle, #3B82F6 0%, transparent 70%)" }} />
-        <div className={`absolute bottom-1/4 right-1/4 w-80 h-80 rounded-full transition-opacity duration-300 ${isLight ? "opacity-5" : "opacity-15"}`}
-          style={{ background: "radial-gradient(circle, #8B5CF6 0%, transparent 70%)" }} />
-      </div>
-
-      {/* ── SPACE GRID ── */}
-      <div className={`pointer-events-none fixed inset-0 space-grid transition-opacity duration-300 ${isLight ? "opacity-40" : "opacity-60"}`} />
-
-      <div className="relative z-10 p-6 space-y-5">
-
+      <div className="relative z-10 p-6 space-y-6">
         {/* ══════════════ HEADER ══════════════ */}
         <PageHeaderHUD
           title="Mission Control"
-          subtitle="AUTONOMOUS OPERATIONS CENTER — ORBIT v4.81 VANGUARD"
+          subtitle="ORBIT OPERATIONAL HEADQUARTERS · REAL-TIME AI EXECUTION HUB"
           onSelectAgent={setSelectedAgent}
           actions={
-            <button
-              onClick={() => setIsWhatsAppModalOpen(true)}
-              className="px-4 py-2 rounded-xl bg-gradient-to-r from-orbit-success to-emerald-450 text-white font-mono text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5 hover:opacity-90 hover:scale-[1.02] active:scale-95 duration-200 cursor-pointer shadow-orbit-glow-green"
-            >
-              <Send size={11} />
-              Launch WhatsApp Campaign
-            </button>
+            <div className="flex items-center gap-3">
+              {/* Demo Mode Toggle Switch */}
+              <div className="flex items-center gap-2 border border-gray-800 bg-gray-950/60 rounded-xl px-4 py-2">
+                <span className="font-mono text-[9px] uppercase tracking-wider text-gray-400">Autonomous Demo Mode</span>
+                <button
+                  onClick={toggleDemoMode}
+                  className={`w-10 h-5 rounded-full p-0.5 transition-colors cursor-pointer outline-none ${
+                    demoMode ? "bg-orbit-success" : "bg-gray-800"
+                  }`}
+                >
+                  <div className={`w-4 h-4 bg-white rounded-full shadow-md transform duration-300 ${demoMode ? "translate-x-5" : "translate-x-0"}`} />
+                </button>
+              </div>
+
+              <button
+                onClick={() => setIsCreateModalOpen(true)}
+                className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-orbit-blue to-orbit-purple text-white font-mono text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5 hover:opacity-90 hover:scale-[1.02] active:scale-95 duration-200 cursor-pointer shadow-orbit-glow"
+              >
+                <Plus size={12} />
+                Assemble Custom Mission
+              </button>
+            </div>
           }
         />
 
-        {/* ══════════════ SECTION 1 — REVENUE OVERVIEW ══════════════ */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          {[
-            {
-              label: "Revenue Achieved",
-              value: revCounter,
-              raw: totalRevenue,
-              goal: revenueGoal,
-              color: "#22C55E",
-              glow: "rgba(34,197,94,0.15)",
-              delta: "+12.4%",
-              up: true,
-              spark: spark.revenue,
-              icon: TrendingUp,
-            },
-            {
-              label: "Revenue Goal",
-              value: goalCounter,
-              raw: revenueGoal,
-              goal: revenueGoal,
-              color: "#3B82F6",
-              glow: "rgba(59,130,246,0.15)",
-              delta: "Q2 Target",
-              up: null,
-              spark: null,
-              icon: Target,
-            },
-            {
-              label: "Forecast Revenue",
-              value: foreCounter,
-              raw: forecastRevenue,
-              goal: revenueGoal,
-              color: "#8B5CF6",
-              glow: "rgba(139,92,246,0.15)",
-              delta: "+28% projected",
-              up: true,
-              spark: spark.revenue.map(v => v * 1.28),
-              icon: Zap,
-            },
-            {
-              label: "Growth Score",
-              value: `${(parseFloat(growCounter) / 10).toFixed(1)}`,
-              raw: growthScore,
-              goal: 100,
-              color: "#EC4899",
-              glow: "rgba(236,72,153,0.15)",
-              delta: "+2.3 pts this week",
-              up: true,
-              spark: spark.growth,
-              icon: Activity,
-            },
-          ].map((card, i) => {
-            const Icon = card.icon;
-            const pct = Math.min(100, Math.round((card.raw / card.goal) * 100));
-            const isDominant = card.label === "Revenue Achieved" || card.label === "Growth Score" || card.label === "Forecast Revenue";
-            
-            return (
-              <div
-                key={i}
-                className={`relative rounded-xl border p-5 flex flex-col gap-3.5 overflow-hidden transition-all duration-300 ${
-                  isLight
-                    ? "bg-white border-gray-200 shadow-[0_4px_20px_rgba(0,0,0,0.02)] hover:border-gray-300"
-                    : isDominant
-                      ? "bg-gradient-to-br from-[#0F172A] to-[#1E293B] border-[rgba(255,255,255,0.12)] hover:border-[rgba(255,255,255,0.22)] animate-glow-pulse"
-                      : "bg-[#0F172A]/70 border-[rgba(255,255,255,0.06)] hover:border-[rgba(255,255,255,0.15)] opacity-85 hover:opacity-100"
-                }`}
-                style={{
-                  boxShadow: isLight
-                    ? undefined
-                    : isDominant
-                      ? `0 0 35px ${card.glow}, inset 0 0 15px rgba(255,255,255,0.01)`
-                      : `0 0 15px ${card.glow}`
-                }}
-              >
-                {/* Top row */}
-                <div className="flex items-center justify-between">
-                  <span className={`font-mono text-[9.5px] uppercase tracking-[0.15em] ${isLight ? "text-gray-550" : "text-gray-400"}`}>{card.label}</span>
-                  <Icon size={14} style={{ color: card.color }} />
-                </div>
-
-                {/* Value */}
-                <div>
-                  <span className="font-space text-2xl lg:text-3xl font-bold tracking-tight tabular-nums" style={{ color: card.color }}>
-                    {card.value}
-                  </span>
-                  {card.label === "Growth Score" && (
-                    <span className={`font-space text-xs lg:text-sm font-semibold ml-1.5 ${isLight ? "text-gray-500" : "text-gray-400"}`}> /100</span>
-                  )}
-                </div>
-
-                {/* Delta badge */}
-                <div className="flex items-center gap-1.5">
-                  {card.up === true && <ChevronUp size={12} className="text-orbit-success" />}
-                  {card.up === false && <ChevronDown size={12} className="text-red-400" />}
-                  <span className={`font-mono text-[10.5px] font-semibold ${card.up === true ? "text-orbit-success" : card.up === false ? "text-red-400" : isLight ? "text-gray-500" : "text-gray-500"}`}>
-                    {card.delta}
-                  </span>
-                </div>
-
-                {/* Sparkline */}
-                {card.spark && (
-                  <div className="mt-auto">
-                    <Sparkline values={card.spark} color={card.color} height={38} />
-                  </div>
-                )}
-
-                {/* Progress bar */}
-                {card.label !== "Growth Score" && (
-                  <div className={`w-full h-1 rounded-full overflow-hidden ${isLight ? "bg-gray-200" : "bg-gray-800"}`}>
-                    <div
-                      className="h-full rounded-full transition-all duration-1000"
-                      style={{ width: `${pct}%`, backgroundColor: card.color, boxShadow: `0 0 8px ${card.color}` }}
-                    />
-                  </div>
-                )}
-
-                {/* Corner glow */}
-                <div className={`absolute -top-8 -right-8 w-24 h-24 rounded-full pointer-events-none transition-opacity duration-300 ${isLight ? "opacity-10" : "opacity-15"}`}
-                  style={{ background: `radial-gradient(circle, ${card.color}, transparent)` }} />
-              </div>
-            );
-          })}
-        </div>
-
-        {/* ══════════════ MIDDLE ROW ══════════════ */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-
-          {/* ── SECTION 2 — ACTIVE MISSIONS ── */}
-          <div className={`rounded-xl border p-5 flex flex-col gap-4 ${
-            isLight ? "bg-white border-gray-200 shadow-sm" : "bg-gray-900/50 border-gray-800/80 backdrop-blur-md"
-          }`}>
-            <div className={`flex items-center justify-between border-b pb-3 ${isLight ? "border-gray-150" : "border-gray-800"}`}>
-              <div className="flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-orbit-blue animate-pulse" />
-                <span className={`font-space text-sm font-bold uppercase tracking-wider ${isLight ? "text-gray-900" : "text-white"}`}>Active Missions</span>
-              </div>
-              <span className={`font-mono text-[9px] ${isLight ? "text-gray-400" : "text-gray-550"}`}>
-                {campaigns.length} TOTAL
-              </span>
-            </div>
-
-            {/* Summary stats */}
-            <div className="grid grid-cols-3 gap-3 text-center">
-              {[
-                { label: "Running", val: runningCamps.length, color: "text-orbit-blue" },
-                { label: "Complete", val: completedCamps.length, color: "text-orbit-success" },
-                { label: "Draft", val: campaigns.filter(c => c.status === "Draft").length, color: isLight ? "text-gray-550" : "text-gray-400" },
-              ].map((s, i) => (
-                <div key={i} className={`rounded-lg p-3 border ${isLight ? "bg-gray-50 border-gray-150" : "bg-gray-950/40 border-gray-800"}`}>
-                  <span className={`font-space text-xl font-bold ${s.color}`}>{s.val}</span>
-                  <span className={`font-mono text-[9px] uppercase block mt-0.5 ${isLight ? "text-gray-555" : "text-gray-555"}`}>{s.label}</span>
-                </div>
-              ))}
-            </div>
-
-            {/* Campaign list */}
-            <div className="flex flex-col gap-2 flex-1 overflow-y-auto max-h-52">
-              {campaigns.length === 0 && (
-                <div className="text-center py-6 text-gray-600 font-mono text-xs">
-                  No campaigns yet. Launch a mission.
-                </div>
-              )}
-              {campaigns.map((camp, i) => {
-                const pct = camp.sentCount > 0 ? Math.round((camp.openedCount / camp.sentCount) * 100) : 0;
-                const statusColor = camp.status === "Running" ? "#3B82F6" : camp.status === "Completed" ? "#22C55E" : "#6B7280";
-                return (
-                  <div key={i} className={`p-3 rounded-lg border transition-colors ${
-                    isLight ? "bg-gray-55 border-gray-150 hover:border-gray-300" : "bg-gray-950/40 border-gray-800 hover:border-gray-700"
-                  }`}>
-                    <div className="flex items-start justify-between gap-2 mb-2">
-                      <div className="flex-1 min-w-0">
-                        <p className={`font-mono text-[10px] font-bold truncate ${isLight ? "text-gray-900" : "text-white"}`}>{camp.name}</p>
-                        <p className="font-mono text-[9px] text-gray-500 mt-0.5">{camp.channel} · {camp.sentCount} targets</p>
-                      </div>
-                      <div className="flex items-center gap-1 shrink-0">
-                        <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: statusColor }} />
-                        <span className="font-mono text-[8px] uppercase" style={{ color: statusColor }}>{camp.status}</span>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <div className={`flex-1 h-1 rounded-full overflow-hidden ${isLight ? "bg-gray-200" : "bg-gray-800"}`}>
-                        <div
-                          className="h-full rounded-full transition-all duration-700"
-                          style={{ width: `${pct}%`, backgroundColor: statusColor }}
-                        />
-                      </div>
-                      <span className={`font-mono text-[9px] shrink-0 ${isLight ? "text-gray-500" : "text-gray-400"}`}>{pct}%</span>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* ── SECTION 3 — NETWORK HEALTH + SECTION 5 FORECAST ── */}
-          <div className="flex flex-col gap-4">
-            {/* Network Health */}
-            <div className={`rounded-xl border p-5 flex flex-col gap-4 transition-all duration-300 ${
-              isLight ? "bg-white border-gray-200 shadow-sm" : "bg-gradient-to-br from-[#0F172A] to-[#1E293B] border-[rgba(34,197,94,0.25)] backdrop-blur-md"
-            }`}
-            style={{ boxShadow: isLight ? undefined : "0 0 30px rgba(34, 197, 94, 0.15), inset 0 0 10px rgba(34, 197, 94, 0.02)" }}>
-              <div className={`flex items-center justify-between border-b pb-3 ${isLight ? "border-gray-150" : "border-[rgba(255,255,255,0.06)]"}`}>
-                <div className="flex items-center gap-2">
-                  <Shield size={13} className="text-orbit-success animate-pulse" />
-                  <span className={`font-space text-sm font-bold uppercase tracking-wider ${isLight ? "text-gray-900" : "text-white"}`}>Orbit Network Health</span>
-                </div>
-                <span className={`font-mono text-[9.5px] font-bold px-2 py-0.5 rounded-full border ${
-                  isLight ? "text-emerald-700 border-emerald-200 bg-emerald-50" : "text-orbit-success border-orbit-success/30 bg-orbit-success/5 animate-pulse"
-                }`}>
-                  {networkHealth}% UPTIME
-                </span>
-              </div>
-
-              <div className="flex items-center justify-around py-2">
-                <RadialGauge value={deliveryRate} color="#3B82F6" label="Delivery Rate" isLight={isLight} />
-                <RadialGauge value={openRate} color="#8B5CF6" label="Open Rate" isLight={isLight} />
-                <RadialGauge value={convRate} color="#22C55E" label="Conversion" isLight={isLight} />
-              </div>
-
-              {/* Extra Core Telemetry: SpaceX style */}
-              <div className={`grid grid-cols-3 gap-2 p-2 rounded-lg border text-center ${
-                isLight ? "bg-gray-50 border-gray-150" : "bg-gray-950/40 border-gray-800"
-              }`}>
-                <div>
-                  <span className="font-mono text-[7px] text-gray-500 block uppercase">CPU Load</span>
-                  <span className={`font-mono text-[10px] font-bold ${isLight ? "text-gray-800" : "text-gray-300"}`}>3.4%</span>
-                </div>
-                <div>
-                  <span className="font-mono text-[7px] text-gray-500 block uppercase">Queue Rate</span>
-                  <span className={`font-mono text-[10px] font-bold ${isLight ? "text-gray-800" : "text-gray-300"}`}>18 msg/s</span>
-                </div>
-                <div>
-                  <span className="font-mono text-[7px] text-gray-500 block uppercase">DB Latency</span>
-                  <span className={`font-mono text-[10px] font-bold ${isLight ? "text-gray-800" : "text-gray-300"}`}>12 ms</span>
-                </div>
-              </div>
-
-              <div className={`grid grid-cols-5 gap-2 pt-1 border-t ${isLight ? "border-gray-150" : "border-gray-800"}`}>
-                {[
-                  { label: "Polaris", val: "99.8%" },
-                  { label: "Vega",    val: "98.2%" },
-                  { label: "Nova",    val: "100%"  },
-                  { label: "Atlas",   val: "97.6%" },
-                  { label: "Luna",    val: "99.1%" },
-                ].map((n, i) => (
-                  <div key={i} className="text-center">
-                    <p className="font-mono text-[8px] text-gray-500 uppercase">{n.label}</p>
-                    <p className="font-mono text-[10px] text-orbit-success font-bold">{n.val}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Revenue Forecast */}
-            <div className={`rounded-xl border p-5 flex flex-col gap-3 ${
-              isLight ? "bg-white border-gray-200 shadow-sm" : "bg-gray-900/50 border-gray-800/80 backdrop-blur-md"
-            }`}>
-              <div className={`flex items-center justify-between border-b pb-3 ${isLight ? "border-gray-150" : "border-gray-800"}`}>
-                <div className="flex items-center gap-2">
-                  <Star size={13} className="text-orbit-purple" />
-                  <span className={`font-space text-sm font-bold uppercase tracking-wider ${isLight ? "text-gray-900" : "text-white"}`}>Revenue Forecast</span>
-                </div>
-                <span className="font-mono text-[9px] text-orbit-purple">AI VEGA MODEL</span>
-              </div>
-
-              {[
-                { period: "Next 7 Days",  amount: forecastRevenue * 0.25, conf: 94, color: "#3B82F6" },
-                { period: "Next 30 Days", amount: forecastRevenue * 0.72, conf: 87, color: "#8B5CF6" },
-                { period: "Next 90 Days", amount: forecastRevenue * 1.8,  conf: 71, color: "#EC4899" },
-              ].map((row, i) => (
-                <div key={i} className="flex flex-col gap-1.5">
-                  <div className="flex justify-between items-center">
-                    <span className={`font-mono text-[10px] ${isLight ? "text-gray-700" : "text-gray-300"}`}>{row.period}</span>
-                    <div className="flex items-center gap-2">
-                      <span className={`font-space text-sm font-bold ${isLight ? "text-gray-900" : "text-white"}`}>
-                        ₹{Math.round(row.amount / 1000)}K
-                      </span>
-                      <span className={`font-mono text-[8px] ${isLight ? "text-gray-400" : "text-gray-550"}`}>{row.conf}% conf</span>
-                    </div>
-                  </div>
-                  <div className={`w-full h-1.5 rounded-full overflow-hidden ${isLight ? "bg-gray-200" : "bg-gray-800"}`}>
-                    <div
-                      className="h-full rounded-full transition-all duration-1000"
-                      style={{ width: `${row.conf}%`, backgroundColor: row.color }}
-                    />
-                  </div>
-                </div>
-              ))}
-
-              <div className={`mt-2 p-3 rounded-lg border ${
-                isLight ? "bg-purple-50/50 border-purple-100 text-purple-950" : "bg-orbit-purple/5 border-orbit-purple/20 text-gray-400"
-              }`}>
-                <p className="font-mono text-[9px] leading-relaxed">
-                  💡 <span className={isLight ? "text-purple-700 font-bold" : "text-orbit-purple"}>Vega</span>: Loyalist segment poised to drive ₹{Math.round(forecastRevenue * 0.42 / 1000)}K of next 30-day revenue. Recommend Nova cross-sell activation.
-                </p>
-              </div>
-            </div>
-
-            {/* Revenue Recovery Radar (Luna) */}
-            <div 
-              onClick={() => setSelectedAgent("Luna")}
-              className={`rounded-xl border p-5 flex flex-col gap-3 cursor-pointer hover:border-amber-500/50 hover:scale-[1.01] transition-all duration-300 ${
-                isLight ? "bg-white border-gray-200 shadow-sm" : "bg-gray-900/50 border-gray-800/80 backdrop-blur-md"
-              }`}
-              title="Click to view Luna premium recovery card"
-            >
-              <div className={`flex items-center justify-between border-b pb-3 ${isLight ? "border-gray-150" : "border-gray-800"}`}>
-                <div className="flex items-center gap-2">
-                  <Activity size={13} className="text-amber-500 animate-pulse" />
-                  <span className={`font-space text-sm font-bold uppercase tracking-wider ${isLight ? "text-gray-900" : "text-white"}`}>Revenue Recovery Radar</span>
-                </div>
-                <span className="font-mono text-[9px] text-amber-500">AI LUNA MODEL</span>
-              </div>
-
-              <div className="flex items-center gap-4">
-                {/* Spinning Radar scanner graphic */}
-                <div className="relative w-16 h-16 flex items-center justify-center shrink-0 bg-gray-950/40 rounded-full border border-gray-805/20">
-                  <svg className="absolute inset-0 w-full h-full animate-orbit-spin-slow" viewBox="0 0 100 100">
-                    <circle cx="50" cy="50" r="45" fill="none" stroke="rgba(245,158,11,0.15)" strokeWidth="1" />
-                    <circle cx="50" cy="50" r="30" fill="none" stroke="rgba(245,158,11,0.1)" strokeWidth="1" />
-                    <circle cx="50" cy="50" r="15" fill="none" stroke="rgba(245,158,11,0.05)" strokeWidth="1" />
-                    <line x1="50" y1="50" x2="50" y2="5" stroke="#F59E0B" strokeWidth="1.5" strokeLinecap="round" />
-                  </svg>
-                  <span className="absolute w-2 h-2 rounded-full bg-purple-500 animate-ping top-3 left-4" />
-                  <span className="absolute w-1.5 h-1.5 rounded-full bg-amber-500 top-8 right-3 animate-pulse" />
-                </div>
-
-                <div className="flex-1 grid grid-cols-2 gap-2 text-left font-mono">
-                  <div>
-                    <span className="text-[8px] text-gray-550 block uppercase">Recoverable</span>
-                    <span className={`text-xs font-bold font-space ${isLight ? "text-gray-900" : "text-white"}`}>₹{lunaMetrics.recoverableRevenue.toLocaleString()}</span>
-                  </div>
-                  <div>
-                    <span className="text-[8px] text-gray-555 block uppercase">Lost Opps</span>
-                    <span className={`text-xs font-bold font-space ${isLight ? "text-gray-900" : "text-white"}`}>{lunaMetrics.abandonedLeads} leads</span>
-                  </div>
-                  <div>
-                    <span className="text-[8px] text-gray-550 block uppercase">Inactive</span>
-                    <span className={`text-xs font-bold font-space ${isLight ? "text-gray-900" : "text-white"}`}>{lunaMetrics.inactiveCustomers} VIPs</span>
-                  </div>
-                  <div>
-                    <span className="text-[8px] text-gray-550 block uppercase">Opp Score</span>
-                    <span className="text-xs font-bold text-amber-500 font-space">{lunaMetrics.opportunityScore}/100</span>
-                  </div>
-                </div>
-              </div>
-
-              <div className={`mt-1 p-2.5 rounded-lg border ${
-                isLight ? "bg-amber-50/50 border-amber-100 text-amber-950" : "bg-amber-500/5 border-amber-500/20 text-gray-400"
-              }`}>
-                <p className="font-mono text-[9px] leading-relaxed">
-                  📡 <span className={isLight ? "text-amber-800 font-bold" : "text-amber-500"}>Luna</span>: Scanning customer universe... Detected {lunaMetrics.abandonedLeads} abandoned enquiries and checkout leads with high purchase affinity scores.
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* ── SECTION 4 — LIVE DISPATCH & ATLAS DELIVERY ── */}
-          <div className={`rounded-xl border p-5 flex flex-col gap-4 min-h-[460px] ${
-            isLight ? "bg-white border-gray-200 shadow-sm" : "bg-gray-900/50 border-gray-800/80 backdrop-blur-md"
-          }`}>
-            <div className={`flex items-center justify-between border-b pb-3 ${isLight ? "border-gray-150" : "border-gray-800"}`}>
-              <div className="flex gap-4 font-space font-bold text-xs uppercase">
-                <button
-                  onClick={() => setAtlasTab("dashboard")}
-                  className={`pb-1 border-b-2 cursor-pointer transition-colors ${
-                    atlasTab === "dashboard"
-                      ? "border-orbit-success text-white"
-                      : "border-transparent text-gray-500 hover:text-gray-300"
-                  }`}
-                >
-                  Atlas Delivery
-                </button>
-                <button
-                  onClick={() => setAtlasTab("feed")}
-                  className={`pb-1 border-b-2 cursor-pointer transition-colors ${
-                    atlasTab === "feed"
-                      ? "border-orbit-success text-white"
-                      : "border-transparent text-gray-500 hover:text-gray-300"
-                  }`}
-                >
-                  Live Dispatch Feed
-                </button>
-              </div>
-              <div className={`flex items-center gap-1.5 font-mono text-[9px] ${isLight ? "text-emerald-700 font-bold" : "text-orbit-success"}`}>
-                <span className="w-1.5 h-1.5 rounded-full bg-orbit-success animate-ping" />
-                LIVE
-              </div>
-            </div>
-
-            {atlasTab === "dashboard" ? (
-              <div className="flex-1 flex flex-col gap-4 font-mono text-xs">
-                <div className="grid grid-cols-2 gap-3">
-                  <div className={`p-3 rounded-lg border ${isLight ? "bg-gray-55 border-gray-150" : "bg-gray-950/40 border-gray-800"}`}>
-                    <span className="text-[8px] text-gray-500 uppercase block mb-1">Messages Sent</span>
-                    <span className={`text-xl font-bold font-space ${isLight ? "text-gray-900" : "text-white"}`}>{totalSent}</span>
-                  </div>
-                  <div className={`p-3 rounded-lg border ${isLight ? "bg-gray-55 border-gray-150" : "bg-gray-950/40 border-gray-800"}`}>
-                    <span className="text-[8px] text-gray-500 uppercase block mb-1">Delivery Rate</span>
-                    <span className="text-xl font-bold text-orbit-success font-space">{deliveryRatePct}%</span>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-3 gap-2">
-                  <div className={`p-2 rounded-lg border text-center ${isLight ? "bg-gray-55 border-gray-150" : "bg-gray-950/40 border-gray-800"}`}>
-                    <span className="text-[7px] text-gray-550 block uppercase mb-0.5">Delivered</span>
-                    <span className="text-xs font-bold text-orbit-success">{totalDelivered}</span>
-                  </div>
-                  <div className={`p-2 rounded-lg border text-center ${isLight ? "bg-gray-55 border-gray-150" : "bg-gray-950/40 border-gray-800"}`}>
-                    <span className="text-[7px] text-gray-555 block uppercase mb-0.5">Failed</span>
-                    <span className="text-xs font-bold text-red-400">{totalFailed}</span>
-                  </div>
-                  <div className={`p-2 rounded-lg border text-center ${isLight ? "bg-gray-55 border-gray-150" : "bg-gray-950/40 border-gray-800"}`}>
-                    <span className="text-[7px] text-gray-550 block uppercase mb-0.5">Pending</span>
-                    <span className="text-xs font-bold text-blue-405">{totalPending}</span>
-                  </div>
-                </div>
-
-                <div className="space-y-1">
-                  <div className="flex justify-between text-[8px] text-gray-500 uppercase">
-                    <span>Overall Delivery Health</span>
-                    <span>{deliveryRatePct}%</span>
-                  </div>
-                  <div className={`w-full h-1.5 rounded-full overflow-hidden ${isLight ? "bg-gray-200" : "bg-gray-800"}`}>
-                    <div className="h-full bg-orbit-success rounded-full" style={{ width: `${deliveryRatePct}%` }} />
-                  </div>
-                </div>
-
-                <div className={`mt-auto p-3 rounded-lg border flex-1 overflow-y-auto max-h-[140px] ${
-                  isLight ? "bg-gray-55 border-gray-150" : "bg-gray-955/30 border-gray-850"
-                }`}>
-                  <span className="text-[8px] text-gray-500 uppercase block border-b border-gray-800/40 pb-1 mb-1.5 font-bold">WhatsApp Dispatch Channels</span>
-                  {whatsappCampaigns.length === 0 ? (
-                    <p className="text-center py-6 text-gray-600 text-[10px]">[ NO ACTIVE WHATSAPP CHANNELS ]</p>
-                  ) : (
-                    <div className="space-y-1.5">
-                      {whatsappCampaigns.map(c => {
-                        const pct = c.sentCount > 0 ? Math.round(((c.deliveredCount ?? 0) / c.sentCount) * 100) : 0;
-                        return (
-                          <div key={c.id} className="flex flex-col gap-1 text-[9.5px] border-b border-gray-900/30 pb-1.5">
-                            <div className="flex justify-between items-center font-bold">
-                              <span className="text-gray-300 truncate max-w-[150px]">{c.name}</span>
-                              <span className={`${
-                                c.status === "Completed" || c.status === "Delivered" ? "text-orbit-success" :
-                                c.status === "Failed" ? "text-red-400" : "text-blue-400 animate-pulse"
-                              }`}>{c.status}</span>
-                            </div>
-                            <div className="flex justify-between items-center text-[8px] text-gray-500">
-                              <span>Sent: {c.sentCount} · Del: {c.deliveredCount} · Fail: {c.failedCount}</span>
-                              <span>{pct}%</span>
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  )}
-                </div>
-              </div>
-            ) : (
-              <div className="flex-1 flex flex-col gap-3 min-h-[360px]">
-                {/* Aggregate totals */}
-                <div className="grid grid-cols-5 gap-1 shrink-0">
-                  {(["sent","delivered","opened","clicked","purchased"] as const).map(type => {
-                    const cfg = TYPE_CONFIG[type];
-                    const count = ticker.filter(t => t.type === type).length;
-                    return (
-                      <div key={type} className={`flex flex-col items-center gap-0.5 rounded-lg p-1.5 border ${isLight ? "bg-gray-50 border-gray-150" : "bg-gray-950/40 border-gray-800"}`}>
-                        <span className={`font-mono text-[8px] uppercase tracking-wider ${cfg.color}`}>{cfg.icon}</span>
-                        <span className={`font-space text-xs font-bold ${isLight ? "text-gray-900" : "text-white"}`}>{count}</span>
-                      </div>
-                    );
-                  })}
-                </div>
-
-                {/* Scrolling events */}
-                <div className="flex-1 overflow-hidden relative min-h-0" style={{ maxHeight: 320 }}>
-                  <div className="space-y-1.5 overflow-y-auto h-full pr-1 scrollbar-thin">
-                    {ticker.map((evt, i) => {
-                      const cfg = TYPE_CONFIG[evt.type];
-                      return (
-                        <div
-                          key={evt.id}
-                          className={`flex items-center gap-2.5 p-2 rounded-lg border transition-all ${
-                            isLight ? "bg-gray-50 border-gray-150 hover:border-gray-200" : "bg-gray-950/40 border-gray-800/50 hover:border-gray-700"
-                          }`}
-                          style={{
-                            animationName: i === 0 ? "fadeInUp" : undefined,
-                            animationDuration: "0.4s",
-                            animationFillMode: "both",
-                          }}
-                        >
-                          <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${cfg.dot}`} />
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-1.5">
-                              <span className={`font-mono text-[9px] font-bold truncate ${isLight ? "text-gray-800" : "text-white"}`}>{evt.name}</span>
-                              <span className={`font-mono text-[8px] font-bold uppercase tracking-wider ${cfg.color}`}>
-                                {cfg.label}
-                              </span>
-                            </div>
-                            <div className={`font-mono text-[8px] truncate ${isLight ? "text-gray-500" : "text-gray-650"}`}>{evt.campaign}</div>
-                          </div>
-                          <div className="text-right shrink-0">
-                            {evt.amount && (
-                              <span className="font-mono text-[9px] text-orbit-success font-bold">+₹{evt.amount.toLocaleString()}</span>
-                            )}
-                            <span className={`font-mono text-[8px] block ${isLight ? "text-gray-550" : "text-gray-655"}`}>{evt.ts}</span>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                  {/* Fade out at bottom */}
-                  <div className="absolute bottom-0 left-0 right-0 h-8 pointer-events-none"
-                    style={{ background: isLight ? "linear-gradient(to bottom, transparent, rgba(255,255,255,0.9))" : "linear-gradient(to bottom, transparent, rgba(17,24,39,0.9))" }} />
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* ══════════════ SECTION 6 — AGENT STATUS GRID ══════════════ */}
-        <div className={`rounded-xl border p-5 ${
-          isLight ? "bg-white border-gray-200 shadow-sm" : "bg-gray-900/50 border-gray-800/80 backdrop-blur-md"
-        }`}>
-          <div className={`flex items-center justify-between border-b pb-3 mb-5 ${isLight ? "border-gray-150" : "border-gray-800"}`}>
-            <div className="flex items-center gap-2">
-              <Cpu size={14} className="text-orbit-purple" />
-              <span className={`font-space text-sm font-bold uppercase tracking-wider ${isLight ? "text-gray-900" : "text-white"}`}>Agent Intelligence Grid</span>
-            </div>
-            <span className={`font-mono text-[9px] border px-2 py-0.5 rounded-full ${
-              isLight ? "text-emerald-700 border-emerald-200 bg-emerald-50" : "text-orbit-success border-orbit-success/30 bg-orbit-success/5"
-            }`}>
-              5/5 AGENTS ONLINE
+        {/* ══════════════ TOP KPI SECTION ══════════════ */}
+        <div className="space-y-3">
+          <div className="flex justify-between items-center">
+            <span className="font-space text-xs font-bold text-white uppercase tracking-wider flex items-center gap-2">
+              <BarChart3 size={14} className="text-orbit-blue animate-pulse" />
+              Live Telemetry Ledger
             </span>
+            {/* Timeframe Selector */}
+            <div className="flex bg-gray-950 border border-gray-800 rounded-lg p-0.5 font-mono text-[9px] uppercase">
+              {(["Today", "This Week", "This Month"] as const).map(tf => (
+                <button
+                  key={tf}
+                  onClick={() => setKpiTimeframe(tf)}
+                  className={`px-3 py-1.5 rounded-md font-bold transition-all cursor-pointer ${
+                    kpiTimeframe === tf
+                      ? "bg-orbit-blue text-white shadow-orbit-glow-blue"
+                      : "text-gray-500 hover:text-gray-300"
+                  }`}
+                >
+                  {tf}
+                </button>
+              ))}
+            </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-            {AGENTS.map((agent, i) => {
-              const currentTask = agent.tasks[agentTaskIdx[i]];
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            {[
+              {
+                label: "Revenue Achieved",
+                value: achievedCounter,
+                raw: kpis.achieved,
+                goal: kpis.goal,
+                color: "#22C55E",
+                glow: "rgba(34,197,94,0.15)",
+                delta: "+14.2% yield",
+                up: true,
+                spark: [20000, 24000, 22000, 31000, 28000, kpis.achieved],
+                icon: TrendingUp
+              },
+              {
+                label: "Revenue Goal",
+                value: goalCounter,
+                raw: kpis.goal,
+                goal: kpis.goal,
+                color: "#3B82F6",
+                glow: "rgba(59,130,246,0.15)",
+                delta: "Ledger Target",
+                up: null,
+                spark: null,
+                icon: Target
+              },
+              {
+                label: "Forecast Revenue",
+                value: forecastCounter,
+                raw: kpis.forecast,
+                goal: kpis.goal,
+                color: "#8B5CF6",
+                glow: "rgba(139,92,246,0.15)",
+                delta: "AI projected",
+                up: true,
+                spark: [25000, 29000, 28000, 37000, 34000, kpis.forecast],
+                icon: Zap
+              },
+              {
+                label: "Growth Score",
+                value: `${(parseFloat(growthCounter) / 10).toFixed(1)}`,
+                raw: kpis.growth,
+                goal: 10,
+                color: "#EC4899",
+                glow: "rgba(236,72,153,0.15)",
+                delta: "Attribution Delta",
+                up: true,
+                spark: [7.2, 7.8, 8.1, 7.9, 8.3, kpis.growth],
+                icon: Activity
+              }
+            ].map((card, idx) => {
+              const Icon = card.icon;
+              const progressPct = Math.min(100, Math.round((card.raw / card.goal) * 100)) || 0;
               return (
                 <div
-                  key={agent.name}
-                  className={`relative rounded-xl border p-5 flex flex-col gap-3.5 overflow-hidden transition-all duration-500 ${
-                    isLight
-                      ? "bg-gray-50 border-gray-150 hover:border-gray-250 hover:bg-gray-100/30"
-                      : "bg-[#0F172A] hover:bg-[#1E293B] border-[rgba(255,255,255,0.08)] hover:border-white/15"
+                  key={idx}
+                  className={`relative rounded-xl border p-4 flex flex-col gap-3 overflow-hidden transition-all duration-300 ${
+                    isLight ? "bg-white border-gray-200" : "bg-[#0c0f20]/60 border-gray-800 hover:border-gray-750"
                   }`}
-                  style={isLight ? undefined : {
-                    borderLeft: `4px solid ${agent.color}`,
-                    boxShadow: `0 0 25px ${agent.color}15, inset 0 0 10px ${agent.color}02`
-                  }}
+                  style={{ boxShadow: isLight ? undefined : `0 0 20px ${card.glow}` }}
                 >
-                  {/* Header */}
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <span
-                        className="w-2.5 h-2.5 rounded-full animate-pulse"
-                        style={{ backgroundColor: agent.color }}
-                      />
-                      <span className={`font-space text-base font-bold ${isLight ? "text-gray-900" : "text-white"}`}>{agent.name}</span>
-                    </div>
-                    <span
-                      className="font-mono text-[8px] font-bold uppercase px-2 py-0.5 rounded-full border"
-                      style={{ color: agent.color, borderColor: `${agent.color}40`, background: `${agent.color}10` }}
-                    >
-                      ONLINE
+                  <div className="flex justify-between items-center">
+                    <span className="font-mono text-[9px] uppercase tracking-wider text-gray-400">{card.label}</span>
+                    <Icon size={12} style={{ color: card.color }} />
+                  </div>
+                  <div>
+                    <span className="font-space text-2xl font-bold tracking-tight" style={{ color: card.color }}>
+                      {card.value}
                     </span>
                   </div>
-
-                  {/* Role */}
-                  <p className="font-mono text-[9px] uppercase tracking-wider" style={{ color: agent.color }}>
-                    {agent.role}
-                  </p>
-
-                  {/* Current task */}
-                  <div className={`rounded-lg p-3 border min-h-[52px] flex flex-col justify-center ${
-                    isLight ? "bg-white border-gray-150" : "bg-gray-950/40 border-gray-800"
-                  }`}>
-                    <p className={`font-mono text-[9px] uppercase tracking-wider mb-1 ${isLight ? "text-gray-400" : "text-gray-500"}`}>Current Task</p>
-                    <p
-                      className={`font-mono text-[10px] leading-relaxed transition-all duration-500 ${isLight ? "text-gray-800" : "text-white"}`}
-                      key={currentTask}
-                      style={{ animation: "fadeInUp 0.4s ease" }}
-                    >
-                      {currentTask}
-                    </p>
+                  <div className="flex items-center gap-1">
+                    {card.up && <ChevronUp size={10} className="text-orbit-success" />}
+                    <span className={`font-mono text-[9px] ${card.up ? "text-orbit-success" : "text-gray-500"}`}>{card.delta}</span>
                   </div>
-
-                  {/* Confidence meter */}
-                  <div>
-                    <div className="flex justify-between items-center mb-1.5">
-                      <span className={`font-mono text-[9px] uppercase tracking-wider ${isLight ? "text-gray-550" : "text-gray-450"}`}>Confidence</span>
-                      <span className={`font-mono text-[10px] font-bold ${isLight ? "text-gray-800" : "text-white"}`}>{agent.confidence}%</span>
-                    </div>
-                    <div className={`w-full h-1.5 rounded-full overflow-hidden ${isLight ? "bg-gray-200" : "bg-gray-800"}`}>
-                      <div
-                        className="h-full rounded-full transition-all duration-1000"
-                        style={{
-                          width: `${agent.confidence}%`,
-                          backgroundColor: agent.color,
-                          boxShadow: `0 0 8px ${agent.color}`,
-                        }}
-                      />
-                    </div>
-                  </div>
-
-                  {/* Recent log */}
-                  {agentLogs.find(l => l.agent === agent.name) && (
-                    <div className={`border-t pt-3 ${isLight ? "border-gray-150" : "border-gray-800"}`}>
-                      <p className={`font-mono text-[9px] leading-relaxed line-clamp-2 ${isLight ? "text-gray-500" : "text-gray-500"}`}>
-                        {agentLogs.find(l => l.agent === agent.name)!.message}
-                      </p>
+                  {card.spark && (
+                    <div className="mt-1">
+                      <Sparkline values={card.spark} color={card.color} height={30} />
                     </div>
                   )}
-
-                  {/* Corner accent */}
-                  <div
-                    className="absolute -top-6 -right-6 w-20 h-20 rounded-full pointer-events-none"
-                    style={{ background: `radial-gradient(circle, ${agent.color}25, transparent)` }}
-                  />
+                  {card.label !== "Growth Score" && (
+                    <div className={`w-full h-1 rounded-full overflow-hidden mt-1 ${isLight ? "bg-gray-200" : "bg-gray-900"}`}>
+                      <div className="h-full rounded-full" style={{ width: `${progressPct}%`, backgroundColor: card.color }} />
+                    </div>
+                  )}
                 </div>
               );
             })}
           </div>
         </div>
 
-        {/* ══════════════ BOTTOM STATUS BAR ══════════════ */}
-        <div className={`rounded-xl border px-5 py-3 flex flex-wrap items-center gap-x-8 gap-y-2.5 ${
-          isLight ? "bg-white border-gray-200 shadow-sm" : "bg-gray-955/60 border-gray-800/80 backdrop-blur-md"
-        }`}>
-          <div className="flex items-center gap-2">
-            <span className="w-1.5 h-1.5 rounded-full bg-orbit-success animate-pulse" />
-            <span className={`font-mono text-[9px] uppercase tracking-wider ${isLight ? "text-gray-600" : "text-gray-400"}`}>
-              Orbit Core <span className={isLight ? "text-emerald-700 font-bold" : "text-orbit-success"}>v4.81-Vanguard</span>
-            </span>
-          </div>
-          <div className="flex items-center gap-2">
-            <Layers size={10} className="text-orbit-blue" />
-            <span className={`font-mono text-[9px] ${isLight ? "text-gray-500" : "text-gray-500"}`}>
-              {campaigns.length} Campaigns · {orders.length} Orders · {ticker.length} Live Events
-            </span>
-          </div>
-
-          {/* Interactive Ping Trigger */}
-          <div className="flex items-center gap-3">
-            <button
-              onClick={handlePingTest}
-              disabled={isPingRunning}
-              className={`px-3 py-1.5 rounded-lg border font-mono text-[9px] font-bold uppercase tracking-wider transition-all flex items-center gap-1.5 cursor-pointer ${
-                isPingRunning
-                  ? "border-yellow-500/50 bg-yellow-500/20 text-yellow-400 shadow-orbit-glow-amber animate-pulse"
-                  : isLight
-                    ? "border-gray-200 bg-white text-gray-700 hover:bg-gray-150"
-                    : "border-[rgba(255,255,255,0.12)] bg-[#0F172A] text-gray-300 hover:border-orbit-blue/50 hover:text-white hover:shadow-orbit-glow-blue"
-              }`}
-            >
-              <Activity size={10} className={isPingRunning ? "animate-spin" : ""} />
-              {isPingRunning ? `PINGING (STG ${pingStep}/5)` : "Run Core Diagnostics PING"}
-            </button>
-            {pingLogs.length > 0 && (
-              <div className={`font-mono text-[8px] truncate max-w-[200px] md:max-w-[350px] ${isLight ? "text-gray-500" : "text-gray-400"}`}>
-                <span className="text-orbit-blue font-bold">»</span> {pingLogs[0]}
+        {/* ══════════════ THREE COLUMN GRID DASHBOARD ══════════════ */}
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+          
+          {/* COLUMN 1: EXECUTIVE BRIEFING, EXECUTION CENTER & ACTIVE MISSIONS */}
+          <div className="space-y-6">
+            
+            {/* AI Executive Briefing */}
+            <div className={`rounded-xl border p-5 space-y-3 ${isLight ? "bg-white border-gray-200" : "bg-gray-900/40 border-gray-800"}`}>
+              <div className="flex justify-between items-center border-b border-gray-800/60 pb-2">
+                <span className="font-space text-xs font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
+                  <Flame size={13} className="text-orbit-purple" />
+                  AI Executive Briefing
+                </span>
+                <button
+                  onClick={fetchBriefing}
+                  disabled={isBriefingLoading}
+                  className="p-1 text-gray-500 hover:text-white cursor-pointer transition-colors"
+                >
+                  <RefreshCw size={11} className={isBriefingLoading ? "animate-spin" : ""} />
+                </button>
               </div>
-            )}
+
+              {isBriefingLoading ? (
+                <div className="space-y-2 py-4">
+                  <div className="h-3 bg-gray-850 rounded w-3/4 animate-pulse" />
+                  <div className="h-3 bg-gray-850 rounded w-5/6 animate-pulse" />
+                  <div className="h-3 bg-gray-850 rounded w-2/3 animate-pulse" />
+                </div>
+              ) : (
+                <div className="font-mono text-[9.5px] leading-relaxed text-gray-400 whitespace-pre-line bg-gray-950/35 p-3 rounded-lg border border-gray-850">
+                  {briefing || "ORBIT currently has no active missions. Click launch opportunity or generate new mission above to begin."}
+                </div>
+              )}
+            </div>
+
+            {/* Mission Execution Center Pipeline */}
+            <div className={`rounded-xl border p-5 space-y-4 ${isLight ? "bg-white border-gray-200" : "bg-gray-900/40 border-gray-800"}`}>
+              <div className="flex justify-between items-center border-b border-gray-800/60 pb-2">
+                <span className="font-space text-xs font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
+                  <Cpu size={13} className="text-orbit-blue" />
+                  Mission Execution Center
+                </span>
+                {pipelineState.active && (
+                  <span className="font-mono text-[8px] bg-orbit-blue/10 border border-orbit-blue/35 text-orbit-blue px-2 py-0.5 rounded-full uppercase animate-pulse">
+                    Pipeline Active
+                  </span>
+                )}
+              </div>
+
+              {/* Execution flowchart visualizer */}
+              <div className="grid grid-cols-5 gap-1 items-center relative py-2 bg-gray-950/20 p-2 rounded-lg border border-gray-855/20">
+                {Object.keys(AGENT_CONFIG).map((agentName, idx) => {
+                  const cfg = AGENT_CONFIG[agentName as keyof typeof AGENT_CONFIG];
+                  const isActive = pipelineState.currentStep === agentName;
+                  const isCompleted = pipelineState.completedSteps.includes(agentName);
+                  
+                  return (
+                    <React.Fragment key={agentName}>
+                      <div className="flex flex-col items-center gap-1 relative z-10">
+                        <div
+                          className={`w-9 h-9 rounded-full flex items-center justify-center border transition-all duration-300 ${
+                            isActive
+                              ? "border-white bg-[#1e293b] scale-110 shadow-orbit-glow"
+                              : isCompleted
+                                ? "bg-orbit-success/15 border-orbit-success text-orbit-success"
+                                : "border-gray-800 bg-[#0c0f20]"
+                          }`}
+                          style={isActive ? { boxShadow: `0 0 15px ${cfg.color}` } : undefined}
+                          onClick={() => setSelectedAgent(agentName as any)}
+                        >
+                          <span className="font-space text-[10px] font-bold">
+                            {isCompleted ? "✓" : agentName.slice(0, 3).toUpperCase()}
+                          </span>
+                        </div>
+                        <span className="font-mono text-[8px] text-gray-500 uppercase tracking-wide">{agentName}</span>
+                      </div>
+                      {idx < 4 && (
+                        <div className="h-0.5 flex-1 bg-gray-855 relative">
+                          <div
+                            className="absolute inset-y-0 left-0 bg-orbit-success transition-all duration-500"
+                            style={{ width: isCompleted ? "100%" : "0%" }}
+                          />
+                        </div>
+                      )}
+                    </React.Fragment>
+                  );
+                })}
+              </div>
+
+              {/* Real-time Logs scrolling */}
+              <div className="bg-black/40 border border-gray-850 p-3 rounded-lg h-36 overflow-y-auto font-mono text-[9px] text-gray-400 space-y-1.5 scrollbar-thin">
+                {pipelineState.logs.length === 0 ? (
+                  <p className="text-gray-600 text-center py-8">[ Pipeline Idle - Launch a mission to monitor logs ]</p>
+                ) : (
+                  pipelineState.logs.map((log, i) => (
+                    <p key={i} className="leading-relaxed border-l border-gray-800 pl-1.5">
+                      <span className="text-orbit-blue font-bold">&gt;</span> {log}
+                    </p>
+                  ))
+                )}
+              </div>
+            </div>
+
+            {/* Active Missions Dashboard */}
+            <div className={`rounded-xl border p-5 space-y-4 ${isLight ? "bg-white border-gray-200" : "bg-gray-900/40 border-gray-800"}`}>
+              <div className="flex justify-between items-center border-b border-gray-800/60 pb-2">
+                <span className="font-space text-xs font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
+                  <Activity size={13} className="text-orbit-success" />
+                  Active Pipelines
+                </span>
+                <span className="font-mono text-[9px] text-gray-550">
+                  {campaigns.filter(c => c.status === "Running" || c.status === "Sending").length} RUNNING
+                </span>
+              </div>
+
+              <div className="space-y-3.5 max-h-56 overflow-y-auto pr-1">
+                {campaigns.filter(c => c.status === "Running" || c.status === "Sending").length === 0 ? (
+                  <p className="text-center text-gray-600 font-mono text-[10px] py-8">[ No active running campaigns ]</p>
+                ) : (
+                  campaigns.filter(c => c.status === "Running" || c.status === "Sending").map(c => {
+                    const progressPct = c.sentCount > 0 ? Math.round(((c.deliveredCount || 0) / c.sentCount) * 100) : 0;
+                    return (
+                      <div
+                        key={c.id}
+                        onClick={() => setSelectedMission(c)}
+                        className="p-3 bg-gray-950/20 border border-gray-850 rounded-lg space-y-2 cursor-pointer hover:border-gray-700 transition-colors"
+                      >
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <span className="font-space text-[10px] font-bold text-white uppercase">{c.name}</span>
+                            <span className="font-mono text-[8px] text-gray-500 block uppercase">{c.channel} · {c.sentCount} recipients</span>
+                          </div>
+                          <span className="font-mono text-[8px] border border-orbit-blue/30 bg-orbit-blue/5 text-orbit-blue px-2 py-0.5 rounded-full uppercase animate-pulse">
+                            {c.status}
+                          </span>
+                        </div>
+                        <div className="flex justify-between items-center text-[9px] font-mono text-gray-400">
+                          <span>Yield: ₹{(c.revenueGenerated || 0).toLocaleString()}</span>
+                          <span>Conv: {c.purchaseCount} ({c.sentCount > 0 ? ((c.purchaseCount / c.sentCount)*100).toFixed(0) : 0}%)</span>
+                        </div>
+                        <div className="space-y-1">
+                          <div className="w-full h-1 bg-gray-900 rounded-full overflow-hidden">
+                            <div className="h-full bg-orbit-blue transition-all duration-500" style={{ width: `${progressPct}%` }} />
+                          </div>
+                          <div className="flex justify-between text-[7.5px] font-mono text-gray-500 uppercase">
+                            <span>Delivered: {c.deliveredCount}</span>
+                            <span>{progressPct}%</span>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })
+                )}
+              </div>
+            </div>
+
           </div>
 
-          <div className="ml-auto flex items-center gap-2">
-            <ArrowUpRight size={10} className="text-orbit-success" />
-            <span className={`font-mono text-[9px] ${isLight ? "text-gray-650" : "text-gray-400"}`}>
-              All agents nominal · Dispatch queue: <span className={isLight ? "text-gray-900 font-bold" : "text-white"}>Active</span>
+          {/* COLUMN 2: OPPORTUNITY SCANNER, ATLAS DELIVERY & SCROLLING ACTIVITY */}
+          <div className="space-y-6">
+            
+            {/* Opportunity Detection powered by Luna */}
+            <div className={`rounded-xl border p-5 space-y-4 ${isLight ? "bg-white border-gray-200" : "bg-gray-900/40 border-gray-800"}`}>
+              <div className="flex justify-between items-center border-b border-gray-800/60 pb-2">
+                <span className="font-space text-xs font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
+                  <Shield size={13} className="text-amber-500" />
+                  Luna Opportunity Detector
+                </span>
+                <button
+                  onClick={fetchOpportunities}
+                  disabled={isOppsLoading}
+                  className="p-1 text-gray-500 hover:text-white cursor-pointer transition-colors"
+                  title="Rescan database cohorts"
+                >
+                  <RefreshCw size={11} className={isOppsLoading ? "animate-spin" : ""} />
+                </button>
+              </div>
+
+              <div className="space-y-3 max-h-[295px] overflow-y-auto pr-1">
+                {isOppsLoading ? (
+                  <div className="space-y-2 py-8 text-center font-mono text-[10px] text-gray-500">
+                    <RefreshCw className="animate-spin inline mr-1" size={12} />
+                    Aggregating customer ledgers...
+                  </div>
+                ) : opportunities.length === 0 ? (
+                  <p className="text-center text-gray-600 font-mono text-[10px] py-12">[ No opportunities found in current matrix ]</p>
+                ) : (
+                  opportunities.map(opp => (
+                    <div
+                      key={opp.id}
+                      className="p-3 bg-gray-950/30 border border-gray-850 rounded-lg space-y-2 hover:border-amber-500/30 transition-colors"
+                    >
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <span className="font-space text-[10.5px] font-bold text-white block uppercase">{opp.title}</span>
+                          <span className="font-mono text-[8px] text-gray-500 uppercase">{opp.description}</span>
+                        </div>
+                        <span className="font-mono text-[8px] border border-amber-500/30 bg-amber-500/5 text-amber-500 px-2 py-0.5 rounded-full uppercase">
+                          {opp.confidence}% CONF
+                        </span>
+                      </div>
+                      <div className="grid grid-cols-2 gap-2 font-mono text-[9px] text-gray-400">
+                        <div>
+                          <span className="text-gray-550 text-[7.5px] block uppercase">Potential Revenue</span>
+                          <span className="text-white font-bold text-[10px]">₹{opp.potentialRevenue.toLocaleString()}</span>
+                        </div>
+                        <div>
+                          <span className="text-gray-550 text-[7.5px] block uppercase">Target Group</span>
+                          <span className="text-white">{opp.audienceSize} accounts</span>
+                        </div>
+                      </div>
+                      <div className="flex items-center justify-between border-t border-gray-900/50 pt-2 gap-2">
+                        <span className="font-mono text-[8.5px] text-gray-500 truncate">{opp.reasoning || opp.recommendedAction}</span>
+                        <button
+                          onClick={() => handleLaunchOpportunity(opp)}
+                          className="px-3 py-1 bg-amber-500 hover:bg-amber-600 text-black font-mono text-[8px] font-bold uppercase rounded cursor-pointer transition-colors"
+                        >
+                          Launch
+                        </button>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+
+            {/* Atlas Delivery Center */}
+            <div className={`rounded-xl border p-5 space-y-4 ${isLight ? "bg-white border-gray-200" : "bg-gray-900/40 border-gray-800"}`}>
+              <div className="flex justify-between items-center border-b border-gray-800/60 pb-2">
+                <span className="font-space text-xs font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
+                  <Database size={13} className="text-orbit-success" />
+                  Atlas Delivery Center
+                </span>
+                <span className="font-mono text-[9px] text-gray-550">TWILIO + RESEND GATEWAYS</span>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div className="bg-gray-950/20 border border-gray-850 p-2.5 rounded-lg text-center">
+                  <span className="font-mono text-[8px] text-gray-500 uppercase block">Sent Messages</span>
+                  <span className="font-space text-lg font-bold text-white">{totalSentCount}</span>
+                </div>
+                <div className="bg-gray-950/20 border border-gray-850 p-2.5 rounded-lg text-center">
+                  <span className="font-mono text-[8px] text-gray-500 uppercase block">Delivered Messages</span>
+                  <span className="font-space text-lg font-bold text-orbit-success">{totalDeliveredCount}</span>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-3 gap-2 font-mono text-[9.5px]">
+                {[
+                  { label: "Opened", val: totalOpenedCount, color: "text-orbit-purple" },
+                  { label: "Clicked", val: totalClickedCount, color: "text-yellow-450" },
+                  { label: "Converted", val: totalConvertedCount, color: "text-orbit-success" },
+                  { label: "Failed", val: totalFailedCount, color: "text-red-400" },
+                  { label: "Pending", val: totalPendingCount, color: "text-blue-400" },
+                  { label: "Yield", val: `₹${totalCampaignRevenue.toLocaleString()}`, color: "text-white font-bold" }
+                ].map((stat, idx) => (
+                  <div key={idx} className="bg-gray-950/20 border border-gray-850 p-2 rounded text-center">
+                    <span className="text-[7.5px] text-gray-500 uppercase block mb-0.5">{stat.label}</span>
+                    <span className={stat.color}>{stat.val}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* scrolling Live Agent Activity Ticker */}
+            <div className={`rounded-xl border p-5 space-y-3 ${isLight ? "bg-white border-gray-200" : "bg-gray-900/40 border-gray-800"}`}>
+              <div className="flex justify-between items-center border-b border-gray-800/60 pb-2">
+                <span className="font-space text-xs font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
+                  <Activity size={13} className="text-orbit-blue animate-pulse" />
+                  Live Operator Feeds
+                </span>
+                <span className="font-mono text-[8px] text-gray-550 uppercase">Sync active</span>
+              </div>
+
+              <div className="relative h-28 overflow-hidden bg-gray-955/20 border border-gray-855/20 rounded-lg p-2.5">
+                <div className="space-y-2 scroll-feed-anim">
+                  {activityTicker.map((act, i) => (
+                    <div key={i} className="flex gap-2 items-center font-mono text-[8.5px] text-gray-400 truncate border-b border-gray-900/30 pb-1">
+                      <span className="w-1 h-1 rounded-full bg-orbit-blue shrink-0 animate-pulse" />
+                      <span>{act}</span>
+                    </div>
+                  ))}
+                </div>
+                {/* Fade out mask */}
+                <div className="absolute bottom-0 left-0 right-0 h-6 bg-gradient-to-t from-[#050816]/90 to-transparent pointer-events-none" />
+              </div>
+            </div>
+
+          </div>
+
+          {/* COLUMN 3: REVENUE ATTRIBUTION, MISSION HEALTH, timeline & COMMANDS */}
+          <div className="space-y-6">
+            
+            {/* Revenue Attribution Panel */}
+            <div className={`rounded-xl border p-5 space-y-4 ${isLight ? "bg-white border-gray-200" : "bg-gray-900/40 border-gray-800"}`}>
+              <div className="flex justify-between items-center border-b border-gray-800/60 pb-2">
+                <span className="font-space text-xs font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
+                  <BarChart3 size={13} className="text-orbit-purple" />
+                  Revenue Attribution Metrics
+                </span>
+                <span className="font-mono text-[8px] text-gray-550">Attributed loops</span>
+              </div>
+
+              {/* Attribution charts by Segment and Channel */}
+              <div className="space-y-4 font-mono text-[9.5px]">
+                
+                {/* Segment Attribution */}
+                <div className="space-y-2">
+                  <p className="text-gray-500 uppercase text-[8px] font-bold tracking-wider">Revenue by Customer Segment</p>
+                  {[
+                    { label: "Loyalists", val: revenueBySegment.Loyalists, color: "bg-orbit-blue" },
+                    { label: "Slipping Away", val: revenueBySegment.SlippingAway, color: "bg-amber-500" },
+                    { label: "High-Value Inactive", val: revenueBySegment.HighValueInactive, color: "bg-orbit-purple" },
+                    { label: "New Signups", val: revenueBySegment.NewSignups, color: "bg-pink-500" }
+                  ].map(item => {
+                    const ratio = Math.max(2, Math.round((item.val / totalSegmentRev) * 100)) || 25;
+                    return (
+                      <div key={item.label} className="space-y-1">
+                        <div className="flex justify-between text-[8.5px] text-gray-400">
+                          <span>{item.label}</span>
+                          <span>₹{item.val.toLocaleString()} ({ratio}%)</span>
+                        </div>
+                        <div className="w-full h-1 bg-gray-900 rounded-full overflow-hidden">
+                          <div className={`h-full ${item.color} rounded-full`} style={{ width: `${ratio}%` }} />
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {/* Channel Attribution */}
+                <div className="space-y-2 border-t border-gray-900/80 pt-3">
+                  <p className="text-gray-500 uppercase text-[8px] font-bold tracking-wider">Revenue by Channel</p>
+                  {[
+                    { label: "WhatsApp", val: revenueByChannel.WhatsApp, color: "bg-orbit-success" },
+                    { label: "Email", val: revenueByChannel.Email, color: "bg-orbit-purple" },
+                    { label: "SMS", val: revenueByChannel.SMS, color: "bg-orbit-blue" },
+                    { label: "RCS", val: revenueByChannel.RCS, color: "bg-pink-500" }
+                  ].map(item => {
+                    const ratio = Math.max(2, Math.round((item.val / totalChannelRev) * 100)) || 25;
+                    return (
+                      <div key={item.label} className="space-y-1">
+                        <div className="flex justify-between text-[8.5px] text-gray-400">
+                          <span>{item.label}</span>
+                          <span>₹{item.val.toLocaleString()} ({ratio}%)</span>
+                        </div>
+                        <div className="w-full h-1 bg-gray-900 rounded-full overflow-hidden">
+                          <div className={`h-full ${item.color} rounded-full`} style={{ width: `${ratio}%` }} />
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+
+              </div>
+            </div>
+
+            {/* Mission Health System */}
+            <div className={`rounded-xl border p-5 space-y-4 ${isLight ? "bg-white border-gray-200" : "bg-gray-900/40 border-gray-800"}`}>
+              <div className="flex justify-between items-center border-b border-gray-800/60 pb-2">
+                <span className="font-space text-xs font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
+                  <Shield size={13} className="text-orbit-success" />
+                  Mission Health Ledger
+                </span>
+                <span className="font-mono text-[8px] text-gray-550">Integrity audits</span>
+              </div>
+
+              <div className="flex items-center justify-around py-1.5 border-b border-gray-900/60 pb-3">
+                <RadialGauge value={healthScore} color="#22C55E" label="System Health" isLight={isLight} size={70} />
+                <RadialGauge value={successRate} color="#3B82F6" label="Success Rate" isLight={isLight} size={70} />
+              </div>
+
+              <div className="grid grid-cols-3 gap-2 text-center font-mono text-[9px] text-gray-400">
+                <div>
+                  <span className="text-[7px] text-gray-500 uppercase block mb-0.5">Average ROI</span>
+                  <span className="text-white font-bold">{averageROI}x</span>
+                </div>
+                <div>
+                  <span className="text-[7px] text-gray-500 uppercase block mb-0.5">Avg Conv</span>
+                  <span className="text-orbit-success font-bold">{averageConversion}%</span>
+                </div>
+                <div>
+                  <span className="text-[7px] text-gray-500 uppercase block mb-0.5">Network latency</span>
+                  <span className="text-white font-bold">12ms</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Timeline */}
+            <div className={`rounded-xl border p-5 space-y-4 ${isLight ? "bg-white border-gray-200" : "bg-gray-900/40 border-gray-800"}`}>
+              <div className="flex justify-between items-center border-b border-gray-800/60 pb-2">
+                <span className="font-space text-xs font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
+                  <Activity size={13} className="text-orbit-blue" />
+                  Mission Timeline
+                </span>
+                <span className="font-mono text-[8px] text-gray-550 uppercase">Operational Steps</span>
+              </div>
+
+              <div className="relative pl-4 border-l border-gray-800 space-y-3 font-mono text-[9px] text-gray-400 max-h-48 overflow-y-auto scrollbar-thin">
+                {[
+                  { title: "Mission Formulated", desc: "AI engine resolved campaign constraints", step: "Detected" },
+                  { title: "Audience Isolated", desc: "Polaris demographic vectors matched", step: "Analyzed" },
+                  { title: "Forecast Rendered", desc: "Vega calculated regression ROI limits", step: "Generated" },
+                  { title: "Marketing Assets Ready", desc: "Nova compiled WhatsApp & Email copy templates", step: "Scheduled" },
+                  { title: "Gateway Port Armed", desc: "Atlas verified delivery latency bounds", step: "Launching" },
+                  { title: "Broadcast Dispatched", desc: "Dispatched over Twilio/Resend channels", step: "Running" },
+                  { title: "Engagement Logs Syncing", desc: "Live webhooks monitoring conversions", step: "Completed" }
+                ].map((item, idx) => {
+                  const isActiveStep = pipelineState.active && (
+                    (pipelineState.currentStep === "Polaris" && idx <= 1) ||
+                    (pipelineState.currentStep === "Luna" && idx <= 2) ||
+                    (pipelineState.currentStep === "Vega" && idx <= 2) ||
+                    (pipelineState.currentStep === "Nova" && idx <= 3) ||
+                    (pipelineState.currentStep === "Atlas" && idx <= 5)
+                  );
+                  return (
+                    <div key={idx} className="relative">
+                      <div className={`absolute -left-[20.5px] top-1 w-2.5 h-2.5 rounded-full border-2 ${
+                        isActiveStep
+                          ? "border-orbit-blue bg-orbit-blue shadow-orbit-glow-blue animate-ping"
+                          : "border-gray-800 bg-[#050816]"
+                      }`} />
+                      <p className={`font-bold ${isActiveStep ? "text-orbit-blue font-bold" : "text-white"}`}>{item.title}</p>
+                      <p className="text-[7.5px] text-gray-500 mt-0.5">{item.desc}</p>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Executive Commands panel */}
+            <div className={`rounded-xl border p-5 space-y-3 ${isLight ? "bg-white border-gray-200" : "bg-gray-900/40 border-gray-800"}`}>
+              <div className="flex justify-between items-center border-b border-gray-800/60 pb-2">
+                <span className="font-space text-xs font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
+                  <Shield size={13} className="text-red-500 animate-pulse" />
+                  Executive Control Console
+                </span>
+              </div>
+
+              <div className="grid grid-cols-2 gap-2 font-mono text-[9px] uppercase font-bold">
+                <button
+                  onClick={handleGenerateNewMission}
+                  disabled={isGeneratingMission}
+                  className="p-2.5 bg-gray-950 border border-gray-850 rounded-lg hover:border-orbit-blue/40 text-gray-300 hover:text-white flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                >
+                  <Plus size={10} />
+                  {isGeneratingMission ? "Planning..." : "Plan Mission"}
+                </button>
+                <button
+                  onClick={() => triggerExecutionPipeline("Quick Revenue Reactivation")}
+                  disabled={pipelineState.active}
+                  className="p-2.5 bg-gray-950 border border-gray-850 rounded-lg hover:border-orbit-success/40 text-gray-300 hover:text-white flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                >
+                  <Play size={10} />
+                  Launch Loop
+                </button>
+                <button
+                  onClick={handleExportReport}
+                  className="p-2.5 bg-gray-950 border border-gray-850 rounded-lg hover:border-orbit-purple/40 text-gray-300 hover:text-white flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                >
+                  <FileText size={10} />
+                  Export Stats
+                </button>
+                <button
+                  onClick={() => {
+                    if (confirm("Clear local simulation state?")) {
+                      localStorage.clear();
+                      window.location.reload();
+                    }
+                  }}
+                  className="p-2.5 bg-gray-950 border border-red-900/50 hover:bg-red-500/10 rounded-lg text-red-400 flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                >
+                  <Trash2 size={10} />
+                  Wipe DB
+                </button>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+
+        {/* ══════════════ MISSION HISTORY LEDGER ══════════════ */}
+        <div className={`rounded-xl border p-5 ${isLight ? "bg-white border-gray-200" : "bg-gray-900/40 border-gray-800"}`}>
+          <div className="flex justify-between items-center border-b border-gray-800/60 pb-3 mb-4">
+            <span className="font-space text-xs font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
+              <Layers size={13} className="text-orbit-blue" />
+              Operational Mission Ledger
             </span>
+            <span className="font-mono text-[9px] text-gray-550">{missions.length} RECORDED DIRECTIVES</span>
+          </div>
+
+          <div className="overflow-x-auto">
+            <table className="w-full text-left font-mono text-[10px] divide-y divide-gray-900">
+              <thead>
+                <tr className="text-gray-500 uppercase tracking-wider text-[8px]">
+                  <th className="pb-2">Mission Goal</th>
+                  <th className="pb-2">Segment</th>
+                  <th className="pb-2">Channel</th>
+                  <th className="pb-2 text-right">Yield Target</th>
+                  <th className="pb-2 text-center">Status</th>
+                  <th className="pb-2 text-center">Trigger Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-900 text-gray-300">
+                {missions.length === 0 ? (
+                  <tr>
+                    <td colSpan={6} className="text-center py-6 text-gray-600">
+                      [ No mission records stored in ledger ]
+                    </td>
+                  </tr>
+                ) : (
+                  missions.map(m => (
+                    <tr key={m.id} className="hover:bg-gray-950/20 transition-colors">
+                      <td
+                        onClick={() => setSelectedMission(m)}
+                        className="py-3 font-space font-bold cursor-pointer hover:text-orbit-blue transition-colors max-w-xs truncate"
+                      >
+                        {m.goal}
+                      </td>
+                      <td className="py-3">{m.Polaris?.segment || "Loyalists"}</td>
+                      <td className="py-3 uppercase text-[9px]">{m.Atlas?.selectedChannel || "WhatsApp"}</td>
+                      <td className="py-3 text-right font-space font-bold">
+                        ₹{(m.Vega?.predictedRevenue || 12000).toLocaleString()}
+                      </td>
+                      <td className="py-3 text-center">
+                        <span className={`px-2 py-0.5 rounded text-[8px] uppercase tracking-wider font-bold ${
+                          m.status === "Completed" ? "bg-orbit-success/10 text-orbit-success border border-orbit-success/20" :
+                          m.status === "Paused" ? "bg-yellow-500/10 text-yellow-500 border border-yellow-500/20" :
+                          m.status === "Running" ? "bg-orbit-blue/10 text-orbit-blue border border-orbit-blue/20 animate-pulse" :
+                          "bg-gray-800/40 text-gray-400"
+                        }`}>
+                          {m.status || "Detected"}
+                        </span>
+                      </td>
+                      <td className="py-3 text-center">
+                        <div className="flex items-center justify-center gap-2">
+                          {m.status === "Running" ? (
+                            <button
+                              onClick={() => handlePauseMission(m.id)}
+                              className="p-1 hover:text-white text-gray-500 transition-colors"
+                              title="Pause Mission Pipeline"
+                            >
+                              <Pause size={10} />
+                            </button>
+                          ) : (
+                            <button
+                              onClick={() => handleResumeMission(m.id)}
+                              className="p-1 hover:text-white text-gray-500 transition-colors"
+                              title="Resume Mission Pipeline"
+                            >
+                              <Play size={10} />
+                            </button>
+                          )}
+                          <button
+                            onClick={() => handleDuplicateMission(m.id)}
+                            className="p-1 hover:text-white text-gray-500 transition-colors"
+                            title="Duplicate Mission Directive"
+                          >
+                            <Copy size={10} />
+                          </button>
+                          <button
+                            onClick={() => handleArchiveMission(m.id)}
+                            className="p-1 hover:text-red-400 text-gray-500 transition-colors"
+                            title="Archive Mission Record"
+                          >
+                            <Trash2 size={10} />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
           </div>
         </div>
 
       </div>
 
-      <AgentCardModal agent={selectedAgent} onClose={() => setSelectedAgent(null)} />
-
       {/* ════════════════════════════════════════
-          LAUNCH WHATSAPP CAMPAIGN MODAL
+          ASSEMBLE CUSTOM MISSION MODAL
       ════════════════════════════════════════ */}
-      {isWhatsAppModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-fade-in animate-duration-200">
-          <div className={`w-full max-w-lg rounded-2xl border p-6 space-y-4 shadow-2xl relative overflow-hidden transition-all ${
-            isLight ? "bg-white border-gray-200 text-gray-900" : "bg-[#0c0f20]/95 border-gray-800 text-white"
-          }`}>
+      {isCreateModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+          <div className="w-full max-w-md rounded-2xl border border-gray-800 p-6 bg-[#0c0f20]/95 text-white space-y-4 shadow-2xl relative overflow-hidden">
             <div className="absolute inset-0 space-grid opacity-10 pointer-events-none" />
-            
-            {/* Header */}
-            <div className="flex justify-between items-center border-b border-gray-800/60 pb-3">
-              <div className="flex items-center gap-2">
-                <Radio className="text-orbit-success animate-pulse" size={16} />
-                <h3 className="font-space text-base font-bold uppercase tracking-wider">Launch WhatsApp Campaign</h3>
-              </div>
-              <button onClick={() => { setIsWhatsAppModalOpen(false); cancelMission(); }} className="text-gray-500 hover:text-gray-305 cursor-pointer">
+            <div className="flex justify-between items-center border-b border-gray-855 pb-3">
+              <span className="font-space text-sm font-bold uppercase tracking-wider flex items-center gap-1.5">
+                <Target className="text-orbit-blue animate-pulse" size={14} />
+                Assemble Custom Directive
+              </span>
+              <button onClick={() => setIsCreateModalOpen(false)} className="text-gray-550 hover:text-white cursor-pointer">
                 <X size={16} />
               </button>
             </div>
 
-            {!mission.isActive ? (
-              // Setup Phase
-              <div className="space-y-4 font-mono text-[11px]">
-                {/* Cohort Selector */}
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-gray-405 uppercase tracking-wider block">Target Cohort Segment</label>
-                  <select
-                    value={selectedCohort}
-                    onChange={e => setSelectedCohort(e.target.value as any)}
-                    className="w-full bg-gray-950 border border-gray-800 rounded-lg p-2.5 text-xs text-white focus:outline-none focus:border-blue-500/50"
-                  >
-                    <option value="Slipping Away">Slipping Away ({customers.filter(c => c.segment === "Slipping Away").length} targets)</option>
-                    <option value="Loyalists">Loyalists ({customers.filter(c => c.segment === "Loyalists").length} targets)</option>
-                    <option value="New Signups">New Signups ({customers.filter(c => c.segment === "New Signups").length} targets)</option>
-                    <option value="High-Value Inactive">High-Value Inactive ({customers.filter(c => c.segment === "High-Value Inactive").length} targets)</option>
-                  </select>
-                </div>
-
-                {/* Template Selector */}
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-gray-405 uppercase tracking-wider block">Campaign Template</label>
-                  <div className="grid grid-cols-3 gap-2">
-                    {(Object.keys(WHATSAPP_TEMPLATES) as Array<keyof typeof WHATSAPP_TEMPLATES>).map(key => (
-                      <button
-                        key={key}
-                        type="button"
-                        onClick={() => setSelectedTemplate(key)}
-                        className={`py-2 px-1 rounded-lg border text-center font-bold text-[9px] uppercase transition-all cursor-pointer ${
-                          selectedTemplate === key
-                            ? "border-orbit-success bg-orbit-success/15 text-orbit-success"
-                            : "border-gray-800 bg-gray-950 text-gray-400 hover:border-gray-700"
-                        }`}
-                      >
-                        {WHATSAPP_TEMPLATES[key].label.split(" ")[0]}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Live Preview */}
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-gray-405 uppercase tracking-wider block">Message Live Preview</label>
-                  <div className="w-full bg-[#1b2532] rounded-xl p-3 border border-gray-800 relative">
-                    <div className="bg-[#005d4b] text-white rounded-xl p-3 text-[10px] leading-relaxed whitespace-pre-line shadow-sm">
-                      {WHATSAPP_TEMPLATES[selectedTemplate].body.replace("{{name}}", "Arjun")}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Estimate KPIs */}
-                <div className="p-3 bg-gray-950/40 rounded-xl border border-gray-900 grid grid-cols-3 gap-2 text-center">
-                  <div>
-                    <span className="text-[7px] text-gray-550 uppercase block">Audience Size</span>
-                    <span className="text-xs font-bold text-white">{customers.filter(c => c.segment === selectedCohort).length} stars</span>
-                  </div>
-                  <div>
-                    <span className="text-[7px] text-gray-550 uppercase block">Expected ROI</span>
-                    <span className="text-xs font-bold text-orbit-success">4.8x</span>
-                  </div>
-                  <div>
-                    <span className="text-[7px] text-gray-550 uppercase block">Expected Yield</span>
-                    <span className="text-xs font-bold text-white">₹{(customers.filter(c => c.segment === selectedCohort).length * 750).toLocaleString()}</span>
-                  </div>
-                </div>
-
-                {/* Launch action */}
-                <button
-                  onClick={handleLaunchWhatsApp}
-                  className="w-full py-3 rounded-xl bg-gradient-to-r from-orbit-success to-emerald-450 text-white font-mono text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 hover:opacity-90 hover:scale-[1.02] active:scale-95 duration-200 cursor-pointer shadow-orbit-glow-green"
-                >
-                  <Play size={12} />
-                  Assemble & Generate Campaign
-                </button>
+            <div className="space-y-4 font-mono text-[11px]">
+              <div className="space-y-1.5">
+                <label className="text-gray-400 uppercase tracking-wider">Business Objective Goal</label>
+                <input
+                  type="text"
+                  value={customGoal}
+                  onChange={e => setCustomGoal(e.target.value)}
+                  placeholder="e.g. Win back inactive VIP customers in Noida sector"
+                  className="w-full bg-gray-950 border border-gray-800 rounded-lg px-3 py-2.5 text-xs text-white focus:outline-none focus:border-blue-500/50"
+                />
               </div>
-            ) : (
-              // Agent Run Phase & Launch Sequence
-              <div className="space-y-4">
-                <div className="flex flex-col gap-2">
-                  <div className="flex items-center justify-between text-xs font-mono">
-                    <span className="text-gray-300 font-bold">
-                      {mission.step === "analyzing" ? "Polaris clustering cohorts..." :
-                       mission.step === "segmenting" ? "Luna auditing opportunity leakage..." :
-                       mission.step === "predicting" ? "Vega modeling conversion probability..." :
-                       mission.step === "generating" ? "Nova generating campaign copies..." :
-                       mission.step === "ready" ? "Atlas operational dispatch ready" :
-                       "Dispatching..."}
-                    </span>
-                    <span className="text-orbit-blue font-bold">
-                      {mission.step === "analyzing" ? "20%" :
-                       mission.step === "segmenting" ? "40%" :
-                       mission.step === "predicting" ? "60%" :
-                       mission.step === "generating" ? "80%" : "100%"}
-                    </span>
-                  </div>
-                  <div className="w-full h-1.5 bg-gray-900 rounded-full overflow-hidden">
-                    <div
-                      className="h-full bg-gradient-to-r from-orbit-blue to-orbit-purple transition-all duration-500"
-                      style={{
-                        width: mission.step === "analyzing" ? "20%" :
-                               mission.step === "segmenting" ? "40%" :
-                               mission.step === "predicting" ? "60%" :
-                               mission.step === "generating" ? "80%" : "100%"
-                      }}
-                    />
-                  </div>
-                </div>
 
-                {/* Agent Boardroom Dialogue ticker in Modal */}
-                <div className="bg-black/60 border border-gray-900 rounded-xl p-3 h-32 overflow-y-auto font-mono text-[9px] text-gray-400 space-y-2">
-                  <p className="text-orbit-success font-bold">&gt; ORBIT AGENTS ONLINE & Deliberating...</p>
-                  {agentLogs.slice(0, 4).reverse().map((log, i) => (
-                    <div key={i} className="border-l-2 pl-2" style={{ borderColor: log.agent === "Polaris" ? "#3b82f6" : log.agent === "Vega" ? "#8b5cf6" : log.agent === "Nova" ? "#ec4899" : log.agent === "Atlas" ? "#22c55e" : "#f59e0b" }}>
-                      <span className="font-bold text-white uppercase">{log.agent}:</span> {log.message}
-                    </div>
-                  ))}
-                </div>
-
-                {mission.step === "ready" && (
-                  <div className="space-y-3 font-mono">
-                    <div className="p-3 bg-orbit-success/5 border border-orbit-success/20 rounded-xl text-[10px] text-orbit-success flex items-center gap-2">
-                      <CheckCircle2 size={14} />
-                      <span>Campaign layout generated. Atlas delivery gateway is armed.</span>
-                    </div>
-
-                    <button
-                      onClick={() => {
-                        launchMissionCampaign("WhatsApp");
-                        setIsWhatsAppModalOpen(false);
-                      }}
-                      className="w-full py-3 rounded-xl bg-gradient-to-r from-orbit-success to-emerald-450 text-white text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 hover:opacity-90 hover:scale-[1.02] active:scale-95 duration-200 cursor-pointer shadow-orbit-glow-green"
-                    >
-                      <Send size={12} />
-                      Arm & Dispatch Campaign
-                    </button>
-                  </div>
-                )}
-              </div>
-            )}
+              <button
+                onClick={async () => {
+                  if (!customGoal.trim()) return;
+                  setIsCreateModalOpen(false);
+                  triggerExecutionPipeline(customGoal);
+                  setCustomGoal("");
+                }}
+                className="w-full py-3 rounded-xl bg-gradient-to-r from-orbit-blue to-orbit-purple text-white text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 hover:opacity-90 hover:scale-[1.02] active:scale-95 duration-200 cursor-pointer shadow-orbit-glow"
+              >
+                <Play size={11} />
+                Compile & Dispatch AI Loop
+              </button>
+            </div>
           </div>
         </div>
       )}
+
+      {/* ════════════════════════════════════════
+          MISSION DETAILS MODAL
+      ════════════════════════════════════════ */}
+      {selectedMission && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-fade-in">
+          <div className="w-full max-w-2xl rounded-2xl border border-gray-800 p-6 bg-[#0c0f20]/95 text-white space-y-4 shadow-2xl relative overflow-hidden">
+            <div className="absolute inset-0 space-grid opacity-10 pointer-events-none" />
+            <div className="flex justify-between items-center border-b border-gray-855 pb-3">
+              <span className="font-space text-sm font-bold uppercase tracking-wider flex items-center gap-1.5">
+                <Layers className="text-orbit-purple" size={14} />
+                Mission Directive details
+              </span>
+              <button onClick={() => setSelectedMission(null)} className="text-gray-555 hover:text-white cursor-pointer">
+                <X size={16} />
+              </button>
+            </div>
+
+            <div className="space-y-4 font-mono text-[10px] text-gray-300 h-[420px] overflow-y-auto pr-1 scrollbar-thin">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="p-3 bg-gray-950/20 border border-gray-850 rounded-lg">
+                  <span className="text-gray-550 block uppercase text-[7.5px]">Goal Target</span>
+                  <span className="text-white text-xs font-bold font-space uppercase block mt-0.5">{selectedMission.goal || selectedMission.name}</span>
+                </div>
+                <div className="p-3 bg-gray-950/20 border border-gray-850 rounded-lg">
+                  <span className="text-gray-550 block uppercase text-[7.5px]">Lifecycle Status</span>
+                  <span className="text-orbit-success text-xs font-bold font-space uppercase block mt-0.5">{selectedMission.status}</span>
+                </div>
+              </div>
+
+              {/* Segment Breakdown */}
+              <div className="p-3 bg-gray-950/20 border border-gray-850 rounded-lg space-y-1.5">
+                <p className="text-gray-500 uppercase font-bold text-[8px]">Audience Segment Matrix</p>
+                <div className="grid grid-cols-3 gap-2">
+                  <div>
+                    <span className="text-gray-550 block text-[7px] uppercase">Matched Segment</span>
+                    <span className="text-white">{selectedMission.Polaris?.segment || "Loyalists"}</span>
+                  </div>
+                  <div>
+                    <span className="text-gray-550 block text-[7px] uppercase">Audience Size</span>
+                    <span className="text-white">{selectedMission.audienceSize || selectedMission.sentCount || 18} stars</span>
+                  </div>
+                  <div>
+                    <span className="text-gray-550 block text-[7px] uppercase">Attribution logic</span>
+                    <span className="text-white truncate block">{selectedMission.Polaris?.explanation || "Spike in churn rate risk"}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Copilot Copy */}
+              <div className="p-3 bg-[#1b2532] rounded-lg border border-gray-800 space-y-1">
+                <p className="text-gray-400 uppercase font-bold text-[8px]">Personalized Marketing Copy Preview</p>
+                <div className="bg-[#005d4b] text-white rounded-lg p-2.5 text-[9px] leading-relaxed whitespace-pre-line">
+                  {selectedMission.copy || selectedMission.Nova?.WhatsApp?.body || "Hello, we have exclusive access for you. Claim your slot inside."}
+                </div>
+              </div>
+
+              {/* ROI & yields */}
+              <div className="grid grid-cols-2 gap-4">
+                <div className="p-3 bg-gray-950/20 border border-gray-850 rounded-lg space-y-1">
+                  <span className="text-gray-500 block uppercase text-[8px] font-bold">Predicted Returns</span>
+                  <p>Revenue: <span className="text-white font-bold font-space text-[11px]">₹{(selectedMission.Vega?.predictedRevenue || selectedMission.predictedRevenue || 12500).toLocaleString()}</span></p>
+                  <p>ROI Factor: <span className="text-orbit-purple font-bold">{selectedMission.Vega?.predictedRoi || selectedMission.predictedRoi || 4.8}x</span></p>
+                </div>
+                <div className="p-3 bg-gray-950/20 border border-gray-850 rounded-lg space-y-1">
+                  <span className="text-gray-500 block uppercase text-[8px] font-bold">Actual Conversions</span>
+                  <p>Revenue Achieved: <span className="text-orbit-success font-bold font-space text-[11px]">₹{(selectedMission.revenueGenerated || 0).toLocaleString()}</span></p>
+                  <p>Purchasers: <span className="text-white font-bold">{selectedMission.purchaseCount || 0} nodes</span></p>
+                </div>
+              </div>
+
+              {/* Agent contributions checklist */}
+              <div className="p-3 bg-gray-950/20 border border-gray-850 rounded-lg space-y-2">
+                <p className="text-gray-500 uppercase font-bold text-[8px]">AI Boardroom Collaboration Matrix</p>
+                <div className="space-y-1.5">
+                  {[
+                    { name: "Polaris", role: "Audience Intelligence", expl: selectedMission.Polaris?.explanation || "Cohort demographic vector mapping" },
+                    { name: "Luna", role: "Opportunity Recovery", expl: selectedMission.Luna?.explanation || "Revenue leakage audit checks" },
+                    { name: "Vega", role: "ROI Forecasting", expl: selectedMission.Vega?.explanation || "Conversion optimization regressions" },
+                    { name: "Nova", role: "Campaign Generation", expl: selectedMission.Nova?.WhatsApp?.body || "Personalized template creative writes" },
+                    { name: "Atlas", role: "Operations Dispatch", expl: selectedMission.Atlas?.explanation || "Message dispatch & gateway schedules" }
+                  ].map(agent => (
+                    <div key={agent.name} className="flex gap-2 items-start border-b border-gray-900/30 pb-1.5 last:border-0 last:pb-0">
+                      <span className="w-1.5 h-1.5 rounded-full bg-orbit-blue mt-1 shrink-0" />
+                      <div>
+                        <p className="text-white font-bold">{agent.name} ({agent.role})</p>
+                        <p className="text-[7.5px] text-gray-500 mt-0.5">{agent.expl}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <AgentCardModal agent={selectedAgent} onClose={() => setSelectedAgent(null)} />
     </div>
   );
 };
+
 export default MissionControl;

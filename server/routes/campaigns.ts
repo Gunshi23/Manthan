@@ -2,6 +2,7 @@ import { Router } from "express";
 import { sendWhatsAppMessage, sendCampaignWhatsApp } from "../services/twilioService";
 import { sendEmail, sendCampaignEmail } from "../services/resendService";
 import { db } from "../config/firebase";
+import { isResourceExhausted, getFallbackData } from "../utils/fallback";
 
 const router = Router();
 
@@ -114,6 +115,18 @@ router.get("/", async (req, res) => {
     });
     res.status(200).json(campaigns);
   } catch (error: any) {
+    if (isResourceExhausted(error)) {
+      console.warn("⚠️ Firestore quota exceeded (RESOURCE_EXHAUSTED). Triggering demo-safe fallback for /api/campaigns");
+      const fallbackCampaigns = getFallbackData("campaigns");
+      // Sort by createdAt desc to match expected Firestore order
+      fallbackCampaigns.sort((a, b) => {
+        const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+        const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+        return dateB - dateA;
+      });
+      res.status(200).json(fallbackCampaigns);
+      return;
+    }
     res.status(500).json({ error: error.message || "Failed to retrieve campaigns list" });
   }
 });

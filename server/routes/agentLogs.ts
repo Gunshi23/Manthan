@@ -17,4 +17,25 @@ router.get("/", async (req, res) => {
   }
 });
 
+// POST /api/agent-logs
+router.post("/", async (req, res) => {
+  try {
+    const { agent, message, type } = req.body;
+    const logId = "log_" + Date.now() + "_" + Math.random().toString(36).substring(2, 7);
+    const logData = {
+      id: logId,
+      agent: agent || "System",
+      message: message || "",
+      type: type || "thought",
+      createdAt: new Date().toISOString(),
+      timestamp: new Date().toLocaleTimeString()
+    };
+    await db.collection("agent_logs").doc(logId).set(logData);
+    res.status(201).json(logData);
+  } catch (error: any) {
+    console.error("Agent logs POST error:", error);
+    res.status(500).json({ error: error.message || "Failed to save agent log" });
+  }
+});
+
 export default router;

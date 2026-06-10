@@ -1,8 +1,8 @@
 import React, { useState, useRef, useEffect } from "react";
 import { 
   Terminal, Activity, Star, Zap, Users, Mic, BarChart2, 
-  Settings, Moon, Sun, Radio, ChevronRight, Cpu,
-  Calendar, Compass, Sparkles, MicOff, Send, MessageSquare, X, ArrowRight, LogOut
+  Moon, Sun, Radio, ChevronRight, Cpu,
+  Compass, Sparkles, MicOff, Send, MessageSquare, X, ArrowRight, LogOut
 } from "lucide-react";
 import { useOrbit } from "../context/OrbitContext";
 import { callGeminiAPI, parseGeminiJson } from "../utils/gemini";
@@ -14,12 +14,9 @@ type Page =
   | "growth-engine" 
   | "future-simulator"
   | "opportunity-radar"
-  | "seasonal-intel"
   | "competitor-intel"
   | "agent-boardroom" 
-  | "voice-console" 
-  | "analytics" 
-  | "system-config";
+  | "analytics";
 
 interface ShellProps {
   activePage: Page;
@@ -36,12 +33,9 @@ const navItems: { id: Page; icon: React.FC<any>; label: string; shortLabel: stri
   { id: "growth-engine", icon: Zap, label: "Growth Engine", shortLabel: "GRW" },
   { id: "future-simulator", icon: Cpu, label: "Future Simulator", shortLabel: "FUT" },
   { id: "opportunity-radar", icon: Radio, label: "Opportunity Radar", shortLabel: "RDR" },
-  { id: "seasonal-intel", icon: Calendar, label: "Seasonal Intel", shortLabel: "SEA" },
   { id: "competitor-intel", icon: Compass, label: "Competitor Intel", shortLabel: "CMP" },
   { id: "agent-boardroom", icon: Users, label: "Agent Boardroom", shortLabel: "BRD" },
-  { id: "voice-console", icon: Mic, label: "Voice Console", shortLabel: "VOX" },
   { id: "analytics", icon: BarChart2, label: "Orbit Analytics", shortLabel: "ANL" },
-  { id: "system-config", icon: Settings, label: "System Config", shortLabel: "SYS" },
 ];
 
 export const AppShell: React.FC<ShellProps> = ({ activePage, onNavigate, children, missionGoal, onLogout }) => {
@@ -134,7 +128,7 @@ Format your response as a valid JSON object matching this schema:
   "replyText": "your response speech here...",
   "action": {
     "label": "Next Action Button Label",
-    "page": "command-center" | "mission-control" | "customer-galaxy" | "growth-engine" | "future-simulator" | "opportunity-radar" | "seasonal-intel" | "competitor-intel" | "agent-boardroom" | "analytics" | "system-config"
+    "page": "command-center" | "mission-control" | "customer-galaxy" | "growth-engine" | "future-simulator" | "opportunity-radar" | "competitor-intel" | "agent-boardroom" | "analytics"
   }
 }
 Note: the "action" field is optional. Only include it if there is a highly relevant dashboard page to navigate to.
@@ -175,7 +169,7 @@ Return ONLY the raw JSON object. Do not include markdown tags or extra explanati
         action = { label: "Open Future Simulator", page: "future-simulator" };
       } else {
         replyText = "Copilot: Calibrated boardroom registers. I suggest reviewing our upcoming Diwali campaign window (14 days away) which projects ₹45,000 in expected revenue.";
-        action = { label: "Open Seasonal Calendar", page: "seasonal-intel" };
+        action = { label: "Open Future Simulator", page: "future-simulator" };
       }
     }
 

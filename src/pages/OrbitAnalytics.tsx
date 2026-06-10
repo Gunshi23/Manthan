@@ -1,181 +1,765 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { 
   TrendingUp, Mail, MousePointer, ShoppingCart, Users, BarChart2, 
-  Sparkles, ArrowUpRight, CheckCircle2, AlertTriangle
+  ArrowUpRight, CheckCircle2, Download, 
+  FileText, Brain, RefreshCw, 
+  ShieldAlert, Zap, RefreshCw as LoopIcon, Play
 } from "lucide-react";
 import { useOrbit } from "../context/OrbitContext";
 import { PageHeaderHUD } from "../components/PageHeaderHUD";
 import { AgentCardModal } from "../components/AgentCardModal";
+import { callGeminiAPI, parseGeminiJson } from "../utils/gemini";
 
 export const OrbitAnalytics: React.FC = () => {
-  const { campaigns, orders, customers, businessType } = useOrbit();
-  const [activeTab, setActiveTab] = useState<"overview" | "funnel" | "diagnostics">("overview");
+  const { 
+    campaigns: contextCampaigns, 
+    orders: contextOrders, 
+    customers, 
+    businessType, 
+    config, 
+    addAgentLog,
+    lunaMetrics
+  } = useOrbit();
+
+  // Local state for live reactivity when launching missions
+  const [localCampaigns, setLocalCampaigns] = useState<any[]>([]);
+  const [localOrders, setLocalOrders] = useState<any[]>([]);
+  const [activeTab, setActiveTab] = useState<"overview" | "funnel" | "diagnostics" | "forecast">("overview");
   const [selectedAgent, setSelectedAgent] = useState<"Polaris" | "Vega" | "Nova" | "Atlas" | "Luna" | null>(null);
 
-  /* Calculable parameters */
-  const totalRevenue = orders.reduce((s, o) => s + o.amount, 0);
-  const completedCampaigns = campaigns.filter(c => c.status === "Completed");
+  // Revenue Panel breakdown control
+  const [activeRevenueBreakdown, setActiveRevenueBreakdown] = useState<"campaign" | "channel" | "segment" | "month" | "forecast">("campaign");
+  const [channelFilter, setChannelFilter] = useState<"All" | "Email" | "WhatsApp" | "SMS" | "RCS" | "Instagram">("All");
 
-  const avgOpenRate = completedCampaigns.length > 0
-    ? Math.round(completedCampaigns.reduce((s, c) => s + (c.sentCount > 0 ? (c.openedCount / c.sentCount) * 100 : 0), 0) / completedCampaigns.length) : 71;
-  
-  const avgCTR = completedCampaigns.length > 0
-    ? Math.round(completedCampaigns.reduce((s, c) => s + (c.openedCount > 0 ? (c.clickedCount / c.openedCount) * 100 : 0), 0) / completedCampaigns.length) : 42;
-  
-  const avgConvRate = completedCampaigns.length > 0
-    ? (completedCampaigns.reduce((s, c) => s + (c.clickedCount > 0 ? (c.purchaseCount / c.clickedCount) * 100 : 0), 0) / completedCampaigns.length).toFixed(1) : "18.3";
-  
-  const totalCustomers = customers.length;
-  const loyalists = customers.filter(c => c.segment === "Loyalists").length;
+  // Forecast control
+  const [forecastPeriod, setForecastPeriod] = useState<"7" | "30" | "90">("30");
 
-  const topMetrics = [
-    { label: "Total Revenue", value: `₹${(totalRevenue / 1000).toFixed(1)}K`, delta: "+12.4%", icon: TrendingUp, color: "text-orbit-success", border: "border-orbit-success/20 bg-orbit-success/5" },
-    { label: "Avg Open Rate", value: `${avgOpenRate}%`, delta: "+8.1%", icon: Mail, color: "text-orbit-blue", border: "border-orbit-blue/20 bg-orbit-blue/5" },
-    { label: "Avg CTR", value: `${avgCTR}%`, delta: "+5.6%", icon: MousePointer, color: "text-orbit-purple", border: "border-orbit-purple/20 bg-orbit-purple/5" },
-    { label: "Avg Conversion", value: `${avgConvRate}%`, delta: "+3.2%", icon: ShoppingCart, color: "text-pink-400", border: "border-pink-400/20 bg-pink-400/5" },
-    { label: "Total Customers", value: totalCustomers.toString(), delta: "+4 new", icon: Users, color: "text-yellow-400", border: "border-yellow-400/20 bg-yellow-400/5" },
-    { label: "Loyalist Base", value: loyalists.toString(), delta: `${Math.round((loyalists / totalCustomers) * 100)}%`, icon: BarChart2, color: "text-orbit-success", border: "border-orbit-success/20 bg-orbit-success/5" },
-  ];
+  // Gemini API states
+  const [aiSummary, setAiSummary] = useState<string>("");
+  const [aiSummaryLoading, setAiSummaryLoading] = useState<boolean>(false);
+  const [aiSummaryError, setAiSummaryError] = useState<boolean>(false);
 
-  /* AI Success & Attrition diagnostics */
-  const getDiagnosticsAndRecs = () => {
-    switch (businessType) {
-      case "Fashion & Apparel":
-        return {
-          successDrivers: [
-            { title: "Instagram DM Automation", desc: "Automating Instagram direct message follow-ups for clothing inquiries drove a 35% higher response rate." },
-            { title: "Early-Access Collection Launch", desc: "Providing early access to loyalists via RCS Rich Cards boosted collection sales velocity by 50%." },
-            { title: "Streetwear DNA Personalization", desc: "Tailoring catalog copy to Streetwear and Cargo preferences increased repeat purchases by 3x." }
-          ],
-          failureDiagnostics: [
-            { title: "Social Enquiries Drop-Offs", desc: "Unanswered social DMs resulted in 22% lead leakage. Setting up automatic Instagram DM sync reduced this loss by 75%." },
-            { title: "Email Catalog Bounces", desc: "High file-size email catalogs suffered 12% inbox spam ratings. Moving to RCS card highlights resolved core CTR drop-offs." }
-          ],
-          aiRecommendations: [
-            { title: "Recover Social Leads", roi: "4.8x ROI", channel: "WhatsApp", revenue: "₹34,500 potential", desc: "17 checkout enquiries abandoned in Instagram messages. Deploy automated recovery messages." },
-            { title: "Autumn Collection Cross-Sell", roi: "3.4x ROI", channel: "RCS Cards", revenue: "₹82,000 potential", desc: "Launch new collection wear to 45 loyalist customers who purchased premium hoodies previously." }
-          ]
-        };
-      case "Beauty & Skincare":
-        return {
-          successDrivers: [
-            { title: "Serum Subscription Autopilot", desc: "Triggering automatic replenishments at 30-day intervals drove a 48% subscription retention rate." },
-            { title: "Routine Guide Follow-ups", desc: "Sending personalized beauty routine tips via WhatsApp increased product affinity and reviews by 60%." }
-          ],
-          failureDiagnostics: [
-            { title: "Serum Detail Drops", desc: "Product detail page bounces reached 28%. Adding routine video links inside WhatsApp campaigns reduced bounces by 15%." },
-            { title: "Dormant Beauty Bounces", desc: "Stale email promotions suffered high unsubscribe rates. WhatsApp text alerts restored 35% clickthrough rate." }
-          ],
-          aiRecommendations: [
-            { title: "Serum Replenish Prompts", roi: "5.2x ROI", channel: "WhatsApp", revenue: "₹28,900 potential", desc: "25 customers due for skin routine replenish reminders. Deploy auto-replenishment notifications." },
-            { title: "Reactivate Beauty VIPs", roi: "3.8x ROI", channel: "Email", revenue: "₹45,000 potential", desc: "Target 14 dormant high-ltv beauty collectors with a personalized routine audit invitation." }
-          ]
-        };
-      case "Food & Bakery":
-        return {
-          successDrivers: [
-            { title: "Weekend Brunch Push", desc: "Friday morning notifications for artisanal sourdough brunch packages saw 55% clickthrough rate." },
-            { title: "Morning Delivery Alerts", desc: "Sending fresh breakfast alerts via SMS drove 3.2x higher order velocity before 10 AM." }
-          ],
-          failureDiagnostics: [
-            { title: "Brunch Order Bottlenecks", desc: "Cart drop-offs spiked at 18% during peak hours. Bypassing app forms for direct WhatsApp replies solved conversions." },
-            { title: "Loyalty Decay", desc: "One-time food buyers rarely returned. Implementing automated day-7 feedback coupon reduced churn by 25%." }
-          ],
-          aiRecommendations: [
-            { title: "Launch Weekend Brunch Alert", roi: "3.9x ROI", channel: "WhatsApp", revenue: "₹18,500 potential", desc: "Re-engage 32 slipping foodie accounts with a fresh brunch cronut promo before Friday." },
-            { title: "Artisanal Bread Cross-Sell", roi: "4.1x ROI", channel: "SMS", revenue: "₹12,000 potential", desc: "Target 28 previous croissant buyers with new sourdough loaf nodes." }
-          ]
-        };
-      case "Jewellery & Accessories":
-        return {
-          successDrivers: [
-            { title: "RCS Rich Card Catalogs", desc: "Displaying high-definition quartz watch and pendant carousels drove a 64% engagement rate." },
-            { title: "High-Ticket VIP Access", desc: "Inviting top customers to pre-sales via private links reduced consideration cycles by 40%." }
-          ],
-          failureDiagnostics: [
-            { title: "High Consideration Bounces", desc: "Cart abandonment peaked at 35% on rings. Adding personal agent consultation callbacks salvaged 45% of deals." },
-            { title: "Dormant Luxury Accounts", desc: "Email sequences felt generic. Upgrading to personalized RCS grid views restored premium brand feel." }
-          ],
-          aiRecommendations: [
-            { title: "Recover VIP Cart Drop-offs", roi: "6.5x ROI", channel: "WhatsApp", revenue: "₹45,000 potential", desc: "9 high-ticket aura pendant checkouts abandoned. Deploy premium concierge call option." },
-            { title: "Silver Link Pre-Sale Invite", roi: "5.8x ROI", channel: "RCS Cards", revenue: "₹1.2L potential", desc: "Offer pre-sale access for silver link grids to 6 high-value inactive VIP nodes." }
-          ]
-        };
-      case "D2C Brand":
-        return {
-          successDrivers: [
-            { title: "Accessory Cross-Selling", desc: "Triggering travel organizer recommendations post-tote purchases drove 32% order values." },
-            { title: "WhatsApp Checkout Flows", desc: "Enabling direct payment buttons inside chat increased conversions by 45%." }
-          ],
-          failureDiagnostics: [
-            { title: "High Customer Acq Cost", desc: "Paid social ads suffered 30% CTR declines. Shift to autonomous re-engagement loops cut acquisition cost by 40%." },
-            { title: "Cart Basket Drop-offs", desc: "Checkout forms took too long on mobile. Standardized RCS forms boosted completions by 28%." }
-          ],
-          aiRecommendations: [
-            { title: "D2C Accessory Cross-Sell", roi: "4.2x ROI", channel: "WhatsApp", revenue: "₹18,500 potential", desc: "Target 21 smart cap buyers with eco-fiber tote combinations. Estimated conversion: 16%." },
-            { title: "Abandoned Basket Recovery", roi: "4.5x ROI", channel: "RCS Cards", revenue: "₹32,000 potential", desc: "16 shopping carts left dormant. Send interactive coupon code with free grid pack v2." }
-          ]
-        };
-      case "Enterprise":
-        return {
-          successDrivers: [
-            { title: "License Seat Expansion Logs", desc: "Auto-audits showing developer usage limits prompted 30% of accounts to upgrade contracts." },
-            { title: "Secure Email Gateway Push", desc: "Using dedicated server logs validation emails reduced SLA negotiation times by 50%." }
-          ],
-          failureDiagnostics: [
-            { title: "Stale Contract Approvals", desc: "Renewal forms went unread in standard email. Twilio/RCS failovers triggered urgent dashboard alerts." },
-            { title: "Dormant API Integrations", desc: "25% of registered developer tenants stopped active API calls. Auto SLA health notifications restored 60% activity." }
-          ],
-          aiRecommendations: [
-            { title: "License Extension Audits", roi: "8.5x ROI", channel: "Email", revenue: "₹3,80,000 potential", desc: "3 contract accounts approaching server limit limits. Dispatch dedicated SLA expansion proposal." },
-            { title: "SLA Health Alerts", roi: "5.4x ROI", channel: "RCS Cards", revenue: "₹1.5L potential", desc: "4 premium enterprise tenants exhibiting low session usage. Dispatch proactive account review." }
-          ]
-        };
-      default:
-        return {
-          successDrivers: [
-            { title: "Custom Segment Calibration", desc: "Mapping unique buyer DNA markers boosted niche conversion yield by 35%." },
-            { title: "Multi-Channel Dispatch", desc: "Synchronizing campaign delivery across RCS, WhatsApp, and email drove 2.8x higher CTR." }
-          ],
-          failureDiagnostics: [
-            { title: "Irregular Engagement Signals", desc: "Niche segments showed erratic buying behavior. Implementing predictive ROI model stabilized yields." },
-            { title: "Generic Campaign Copy", desc: "One-size-fits-all text failed to convert. Custom DNA tokens solved engagement drop-offs." }
-          ],
-          aiRecommendations: [
-            { title: "Niche Campaign Calibration", roi: "4.0x ROI", channel: "WhatsApp", revenue: "₹25,000 potential", desc: "Re-engage 12 dormant high-value customers with custom-crafted brand incentives." },
-            { title: "Loyalty Loop Expansion", roi: "3.5x ROI", channel: "RCS Cards", revenue: "₹40,000 potential", desc: "Calibrate custom collection offerings to early adopters. Deploy rich media nodes." }
-          ]
-        };
+  const [aiDiagnostics, setAiDiagnostics] = useState<any>(null);
+  const [aiDiagnosticsLoading, setAiDiagnosticsLoading] = useState<boolean>(false);
+  const [aiDiagnosticsError, setAiDiagnosticsError] = useState<boolean>(false);
+
+  // Modal Reports states
+  const [reportModalType, setReportModalType] = useState<"executive" | "investor" | "client" | null>(null);
+  const [reportModalContent, setReportModalContent] = useState<string>("");
+  const [reportModalLoading, setReportModalLoading] = useState<boolean>(false);
+
+  // Launched Mission Feedback state
+  const [launchingMission, setLaunchingMission] = useState<string | null>(null);
+  const [launchSuccessMsg, setLaunchSuccessMsg] = useState<string | null>(null);
+
+  // Sync from Context initially
+  useEffect(() => {
+    if (contextCampaigns) setLocalCampaigns(contextCampaigns);
+  }, [contextCampaigns]);
+
+  useEffect(() => {
+    if (contextOrders) setLocalOrders(contextOrders);
+  }, [contextOrders]);
+
+  // Derived timeline dates
+  const todayDate = useMemo(() => {
+    const dates = localOrders.map(o => new Date(o.date).getTime());
+    return dates.length > 0 ? new Date(Math.max(...dates)) : new Date();
+  }, [localOrders]);
+
+  const todayStr = useMemo(() => todayDate.toISOString().split("T")[0], [todayDate]);
+
+  // Core metrics calculations
+  const totalRevenue = useMemo(() => localOrders.reduce((sum, o) => sum + o.amount, 0), [localOrders]);
+  const completedCampaigns = useMemo(() => localCampaigns.filter(c => c.status === "Completed" || c.status === "Delivered"), [localCampaigns]);
+  const totalCampaignRevenue = useMemo(() => completedCampaigns.reduce((sum, c) => sum + (c.revenueGenerated || 0), 0), [completedCampaigns]);
+  
+  const aov = useMemo(() => localOrders.length > 0 ? totalRevenue / localOrders.length : 0, [totalRevenue, localOrders]);
+  const ltv = useMemo(() => customers.length > 0 ? customers.reduce((sum, c) => sum + (c.ltv || 0), 0) / customers.length : 0, [customers]);
+
+  const totalSent = useMemo(() => completedCampaigns.reduce((sum, c) => sum + (c.sentCount || 0), 0), [completedCampaigns]);
+  const totalOpened = useMemo(() => completedCampaigns.reduce((sum, c) => sum + (c.openedCount || 0), 0), [completedCampaigns]);
+  const totalClicked = useMemo(() => completedCampaigns.reduce((sum, c) => sum + (c.clickedCount || 0), 0), [completedCampaigns]);
+  const totalPurchases = useMemo(() => completedCampaigns.reduce((sum, c) => sum + (c.purchaseCount || 0), 0), [completedCampaigns]);
+
+  const avgOpenRate = useMemo(() => totalSent > 0 ? Math.round((totalOpened / totalSent) * 100) : 71, [totalOpened, totalSent]);
+  const avgCTR = useMemo(() => totalOpened > 0 ? Math.round((totalClicked / totalOpened) * 100) : 42, [totalClicked, totalOpened]);
+  const avgConvRate = useMemo(() => totalClicked > 0 ? ((totalPurchases / totalClicked) * 100).toFixed(1) : "18.3", [totalPurchases, totalClicked]);
+
+  const repeatPurchaseRate = useMemo(() => {
+    const repeatBuyers = customers.filter(c => c.purchaseCount > 1).length;
+    return customers.length > 0 ? Math.round((repeatBuyers / customers.length) * 100) : 0;
+  }, [customers]);
+
+  // Daily, Weekly, Monthly Live stats
+  const revenueToday = useMemo(() => {
+    return localOrders.filter(o => o.date === todayStr).reduce((sum, o) => sum + o.amount, 0);
+  }, [localOrders, todayStr]);
+
+  const revenueYesterday = useMemo(() => {
+    const prevDate = new Date(todayDate);
+    prevDate.setDate(prevDate.getDate() - 1);
+    const prevDateStr = prevDate.toISOString().split("T")[0];
+    return localOrders.filter(o => o.date === prevDateStr).reduce((sum, o) => sum + o.amount, 0);
+  }, [localOrders, todayDate]);
+
+  const revenueThisWeek = useMemo(() => {
+    const oneDay = 24 * 60 * 60 * 1000;
+    return localOrders.filter(o => {
+      const diff = todayDate.getTime() - new Date(o.date).getTime();
+      return diff >= 0 && diff < 7 * oneDay;
+    }).reduce((sum, o) => sum + o.amount, 0);
+  }, [localOrders, todayDate]);
+
+  const revenueLastWeek = useMemo(() => {
+    const oneDay = 24 * 60 * 60 * 1000;
+    return localOrders.filter(o => {
+      const diff = todayDate.getTime() - new Date(o.date).getTime();
+      return diff >= 7 * oneDay && diff < 14 * oneDay;
+    }).reduce((sum, o) => sum + o.amount, 0);
+  }, [localOrders, todayDate]);
+
+  const revenueThisMonth = useMemo(() => {
+    const oneDay = 24 * 60 * 60 * 1000;
+    return localOrders.filter(o => {
+      const diff = todayDate.getTime() - new Date(o.date).getTime();
+      return diff >= 0 && diff < 30 * oneDay;
+    }).reduce((sum, o) => sum + o.amount, 0);
+  }, [localOrders, todayDate]);
+
+  const revenueLastMonth = useMemo(() => {
+    const oneDay = 24 * 60 * 60 * 1000;
+    return localOrders.filter(o => {
+      const diff = todayDate.getTime() - new Date(o.date).getTime();
+      return diff >= 30 * oneDay && diff < 60 * oneDay;
+    }).reduce((sum, o) => sum + o.amount, 0);
+  }, [localOrders, todayDate]);
+
+  const vipCustomers = useMemo(() => customers.filter(c => c.ltv >= 40000 || (c.segment === "Loyalists" && c.ltv >= 30000)), [customers]);
+  const repeatBuyers = useMemo(() => customers.filter(c => c.purchaseCount > 1), [customers]);
+  const atRiskCustomers = useMemo(() => customers.filter(c => c.churnRisk >= 70 || c.segment === "Slipping Away"), [customers]);
+  const activeCustomers = useMemo(() => customers.filter(c => c.segment === "Loyalists" || c.segment === "New Signups"), [customers]);
+  const activeCustomersCount = useMemo(() => activeCustomers.length, [activeCustomers]);
+  const vipCustomersCount = useMemo(() => vipCustomers.length, [vipCustomers]);
+  const repeatBuyersCount = useMemo(() => repeatBuyers.length, [repeatBuyers]);
+  const churnRiskCount = useMemo(() => atRiskCustomers.length, [atRiskCustomers]);
+
+  const campaignSuccessRate = useMemo(() => {
+    const completed = localCampaigns.filter(c => c.status === "Completed" || c.status === "Delivered");
+    if (completed.length === 0) return 85;
+    const successful = completed.filter(c => c.purchaseCount > 0);
+    return Math.round((successful.length / completed.length) * 100);
+  }, [localCampaigns]);
+
+  // Deltas for KPI Cards
+  const todayPctChange = useMemo(() => revenueYesterday > 0 ? ((revenueToday - revenueYesterday) / revenueYesterday) * 100 : 12.4, [revenueToday, revenueYesterday]);
+  const weekPctChange = useMemo(() => revenueLastWeek > 0 ? ((revenueThisWeek - revenueLastWeek) / revenueLastWeek) * 100 : 8.1, [revenueThisWeek, revenueLastWeek]);
+  const monthPctChange = useMemo(() => revenueLastMonth > 0 ? ((revenueThisMonth - revenueLastMonth) / revenueLastMonth) * 100 : 15.6, [revenueThisMonth, revenueLastMonth]);
+
+  // Channel metrics
+  const channelMetrics = useMemo(() => {
+    return ["WhatsApp", "Email", "SMS", "RCS", "Instagram"].map(channel => {
+      const filteredCamps = localCampaigns.filter(c => c.channel?.toLowerCase() === channel.toLowerCase());
+      const sent = filteredCamps.reduce((sum, c) => sum + (c.sentCount || 0), 0);
+      const opened = filteredCamps.reduce((sum, c) => sum + (c.openedCount || 0), 0);
+      const clicked = filteredCamps.reduce((sum, c) => sum + (c.clickedCount || 0), 0);
+      const converted = filteredCamps.reduce((sum, c) => sum + (c.purchaseCount || 0), 0);
+      const revenue = filteredCamps.reduce((sum, c) => sum + (c.revenueGenerated || 0), 0);
+
+      // Default mock if no campaigns exist yet
+      if (sent === 0) {
+        if (channel === "WhatsApp") {
+          return { channel, sent: 1200, opens: "91%", clicks: "48%", conv: "18%", revenue: 34500, roi: "4.2x" };
+        } else if (channel === "Email") {
+          return { channel, sent: 3400, opens: "28%", clicks: "12%", conv: "3%", revenue: 14500, roi: "2.8x" };
+        } else if (channel === "SMS") {
+          return { channel, sent: 800, opens: "N/A", clicks: "8%", conv: "2%", revenue: 5400, roi: "1.9x" };
+        } else if (channel === "RCS") {
+          return { channel, sent: 450, opens: "68%", clicks: "32%", conv: "14%", revenue: 12000, roi: "3.5x" };
+        } else {
+          return { channel, sent: 0, opens: "0%", clicks: "0%", conv: "0%", revenue: 0, roi: "0.0x" };
+        }
+      }
+
+      const openPct = sent > 0 ? Math.round((opened / sent) * 100) : 0;
+      const clickPct = opened > 0 ? Math.round((clicked / opened) * 100) : 0;
+      const convPct = clicked > 0 ? Math.round((converted / clicked) * 100) : 0;
+      
+      const costRate = channel === "WhatsApp" ? 1.0 : channel === "Email" ? 0.05 : channel === "SMS" ? 0.20 : 0.80;
+      const cost = Math.max(100, sent * costRate);
+      const roi = (revenue / cost).toFixed(1) + "x";
+
+      return {
+        channel,
+        sent,
+        opens: channel === "SMS" || channel === "Instagram" ? "N/A" : `${openPct}%`,
+        clicks: `${clickPct}%`,
+        conv: `${convPct}%`,
+        revenue,
+        roi
+      };
+    });
+  }, [localCampaigns]);
+
+  // Customer segments breakdown
+  const customerSegments = useMemo(() => {
+    const segments = [
+      { name: "VIP Customers", match: (c: any) => c.ltv >= 40000 || (c.segment === "Loyalists" && c.ltv >= 30000), trend: "+4.2%", type: "Loyalists" },
+      { name: "Repeat Buyers", match: (c: any) => c.purchaseCount > 1, trend: "+8.6%", type: "Loyalists" },
+      { name: "New Customers", match: (c: any) => c.segment === "New Signups", trend: "+14.8%", type: "New Signups" },
+      { name: "Inactive Customers", match: (c: any) => c.segment === "High-Value Inactive", trend: "-2.1%", type: "High-Value Inactive" },
+      { name: "At-Risk Customers", match: (c: any) => c.segment === "Slipping Away" || c.churnRisk >= 70, trend: "+5.3%", type: "Slipping Away" }
+    ];
+
+    return segments.map(seg => {
+      const list = customers.filter(seg.match);
+      const count = list.length;
+      const totalSpend = list.reduce((sum, c) => sum + (c.ltv || 0), 0);
+      const avgSpend = count > 0 ? totalSpend / count : 0;
+      const contribution = totalRevenue > 0 ? (totalSpend / totalRevenue) * 100 : 0;
+
+      return {
+        name: seg.name,
+        count,
+        contribution: contribution.toFixed(1) + "%",
+        avgSpend: Math.round(avgSpend),
+        ltv: Math.round(totalSpend / (count || 1)),
+        predictedValue: Math.round(avgSpend * 1.35),
+        trend: seg.trend
+      };
+    });
+  }, [customers, totalRevenue]);
+
+  // Fallback Rule-Based summary
+  const getRuleBasedBriefing = () => {
+    const activeCamps = localCampaigns.filter(c => c.status === "Completed" || c.status === "Delivered");
+    const activeCampsRev = activeCamps.reduce((sum, c) => sum + (c.revenueGenerated || 0), 0);
+    const activeCampsPct = totalRevenue > 0 ? Math.round((activeCampsRev / totalRevenue) * 100) : 78;
+
+    return `• Revenue is up ₹${revenueToday.toLocaleString()} (${todayPctChange.toFixed(1)}%) today compared to yesterday's baseline.
+• Outbound marketing programs driven by WhatsApp nodes generated ₹${activeCampsRev.toLocaleString()} (${activeCampsPct}% of all revenue).
+• Segment progression triggers: ${vipCustomers.length} profiles consolidated inside the VIP segment, holding a combined LTV of ₹${vipCustomers.reduce((sum, c) => sum + c.ltv, 0).toLocaleString()}.
+• Retention Warning: ${atRiskCustomers.length} active customer nodes currently exceed a 70% churn risk index threshold.
+• Recommended action: Launch a high-priority Win-back campaign targeting slipping VIP buyers via the WhatsApp dispatch node immediately.`;
+  };
+
+  // Fetch AI summary with 12s timeout
+  const generateAISummary = async (forceMock = false) => {
+    setAiSummaryLoading(true);
+    setAiSummaryError(false);
+
+    if (forceMock || !config.geminiKey || config.geminiKey.trim() === "" || config.geminiKey.startsWith("placeholder")) {
+      setTimeout(() => {
+        setAiSummary(getRuleBasedBriefing());
+        setAiSummaryLoading(false);
+      }, 800);
+      return;
+    }
+
+    const systemPrompt = "You are ORBIT Executive Briefing AI. Deliver 5 high-impact bullet points summarizing current business intelligence. Rely on actual metrics. Use concise, professional, cyber-command style phrasing. Do not return markdown headers or JSON block formatting.";
+    const userPrompt = `Analyze these live business parameters:
+      Business: "${businessType}" (Aura Threads / Fashion and Apparel)
+      Total Revenue: ₹${totalRevenue}
+      Revenue Today: ₹${revenueToday}
+      Total Customers: ${customers.length}
+      VIP Customers Count: ${vipCustomers.length}
+      Repeat Buyers Count: ${repeatBuyers.length}
+      At Churn Risk Count: ${atRiskCustomers.length}
+      Campaign Revenue Generated: ₹${totalCampaignRevenue}
+      Conversion Rate: ${avgConvRate}%
+      Open Rate: ${avgOpenRate}%
+      CTR: ${avgCTR}%
+      Best Channels: ${JSON.stringify(channelMetrics.slice(0, 3))}
+      Provide a bulleted summary. Ensure the first line states revenue trends today. Recommendations should target the highest risk cohort.`;
+
+    const timeout = new Promise<never>((_, reject) => 
+      setTimeout(() => reject(new Error("Timeout")), 12000)
+    );
+
+    try {
+      const aiResult = await Promise.race([
+        callGeminiAPI(userPrompt, systemPrompt, config.geminiKey),
+        timeout
+      ]);
+      setAiSummary(aiResult);
+      setAiSummaryLoading(false);
+    } catch (err) {
+      console.warn("AI Briefing failed or timed out. Falling back to rule-based briefing:", err);
+      setAiSummary(getRuleBasedBriefing());
+      setAiSummaryError(true);
+      setAiSummaryLoading(false);
     }
   };
 
-  const { successDrivers, failureDiagnostics, aiRecommendations } = getDiagnosticsAndRecs();
-
-  // Bar chart campaign data
-  const chartData = campaigns.slice(0, 5).map(c => ({
-    name: c.name.slice(0, 18) + (c.name.length > 18 ? "..." : ""),
-    revenue: c.revenueGenerated,
-    sent: c.sentCount,
-    purchases: c.purchaseCount,
-  }));
-  const maxRevenue = Math.max(...chartData.map(d => d.revenue), 1);
-
-  // Conversion Funnel math
-  const funnelStages = completedCampaigns.length > 0 
-    ? [
-        { label: "Cohort Mapped", count: completedCampaigns.reduce((s, c) => s + c.sentCount, 0), pct: 100 },
-        { label: "Delivered", count: completedCampaigns.reduce((s, c) => s + (c.deliveredCount ?? Math.round(c.sentCount * 0.96)), 0), pct: 96 },
-        { label: "Opened / Read", count: completedCampaigns.reduce((s, c) => s + c.openedCount, 0), pct: 72 },
-        { label: "Link Clicks", count: completedCampaigns.reduce((s, c) => s + c.clickedCount, 0), pct: 38 },
-        { label: "Converted Purchases", count: completedCampaigns.reduce((s, c) => s + c.purchaseCount, 0), pct: 18 }
+  // Fallback rule-based Diagnostics
+  const getRuleBasedDiagnostics = () => {
+    return {
+      working: "Outbound campaign open rates are strong at 71%, with WhatsApp showing a peak conversion rate of 18.3%.",
+      failing: "Repeat purchase conversion velocity is declining by 4.2% week-over-week among the Slipping Away customer cohort.",
+      leak: `₹${Math.round(totalRevenue * 0.12).toLocaleString()} revenue leakage detected in checkout drop-offs from abandoned cart sessions.`,
+      opportunity: "Cross-selling coordinate pants sets to high-LTV cotton kurti buyers projects an incremental yield of ₹64,000.",
+      recommendations: [
+        "Deploy a dedicated WhatsApp Cart Abandonment concierge flow with a ₹150 off trigger code.",
+        "Launch an invite-only trunk pre-sale campaign for high-value repeat buyers on RCS Cards."
       ]
-    : [
-        { label: "Cohort Mapped", count: 584, pct: 100 },
-        { label: "Delivered", count: 561, pct: 96 },
-        { label: "Opened / Read", count: 420, pct: 72 },
-        { label: "Link Clicks", count: 220, pct: 38 },
-        { label: "Converted Purchases", count: 107, pct: 18 }
+    };
+  };
+
+  // Fetch AI diagnostics report with 12s timeout
+  const generateAIDiagnostics = async (forceMock = false) => {
+    setAiDiagnosticsLoading(true);
+    setAiDiagnosticsError(false);
+
+    if (forceMock || !config.geminiKey || config.geminiKey.trim() === "" || config.geminiKey.startsWith("placeholder")) {
+      setTimeout(() => {
+        setAiDiagnostics(getRuleBasedDiagnostics());
+        setAiDiagnosticsLoading(false);
+      }, 1000);
+      return;
+    }
+
+    const systemPrompt = `You are the ORBIT System Diagnostics AI. Analyze business metrics and output a JSON diagnostics report.
+    Format your response as a single valid JSON object matching this schema exactly:
+    {
+      "working": "brief statement of what's working",
+      "failing": "brief statement of what's failing",
+      "leak": "brief description of the biggest revenue leak",
+      "opportunity": "brief description of the highest opportunity",
+      "recommendations": ["recommendation 1", "recommendation 2"]
+    }
+    Only return the raw JSON object. Do not include markdown code block styling.`;
+
+    const userPrompt = `Live metrics state:
+      Business type: ${businessType}
+      Total Revenue: ₹${totalRevenue}
+      Campaign Revenue: ₹${totalCampaignRevenue}
+      Total Customers: ${customers.length}
+      Average Order Value: ₹${Math.round(aov)}
+      LTV Average: ₹${Math.round(ltv)}
+      Active customers: ${customers.filter(c => c.segment === 'Loyalists' || c.segment === 'New Signups').length}
+      At Churn Risk: ${atRiskCustomers.length}
+      Conversion Rate: ${avgConvRate}%
+      Open Rate: ${avgOpenRate}%
+      CTR: ${avgCTR}%
+      Calculate diagnostics.`;
+
+    const timeout = new Promise<never>((_, reject) => 
+      setTimeout(() => reject(new Error("Timeout")), 12000)
+    );
+
+    try {
+      const aiResult = await Promise.race([
+        callGeminiAPI(userPrompt, systemPrompt, config.geminiKey),
+        timeout
+      ]);
+      const parsed = parseGeminiJson<any>(aiResult, null);
+      if (parsed && parsed.working && parsed.failing) {
+        setAiDiagnostics(parsed);
+      } else {
+        throw new Error("Invalid output format");
+      }
+      setAiDiagnosticsLoading(false);
+    } catch (err) {
+      console.warn("AI Diagnostics failed or timed out. Falling back to rule-based diagnostics:", err);
+      setAiDiagnostics(getRuleBasedDiagnostics());
+      setAiDiagnosticsError(true);
+      setAiDiagnosticsLoading(false);
+    }
+  };
+
+  // Launching Mission Simulator from Recommendations
+  const handleLaunchMission = async (rec: any) => {
+    setLaunchingMission(rec.title);
+    setLaunchSuccessMsg(null);
+
+    // Call Context agent log
+    addAgentLog("Atlas", `Initiating autonomous launch directive for: "${rec.title}"`, "action");
+
+    // Fetch cohort matching recommendation segments
+    const matchingCohort = customers.filter(c => {
+      if (rec.title.toLowerCase().includes("cart") || rec.title.toLowerCase().includes("abandon")) {
+        return c.segment === "Slipping Away";
+      }
+      if (rec.title.toLowerCase().includes("vip")) {
+        return c.segment === "Loyalists" || c.ltv >= 40000;
+      }
+      if (rec.title.toLowerCase().includes("upsell") || rec.title.toLowerCase().includes("repeat")) {
+        return c.purchaseCount > 1;
+      }
+      return c.segment === "New Signups";
+    });
+
+    const audienceSize = matchingCohort.length > 0 ? matchingCohort.length : 35;
+    const campaignId = `camp_launch_${Date.now()}`;
+
+    // Simulate Atlas dispatch process
+    setTimeout(async () => {
+      const delivered = audienceSize;
+      const opened = Math.round(delivered * (rec.channel === "SMS" ? 0 : 0.76));
+      const clicked = Math.round((opened || delivered) * 0.42);
+      const purchases = Math.max(1, Math.round(clicked * 0.24));
+      const revenue = purchases * (600 + Math.floor(Math.random() * 800));
+
+      const newCampaignObj = {
+        id: campaignId,
+        name: rec.title,
+        goal: rec.title,
+        description: `Autonomous recommended campaign: ${rec.title}`,
+        channel: rec.channel,
+        status: "Completed",
+        sentCount: delivered,
+        deliveredCount: delivered,
+        openedCount: opened,
+        clickedCount: clicked,
+        purchaseCount: purchases,
+        revenueGenerated: revenue,
+        createdAt: new Date().toISOString()
+      };
+
+      // Create new orders to simulate purchasers
+      const newOrdersList: any[] = [];
+      const cohortPurchasers = matchingCohort.slice(0, purchases);
+      cohortPurchasers.forEach((cust, index) => {
+        newOrdersList.push({
+          id: `ord_sim_${Date.now()}_${index}`,
+          customerId: cust.id,
+          customerName: cust.name,
+          amount: Math.round(revenue / purchases),
+          date: todayStr,
+          product: cust.predictedCategory || "Premium Fashion Outfit",
+          channel: rec.channel
+        });
+      });
+
+      // Save to server
+      try {
+        await fetch("/api/campaigns", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name: rec.title,
+            goal: rec.title,
+            channel: rec.channel,
+            targetSegment: rec.title.toLowerCase().includes("vip") ? "Loyalists" : "Slipping Away",
+            audienceSize: delivered,
+            predictedRevenue: rec.revenueVal,
+            predictedRoi: parseFloat(rec.roi.replace("x", "")),
+            copy: `Autonomous Campaign copy launched via ${rec.channel}.`,
+            subject: `Exclusive offer: ${rec.title}`,
+            status: "Completed"
+          })
+        });
+
+        // Add simulated orders to orders route
+        for (const ord of newOrdersList) {
+          await fetch("/api/orders", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(ord)
+          });
+        }
+      } catch (err) {
+        console.warn("Failed to sync simulated campaign/orders with backend:", err);
+      }
+
+      // Update local state instantly so numbers refresh
+      setLocalCampaigns(prev => [newCampaignObj, ...prev]);
+      setLocalOrders(prev => [...newOrdersList, ...prev]);
+
+      addAgentLog("Atlas", `Twilio/Resend dispatch completed. Sent: ${delivered}. Webhook recorded: ${purchases} conversions.`, "chat");
+      addAgentLog("Vega", `Vega logged direct conversion revenue flow: +₹${revenue.toLocaleString()}`, "result");
+
+      setLaunchingMission(null);
+      setLaunchSuccessMsg(`Successfully launched: "${rec.title}"! Generated ₹${revenue.toLocaleString()} revenue from ${purchases} converters.`);
+      
+      // Auto-clear success message after 5 seconds
+      setTimeout(() => setLaunchSuccessMsg(null), 5000);
+    }, 2500);
+  };
+
+  // AI Modal Report Generator (Export Center)
+  const handleGenerateAIReport = async (type: "executive" | "investor" | "client") => {
+    setReportModalType(type);
+    setReportModalLoading(true);
+    setReportModalContent("");
+
+    if (!config.geminiKey || config.geminiKey.trim() === "" || config.geminiKey.startsWith("placeholder")) {
+      // Immediate mock fallback
+      setTimeout(() => {
+        setReportModalContent(getMockReportContent(type));
+        setReportModalLoading(false);
+      }, 1200);
+      return;
+    }
+
+    const typeLabels = {
+      executive: "AI Executive Briefing Report",
+      investor: "AI Quarterly Investor Performance Pitch",
+      client: "AI Client Campaign Deliverables Ledger"
+    };
+
+    const systemPrompt = `You are the ORBIT Lead AI Business Consultant. Generate a detailed, highly professional business report in markdown format. 
+    Use titles, stats grids, and bullet lists. Address key trends, leak recovery, and forecasted growth metrics. Do not exceed 400 words.`;
+
+    const userPrompt = `Generate a "${typeLabels[type]}" for the business "${businessType}".
+    Core stats:
+    - Total Revenue: ₹${totalRevenue.toLocaleString()}
+    - Total Customers: ${customers.length}
+    - Total Outbound Campaigns: ${localCampaigns.length}
+    - Overall Conversion Rate: ${avgConvRate}%
+    - WhatsApp Campaigns Revenue: ₹${channelMetrics.find(c => c.channel === "WhatsApp")?.revenue.toLocaleString()}
+    - VIP Customers Base: ${vipCustomers.length} profiles
+    - Slipping Churn Risk: ${atRiskCustomers.length} profiles
+    Deliver actionable summaries and investor/operator forecasts.`;
+
+    const timeout = new Promise<never>((_, reject) => 
+      setTimeout(() => reject(new Error("Timeout")), 12000)
+    );
+
+    try {
+      const aiResult = await Promise.race([
+        callGeminiAPI(userPrompt, systemPrompt, config.geminiKey),
+        timeout
+      ]);
+      setReportModalContent(aiResult);
+      setReportModalLoading(false);
+    } catch (err) {
+      console.warn("AI Report failed or timed out. Falling back to customized template:", err);
+      setReportModalContent(getMockReportContent(type));
+      setReportModalLoading(false);
+    }
+  };
+
+  const getMockReportContent = (type: "executive" | "investor" | "client") => {
+    const formatCurrency = (val: number) => `₹${Math.round(val).toLocaleString()}`;
+    const dateStr = todayDate.toLocaleDateString();
+
+    if (type === "executive") {
+      return `# ORBIT Executive Briefing Report
+**Date Generated:** ${dateStr} | **Operational Status:** NOMINAL
+
+## 1. Executive Performance Summary
+Our growth marketing vectors are nominal, with total cumulative revenue standing at **${formatCurrency(totalRevenue)}** across **${localOrders.length}** conversions. Outbound AI campaigns have accounted for **${formatCurrency(totalCampaignRevenue)}** (representing a healthy share of business metrics).
+
+* **Average Order Value (AOV):** ${formatCurrency(aov)}
+* **Customer Lifetime Value (LTV):** ${formatCurrency(ltv)}
+* **Conversion Rate (Average):** ${avgConvRate}%
+
+## 2. Channel Diagnostics & ROI Ledger
+Our analysis confirms **WhatsApp** remains the primary yield driver, outperforming email and SMS with a **${channelMetrics.find(c => c.channel === "WhatsApp")?.roi}** ROI coefficient.
+
+* **WhatsApp Revenue:** ${formatCurrency(channelMetrics.find(c => c.channel === "WhatsApp")?.revenue || 0)}
+* **RCS Cards Revenue:** ${formatCurrency(channelMetrics.find(c => c.channel === "RCS")?.revenue || 0)}
+* **Email / Newsletters Revenue:** ${formatCurrency(channelMetrics.find(c => c.channel === "Email")?.revenue || 0)}
+
+## 3. High-Priority Directives
+1. **Reactivate Churn Nodes:** Immediately launch the *Dormant VIP Win-back Loop* targeting ${atRiskCustomers.length} at-risk buyers.
+2. **Optimize Checkout Gateway:** Deploy automated checkout links inside WhatsApp to capture ₹12,500 in cart leaks.`;
+    } else if (type === "investor") {
+      return `# ORBIT Performance Pitch (Investor Report)
+**Quarterly Assessment:** Q2 | **Valuation Node:** Vanguard-v4.8
+
+## 1. Financial Highlights
+Orbit Core has unlocked positive trajectory indicators across fashion customer databases. Cumulative cohort yield totals **${formatCurrency(totalRevenue)}**, showing an active **+18.5%** quarter-over-quarter expansion trend.
+
+* **Gross Campaign Billings:** ${formatCurrency(totalCampaignRevenue)}
+* **Average LTV per Cohort:** ${formatCurrency(ltv)}
+* **VIP Cluster Assets Value:** ${formatCurrency(vipCustomers.length * ltv)}
+
+## 2. Customer Acquisition & Unit Economics
+The CAC-to-LTV ratio remains healthy, supported by high organic repeat purchase rates (**${repeatPurchaseRate}%**). 
+
+* **Repeat Buyer Base:** ${repeatBuyers.length} profiles
+* **Active Signups (unconverted):** ${customers.filter(c => c.segment === 'New Signups').length} accounts
+* **Average CAC:** ₹240 (driven by low-cost automated WhatsApp dispatch hooks)
+
+## 3. Projections & Forecast
+Vega Agent forecasts Q3 baseline revenues extending to **${formatCurrency(totalRevenue * 1.35)}**, representing a **+35%** growth scenario driven by automated RCS festive drops.`;
+    } else {
+      return `# ORBIT Client Campaign Deliverables Ledger
+**Client Profile:** Aura Threads (Fashion and Apparel) | **Active Agent Registry:** Polaris, Nova, Vega, Atlas, Luna
+
+## 1. Outbound Campaign Performance Table
+The following details campaigns dispatched automatically by Orbit AI:
+
+* **Summer Cotton Drop:** Sent to 800 WhatsApp numbers. Delivered: 98%. Generated **₹1,22,106** with **4.8x ROI**.
+* **Diwali VIP Spark:** Sent to 120 Email addresses. Delivered: 100%. Generated **₹61,572** with **3.4x ROI**.
+* **DM Enquiry Recovery:** Sent to 245 WhatsApp checkout drop-offs. Generated **₹62,352** with **3.9x ROI**.
+
+## 2. Conversion Audit
+Overall campaign open rates hit **${avgOpenRate}%** with a click-through rate of **${avgCTR}%**, indicating strong copywriting relevance generated by Nova copywriter nodes.`;
+    }
+  };
+
+  // Export CSV Function
+  const handleExportCSV = () => {
+    // Generate campaigns CSV string
+    let csvContent = "data:text/csv;charset=utf-8,";
+    csvContent += "Campaign Name,Goal,Channel,Status,Audience Size,Revenue Generated,ROI\n";
+    
+    localCampaigns.forEach(c => {
+      const roi = c.revenueGenerated > 0 ? (c.revenueGenerated / (c.sentCount * 0.5 || 1)).toFixed(1) + "x" : "0.0x";
+      csvContent += `"${c.name}","${c.goal}","${c.channel}","${c.status}",${c.sentCount},${c.revenueGenerated},"${roi}"\n`;
+    });
+
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", `ORBIT_Campaigns_Ledger_${todayStr}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    addAgentLog("System", "CSV report exported to client local files.", "thought");
+  };
+
+  // Recommendations static context (real functionality on buttons)
+  const recommendationsList = [
+    { title: "Recover Abandoned Carts", channel: "WhatsApp", confidence: "94%", roi: "4.8x", revenue: "₹12,500 potential", revenueVal: 12500, desc: "Re-engage 17 shoppers who left Swadeshi Cotton Kurtis in their checkouts today." },
+    { title: "Launch VIP Campaign", channel: "RCS Cards", confidence: "92%", roi: "5.8x", revenue: "₹24,000 potential", revenueVal: 24000, desc: "Invite our top 15 loyalists with a private early access pre-sale link." },
+    { title: "Upsell Repeat Buyers", channel: "Email", confidence: "87%", roi: "3.4x", revenue: "₹18,200 potential", revenueVal: 18200, desc: "Target 28 previous kurti purchasers with coordinating palazzo sets bundles." },
+    { title: "Diwali Festival Campaign", channel: "WhatsApp", confidence: "89%", roi: "4.2x", revenue: "₹31,000 potential", revenueVal: 31000, desc: "Dispatch premium silk templates to Slipping Away VIP segments." }
+  ];
+
+  // Fetch initial summary & diagnostics on mount or businessType change
+  useEffect(() => {
+    generateAISummary();
+    generateAIDiagnostics();
+  }, [businessType]);
+
+  // Automated workflow scrolling logs simulator
+  const [workflowLogs, setWorkflowLogs] = useState<string[]>([]);
+  useEffect(() => {
+    const baseLogs = [
+      "Polaris clustered customer database: isolated 4 segments.",
+      "Luna audited billing logs: detected ₹12,500 cart leakage.",
+      "Vega calculated conversion timeline ROI variables.",
+      "Nova compiled creative templates for WhatsApp / Email drops.",
+      "Atlas initialized dispatcher webhooks for dispatch queues."
+    ];
+    setWorkflowLogs(baseLogs);
+
+    // Keep adding live updates
+    const interval = setInterval(() => {
+      const logPool = [
+        "Polaris: Customer coordinate charts successfully mapped.",
+        "Luna: Inactive VIP segment re-audited.",
+        "Vega: Simulation Timelines recalculated (89.2% accuracy).",
+        "Nova: Created high-CTR catalog drafts.",
+        "Atlas: Twilio REST sockets verified (99.4% net health)."
       ];
+      const randomLog = logPool[Math.floor(Math.random() * logPool.length)];
+      setWorkflowLogs(prev => [randomLog, ...prev.slice(0, 4)]);
+    }, 8000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  // Visual chart datasets
+  const revenueChartData = useMemo(() => {
+    // Group campaigns by name/revenue
+    return localCampaigns.slice(0, 5).map(c => ({
+      label: c.name.slice(0, 15) + (c.name.length > 15 ? "..." : ""),
+      value: c.revenueGenerated || 0
+    }));
+  }, [localCampaigns]);
+
+  const channelChartData = useMemo(() => {
+    return channelMetrics.map(c => ({
+      label: c.channel,
+      value: c.revenue
+    }));
+  }, [channelMetrics]);
+
+  const segmentChartData = useMemo(() => {
+    return customerSegments.map(c => ({
+      label: c.name.slice(0, 10),
+      value: c.count * c.ltv * 0.05 // simulated revenue share
+    }));
+  }, [customerSegments]);
+
+  const monthChartData = useMemo(() => {
+    return [
+      { label: "Feb", value: totalRevenue * 0.12 },
+      { label: "Mar", value: totalRevenue * 0.18 },
+      { label: "Apr", value: totalRevenue * 0.22 },
+      { label: "May", value: totalRevenue * 0.32 },
+      { label: "Jun (Today)", value: totalRevenue * 0.16 }
+    ];
+  }, [totalRevenue]);
+
+  // SVG Chart calculation helper
+  const renderSVGChart = (data: { label: string; value: number }[]) => {
+    const maxValue = Math.max(...data.map(d => d.value), 1);
+    const width = 500;
+    const height = 180;
+    const paddingLeft = 50;
+    const paddingRight = 30;
+    const paddingBottom = 25;
+    const paddingTop = 15;
+    
+    const chartWidth = width - paddingLeft - paddingRight;
+    const chartHeight = height - paddingTop - paddingBottom;
+
+    return (
+      <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-44 text-white">
+        {/* Y Axis Grid lines */}
+        {[0, 0.25, 0.5, 0.75, 1].map((ratio, idx) => {
+          const y = paddingTop + chartHeight * (1 - ratio);
+          const valLabel = Math.round(maxValue * ratio);
+          return (
+            <g key={idx}>
+              <line x1={paddingLeft} y1={y} x2={width - paddingRight} y2={y} stroke="rgba(255,255,255,0.04)" strokeDasharray="3 3" />
+              <text x={paddingLeft - 8} y={y + 3} textAnchor="end" fill="#64748B" className="font-mono text-[8px]">
+                ₹{valLabel >= 1000 ? (valLabel / 1000).toFixed(0) + "K" : valLabel}
+              </text>
+            </g>
+          );
+        })}
+
+        {/* X Axis Line */}
+        <line x1={paddingLeft} y1={height - paddingBottom} x2={width - paddingRight} y2={height - paddingBottom} stroke="rgba(255,255,255,0.12)" />
+
+        {/* Bars */}
+        {data.map((item, idx) => {
+          const barWidth = Math.min(30, chartWidth / (data.length || 1) * 0.5);
+          const gap = (chartWidth - barWidth * data.length) / (data.length + 1);
+          const x = paddingLeft + gap + idx * (barWidth + gap);
+          const barHeight = (item.value / maxValue) * chartHeight;
+          const y = height - paddingBottom - barHeight;
+
+          return (
+            <g key={idx} className="group cursor-pointer">
+              {/* Glowing gradient bar */}
+              <rect
+                x={x}
+                y={y}
+                width={barWidth}
+                height={barHeight}
+                fill="url(#neonGradient)"
+                className="transition-all duration-300 hover:opacity-80"
+                rx="3"
+              />
+              <text x={x + barWidth / 2} y={height - paddingBottom + 14} textAnchor="middle" fill="#94A3B8" className="font-mono text-[7.5px] font-semibold">
+                {item.label}
+              </text>
+              {/* Tooltip value */}
+              <text x={x + barWidth / 2} y={Math.max(12, y - 5)} textAnchor="middle" fill="#3B82F6" className="font-mono text-[8px] font-bold opacity-0 group-hover:opacity-100 transition-opacity">
+                ₹{Math.round(item.value).toLocaleString()}
+              </text>
+            </g>
+          );
+        })}
+
+        <defs>
+          <linearGradient id="neonGradient" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="#8B5CF6" />
+            <stop offset="100%" stopColor="#3B82F6" />
+          </linearGradient>
+        </defs>
+      </svg>
+    );
+  };
 
   return (
     <div className="flex-1 flex overflow-hidden bg-[#050816] relative">
@@ -189,12 +773,11 @@ export const OrbitAnalytics: React.FC = () => {
         {/* Title Header */}
         <PageHeaderHUD
           title="Orbit Analytics"
-          subtitle="AI-GENERATED PERFORMANCE & DIRECTIVE REPORTS"
+          subtitle="AI-OPERATIONAL COGNITIVE COMMAND CENTER"
           onSelectAgent={setSelectedAgent}
           actions={
-            /* Section Navigation Tabs */
             <div className="flex items-center gap-1 bg-gray-950 p-1 rounded-xl border border-gray-900 font-mono text-[9px] font-bold">
-              {["overview", "funnel", "diagnostics"].map((tab) => (
+              {["overview", "funnel", "diagnostics", "forecast"].map((tab) => (
                 <button
                   key={tab}
                   onClick={() => setActiveTab(tab as any)}
@@ -211,181 +794,854 @@ export const OrbitAnalytics: React.FC = () => {
           }
         />
 
+        {/* Global Feedback Banner */}
+        {launchSuccessMsg && (
+          <div className="bg-orbit-success/15 border border-orbit-success/30 rounded-xl p-3.5 flex items-center justify-between animate-fade-in-up font-mono text-xs text-orbit-success">
+            <div className="flex items-center gap-2">
+              <CheckCircle2 size={14} className="animate-bounce" />
+              <span>{launchSuccessMsg}</span>
+            </div>
+            <button onClick={() => setLaunchSuccessMsg(null)} className="text-gray-400 hover:text-white cursor-pointer">×</button>
+          </div>
+        )}
+
         {/* KPI Strip */}
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-          {topMetrics.map((m, i) => {
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-3.5">
+          {[
+            { label: "Total Revenue", value: `₹${(totalRevenue / 1000).toFixed(1)}K`, raw: totalRevenue, delta: "+18.5%", icon: TrendingUp, color: "text-orbit-success", border: "border-orbit-success/15 bg-orbit-success/5" },
+            { label: "Campaign Revenue", value: `₹${(totalCampaignRevenue / 1000).toFixed(1)}K`, raw: totalCampaignRevenue, delta: "+24.2%", icon: Zap, color: "text-orbit-blue", border: "border-orbit-blue/15 bg-orbit-blue/5" },
+            { label: "Avg Order Value", value: `₹${Math.round(aov)}`, raw: aov, delta: "+4.1%", icon: ShoppingCart, color: "text-yellow-400", border: "border-yellow-400/15 bg-yellow-400/5" },
+            { label: "Customer LTV", value: `₹${Math.round(ltv)}`, raw: ltv, delta: "+12.6%", icon: Users, color: "text-orbit-purple", border: "border-orbit-purple/15 bg-orbit-purple/5" },
+            { label: "Conversion Rate", value: `${avgConvRate}%`, raw: parseFloat(avgConvRate), delta: "+3.2%", icon: CheckCircle2, color: "text-orbit-pink", border: "border-orbit-pink/15 bg-orbit-pink/5" },
+            { label: "Avg Open Rate", value: `${avgOpenRate}%`, raw: avgOpenRate, delta: "+8.1%", icon: Mail, color: "text-orbit-blue", border: "border-orbit-blue/15 bg-orbit-blue/5" },
+            { label: "Avg CTR", value: `${avgCTR}%`, raw: avgCTR, delta: "+5.6%", icon: MousePointer, color: "text-orbit-purple", border: "border-orbit-purple/15 bg-orbit-purple/5" },
+            { label: "Repeat Purchase Rate", value: `${repeatPurchaseRate}%`, raw: repeatPurchaseRate, delta: "+6.8%", icon: BarChart2, color: "text-orbit-success", border: "border-orbit-success/15 bg-orbit-success/5" },
+            { label: "Customer Growth", value: "+14.2%", raw: 14.2, delta: "+2.1%", icon: Users, color: "text-yellow-400", border: "border-yellow-400/15 bg-yellow-400/5" },
+            { label: "Revenue Growth", value: "+18.5%", raw: 18.5, delta: "+3.4%", icon: TrendingUp, color: "text-orbit-success", border: "border-orbit-success/15 bg-orbit-success/5" }
+          ].map((m, i) => {
             const Icon = m.icon;
             return (
-              <div key={i} className={`orbit-panel p-4 flex flex-col gap-2 hover:scale-[1.02] transition-transform ${m.border}`}>
-                <div className="flex items-center justify-between">
-                  <Icon size={14} className={m.color} />
-                  <span className="font-mono text-[9px] text-orbit-success flex items-center gap-0.5">
-                    <ArrowUpRight size={10} />{m.delta}
+              <div key={i} className={`orbit-panel p-3.5 flex flex-col gap-1 hover:scale-[1.03] transition-all duration-300 ${m.border}`}>
+                <div className="flex items-center justify-between text-[8px] font-mono text-gray-500">
+                  <span className="uppercase tracking-wider truncate max-w-[80px]">{m.label}</span>
+                  <Icon size={12} className={m.color} />
+                </div>
+                <div className="flex items-baseline justify-between mt-1">
+                  <span className="font-space text-lg font-bold text-white">{m.value}</span>
+                  <span className="font-mono text-[8.5px] text-orbit-success flex items-center gap-0.5">
+                    <ArrowUpRight size={9} />{m.delta}
                   </span>
                 </div>
-                <span className={`font-space text-2xl font-bold ${m.color}`}>{m.value}</span>
-                <span className="font-mono text-[8px] text-gray-550 uppercase tracking-widest">{m.label}</span>
               </div>
             );
           })}
         </div>
 
-        {/* Tab 1: Overview Dashboard */}
+        {/* Tab 1: Overview */}
         {activeTab === "overview" && (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Revenue bar chart */}
-            <div className="lg:col-span-2 orbit-panel p-5 flex flex-col min-h-[300px]">
-              <div className="flex items-center justify-between border-b border-gray-900 pb-3 mb-5">
-                <span className="font-space text-xs font-bold uppercase tracking-wider text-white">Campaign Revenue Output</span>
-                <BarChart2 size={13} className="text-orbit-blue" />
+            
+            {/* LEFT COLUMN (2/3 Width) */}
+            <div className="lg:col-span-2 space-y-6">
+              
+              {/* Live KPI Cards strip */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3.5">
+                {[
+                  { label: "Revenue Today", val: `₹${revenueToday.toLocaleString()}`, pct: todayPctChange.toFixed(1) + "%", comp: "vs yesterday", isUp: todayPctChange >= 0 },
+                  { label: "Revenue This Week", val: `₹${revenueThisWeek.toLocaleString()}`, pct: weekPctChange.toFixed(1) + "%", comp: "vs last week", isUp: weekPctChange >= 0 },
+                  { label: "Revenue This Month", val: `₹${revenueThisMonth.toLocaleString()}`, pct: monthPctChange.toFixed(1) + "%", comp: "vs last month", isUp: monthPctChange >= 0 },
+                  { label: "Active Customers", val: activeCustomersCount.toString(), pct: "+6.8%", comp: "vs last week", isUp: true },
+                  { label: "VIP Customers", val: vipCustomersCount.toString(), pct: "+4.2%", comp: "vs last week", isUp: true },
+                  { label: "Repeat Buyers", val: repeatBuyersCount.toString(), pct: "+8.6%", comp: "vs last month", isUp: true },
+                  { label: "At-Risk Customers", val: churnRiskCount.toString(), pct: "+12.1%", comp: "vs last week", isUp: false },
+                  { label: "Campaign Success", val: `${campaignSuccessRate}%`, pct: "+2.4%", comp: "vs last month", isUp: true }
+                ].map((kpi, idx) => (
+                  <div key={idx} className="orbit-panel p-3.5 relative overflow-hidden flex flex-col justify-between min-h-[90px] border-gray-900/60 bg-gray-950/20">
+                    <span className="font-mono text-[8px] text-gray-500 uppercase tracking-widest block">{kpi.label}</span>
+                    <span className="font-space text-xl font-bold text-white mt-1 block">{kpi.val}</span>
+                    
+                    <div className="flex items-center justify-between mt-2 font-mono text-[8px]">
+                      <span className={kpi.isUp ? "text-orbit-success" : "text-red-400"}>
+                        {kpi.isUp ? "▲" : "▼"} {kpi.pct}
+                      </span>
+                      <span className="text-gray-650 italic">{kpi.comp}</span>
+                    </div>
+                  </div>
+                ))}
               </div>
-              {chartData.length > 0 ? (
-                <div className="flex items-end gap-5 h-44 mt-auto">
-                  {chartData.map((d, i) => (
-                    <div key={i} className="flex flex-col items-center gap-2 flex-1">
-                      <span className="font-mono text-[9px] text-orbit-success font-bold">₹{(d.revenue / 1000).toFixed(1)}K</span>
-                      <div className="w-full relative flex items-end justify-center" style={{ height: 110 }}>
-                        <div
-                          className="w-full rounded-t-lg bg-gradient-to-t from-orbit-blue to-orbit-purple transition-all duration-700 hover:opacity-80"
-                          style={{ height: `${Math.max(6, (d.revenue / maxRevenue) * 100)}%` }}
-                        />
+
+              {/* Revenue Intelligence Panel */}
+              <div className="orbit-panel p-5 space-y-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-gray-900 pb-3 gap-2">
+                  <div className="flex items-center gap-2">
+                    <BarChart2 size={14} className="text-orbit-blue" />
+                    <span className="font-space text-xs font-bold uppercase tracking-wider text-white">Revenue Intelligence Panel</span>
+                  </div>
+
+                  {/* Channel selectors */}
+                  <div className="flex items-center gap-1 bg-black/60 p-1 rounded-lg border border-gray-900 font-mono text-[8px]">
+                    {(["All", "WhatsApp", "Email", "SMS", "RCS", "Instagram"] as const).map(ch => (
+                      <button
+                        key={ch}
+                        onClick={() => setChannelFilter(ch)}
+                        className={`px-2 py-1 rounded transition-all cursor-pointer ${
+                          channelFilter === ch ? "bg-orbit-blue/20 text-orbit-blue border border-orbit-blue/30 font-bold" : "text-gray-550 hover:text-gray-300"
+                        }`}
+                      >
+                        {ch}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Sub-selector tabs */}
+                <div className="flex items-center gap-2 border-b border-gray-950 pb-2.5 font-mono text-[8.5px] font-bold">
+                  {[
+                    { id: "campaign", label: "REVENUE BY CAMPAIGN" },
+                    { id: "channel", label: "REVENUE BY CHANNEL" },
+                    { id: "segment", label: "REVENUE BY SEGMENT" },
+                    { id: "month", label: "REVENUE BY MONTH" },
+                    { id: "forecast", label: "FORECAST PROJECTIONS" }
+                  ].map(tab => (
+                    <button
+                      key={tab.id}
+                      onClick={() => setActiveRevenueBreakdown(tab.id as any)}
+                      className={`pb-1 border-b transition-all cursor-pointer ${
+                        activeRevenueBreakdown === tab.id ? "text-orbit-purple border-orbit-purple font-extrabold" : "text-gray-500 border-transparent hover:text-gray-300"
+                      }`}
+                    >
+                      {tab.label}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Live rendering of custom SVG charts */}
+                <div className="bg-black/35 rounded-xl border border-gray-950 p-4 min-h-[190px] flex items-center justify-center relative">
+                  
+                  {activeRevenueBreakdown === "campaign" && (
+                    <div className="w-full">
+                      {revenueChartData.length > 0 ? renderSVGChart(revenueChartData) : (
+                        <span className="font-mono text-xs text-gray-500">No campaigns found for current filters.</span>
+                      )}
+                    </div>
+                  )}
+
+                  {activeRevenueBreakdown === "channel" && (
+                    <div className="w-full">{renderSVGChart(channelChartData)}</div>
+                  )}
+
+                  {activeRevenueBreakdown === "segment" && (
+                    <div className="w-full">{renderSVGChart(segmentChartData)}</div>
+                  )}
+
+                  {activeRevenueBreakdown === "month" && (
+                    <div className="w-full">{renderSVGChart(monthChartData)}</div>
+                  )}
+
+                  {activeRevenueBreakdown === "forecast" && (
+                    <div className="w-full flex flex-col space-y-3">
+                      {renderSVGChart([
+                        { label: "Today", value: totalRevenue },
+                        { label: "+7 Days", value: totalRevenue + 14500 },
+                        { label: "+14 Days", value: totalRevenue + 28900 },
+                        { label: "+30 Days", value: totalRevenue + 58000 },
+                        { label: "+90 Days", value: totalRevenue + 192000 }
+                      ])}
+                      <span className="font-mono text-[8px] text-orbit-purple text-center uppercase tracking-widest animate-pulse">
+                        Vega forecast sequence locked: 89.2% expected accuracy model
+                      </span>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Channel Performance Center */}
+              <div className="orbit-panel p-5 space-y-4">
+                <div className="border-b border-gray-900 pb-3">
+                  <h3 className="font-space text-xs font-bold text-white uppercase tracking-wider">Channel Performance Center</h3>
+                </div>
+
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left font-mono text-[9px] divide-y divide-gray-950">
+                    <thead>
+                      <tr className="text-gray-550">
+                        <th className="pb-2">CHANNEL</th>
+                        <th className="pb-2">MESSAGES SENT</th>
+                        <th className="pb-2">OPENS</th>
+                        <th className="pb-2">CLICKS</th>
+                        <th className="pb-2">CONVERSIONS</th>
+                        <th className="pb-2 text-right">REVENUE GENERATED</th>
+                        <th className="pb-2 text-right">ROI YIELD</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-950 text-gray-300">
+                      {channelMetrics.map((ch, idx) => (
+                        <tr key={idx} className="hover:bg-gray-900/10">
+                          <td className="py-2.5 font-bold font-space text-white">{ch.channel}</td>
+                          <td className="py-2.5">{ch.sent.toLocaleString()}</td>
+                          <td className="py-2.5 text-orbit-blue">{ch.opens}</td>
+                          <td className="py-2.5 text-orbit-purple">{ch.clicks}</td>
+                          <td className="py-2.5 text-orbit-pink">{ch.conv}</td>
+                          <td className="py-2.5 text-right text-white font-bold">₹{ch.revenue.toLocaleString()}</td>
+                          <td className="py-2.5 text-right text-orbit-success font-bold">{ch.roi}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              {/* Customer Intelligence */}
+              <div className="orbit-panel p-5 space-y-4">
+                <div className="border-b border-gray-900 pb-3">
+                  <h3 className="font-space text-xs font-bold text-white uppercase tracking-wider">Customer Segment Intelligence</h3>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-5 gap-3.5">
+                  {customerSegments.map((seg, idx) => (
+                    <div key={idx} className="bg-black/30 border border-gray-900/60 p-3.5 rounded-xl space-y-2 relative overflow-hidden flex flex-col justify-between">
+                      <div>
+                        <div className="flex justify-between items-start">
+                          <span className="font-space text-[10px] font-bold text-white leading-none">{seg.name.split(" ")[0]}</span>
+                          <span className={`font-mono text-[8px] px-1 py-0.5 rounded ${
+                            seg.trend.startsWith("+") ? "text-orbit-success bg-orbit-success/5 border border-orbit-success/15" : "text-red-400 bg-red-500/5 border border-red-500/15"
+                          }`}>{seg.trend}</span>
+                        </div>
+                        <span className="font-mono text-[8px] text-gray-500 uppercase tracking-widest mt-0.5 block">{seg.name}</span>
                       </div>
-                      <span className="font-mono text-[8px] text-gray-500 text-center leading-tight max-w-[75px] truncate">{d.name}</span>
+
+                      <div className="space-y-1 mt-2.5 font-mono text-[8.5px]">
+                        <div className="flex justify-between">
+                          <span className="text-gray-500">Count:</span>
+                          <span className="text-white font-bold">{seg.count}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-500">Contrib:</span>
+                          <span className="text-orbit-blue font-bold">{seg.contribution}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-500">Avg Spend:</span>
+                          <span className="text-white">₹{seg.avgSpend}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-500">LTV:</span>
+                          <span className="text-white">₹{seg.ltv}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-500">Pred. LTV:</span>
+                          <span className="text-orbit-purple font-bold">₹{seg.predictedValue}</span>
+                        </div>
+                      </div>
                     </div>
                   ))}
                 </div>
-              ) : (
-                <div className="h-44 flex items-center justify-center text-gray-600 font-mono text-xs">
-                  No campaign dispatches recorded.
+              </div>
+
+              {/* Mission Performance */}
+              <div className="orbit-panel p-5 space-y-4">
+                <div className="border-b border-gray-900 pb-3">
+                  <h3 className="font-space text-xs font-bold text-white uppercase tracking-wider">Mission Performance Ledger</h3>
                 </div>
-              )}
+
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left font-mono text-[9px] divide-y divide-gray-950">
+                    <thead>
+                      <tr className="text-gray-550">
+                        <th className="pb-2">MISSION NAME</th>
+                        <th className="pb-2">STATUS</th>
+                        <th className="pb-2">AUDIENCE SIZE</th>
+                        <th className="pb-2">CHANNEL</th>
+                        <th className="pb-2 text-right">REVENUE GENERATED</th>
+                        <th className="pb-2 text-right">ROI YIELD</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-950 text-gray-300">
+                      {localCampaigns.map((camp, idx) => {
+                        const roiVal = camp.revenueGenerated > 0 
+                          ? (camp.revenueGenerated / (camp.sentCount * 0.5 || 100)).toFixed(1) + "x" 
+                          : "0.0x";
+                        return (
+                          <tr key={idx} className="hover:bg-gray-900/10">
+                            <td className="py-2.5 font-bold font-space text-white">{camp.name}</td>
+                            <td className="py-2.5">
+                              <span className={`px-2 py-0.5 rounded text-[8.5px] uppercase ${
+                                camp.status === "Completed" || camp.status === "Delivered"
+                                  ? "bg-orbit-success/10 text-orbit-success border border-orbit-success/20"
+                                  : camp.status === "Sending"
+                                  ? "bg-orbit-blue/10 text-orbit-blue border border-orbit-blue/20 animate-pulse"
+                                  : "bg-gray-800 text-gray-500 border border-gray-700"
+                              }`}>{camp.status}</span>
+                            </td>
+                            <td className="py-2.5">{camp.sentCount || camp.audienceSize}</td>
+                            <td className="py-2.5 text-orbit-blue">{camp.channel}</td>
+                            <td className="py-2.5 text-right text-white font-bold">₹{(camp.revenueGenerated || 0).toLocaleString()}</td>
+                            <td className="py-2.5 text-right text-orbit-success font-bold">{roiVal}</td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
             </div>
 
-            {/* Channels breakdown */}
-            <div className="orbit-panel p-5 flex flex-col justify-between">
-              <div className="border-b border-gray-900 pb-3 mb-4">
-                <span className="font-space text-xs font-bold uppercase tracking-wider text-white">Best Channel Nodes</span>
-              </div>
-              <div className="flex flex-col gap-3 flex-1 justify-center">
-                {(["Email", "WhatsApp", "SMS", "RCS"] as const).map(ch => {
-                  const chCamps = campaigns.filter(c => c.channel === ch);
-                  const chRevenue = chCamps.reduce((s, c) => s + c.revenueGenerated, 0);
-                  const chOpen = chCamps.length > 0 && chCamps[0].sentCount > 0
-                    ? Math.round((chCamps.reduce((s, c) => s + c.openedCount, 0) / chCamps.reduce((s, c) => s + c.sentCount, 0)) * 100) : 74;
-                  const colors = { Email: "text-orbit-blue", WhatsApp: "text-orbit-success", SMS: "text-yellow-400", RCS: "text-orbit-purple" };
-                  return (
-                    <div key={ch} className="p-2.5 bg-gray-950/40 border border-gray-900 rounded-xl flex items-center justify-between font-mono text-[9px]">
-                      <div>
-                        <span className={`font-bold uppercase block ${colors[ch]}`}>{ch}</span>
-                        <span className="text-gray-500">{chCamps.length} launches</span>
-                      </div>
-                      <div className="text-right">
-                        <span className="font-space font-bold text-white text-xs block">₹{(chRevenue / 1000).toFixed(1)}K</span>
-                        <span className="text-gray-600">{chOpen}% opens</span>
-                      </div>
+            {/* RIGHT COLUMN (1/3 Width) */}
+            <div className="space-y-6">
+              
+              {/* AI Executive Summary */}
+              <div className="orbit-panel p-5 space-y-4 border-orbit-purple/20 bg-orbit-purple/5 relative overflow-hidden shadow-[0_0_25px_rgba(139,92,246,0.15)]">
+                {/* Visual scanline */}
+                <div className="absolute top-0 left-0 w-full h-[1px] bg-orbit-purple opacity-40 animate-scan-beam" />
+                
+                <div className="flex justify-between items-center border-b border-gray-900 pb-3">
+                  <div className="flex items-center gap-2">
+                    <Brain size={14} className="text-orbit-purple animate-pulse" />
+                    <span className="font-space text-xs font-bold uppercase tracking-wider text-white">Today's Business Briefing</span>
+                  </div>
+                  <button 
+                    onClick={() => generateAISummary()} 
+                    disabled={aiSummaryLoading}
+                    className="p-1 hover:bg-gray-900 rounded text-gray-550 hover:text-white transition-colors cursor-pointer"
+                    title="Refresh AI summary"
+                  >
+                    <RefreshCw size={11} className={aiSummaryLoading ? "animate-spin" : ""} />
+                  </button>
+                </div>
+
+                {aiSummaryLoading ? (
+                  <div className="py-6 flex flex-col items-center justify-center gap-2 font-mono text-[9px] text-gray-500">
+                    <div className="flex gap-1 animate-pulse">
+                      <span className="w-1.5 h-1.5 rounded-full bg-orbit-purple animate-bounce" />
+                      <span className="w-1.5 h-1.5 rounded-full bg-orbit-purple animate-bounce" style={{ animationDelay: "0.2s" }} />
+                      <span className="w-1.5 h-1.5 rounded-full bg-orbit-purple animate-bounce" style={{ animationDelay: "0.4s" }} />
                     </div>
-                  );
-                })}
+                    <span className="uppercase tracking-widest mt-1.5">Generating AI Insights...</span>
+                  </div>
+                ) : (
+                  <div className="font-mono text-[9.5px] leading-relaxed text-gray-300 space-y-3.5 whitespace-pre-line">
+                    {aiSummary}
+                  </div>
+                )}
+                {aiSummaryError && (
+                  <span className="font-mono text-[7px] text-yellow-500 uppercase tracking-wide block mt-2 text-right">
+                    * Showing high-fidelity live fallback summary
+                  </span>
+                )}
               </div>
+
+              {/* AI Recommendations Engine */}
+              <div className="orbit-panel p-5 space-y-4">
+                <div className="border-b border-gray-900 pb-3">
+                  <span className="font-space text-xs font-bold uppercase tracking-wider text-white">AI Recommendations Engine</span>
+                </div>
+
+                <div className="space-y-3.5">
+                  {recommendationsList.map((rec, i) => (
+                    <div 
+                      key={i} 
+                      className={`p-3.5 rounded-xl border border-gray-950 flex flex-col justify-between gap-3 relative overflow-hidden transition-all ${
+                        launchingMission === rec.title ? "bg-orbit-blue/5 border-orbit-blue/20" : "bg-black/25 hover:border-gray-900"
+                      }`}
+                    >
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="space-y-1">
+                          <div className="flex items-center gap-2">
+                            <span className="font-space text-[10px] font-bold text-white">{rec.title}</span>
+                            <span className="font-mono text-[7px] text-orbit-purple border border-orbit-purple/30 bg-orbit-purple/5 px-1.5 py-0.5 rounded uppercase font-bold">{rec.roi}</span>
+                          </div>
+                          <p className="font-mono text-[8.5px] text-gray-550 leading-normal">{rec.desc}</p>
+                        </div>
+                        <div className="text-right shrink-0">
+                          <span className="font-mono text-[9px] text-orbit-success font-bold block">{rec.revenue}</span>
+                          <span className="font-mono text-[7px] text-gray-600 block mt-0.5">via {rec.channel}</span>
+                        </div>
+                      </div>
+
+                      <button
+                        onClick={() => handleLaunchMission(rec)}
+                        disabled={launchingMission !== null}
+                        className={`w-full py-2 bg-gradient-to-tr from-orbit-blue to-orbit-purple text-white font-bold rounded-lg text-[8.5px] uppercase tracking-wider flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+                          launchingMission === rec.title ? "opacity-50" : "hover:shadow-orbit-glow"
+                        }`}
+                      >
+                        {launchingMission === rec.title ? (
+                          <>
+                            <RefreshCw size={9} className="animate-spin" />
+                            <span>LAUNCHING DISPATCH...</span>
+                          </>
+                        ) : (
+                          <>
+                            <Play size={8} fill="#fff" />
+                            <span>Launch Mission</span>
+                          </>
+                        )}
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Agent Contribution Report */}
+              <div className="orbit-panel p-5 space-y-4">
+                <div className="border-b border-gray-900 pb-3">
+                  <span className="font-space text-xs font-bold uppercase tracking-wider text-white">Agent Contribution Report</span>
+                </div>
+
+                <div className="grid grid-cols-1 gap-2.5">
+                  {[
+                    { agent: "Polaris", act: `Mapped ${customers.length} target customers`, score: 98, role: "Audience cluster compiler" },
+                    { agent: "Luna", act: `Flagged ${atRiskCustomers.length} slipping profiles (₹${lunaMetrics?.recoverableRevenue?.toLocaleString()} at risk)`, score: 91, role: "Leak auditor" },
+                    { agent: "Vega", act: `Forecasted baseline conversions & scenario ROIs`, score: 87, role: "ROI Forecaster" },
+                    { agent: "Nova", act: `Drafted 10+ custom marketing copy variants`, score: 75, role: "Autonomous copywriter" },
+                    { agent: "Atlas", act: `Delivered ${totalSent.toLocaleString()} webhook templates successfully`, score: 95, role: "Outbound dispatcher" }
+                  ].map((contrib, idx) => (
+                    <div 
+                      key={idx} 
+                      onClick={() => setSelectedAgent(contrib.agent as any)}
+                      className="p-3 bg-gray-950/45 border border-gray-900/60 rounded-xl hover:border-gray-800 transition-colors cursor-pointer flex items-center justify-between"
+                      title={`Click to inspect ${contrib.agent} specs`}
+                    >
+                      <div>
+                        <span className="font-space text-[10px] font-bold text-white">{contrib.agent}</span>
+                        <p className="font-mono text-[8px] text-gray-500 uppercase mt-0.5">{contrib.role}</p>
+                        <p className="font-mono text-[8.5px] text-gray-300 mt-1">{contrib.act}</p>
+                      </div>
+                      <span className="font-mono text-[9px] text-orbit-success bg-orbit-success/5 border border-orbit-success/15 px-2 py-0.5 rounded font-bold">{contrib.score}% sync</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Export Center */}
+              <div className="orbit-panel p-5 space-y-3.5">
+                <div className="border-b border-gray-900 pb-3">
+                  <span className="font-space text-xs font-bold uppercase tracking-wider text-white">Report & Export Center</span>
+                </div>
+
+                <div className="grid grid-cols-2 gap-2">
+                  <button 
+                    onClick={() => window.print()}
+                    className="py-2.5 bg-gray-950 border border-gray-900 hover:border-gray-800 text-gray-300 rounded-xl font-mono text-[8.5px] uppercase tracking-wider flex items-center justify-center gap-1.5 cursor-pointer"
+                  >
+                    <FileText size={10} />
+                    <span>Print PDF</span>
+                  </button>
+                  
+                  <button 
+                    onClick={handleExportCSV}
+                    className="py-2.5 bg-gray-950 border border-gray-900 hover:border-gray-800 text-gray-300 rounded-xl font-mono text-[8.5px] uppercase tracking-wider flex items-center justify-center gap-1.5 cursor-pointer"
+                  >
+                    <Download size={10} />
+                    <span>Export CSV</span>
+                  </button>
+                </div>
+
+                <div className="flex flex-col gap-1.5 pt-2">
+                  {[
+                    { id: "executive", label: "Generate Executive Report" },
+                    { id: "investor", label: "Generate Investor Deck" },
+                    { id: "client", label: "Generate Client Ledger" }
+                  ].map(report => (
+                    <button
+                      key={report.id}
+                      onClick={() => handleGenerateAIReport(report.id as any)}
+                      className="w-full py-2 bg-gray-900/60 border border-gray-800 hover:border-blue-500/30 text-gray-300 hover:text-white rounded-xl font-mono text-[8.5px] uppercase tracking-wider flex items-center justify-center gap-1 transition-colors cursor-pointer"
+                    >
+                      <Brain size={10} className="text-orbit-purple" />
+                      <span>{report.label}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Autonomous Analytics Workflow */}
+              <div className="orbit-panel p-5 space-y-3 font-mono text-[8px]">
+                <div className="border-b border-gray-900 pb-3 flex items-center justify-between">
+                  <span className="font-space text-xs font-bold uppercase tracking-wider text-white">Autonomous Workflow</span>
+                  <LoopIcon size={10} className="text-orbit-success animate-spin-slow" />
+                </div>
+                <div className="space-y-2 max-h-[120px] overflow-y-auto pr-1">
+                  {workflowLogs.map((log, idx) => (
+                    <div key={idx} className="flex items-start gap-1 text-gray-400">
+                      <span className="text-orbit-success">▶</span>
+                      <span>{log}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
             </div>
+
           </div>
         )}
 
         {/* Tab 2: Funnel Visualizer */}
         {activeTab === "funnel" && (
-          <div className="orbit-panel p-5 space-y-6">
+          <div className="orbit-panel p-6 space-y-6">
             <div className="border-b border-gray-900 pb-3">
-              <span className="font-space text-xs font-bold uppercase tracking-wider text-white">Consensus Conversion Funnel</span>
+              <span className="font-space text-xs font-bold uppercase tracking-wider text-white">Full Funnel Conversion Performance</span>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-5 gap-3 relative">
-              {funnelStages.map((stage, idx) => {
-                return (
-                  <div key={idx} className="bg-gray-900/10 border border-gray-850 rounded-xl p-4 flex flex-col items-center justify-center text-center relative overflow-hidden">
-                    <span className="font-mono text-[8px] text-gray-500 uppercase tracking-wider block mb-1">{stage.label}</span>
-                    <span className="font-space text-lg font-bold text-white block">{stage.count}</span>
-                    <span className="font-mono text-[10px] text-blue-400 font-bold block mt-1">{stage.pct}%</span>
-                    
-                    {/* Background glow fill based on percentage */}
-                    <div 
-                      className="absolute bottom-0 left-0 right-0 bg-blue-500/5 transition-all" 
-                      style={{ height: `${stage.pct}%` }} 
-                    />
-                  </div>
-                );
-              })}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-center">
+              
+              {/* SVG Funnel Visualizer */}
+              <div className="lg:col-span-2 bg-black/20 p-5 rounded-2xl border border-gray-950 flex justify-center items-center">
+                <svg viewBox="0 0 500 280" className="w-full max-w-lg text-white">
+                  {/* Trapazoids representing layers */}
+                  {/* Layer 1: Visitors */}
+                  <polygon points="50,10 450,10 400,55 100,55" fill="rgba(59,130,246,0.3)" stroke="#3B82F6" strokeWidth="1.5" className="hover:opacity-85 transition-opacity cursor-pointer" />
+                  {/* Layer 2: Leads */}
+                  <polygon points="100,60 400,60 350,105 150,105" fill="rgba(139,92,246,0.3)" stroke="#8B5CF6" strokeWidth="1.5" className="hover:opacity-85 transition-opacity cursor-pointer" />
+                  {/* Layer 3: Customers */}
+                  <polygon points="150,110 350,110 300,155 200,155" fill="rgba(236,72,153,0.3)" stroke="#EC4899" strokeWidth="1.5" className="hover:opacity-85 transition-opacity cursor-pointer" />
+                  {/* Layer 4: Repeat Buyers */}
+                  <polygon points="200,160 300,160 260,205 240,205" fill="rgba(245,158,11,0.3)" stroke="#F59E0B" strokeWidth="1.5" className="hover:opacity-85 transition-opacity cursor-pointer" />
+                  {/* Layer 5: VIP Customers */}
+                  <polygon points="260,210 240,210 245,255 255,255" fill="rgba(34,197,94,0.3)" stroke="#22C55E" strokeWidth="1.5" className="hover:opacity-85 transition-opacity cursor-pointer" />
+
+                  {/* Text labels on layers */}
+                  <text x="250" y="33" textAnchor="middle" fill="#fff" className="font-space text-[10px] font-bold">1. VISITORS - {customers.length * 5}</text>
+                  <text x="250" y="83" textAnchor="middle" fill="#fff" className="font-space text-[10px] font-bold">2. LEADS - {customers.filter(c => c.purchaseCount === 0).length + atRiskCustomers.length}</text>
+                  <text x="250" y="133" textAnchor="middle" fill="#fff" className="font-space text-[10px] font-bold">3. CUSTOMERS - {customers.filter(c => c.purchaseCount >= 1).length}</text>
+                  <text x="250" y="183" textAnchor="middle" fill="#fff" className="font-space text-[10px] font-bold">4. REPEAT BUYERS - {repeatBuyersCount}</text>
+                  <text x="250" y="233" textAnchor="middle" fill="#fff" className="font-space text-[9px] font-bold">5. VIPs - {vipCustomersCount}</text>
+                </svg>
+              </div>
+
+              {/* Conversion Statistics table */}
+              <div className="space-y-4">
+                <span className="font-space text-xs font-bold text-gray-400 uppercase tracking-widest block">Cohort Funnel Analytics</span>
+                
+                <div className="space-y-3 font-mono text-[9px]">
+                  {[
+                    { label: "Website Visitors", count: customers.length * 5, conversion: "100%", dropoff: "0%", contribution: "0%" },
+                    { label: "Engaged Leads", count: customers.filter(c => c.purchaseCount === 0).length + atRiskCustomers.length, conversion: "76%", dropoff: "24%", contribution: "0%" },
+                    { label: "Purchasing Customers", count: customers.filter(c => c.purchaseCount >= 1).length, conversion: "62%", dropoff: "14%", contribution: "68%" },
+                    { label: "Repeat Buyers", count: repeatBuyersCount, conversion: `${repeatPurchaseRate}%`, dropoff: "42%", contribution: "84%" },
+                    { label: "VIP Loyalists", count: vipCustomersCount, conversion: `${Math.round(vipCustomersCount / (customers.length || 1) * 100)}%`, dropoff: "58%", contribution: "42%" }
+                  ].map((stage, idx) => (
+                    <div key={idx} className="p-3 bg-gray-950/50 border border-gray-900 rounded-xl space-y-1">
+                      <div className="flex justify-between font-bold text-white">
+                        <span>{stage.label}</span>
+                        <span>{stage.count} profiles</span>
+                      </div>
+                      <div className="flex justify-between text-gray-550 pt-1 text-[8.5px]">
+                        <span>Conversion: <span className="text-orbit-success">{stage.conversion}</span></span>
+                        <span>Drop-off: <span className="text-red-400">{stage.dropoff}</span></span>
+                        <span>Rev share: <span className="text-orbit-blue">{stage.contribution}</span></span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
             </div>
-            
-            <p className="font-mono text-[8px] text-gray-600 text-center uppercase tracking-wide">
-              Funnel represents average conversion performance across active dispatches
-            </p>
           </div>
         )}
 
-        {/* Tab 3: Attrition & Diagnostics */}
+        {/* Tab 3: Diagnostics */}
         {activeTab === "diagnostics" && (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Why Succeeded */}
-            <div className="orbit-panel p-5 border border-green-500/20 bg-green-500/5">
-              <h3 className="font-space text-xs font-bold text-green-400 uppercase tracking-wider flex items-center gap-1.5 border-b border-green-900/30 pb-3 mb-4">
-                <CheckCircle2 size={14} className="text-green-400" />
-                Why Campaign Succeeded
-              </h3>
-              <div className="flex flex-col gap-3">
-                {successDrivers.map((item, idx) => (
-                  <div key={idx} className="bg-black/40 border border-green-950 p-3.5 rounded-xl space-y-1">
-                    <p className="font-mono text-xs font-bold text-white">{item.title}</p>
-                    <p className="font-mono text-[9px] text-gray-400 leading-relaxed">{item.desc}</p>
-                  </div>
-                ))}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            
+            {/* System Health Indicators */}
+            <div className="lg:col-span-1 space-y-4">
+              <div className="orbit-panel p-5 space-y-3.5">
+                <div className="border-b border-gray-900 pb-3">
+                  <span className="font-space text-xs font-bold uppercase tracking-wider text-white">AI System Health HUD</span>
+                </div>
+
+                <div className="space-y-3 font-mono text-[10px]">
+                  {[
+                    { label: "Campaign Health", rate: "94%", desc: "Autonomous matching accuracy metrics", color: "text-orbit-success" },
+                    { label: "Agent Synchronization", rate: "98%", desc: "Vega, Polaris, and Luna threads active", color: "text-orbit-success" },
+                    { label: "Database Socket Sync", rate: "99.9%", desc: "Firestore collections online", color: "text-orbit-blue" },
+                    { label: "Outbound Delivery", rate: "96.4%", desc: "Twilio message gateway throughput", color: "text-orbit-success" },
+                    { label: "Revenue Health", rate: "92.1%", desc: "Baseline ROI yield ratios stability", color: "text-orbit-purple" },
+                    { label: "Vega Forecast Accuracy", rate: "89.2%", desc: "Deviation offset tolerance", color: "text-orbit-pink" }
+                  ].map((health, idx) => (
+                    <div key={idx} className="p-3 bg-black/20 border border-gray-900 rounded-xl flex items-center justify-between">
+                      <div>
+                        <span className="font-bold text-white">{health.label}</span>
+                        <p className="text-[8px] text-gray-550 mt-0.5 leading-none">{health.desc}</p>
+                      </div>
+                      <span className={`font-bold font-space text-xs ${health.color}`}>{health.rate}</span>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
 
-            {/* Why Failed */}
-            <div className="orbit-panel p-5 border border-red-500/20 bg-red-500/5">
-              <h3 className="font-space text-xs font-bold text-red-400 uppercase tracking-wider flex items-center gap-1.5 border-b border-red-900/30 pb-3 mb-4">
-                <AlertTriangle size={14} className="text-red-400" />
-                Friction Points & Failure Logs
-              </h3>
-              <div className="flex flex-col gap-3">
-                {failureDiagnostics.map((item, idx) => (
-                  <div key={idx} className="bg-black/40 border border-red-950 p-3.5 rounded-xl space-y-1">
-                    <p className="font-mono text-xs font-bold text-white">{item.title}</p>
-                    <p className="font-mono text-[9px] text-gray-400 leading-relaxed">{item.desc}</p>
-                  </div>
-                ))}
+            {/* AI Diagnostics Report */}
+            <div className="lg:col-span-2 orbit-panel p-5 space-y-4 border-red-500/15 bg-red-500/5 shadow-[0_0_20px_rgba(239,68,68,0.1)]">
+              <div className="flex justify-between items-center border-b border-gray-950 pb-3">
+                <div className="flex items-center gap-2">
+                  <ShieldAlert size={14} className="text-red-400 animate-pulse" />
+                  <span className="font-space text-xs font-bold uppercase tracking-wider text-white">AI Diagnostics Report</span>
+                </div>
+                <button
+                  onClick={() => generateAIDiagnostics()}
+                  disabled={aiDiagnosticsLoading}
+                  className="p-1 hover:bg-gray-900 rounded text-gray-550 hover:text-white transition-colors cursor-pointer"
+                  title="Reload diagnostics"
+                >
+                  <RefreshCw size={11} className={aiDiagnosticsLoading ? "animate-spin" : ""} />
+                </button>
               </div>
+
+              {aiDiagnosticsLoading ? (
+                <div className="py-12 flex flex-col items-center justify-center gap-2 font-mono text-[9px] text-gray-500">
+                  <div className="flex gap-1 animate-pulse">
+                    <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-bounce" />
+                    <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-bounce" style={{ animationDelay: "0.2s" }} />
+                    <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-bounce" style={{ animationDelay: "0.4s" }} />
+                  </div>
+                  <span className="uppercase tracking-widest mt-1.5">Generating AI Diagnostic Audit...</span>
+                </div>
+              ) : aiDiagnostics ? (
+                <div className="space-y-4 font-mono text-[9.5px]">
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="p-3 bg-black/40 border border-gray-900 rounded-xl space-y-1">
+                      <span className="font-bold text-orbit-success block uppercase tracking-wider text-[8px]">✔ What's Working</span>
+                      <p className="text-gray-350 leading-relaxed">{aiDiagnostics.working}</p>
+                    </div>
+                    
+                    <div className="p-3 bg-black/40 border border-gray-900 rounded-xl space-y-1">
+                      <span className="font-bold text-red-400 block uppercase tracking-wider text-[8px]">⚠ What's Failing</span>
+                      <p className="text-gray-350 leading-relaxed">{aiDiagnostics.failing}</p>
+                    </div>
+                  </div>
+
+                  <div className="p-3.5 bg-black/40 border border-gray-900 rounded-xl space-y-1">
+                    <span className="font-bold text-yellow-500 block uppercase tracking-wider text-[8px]">⚡ Biggest Revenue Leak</span>
+                    <p className="text-gray-350 leading-relaxed font-bold">{aiDiagnostics.leak}</p>
+                  </div>
+
+                  <div className="p-3.5 bg-black/40 border border-gray-900 rounded-xl space-y-1">
+                    <span className="font-bold text-orbit-blue block uppercase tracking-wider text-[8px]">✦ Highest Opportunity</span>
+                    <p className="text-gray-350 leading-relaxed font-bold">{aiDiagnostics.opportunity}</p>
+                  </div>
+
+                  <div className="p-3.5 bg-black/40 border border-gray-900 rounded-xl space-y-2">
+                    <span className="font-bold text-orbit-purple block uppercase tracking-wider text-[8px]">⚙ Recommended Core Actions</span>
+                    <ul className="space-y-1 text-gray-400">
+                      {aiDiagnostics.recommendations?.map((item: string, idx: number) => (
+                        <li key={idx} className="flex items-start gap-1.5">
+                          <span className="text-orbit-purple">•</span>
+                          <span>{item}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  {aiDiagnosticsError && (
+                    <span className="text-[7.5px] text-yellow-500 uppercase font-bold text-right block mt-2">
+                      * Running on diagnostic local heuristics
+                    </span>
+                  )}
+                </div>
+              ) : null}
             </div>
+
           </div>
         )}
 
-        {/* AI Recommendations */}
-        <div className="space-y-4">
-          <h2 className="font-space text-sm font-bold uppercase tracking-wider text-white flex items-center gap-1.5">
-            <Sparkles size={15} className="text-orbit-purple" />
-            AI Recommendations & Opportunities
-          </h2>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {aiRecommendations.map((rec, i) => (
-              <div key={i} className="orbit-panel p-4 flex items-start justify-between gap-4 border border-gray-850 hover:border-blue-500/35 transition-colors">
-                <div className="space-y-1 flex-1">
-                  <div className="flex items-center gap-2">
-                    <span className="font-space text-xs font-bold text-white">{rec.title}</span>
-                    <span className="font-mono text-[8px] text-orbit-purple border border-orbit-purple/30 bg-orbit-purple/5 px-1.5 py-0.5 rounded-full uppercase">{rec.roi}</span>
-                  </div>
-                  <p className="font-mono text-[9px] text-gray-500 leading-relaxed">{rec.desc}</p>
-                </div>
-                <div className="text-right shrink-0">
-                  <span className="font-mono text-[9px] text-orbit-success font-bold block">{rec.revenue}</span>
-                  <span className="font-mono text-[8px] text-gray-600 block mt-0.5">via {rec.channel}</span>
-                </div>
+        {/* Tab 4: Forecast Center */}
+        {activeTab === "forecast" && (
+          <div className="orbit-panel p-6 space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-gray-900 pb-3 gap-2">
+              <div className="flex items-center gap-2">
+                <Brain size={14} className="text-orbit-pink" />
+                <span className="font-space text-xs font-bold uppercase tracking-wider text-white">Vega Forecast Center</span>
               </div>
-            ))}
+
+              {/* Period selection */}
+              <div className="flex items-center gap-1 bg-black/60 p-1 rounded-lg border border-gray-900 font-mono text-[8px] font-bold">
+                {[
+                  { id: "7", label: "7 DAYS" },
+                  { id: "30", label: "30 DAYS" },
+                  { id: "90", label: "90 DAYS" }
+                ].map(p => (
+                  <button
+                    key={p.id}
+                    onClick={() => setForecastPeriod(p.id as any)}
+                    className={`px-2 py-1 rounded transition-all cursor-pointer ${
+                      forecastPeriod === p.id ? "bg-orbit-pink/20 text-orbit-pink border border-orbit-pink/30" : "text-gray-550 hover:text-gray-300"
+                    }`}
+                  >
+                    {p.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-center">
+              
+              {/* Forecast SVG Line graph */}
+              <div className="lg:col-span-2 bg-black/25 p-5 rounded-2xl border border-gray-950 flex flex-col justify-center relative">
+                <span className="font-mono text-[8.5px] text-gray-550 uppercase tracking-widest block mb-4">Historical vs Vega Predicted Revenue Trends</span>
+                
+                <svg viewBox="0 0 500 200" className="w-full h-44 text-white">
+                  {/* Grid lines */}
+                  {[0, 0.25, 0.5, 0.75, 1].map((ratio, idx) => {
+                    const y = 15 + 150 * (1 - ratio);
+                    return (
+                      <line key={idx} x1="40" y1={y} x2="480" y2={y} stroke="rgba(255,255,255,0.03)" />
+                    );
+                  })}
+
+                  {/* Historical Solid Line */}
+                  <path
+                    d={`M 50,150 L 120,130 L 190,140 L 260,95 L 330,80`}
+                    fill="none"
+                    stroke="#3B82F6"
+                    strokeWidth="2"
+                    className="drop-shadow-[0_0_6px_#3B82F6]"
+                  />
+
+                  {/* Future Forecasted Dashed Line */}
+                  <path
+                    d={forecastPeriod === "7" 
+                      ? `M 330,80 L 400,65 L 470,55` 
+                      : forecastPeriod === "30" 
+                      ? `M 330,80 L 400,55 L 470,30` 
+                      : `M 330,80 L 400,45 L 470,15`
+                    }
+                    fill="none"
+                    stroke="#EC4899"
+                    strokeWidth="2.5"
+                    strokeDasharray="4 4"
+                    className="drop-shadow-[0_0_8px_#EC4899]"
+                  />
+
+                  {/* Historical Dots */}
+                  <circle cx="50" cy="150" r="3.5" fill="#3B82F6" />
+                  <circle cx="120" cy="130" r="3.5" fill="#3B82F6" />
+                  <circle cx="190" cy="140" r="3.5" fill="#3B82F6" />
+                  <circle cx="260" cy="95" r="3.5" fill="#3B82F6" />
+                  <circle cx="330" cy="80" r="4" fill="#8B5CF6" />
+
+                  {/* Predicted Dots */}
+                  {forecastPeriod === "7" && (
+                    <>
+                      <circle cx="400" cy="65" r="3.5" fill="#EC4899" />
+                      <circle cx="470" cy="55" r="3.5" fill="#EC4899" />
+                    </>
+                  )}
+                  {forecastPeriod === "30" && (
+                    <>
+                      <circle cx="400" cy="55" r="3.5" fill="#EC4899" />
+                      <circle cx="470" cy="30" r="3.5" fill="#EC4899" />
+                    </>
+                  )}
+                  {forecastPeriod === "90" && (
+                    <>
+                      <circle cx="400" cy="45" r="3.5" fill="#EC4899" />
+                      <circle cx="470" cy="15" r="3.5" fill="#EC4899" />
+                    </>
+                  )}
+
+                  {/* Vertical separator */}
+                  <line x1="330" y1="10" x2="330" y2="175" stroke="rgba(255,255,255,0.2)" strokeDasharray="2 2" />
+                  <text x="325" y="165" textAnchor="end" fill="#64748B" className="font-mono text-[7px]">TODAY</text>
+                  <text x="335" y="165" textAnchor="start" fill="#EC4899" className="font-mono text-[7px] font-bold">PREDICTED</text>
+                </svg>
+              </div>
+
+              {/* Forecasting stats */}
+              <div className="space-y-4 font-mono text-[9px]">
+                <span className="font-space text-xs font-bold text-gray-400 uppercase tracking-widest block">Forecast Summary Parameters</span>
+
+                {[
+                  { label: "Predicted Revenue", val: forecastPeriod === "7" ? `₹${Math.round(totalRevenue + 14500).toLocaleString()}` : forecastPeriod === "30" ? `₹${Math.round(totalRevenue + 58000).toLocaleString()}` : `₹${Math.round(totalRevenue + 192000).toLocaleString()}`, desc: `Incremental change projection over current total`, color: "text-white" },
+                  { label: "Predicted Customer Nodes", val: forecastPeriod === "7" ? `+8 signups` : forecastPeriod === "30" ? `+24 signups` : `+92 signups`, desc: "Expected database size growth", color: "text-orbit-blue" },
+                  { label: "Forecasted Average ROI", val: forecastPeriod === "7" ? "4.1x" : forecastPeriod === "30" ? "4.3x" : "4.5x", desc: "Outbound campaign yield average multiplier", color: "text-orbit-success" },
+                  { label: "Model Confidence Score", val: forecastPeriod === "7" ? "92%" : forecastPeriod === "30" ? "88%" : "84%", desc: "Vega algorithm confidence calculation", color: "text-orbit-pink" }
+                ].map((item, idx) => (
+                  <div key={idx} className="p-3 bg-gray-950/50 border border-gray-900 rounded-xl flex items-center justify-between">
+                    <div>
+                      <span className="font-bold text-white block">{item.label}</span>
+                      <span className="text-[7.5px] text-gray-550">{item.desc}</span>
+                    </div>
+                    <span className={`font-space font-bold text-xs ${item.color}`}>{item.val}</span>
+                  </div>
+                ))}
+              </div>
+
+            </div>
           </div>
-        </div>
+        )}
 
       </main>
+
+      {/* ════════════════════════════════════════
+          AI REPORT GENERATION MODAL
+      ════════════════════════════════════════ */}
+      {reportModalType && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-md font-mono">
+          <div 
+            className="w-full max-w-2xl bg-[#080d24] border border-gray-800 rounded-2xl p-6 shadow-2xl relative overflow-hidden flex flex-col max-h-[85vh]"
+            style={{ animation: "scaleIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards" }}
+          >
+            <div className="flex justify-between items-center border-b border-gray-900 pb-3 mb-4">
+              <div className="flex items-center gap-2">
+                <Brain size={14} className="text-orbit-purple animate-pulse" />
+                <h3 className="font-space text-sm font-bold text-white uppercase tracking-wider">
+                  {reportModalType === "executive" ? "Executive Summary Report" : reportModalType === "investor" ? "Investor Presentation" : "Client Performance Ledger"}
+                </h3>
+              </div>
+              <button 
+                onClick={() => setReportModalType(null)} 
+                className="text-gray-400 hover:text-white cursor-pointer"
+              >
+                ×
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto pr-1 text-gray-300 text-[9.5px] leading-relaxed whitespace-pre-line border border-gray-950 p-4 rounded-xl bg-black/20">
+              {reportModalLoading ? (
+                <div className="h-44 flex flex-col items-center justify-center gap-2 text-gray-500">
+                  <div className="flex gap-1 animate-pulse">
+                    <span className="w-1.5 h-1.5 rounded-full bg-orbit-purple animate-bounce" />
+                    <span className="w-1.5 h-1.5 rounded-full bg-orbit-purple animate-bounce" style={{ animationDelay: "0.2s" }} />
+                    <span className="w-1.5 h-1.5 rounded-full bg-orbit-purple animate-bounce" style={{ animationDelay: "0.4s" }} />
+                  </div>
+                  <span className="uppercase tracking-widest mt-1">Generating custom report variables...</span>
+                </div>
+              ) : (
+                reportModalContent
+              )}
+            </div>
+
+            <div className="flex justify-end gap-3.5 mt-5">
+              <button 
+                onClick={async () => {
+                  try {
+                    await navigator.clipboard.writeText(reportModalContent);
+                    addAgentLog("System", "AI Report copied to clipboard.", "thought");
+                    alert("Report successfully copied to clipboard!");
+                  } catch (e) {
+                    console.error("Clipboard copy failed:", e);
+                  }
+                }}
+                disabled={reportModalLoading}
+                className="px-4 py-2 bg-gray-900 border border-gray-800 hover:border-gray-700 text-gray-300 rounded-lg text-[8.5px] uppercase tracking-wider font-bold cursor-pointer transition-colors"
+              >
+                Copy to Clipboard
+              </button>
+              
+              <button 
+                onClick={() => setReportModalType(null)}
+                className="px-4 py-2 bg-orbit-purple hover:bg-purple-650 text-white rounded-lg text-[8.5px] uppercase tracking-wider font-bold cursor-pointer transition-colors"
+              >
+                Close Report
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <AgentCardModal agent={selectedAgent} onClose={() => setSelectedAgent(null)} />
     </div>
   );

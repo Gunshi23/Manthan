@@ -45,6 +45,8 @@ export interface Campaign {
   pendingCount?: number;
   messageId?: string;
   missionId?: string;
+  predictedRoi?: number;
+  predictedRevenue?: number;
 }
 
 // Order Interface
@@ -131,6 +133,11 @@ interface OrbitContextType {
   cancelMission: () => void;
   runSimulationStep: () => void;
   clearSimData: () => void;
+  missions: any[];
+  refreshMissions: () => Promise<void>;
+  updateMissionStatus: (id: string, status: string) => Promise<void>;
+  duplicateMission: (id: string) => Promise<void>;
+  deleteMission: (id: string) => Promise<void>;
 }
 
 const OrbitContext = createContext<OrbitContextType | undefined>(undefined);
@@ -279,6 +286,7 @@ const generateMockOrders = (customers: Customer[], businessType: string = "Fashi
 
 export const OrbitProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [theme, setThemeState] = useState<ThemeMode>("command-center");
+  const [missions, setMissions] = useState<any[]>([]);
   const [businessType, setBusinessType] = useState<string>(() => {
     return localStorage.getItem("orbit_business_type") || "Fashion & Apparel";
   });
@@ -381,14 +389,14 @@ export const OrbitProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     const parsed = saved ? JSON.parse(saved) : {};
     return {
       geminiKey: parsed.geminiKey || import.meta.env.VITE_GEMINI_API_KEY || "",
-      deepgramKey: parsed.deepgramKey || "",
-      elevenLabsKey: parsed.elevenLabsKey || "",
+      deepgramKey: parsed.deepgramKey || import.meta.env.VITE_DEEPGRAM_API_KEY || "",
+      elevenLabsKey: parsed.elevenLabsKey || import.meta.env.VITE_ELEVENLABS_API_KEY || "",
       resendKey: parsed.resendKey || import.meta.env.VITE_RESEND_API_KEY || "",
       simulationSpeed: parsed.simulationSpeed ?? 1,
       autonomousMode: parsed.autonomousMode ?? false,
       voiceSynthesis: parsed.voiceSynthesis ?? false,
-      firebaseKey: parsed.firebaseKey || "",
-      firebaseProjectId: parsed.firebaseProjectId || ""
+      firebaseKey: parsed.firebaseKey || import.meta.env.VITE_FIREBASE_API_KEY || "",
+      firebaseProjectId: parsed.firebaseProjectId || import.meta.env.VITE_FIREBASE_PROJECT_ID || ""
     };
   });
 
@@ -431,6 +439,13 @@ export const OrbitProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       type
     };
     setAgentLogs(prev => [newLog, ...prev].slice(0, 150)); // Cap at 150 items
+
+    // Sync to backend DB in background
+    fetch("/api/agent-logs", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ agent, message, type })
+    }).catch(err => console.warn("Failed to sync agent log to backend:", err));
 
     // Voice Synthesis integration
     if (config.voiceSynthesis && typeof window !== "undefined" && "speechSynthesis" in window) {
@@ -488,6 +503,19 @@ export const OrbitProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         if (health.status !== "online") throw new Error("Backend status invalid");
 
         console.log("Connected to ORBIT Backend. Fetching state...");
+
+        // Sync API keys on startup if loaded from localStorage or env
+        const startupPayload: any = {};
+        if (config.geminiKey) startupPayload.geminiKey = config.geminiKey;
+        if (config.deepgramKey) startupPayload.deepgramKey = config.deepgramKey;
+
+        if (Object.keys(startupPayload).length > 0) {
+          fetch("/api/config", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(startupPayload)
+          }).catch(err => console.warn("Failed to sync keys on startup:", err));
+        }
 
         // Load campaigns
         const campRes = await fetch("/api/campaigns");
@@ -560,6 +588,17 @@ export const OrbitProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           if (logsData && logsData.length > 0) {
             setAgentLogs(logsData);
           }
+        }
+
+        // Load missions
+        try {
+          const missionsRes = await fetch("/api/autonomous-mission/history");
+          if (missionsRes.ok) {
+            const missionsData = await missionsRes.json();
+            setMissions(missionsData);
+          }
+        } catch (e) {
+          console.warn("Failed to retrieve missions history on start:", e);
         }
       } catch (err) {
         console.warn("Failed to synchronize with backend APIs. Running in client-side fallback mode.", err);
@@ -731,9 +770,95 @@ export const OrbitProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   };
 
   const updateConfig = (newConfig: Partial<SystemConfig>) => {
-    setConfig(prev => ({ ...prev, ...newConfig }));
+    setConfig(prev => {
+      const updated = { ...prev, ...newConfig };
+      const payload: any = {};
+      if (newConfig.geminiKey !== undefined) payload.geminiKey = newConfig.geminiKey;
+      if (newConfig.deepgramKey !== undefined) payload.deepgramKey = newConfig.deepgramKey;
+
+      if (Object.keys(payload).length > 0) {
+        fetch("/api/config", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        })
+        .then(res => {
+          if (res.ok) {
+            if (payload.geminiKey !== undefined) {
+              addAgentLog("System", "Gemini API Key successfully synchronized with the backend Node.", "thought");
+            }
+            if (payload.deepgramKey !== undefined) {
+              addAgentLog("System", "Deepgram API Key successfully synchronized with the backend Node.", "thought");
+            }
+          } else {
+            console.warn("Failed to sync credentials with the backend");
+          }
+        })
+        .catch(err => {
+          console.warn("Error syncing credentials with backend:", err);
+        });
+      }
+      return updated;
+    });
     addAgentLog("System", `System parameters reconfigured. Speed: ${newConfig.simulationSpeed || config.simulationSpeed}x`, "thought");
   };
+
+  const refreshMissions = useCallback(async () => {
+    try {
+      const res = await fetch("/api/autonomous-mission/history");
+      if (res.ok) {
+        const data = await res.json();
+        setMissions(data);
+      }
+    } catch (err) {
+      console.warn("Failed to refresh missions:", err);
+    }
+  }, []);
+
+  const updateMissionStatus = useCallback(async (id: string, status: string) => {
+    try {
+      const res = await fetch(`/api/autonomous-mission/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status })
+      });
+      if (res.ok) {
+        setMissions(prev => prev.map(m => m.id === id ? { ...m, status } : m));
+        addAgentLog("System", `Mission status updated to ${status}.`, "thought");
+      }
+    } catch (err) {
+      console.error("Failed to update mission status:", err);
+    }
+  }, [addAgentLog]);
+
+  const duplicateMission = useCallback(async (id: string) => {
+    try {
+      const res = await fetch(`/api/autonomous-mission/duplicate/${id}`, {
+        method: "POST"
+      });
+      if (res.ok) {
+        const newMission = await res.json();
+        setMissions(prev => [newMission, ...prev]);
+        addAgentLog("System", `Mission duplicated successfully.`, "thought");
+      }
+    } catch (err) {
+      console.error("Failed to duplicate mission:", err);
+    }
+  }, [addAgentLog]);
+
+  const deleteMission = useCallback(async (id: string) => {
+    try {
+      const res = await fetch(`/api/autonomous-mission/${id}`, {
+        method: "DELETE"
+      });
+      if (res.ok) {
+        setMissions(prev => prev.filter(m => m.id !== id));
+        addAgentLog("System", `Mission removed/archived.`, "thought");
+      }
+    } catch (err) {
+      console.error("Failed to delete mission:", err);
+    }
+  }, [addAgentLog]);
 
   const cancelMission = () => {
     setMission({
@@ -1575,7 +1700,12 @@ Do not return any markdown code block formatting. Only return the raw JSON objec
       lunaMetrics,
       updateLunaMetrics,
       businessType,
-      personalizeForBusiness
+      personalizeForBusiness,
+      missions,
+      refreshMissions,
+      updateMissionStatus,
+      duplicateMission,
+      deleteMission
     }}>
       {children}
     </OrbitContext.Provider>

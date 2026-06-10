@@ -1,16 +1,17 @@
-import { GEMINI_API_KEY } from "../config/gemini";
+import { getGeminiApiKey } from "../config/gemini";
 
 // Helper to call Gemini REST API using native fetch
 export async function callGeminiAPI(
   prompt: string,
   systemInstruction?: string
 ): Promise<string> {
-  if (!GEMINI_API_KEY || GEMINI_API_KEY.trim() === "" || GEMINI_API_KEY.startsWith("placeholder")) {
+  const activeKey = getGeminiApiKey();
+  if (!activeKey || activeKey.trim() === "" || activeKey.startsWith("placeholder")) {
     throw new Error("Gemini API key is not configured on the backend.");
   }
 
   const model = "gemini-2.5-flash"; // standard stable model
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${GEMINI_API_KEY}`;
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${activeKey}`;
 
   const requestBody: any = {
     contents: [
@@ -224,7 +225,7 @@ Format your response as a valid JSON object matching this schema:
   "replyText": "your response speech here...",
   "action": {
     "label": "Next Action Button Label",
-    "page": "command-center" | "mission-control" | "customer-galaxy" | "growth-engine" | "future-simulator" | "opportunity-radar" | "seasonal-intel" | "competitor-intel" | "agent-boardroom" | "analytics" | "system-config"
+    "page": "command-center" | "mission-control" | "customer-galaxy" | "growth-engine" | "future-simulator" | "opportunity-radar" | "competitor-intel" | "agent-boardroom" | "analytics"
   }
 }
 Note: the "action" field is optional. Only include it if there is a highly relevant dashboard page to navigate to.

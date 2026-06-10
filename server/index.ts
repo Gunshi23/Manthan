@@ -18,7 +18,7 @@ import customersRouter from "./routes/customers";
 import ordersRouter from "./routes/orders";
 import agentLogsRouter from "./routes/agentLogs";
 import competitorIntelRouter from "./routes/competitorIntel";
-import seasonalIntelRouter from "./routes/seasonalIntel";
+import configRouter from "./routes/config";
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -55,7 +55,7 @@ app.use("/api/customers", customersRouter);
 app.use("/api/orders", ordersRouter);
 app.use("/api/agent-logs", agentLogsRouter);
 app.use("/api/competitor-intel", competitorIntelRouter);
-app.use("/api/seasonal-intel", seasonalIntelRouter);
+app.use("/api/config", configRouter);
 
 // Start server
 if (process.env.NODE_ENV !== "production") {

@@ -3,7 +3,7 @@ import { db } from "../config/firebase";
 import { callGeminiAPI, parseGeminiJson } from "../services/geminiService";
 
 const router = Router();
-const SERPAPI_KEY = process.env.SERPAPI_KEY || "";
+// SERPAPI_KEY is retrieved dynamically from process.env at request time.
 
 // Helper for HTTP requests with 3-second timeout
 async function fetchWithTimeout(url: string, options: any = {}, timeout = 3000) {
@@ -49,7 +49,8 @@ router.get("/trends", async (req, res) => {
 
     // Try to enrich with live Google Trends data via SerpAPI
     try {
-      const url = `https://serpapi.com/search?engine=google_trends&q=kurtis&data_type=TIMESERIES&api_key=${SERPAPI_KEY}`;
+      const activeKey = process.env.SERPAPI_KEY || "";
+      const url = `https://serpapi.com/search?engine=google_trends&q=kurtis&data_type=TIMESERIES&api_key=${activeKey}`;
       const response = await fetchWithTimeout(url, {}, 2500);
       if (response.ok) {
         const result = await response.json();
@@ -97,7 +98,8 @@ router.get("/signals", async (req, res) => {
 
     // Try to pull live news from SerpAPI and translate to ORBIT signals via Gemini
     try {
-      const url = `https://serpapi.com/search?engine=google_news&q=kurtis+fashion+india&api_key=${SERPAPI_KEY}`;
+      const activeKey = process.env.SERPAPI_KEY || "";
+      const url = `https://serpapi.com/search?engine=google_news&q=kurtis+fashion+india&api_key=${activeKey}`;
       const response = await fetchWithTimeout(url, {}, 2500);
       if (response.ok) {
         const result = await response.json();

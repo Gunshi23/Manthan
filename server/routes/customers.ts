@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { db } from "../config/firebase";
+import { isResourceExhausted, getFallbackData } from "../utils/fallback";
 
 const router = Router();
 
@@ -12,6 +13,12 @@ router.get("/", async (req, res) => {
     });
     res.status(200).json(customers);
   } catch (error: any) {
+    if (isResourceExhausted(error)) {
+      console.warn("⚠️ Firestore quota exceeded (RESOURCE_EXHAUSTED). Triggering demo-safe fallback for /api/customers");
+      const fallbackCustomers = getFallbackData("customers");
+      res.status(200).json(fallbackCustomers);
+      return;
+    }
     console.error("Customers route error:", error);
     res.status(500).json({ error: error.message || "Failed to retrieve customers" });
   }
