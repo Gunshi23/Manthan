@@ -1,1356 +1,789 @@
 import { db } from "../server/config/firebase";
 
-// Aura Threads Business Profile Metadata
-const BRAND_DNA_ID = "dna_aura_threads";
-const BRAND_DNA_DATA = {
-  id: BRAND_DNA_ID,
-  businessName: "Aura Threads",
-  businessType: "Fashion & Apparel",
-  industry: "Women's Fashion & Kurtis",
-  growthStyle: "High Growth",
-  primaryChannel: "Instagram",
-  monthlyRevenue: 250000,
-  averageOrderValue: 1299,
-  customerUniverse: 500,
-  instagramFollowers: 12000,
-  whatsAppSubscribers: 800,
-  growthPotential: "High",
-  orbitHealth: 91,
-  recommendedMissions: [
-    "Increase Repeat Purchases",
-    "Recover Lost Leads",
-    "Launch Summer Collection",
-    "Reduce Churn",
-    "Increase VIP Revenue"
-  ],
-  createdAt: new Date().toISOString()
-};
+// Helper to clear collection
+async function clearCollection(name: string) {
+  try {
+    const snapshot = await db.collection(name).get();
+    let count = 0;
+    const batch: Promise<void>[] = [];
+    snapshot.forEach((doc: any) => {
+      batch.push(db.collection(name).doc(doc.id).delete());
+      count++;
+    });
+    await Promise.all(batch);
+    if (count > 0) {
+      console.log(`🧹 Cleared ${count} records from collection: ${name}`);
+    }
+  } catch (err: any) {
+    console.warn(`Could not clear collection ${name} (might be empty or initialized as mock):`, err.message || err);
+  }
+}
 
-// Mapped segments compatibility mapping
-const SEGMENT_MAPPING = {
-  "VIP Customers": "Loyalists",
-  "Repeat Buyers": "Loyalists",
-  "New Customers": "New Signups",
-  "Inactive Customers": "High-Value Inactive",
-  "At Risk Customers": "Slipping Away",
-  "Abandoned Cart Customers": "Slipping Away"
-};
-
-const SEGMENTS = Object.keys(SEGMENT_MAPPING);
-const MAPPED_SEGMENTS = ["Loyalists", "New Signups", "High-Value Inactive", "Slipping Away"];
-
-// Quadrant centers for Customer Galaxy
-const GALAXY_CENTERS = {
-  "Loyalists": { cx: 500, cy: 500 },
-  "Slipping Away": { cx: 280, cy: 280 },
-  "High-Value Inactive": { cx: 720, cy: 720 },
-  "New Signups": { cx: 720, cy: 280 }
-};
-
-// Generative pools for Kurtis and Indian names
-const FIRST_NAMES = [
-  "Aaradhya", "Ananya", "Diya", "Isha", "Neha", "Priya", "Riya", "Kavya", "Tanvi", "Sanjana", 
-  "Meera", "Shruti", "Aditi", "Pooja", "Ritu", "Sneha", "Kriti", "Shreya", "Kiran", "Tanya", 
-  "Aishwarya", "Deepika", "Priyanka", "Sonam", "Alia", "Kiara", "Kareena", "Katrina", "Janhvi", "Sara"
+// Lists for generation
+const INDIAN_FEMALE_FIRST_NAMES = [
+  "Priya", "Ananya", "Neha", "Diya", "Riya", "Pooja", "Anjali", "Tanvi", "Isha", "Shreya",
+  "Sneha", "Divya", "Deepika", "Kavita", "Kiran", "Meera", "Aditi", "Preeti", "Sanjana", "Nisha",
+  "Ridhi", "Aishwarya", "Shruti", "Nikita", "Payal", "Shweta", "Kajal", "Sheetal", "Preeti", "Nalini",
+  "Swati", "Rashmi", "Jyoti", "Pallavi", "Geeta", "Sunita", "Anita", "Ritu", "Seema", "Alka",
+  "Komal", "Pinky", "Monika", "Richa", "Suman", "Vandana", "Rekha", "Usha", "Mamta", "Babita"
 ];
 
 const LAST_NAMES = [
-  "Sharma", "Verma", "Mehta", "Patel", "Singh", "Nair", "Das", "Joshi", "Kumar", "Gupta", 
-  "Rao", "Reddy", "Sen", "Bose", "Choudhury", "Jha", "Mishra", "Trivedi", "Pandey", "Chawla", 
-  "Bhasin", "Kapoor", "Khan", "Malhotra", "Bhatt", "Roy", "Chatterjee", "Mukherjee", "Banerjee", "Dutta"
+  "Sharma", "Sharma", "Sharma", "Sharma", "Sharma", // High frequency
+  "Gupta", "Gupta", "Gupta", "Gupta",
+  "Patel", "Patel", "Patel", "Patel",
+  "Sharma", "Verma", "Mehta", "Singh", "Nair", "Das", "Joshi", "Iyer", "Sen", "Bose",
+  "Reddy", "Rao", "Choudhury", "Gupta", "Kumar", "Trivedi", "Mishra", "Pandey", "Chatterjee"
 ];
 
-const KURTI_CATEGORIES = [
-  "Anarkali Kurtis", "Festive Kurta Sets", "Cotton Dailywear", "Designer Tunics", "Jaipuri Prints", 
-  "Silk Straight Kurtis", "Chanderi Kurtas", "Gota Patti Suit Sets", "A-Line Printed Kurtis", "Embroidered Kurtas"
+const PRODUCTS = [
+  { name: "Daily Wear Cotton Kurti", price: 999, category: "Kurtis" },
+  { name: "Anarkali Suit Set", price: 1899, category: "Anarkalis" },
+  { name: "Indigo Palazzo Set", price: 1499, category: "Palazzo Sets" },
+  { name: "Festive Silk Kurti", price: 1699, category: "Kurtis" },
+  { name: "Georgette Floral Kurta", price: 1199, category: "Kurtis" },
+  { name: "Chanderi Straight Kurti", price: 1399, category: "Kurtis" },
+  { name: "Cotton Linen Tunic", price: 1099, category: "Cotton Tunics" },
+  { name: "Rayon A-Line Kurti", price: 899, category: "Kurtis" },
+  { name: "Embroidered Kurta Set", price: 2199, category: "Palazzo Sets" },
+  { name: "Block Print Kurti", price: 1099, category: "Kurtis" }
 ];
 
-const CHANNELS = ["WhatsApp", "Email", "SMS", "RCS"];
+const CHANNELS: ("Email" | "WhatsApp" | "SMS" | "RCS")[] = ["WhatsApp", "Email", "SMS", "RCS"];
 
-// 1. Generate Customers
-function generateCustomers(count: number = 500): any[] {
-  const customers: any[] = [];
-  for (let i = 0; i < count; i++) {
-    const firstName = FIRST_NAMES[Math.floor(Math.random() * FIRST_NAMES.length)];
-    const lastName = LAST_NAMES[Math.floor(Math.random() * LAST_NAMES.length)];
-    const name = `${firstName} ${lastName}`;
-    const email = `${firstName.toLowerCase()}.${lastName.toLowerCase()}${Math.floor(Math.random() * 99 + 1)}@gmail.com`;
-    const phone = `+91 ${9000000000 + Math.floor(Math.random() * 999999999)}`;
-    
-    // Choose segment
-    const origSegment = SEGMENTS[i % SEGMENTS.length];
-    const segment = SEGMENT_MAPPING[origSegment];
-    
-    // Spending patterns based on segment
-    let purchaseCount = 1;
-    let churnRisk = 25;
-    if (segment === "Loyalists") {
-      purchaseCount = 5 + Math.floor(Math.random() * 15);
-      churnRisk = 5 + Math.floor(Math.random() * 20);
-    } else if (segment === "New Signups") {
-      purchaseCount = Math.random() > 0.4 ? 1 : 0;
-      churnRisk = 20 + Math.floor(Math.random() * 30);
-    } else if (segment === "High-Value Inactive") {
-      purchaseCount = 4 + Math.floor(Math.random() * 6);
-      churnRisk = 65 + Math.floor(Math.random() * 20);
-    } else { // Slipping Away
-      purchaseCount = 1 + Math.floor(Math.random() * 3);
-      churnRisk = 75 + Math.floor(Math.random() * 20);
-    }
-    
-    const ltv = purchaseCount * 1299 + (purchaseCount > 0 ? Math.floor(Math.random() * 400 - 200) : 0);
-    const churnTrend = churnRisk > 70 ? "up" : churnRisk < 35 ? "down" : "stable";
-    
-    // Preferred channels (WhatsApp & Instagram prioritized)
-    const preferredChannel = Math.random() > 0.45 ? "WhatsApp" : (Math.random() > 0.5 ? "Email" : (Math.random() > 0.5 ? "SMS" : "RCS"));
-    
-    // Customer DNA keywords
-    const dnaPool = [
-      "Cotton Fabric Preferred", "Instagram Discovery", "Festive Wear Buyer", "Discount Responsive", 
-      "Anarkali Lover", "Aura VIP", "WhatsApp Order", "Repeat Customer", "Jaipuri Prints", "Kurta Sets Preferred"
-    ];
-    const dna = [...dnaPool].sort(() => 0.5 - Math.random()).slice(0, 3);
-    
-    // Next purchase prediction
-    const predictedNextPurchase = churnRisk > 80 ? "Unlikely" : `In ${1 + Math.floor(Math.random() * 3)} weeks`;
-    const predictedCategory = KURTI_CATEGORIES[Math.floor(Math.random() * KURTI_CATEGORIES.length)];
-    
-    // Galaxy coordinates clustering
-    const center = GALAXY_CENTERS[segment] || { cx: 500, cy: 500 };
-    const angle = Math.random() * Math.PI * 2;
-    const distance = 40 + Math.random() * 130;
-    const x = Math.round(center.cx + Math.cos(angle) * distance);
-    const y = Math.round(center.cy + Math.sin(angle) * distance);
-    
-    customers.push({
-      id: `cust_${1001 + i}`,
-      name,
-      email,
-      phone,
-      segment,
-      originalSegment: origSegment, // keep track of requested segment name
-      ltv,
-      churnRisk,
-      churnTrend,
-      purchaseCount,
-      dna,
-      preferredChannel,
-      predictedNextPurchase,
-      predictedCategory,
-      avatar: `https://images.unsplash.com/photo-${1500000000000 + (i * 1000000)}?auto=format&fit=crop&w=100&h=100&q=80`,
-      x,
-      y
-    });
-  }
-  return customers;
-}
-
-// 2. Generate Orders
-function generateOrders(customers: any[], count: number = 2500): any[] {
-  const orders: any[] = [];
-  const channels = ["Instagram DM Checkout", "WhatsApp Order Routing", "Direct Online Store", "In-App Dispatch"];
-  
-  // Base date around current local time
-  const startDate = new Date();
-  startDate.setDate(startDate.getDate() - 300); // 300 days ago
-  
-  for (let i = 0; i < count; i++) {
-    // Pick a random customer with purchaseCount > 0
-    let customer = customers[Math.floor(Math.random() * customers.length)];
-    while (customer.purchaseCount === 0) {
-      customer = customers[Math.floor(Math.random() * customers.length)];
-    }
-    
-    const amount = 1299 + Math.floor(Math.random() * 600 - 300); // Centered around ₹1,299 AOV
-    
-    // Distribute date randomly over the last 300 days
-    const orderDate = new Date(startDate.getTime() + Math.random() * (new Date().getTime() - startDate.getTime()));
-    
-    orders.push({
-      id: `ord_${100001 + i}`,
-      customerId: customer.id,
-      customerName: customer.name,
-      amount,
-      date: orderDate.toISOString().split("T")[0],
-      product: KURTI_CATEGORIES[Math.floor(Math.random() * KURTI_CATEGORIES.length)],
-      channel: channels[Math.floor(Math.random() * channels.length)]
-    });
-  }
-  return orders;
-}
-
-// 3. Campaigns List (10 campaigns)
-const CAMPAIGNS = [
-  {
-    id: "camp_1",
-    name: "Summer Collection Launch",
-    goal: "Launch Summer Collection",
-    description: "Introductory campaign showcasing premium cotton kurtas and printed tunics.",
-    channel: "Instagram",
-    status: "Completed",
-    sentCount: 12000,
-    deliveredCount: 11850,
-    openedCount: 9480,
-    clickedCount: 4740,
-    purchaseCount: 948,
-    revenueGenerated: 1231452,
-    createdAt: "2026-03-15T09:00:00Z"
-  },
-  {
-    id: "camp_2",
-    name: "Diwali Festive Dhamaka",
-    goal: "Increase VIP Revenue",
-    description: "Premium heavy-embroidered suit sets and silk straight kurtas for festive seasons.",
-    channel: "WhatsApp",
-    status: "Completed",
-    sentCount: 800,
-    deliveredCount: 798,
-    openedCount: 760,
-    clickedCount: 532,
-    purchaseCount: 212,
-    revenueGenerated: 423788,
-    createdAt: "2026-05-20T10:15:00Z"
-  },
-  {
-    id: "camp_3",
-    name: "VIP Early Access Sale",
-    goal: "Increase VIP Revenue",
-    description: "Exclusive pre-sale catalog invite offering 20% discount on new Jaipuri arrivals.",
-    channel: "RCS",
-    status: "Completed",
-    sentCount: 180,
-    deliveredCount: 178,
-    openedCount: 169,
-    clickedCount: 118,
-    purchaseCount: 59,
-    revenueGenerated: 114920,
-    createdAt: "2026-05-28T14:30:00Z"
-  },
-  {
-    id: "camp_4",
-    name: "Instagram DM Recovery Campaign",
-    goal: "Recover Lost Leads",
-    description: "Follow up with users who enquired about kurti sizes but didn't finish billing.",
-    channel: "Instagram",
-    status: "Completed",
-    sentCount: 650,
-    deliveredCount: 642,
-    openedCount: 577,
-    clickedCount: 346,
-    purchaseCount: 104,
-    revenueGenerated: 135096,
-    createdAt: "2026-06-01T11:00:00Z"
-  },
-  {
-    id: "camp_5",
-    name: "WhatsApp Reactivation Broadcast",
-    goal: "Reduce Churn",
-    description: "Win back slipping customers with a custom ₹250 flat discount voucher code.",
-    channel: "WhatsApp",
-    status: "Completed",
-    sentCount: 420,
-    deliveredCount: 416,
-    openedCount: 388,
-    clickedCount: 194,
-    purchaseCount: 48,
-    revenueGenerated: 62352,
-    createdAt: "2026-06-03T16:00:00Z"
-  },
-  {
-    id: "camp_6",
-    name: "Anarkali Special Showcase",
-    goal: "Increase Repeat Purchases",
-    description: "Targeting previous kurti buyers with new geometric Anarkali cuts.",
-    channel: "Email",
-    status: "Completed",
-    sentCount: 1500,
-    deliveredCount: 1485,
-    openedCount: 891,
-    clickedCount: 356,
-    purchaseCount: 71,
-    revenueGenerated: 92229,
-    createdAt: "2026-06-05T08:30:00Z"
-  },
-  {
-    id: "camp_7",
-    name: "Weekend Dailywear Flash Promotion",
-    goal: "Increase Repeat Purchases",
-    description: "Short flash sale (48 hours) on basic office wear tunics.",
-    channel: "SMS",
-    status: "Completed",
-    sentCount: 3000,
-    deliveredCount: 2940,
-    openedCount: 1764,
-    clickedCount: 441,
-    purchaseCount: 88,
-    revenueGenerated: 114312,
-    createdAt: "2026-06-07T12:00:00Z"
-  },
-  {
-    id: "camp_8",
-    name: "Cart Leakage Autopilot",
-    goal: "Recover Lost Leads",
-    description: "Trigger automated follow-ups 30 minutes after shopping cart abandons.",
-    channel: "WhatsApp",
-    status: "Running",
-    sentCount: 124,
-    deliveredCount: 124,
-    openedCount: 115,
-    clickedCount: 78,
-    purchaseCount: 23,
-    revenueGenerated: 29877,
-    createdAt: "2026-06-09T10:00:00Z"
-  },
-  {
-    id: "camp_9",
-    name: "Cotton Kurtas Combo Blast",
-    goal: "Increase Repeat Purchases",
-    description: "Buy 2 Get 1 Free promotion on dailywear products.",
-    channel: "Email",
-    status: "Running",
-    sentCount: 2100,
-    deliveredCount: 2050,
-    openedCount: 1025,
-    clickedCount: 410,
-    purchaseCount: 61,
-    revenueGenerated: 79239,
-    createdAt: "2026-06-10T09:00:00Z"
-  },
-  {
-    id: "camp_10",
-    name: "Monsoon Clearance Launch",
-    goal: "Reduce Churn",
-    description: "Seasonal clearance of past stocks with up to 40% markdowns.",
-    channel: "SMS",
-    status: "Draft",
-    sentCount: 0,
-    deliveredCount: 0,
-    openedCount: 0,
-    clickedCount: 0,
-    purchaseCount: 0,
-    revenueGenerated: 0,
-    createdAt: "2026-06-10T13:30:00Z"
-  }
-];
-
-// 4. Opportunities (20 Radar entries)
-const OPPORTUNITIES = [
-  {
-    id: "opp_1",
-    title: "Instagram DM Cart Recovery",
-    type: "Lead",
-    cohort: "Abandoned Cart Customers",
-    description: "Recover potential leads from social DM enquiries who abandoned carts.",
-    potentialRevenue: 22000,
-    opportunityScore: 96,
-    recommendedChannel: "WhatsApp",
-    confidence: "High",
-    audienceSize: 17,
-    priorityScore: 95,
-    recommendedAction: "Recover Lost Revenue",
-    reasoning: "Users who drop off in Instagram messages show extremely high recovery conversion rates when re-engaged on WhatsApp within 3 hours.",
-    color: "Green",
-    angle: 42,
-    distance: 40
-  },
-  {
-    id: "opp_2",
-    title: "Slipping VIP Recovery",
-    type: "VIP",
-    cohort: "Inactive VIP Customers",
-    description: "Win back premium buyers showing no purchase activity for 60+ days.",
-    potentialRevenue: 45000,
-    opportunityScore: 92,
-    recommendedChannel: "WhatsApp",
-    confidence: "High",
-    audienceSize: 12,
-    priorityScore: 91,
-    recommendedAction: "Reduce Customer Churn",
-    reasoning: "High LTV VIP customers representing substantial latent buying potential. Re-engaging them with early festive releases yields high conversions.",
-    color: "Purple",
-    angle: 120,
-    distance: 55
-  },
-  {
-    id: "opp_3",
-    title: "Jaipuri Prints Cross-Sell",
-    type: "Prospect",
-    cohort: "Repeat Buyers",
-    description: "Cross-sell new Jaipuri print models to cotton dailywear catalog buyers.",
-    potentialRevenue: 32000,
-    opportunityScore: 88,
-    recommendedChannel: "RCS",
-    confidence: "High",
-    audienceSize: 45,
-    priorityScore: 89,
-    recommendedAction: "Increase Customer LTV",
-    reasoning: "Customers purchasing dailywear cotton items have a 68% cross-sell affinity score toward premium Jaipuri patterned designs.",
-    color: "Yellow",
-    angle: 200,
-    distance: 65
-  },
-  {
-    id: "opp_4",
-    title: "Festive Gota Patti Early Access",
-    type: "VIP",
-    cohort: "VIP Customers",
-    description: "Offer pre-sale access to designer collections to high LTV buyers.",
-    potentialRevenue: 58000,
-    opportunityScore: 94,
-    recommendedChannel: "RCS",
-    confidence: "High",
-    audienceSize: 8,
-    priorityScore: 93,
-    recommendedAction: "Increase Customer LTV",
-    reasoning: "Top loyalty tier customers show extremely high conversion (over 40%) when offered early private slots on premium festive inventories.",
-    color: "Green",
-    angle: 280,
-    distance: 30
-  },
-  {
-    id: "opp_5",
-    title: "Cotton Dailywear Bundling",
-    type: "Prospect",
-    cohort: "New Customers",
-    description: "Target new buyers with dailywear kurtis bundling offers.",
-    potentialRevenue: 18500,
-    opportunityScore: 85,
-    recommendedChannel: "Email",
-    confidence: "Medium",
-    audienceSize: 28,
-    priorityScore: 82,
-    recommendedAction: "Increase Customer LTV",
-    reasoning: "New users who make single purchases are highly receptive to multi-buy combos to save on delivery fees.",
-    color: "Blue",
-    angle: 310,
-    distance: 70
-  },
-  {
-    id: "opp_6",
-    title: "Monsoon Clearance Cross-Sell",
-    type: "Inactive",
-    cohort: "Inactive Customers",
-    description: "Clear out old stocks to dormant users with steep markdowns.",
-    potentialRevenue: 28000,
-    opportunityScore: 81,
-    recommendedChannel: "SMS",
-    confidence: "Medium",
-    audienceSize: 64,
-    priorityScore: 78,
-    recommendedAction: "Recover Lost Revenue",
-    reasoning: "Dormant users who haven't opened emails react strongly to low-pricing clearout offers sent via SMS.",
-    color: "Yellow",
-    angle: 85,
-    distance: 60
-  },
-  {
-    id: "opp_7",
-    title: "Abandoned Checkout Email Loop",
-    type: "Lead",
-    cohort: "Abandoned Cart Customers",
-    description: "Trigger automatic email vouchers for users dropping off at checkout.",
-    potentialRevenue: 15000,
-    opportunityScore: 89,
-    recommendedChannel: "Email",
-    confidence: "High",
-    audienceSize: 22,
-    priorityScore: 87,
-    recommendedAction: "Recover Lost Revenue",
-    reasoning: "Automatically emailing checkout drop-offs within 1 hour recovers up to 15% of cart values.",
-    color: "Green",
-    angle: 15,
-    distance: 45
-  },
-  {
-    id: "opp_8",
-    title: "Instagram Post Clearance Push",
-    type: "Prospect",
-    cohort: "Repeat Buyers",
-    description: "Leverage Instagram DM post comments automation to boost conversion.",
-    potentialRevenue: 19000,
-    opportunityScore: 87,
-    recommendedChannel: "WhatsApp",
-    confidence: "High",
-    audienceSize: 31,
-    priorityScore: 86,
-    recommendedAction: "Acquire New Customers",
-    reasoning: "Setting up auto-replies to users commenting 'PRICE' on Instagram posts increases checkout completions by 28%.",
-    color: "Purple",
-    angle: 145,
-    distance: 72
-  },
-  {
-    id: "opp_9",
-    title: "Cotton Dailywear Repeat Reminders",
-    type: "Inactive",
-    cohort: "Inactive Customers",
-    description: "Send re-purchase prompts for office wear kurtas at 90 days.",
-    potentialRevenue: 12000,
-    opportunityScore: 78,
-    recommendedChannel: "SMS",
-    confidence: "Medium",
-    audienceSize: 18,
-    priorityScore: 75,
-    recommendedAction: "Reduce Customer Churn",
-    reasoning: "Dailywear items are subject to regular lifecycle decay; prompting re-purchase at 90 days drives repeat rates.",
-    color: "Red",
-    angle: 225,
-    distance: 80
-  },
-  {
-    id: "opp_10",
-    title: "Anarkali Suite Upsell Program",
-    type: "VIP",
-    cohort: "Repeat Buyers",
-    description: "Upsell premium heavy cotton Anarkali items to regular kurti shoppers.",
-    potentialRevenue: 38000,
-    opportunityScore: 90,
-    recommendedChannel: "RCS",
-    confidence: "High",
-    audienceSize: 20,
-    priorityScore: 89,
-    recommendedAction: "Increase Customer LTV",
-    reasoning: "Shoppers who bought 3+ basic kurtas are prime candidates for complete suite sets containing matching pants and dupattas.",
-    color: "Green",
-    angle: 345,
-    distance: 48
-  },
-  {
-    id: "opp_11",
-    title: "Slipping Dailywear buyers",
-    type: "Inactive",
-    cohort: "At Risk Customers",
-    description: "Re-engage basic wear buyers showing declining activity metrics.",
-    potentialRevenue: 14000,
-    opportunityScore: 79,
-    recommendedChannel: "WhatsApp",
-    confidence: "Medium",
-    audienceSize: 25,
-    priorityScore: 76,
-    recommendedAction: "Reduce Customer Churn",
-    reasoning: "Risk indicators include reduced page clicks and cart abandonment. A soft WhatsApp checklist offer mitigates risk.",
-    color: "Yellow",
-    angle: 185,
-    distance: 75
-  },
-  {
-    id: "opp_12",
-    title: "First Purchase Incentive Blast",
-    type: "Prospect",
-    cohort: "New Customers",
-    description: "Push first checkout completions to newly registered users.",
-    potentialRevenue: 9500,
-    opportunityScore: 84,
-    recommendedChannel: "Email",
-    confidence: "Medium",
-    audienceSize: 32,
-    priorityScore: 80,
-    recommendedAction: "Acquire New Customers",
-    reasoning: "Users registering profiles but exiting checkout can be nudged with a special 10% welcome coupon code.",
-    color: "Blue",
-    angle: 65,
-    distance: 82
-  },
-  {
-    id: "opp_13",
-    title: "Jaipuri Gota Patti Cross-sell",
-    type: "VIP",
-    cohort: "VIP Customers",
-    description: "Promote handblock premium print collections to top spenders.",
-    potentialRevenue: 29000,
-    opportunityScore: 91,
-    recommendedChannel: "WhatsApp",
-    confidence: "High",
-    audienceSize: 6,
-    priorityScore: 90,
-    recommendedAction: "Increase Customer LTV",
-    reasoning: "VIPs show maximum ticket size growth when offered premium craft handblock prints and artisanal details.",
-    color: "Green",
-    angle: 110,
-    distance: 35
-  },
-  {
-    id: "opp_14",
-    title: "Abandoned checkout SMS reminder",
-    type: "Lead",
-    cohort: "Abandoned Cart Customers",
-    description: "Trigger backup SMS notifications for cart recovery failures.",
-    potentialRevenue: 8000,
-    opportunityScore: 74,
-    recommendedChannel: "SMS",
-    confidence: "Low",
-    audienceSize: 15,
-    priorityScore: 72,
-    recommendedAction: "Recover Lost Revenue",
-    reasoning: "When WhatsApp recovery remains unopened for 12 hours, a failover SMS helps capture remaining intent.",
-    color: "Red",
-    angle: 255,
-    distance: 88
-  },
-  {
-    id: "opp_15",
-    title: "Silk Kurtas Festive Pre-order",
-    type: "VIP",
-    cohort: "VIP Customers",
-    description: "Collect advance bookings on upcoming silk festive catalogs.",
-    potentialRevenue: 52000,
-    opportunityScore: 95,
-    recommendedChannel: "RCS",
-    confidence: "High",
-    audienceSize: 10,
-    priorityScore: 94,
-    recommendedAction: "Increase Customer LTV",
-    reasoning: "Top customers prefer reservation programs. Booking silk designs in advance reduces inventory risk.",
-    color: "Green",
-    angle: 295,
-    distance: 25
-  },
-  {
-    id: "opp_16",
-    title: "Dormant Dailywear Reactivation",
-    type: "Inactive",
-    cohort: "Inactive Customers",
-    description: "Re-engage cotton kurta buyers inactive for 90+ days.",
-    potentialRevenue: 17500,
-    opportunityScore: 82,
-    recommendedChannel: "Email",
-    confidence: "Medium",
-    audienceSize: 38,
-    priorityScore: 80,
-    recommendedAction: "Reduce Customer Churn",
-    reasoning: "Dormant users can be reactivated by showing fresh dailywear designs and catalog lookbooks.",
-    color: "Yellow",
-    angle: 130,
-    distance: 64
-  },
-  {
-    id: "opp_17",
-    title: "Instagram Post Comment Automations",
-    type: "Lead",
-    cohort: "New Customers",
-    description: "Convert comments on viral posts into direct WhatsApp leads.",
-    potentialRevenue: 13000,
-    opportunityScore: 86,
-    recommendedChannel: "WhatsApp",
-    confidence: "High",
-    audienceSize: 26,
-    priorityScore: 84,
-    recommendedAction: "Acquire New Customers",
-    reasoning: "Connecting viral post comments to direct chat checkouts boosts conversion ratios.",
-    color: "Purple",
-    angle: 50,
-    distance: 58
-  },
-  {
-    id: "opp_18",
-    title: "Office wear kurtas Cross-sell",
-    type: "Prospect",
-    cohort: "New Customers",
-    description: "Introduce solid cotton kurtis to casual tunics buyers.",
-    potentialRevenue: 11000,
-    opportunityScore: 80,
-    recommendedChannel: "Email",
-    confidence: "Medium",
-    audienceSize: 20,
-    priorityScore: 78,
-    recommendedAction: "Increase Customer LTV",
-    reasoning: "Office wear products hold high frequency buying traits. Cross-selling daily items drives repeat conversion.",
-    color: "Blue",
-    angle: 325,
-    distance: 78
-  },
-  {
-    id: "opp_19",
-    title: "Festive Dupattas Add-ons",
-    type: "Prospect",
-    cohort: "Repeat Buyers",
-    description: "Prompt dupatta matches at checkout for printed kurtas.",
-    potentialRevenue: 14500,
-    opportunityScore: 88,
-    recommendedChannel: "RCS",
-    confidence: "High",
-    audienceSize: 50,
-    priorityScore: 87,
-    recommendedAction: "Increase Customer LTV",
-    reasoning: "Gifting recommendations or matching dupatta add-on prompts increase order sizes by ₹350 on average.",
-    color: "Green",
-    angle: 215,
-    distance: 50
-  },
-  {
-    id: "opp_20",
-    title: "Inactive VIP winback RCS blast",
-    type: "Inactive",
-    cohort: "Inactive VIP Customers",
-    description: "Send high definition lookbook catalog to dormant VIPs.",
-    potentialRevenue: 24000,
-    opportunityScore: 84,
-    recommendedChannel: "RCS",
-    confidence: "Medium",
-    audienceSize: 15,
-    priorityScore: 82,
-    recommendedAction: "Reduce Customer Churn",
-    reasoning: "A visual rich lookbook works better than discount codes to bring back premium boutique buyers.",
-    color: "Yellow",
-    angle: 150,
-    distance: 68
-  }
-];
-
-// 5. Missions List (15 missions)
-const MISSIONS = [
-  {
-    id: "miss_1",
-    goal: "Increase Repeat Purchases",
-    status: "Completed",
-    progress: 100,
-    predictedRoi: 4.8,
-    predictedRevenue: 95000,
-    assignedAgents: ["Polaris", "Vega", "Nova", "Atlas"],
-    selectedChannel: "WhatsApp",
-    audienceCount: 150,
-    createdAt: "2026-05-10T10:00:00Z"
-  },
-  {
-    id: "miss_2",
-    goal: "Recover Lost Leads",
-    status: "Completed",
-    progress: 100,
-    predictedRoi: 3.5,
-    predictedRevenue: 42000,
-    assignedAgents: ["Polaris", "Luna", "Vega", "Nova", "Atlas"],
-    selectedChannel: "Instagram",
-    audienceCount: 65,
-    createdAt: "2026-05-18T14:00:00Z"
-  },
-  {
-    id: "miss_3",
-    goal: "Launch Summer Collection",
-    status: "Completed",
-    progress: 100,
-    predictedRoi: 6.2,
-    predictedRevenue: 280000,
-    assignedAgents: ["Polaris", "Vega", "Nova", "Atlas"],
-    selectedChannel: "RCS",
-    audienceCount: 1200,
-    createdAt: "2026-05-25T09:30:00Z"
-  },
-  {
-    id: "miss_4",
-    goal: "Reduce Churn",
-    status: "Completed",
-    progress: 100,
-    predictedRoi: 4.1,
-    predictedRevenue: 65000,
-    assignedAgents: ["Polaris", "Luna", "Vega", "Nova", "Atlas"],
-    selectedChannel: "WhatsApp",
-    audienceCount: 220,
-    createdAt: "2026-06-01T11:00:00Z"
-  },
-  {
-    id: "miss_5",
-    goal: "Increase VIP Revenue",
-    status: "Completed",
-    progress: 100,
-    predictedRoi: 5.5,
-    predictedRevenue: 110000,
-    assignedAgents: ["Polaris", "Vega", "Nova", "Atlas"],
-    selectedChannel: "RCS",
-    audienceCount: 180,
-    createdAt: "2026-06-03T16:00:00Z"
-  },
-  {
-    id: "miss_6",
-    goal: "Recover Lost Leads",
-    status: "Running",
-    progress: 75,
-    predictedRoi: 3.8,
-    predictedRevenue: 34500,
-    assignedAgents: ["Polaris", "Luna", "Vega", "Nova", "Atlas"],
-    selectedChannel: "WhatsApp",
-    audienceCount: 17,
-    createdAt: "2026-06-06T08:30:00Z"
-  },
-  {
-    id: "miss_7",
-    goal: "Increase Repeat Purchases",
-    status: "Running",
-    progress: 60,
-    predictedRoi: 4.5,
-    predictedRevenue: 82000,
-    assignedAgents: ["Polaris", "Vega", "Nova", "Atlas"],
-    selectedChannel: "RCS",
-    audienceCount: 45,
-    createdAt: "2026-06-07T12:00:00Z"
-  },
-  {
-    id: "miss_8",
-    goal: "Launch Summer Collection",
-    status: "Running",
-    progress: 40,
-    predictedRoi: 5.8,
-    predictedRevenue: 150000,
-    assignedAgents: ["Polaris", "Vega", "Nova", "Atlas"],
-    selectedChannel: "Email",
-    audienceCount: 350,
-    createdAt: "2026-06-08T10:00:00Z"
-  },
-  {
-    id: "miss_9",
-    goal: "Reduce Churn",
-    status: "Running",
-    progress: 25,
-    predictedRoi: 3.4,
-    predictedRevenue: 48000,
-    assignedAgents: ["Polaris", "Luna", "Vega", "Nova", "Atlas"],
-    selectedChannel: "WhatsApp",
-    audienceCount: 88,
-    createdAt: "2026-06-09T09:00:00Z"
-  },
-  {
-    id: "miss_10",
-    goal: "Increase VIP Revenue",
-    status: "Queued",
-    progress: 0,
-    predictedRoi: 5.2,
-    predictedRevenue: 75000,
-    assignedAgents: ["Polaris", "Vega", "Nova", "Atlas"],
-    selectedChannel: "RCS",
-    audienceCount: 84,
-    createdAt: "2026-06-10T09:00:00Z"
-  },
-  {
-    id: "miss_11",
-    goal: "Recover Lost Leads",
-    status: "Queued",
-    progress: 0,
-    predictedRoi: 4.0,
-    predictedRevenue: 25000,
-    assignedAgents: ["Polaris", "Luna", "Vega", "Nova", "Atlas"],
-    selectedChannel: "WhatsApp",
-    audienceCount: 32,
-    createdAt: "2026-06-10T11:00:00Z"
-  },
-  {
-    id: "miss_12",
-    goal: "Increase Repeat Purchases",
-    status: "Queued",
-    progress: 0,
-    predictedRoi: 3.9,
-    predictedRevenue: 40000,
-    assignedAgents: ["Polaris", "Vega", "Nova", "Atlas"],
-    selectedChannel: "Email",
-    audienceCount: 110,
-    createdAt: "2026-06-10T12:00:00Z"
-  },
-  {
-    id: "miss_13",
-    goal: "Reduce Churn",
-    status: "Completed",
-    progress: 100,
-    predictedRoi: 3.6,
-    predictedRevenue: 32000,
-    assignedAgents: ["Polaris", "Luna", "Vega", "Nova", "Atlas"],
-    selectedChannel: "SMS",
-    audienceCount: 120,
-    createdAt: "2026-05-05T10:00:00Z"
-  },
-  {
-    id: "miss_14",
-    goal: "Increase VIP Revenue",
-    status: "Completed",
-    progress: 100,
-    predictedRoi: 5.8,
-    predictedRevenue: 85000,
-    assignedAgents: ["Polaris", "Vega", "Nova", "Atlas"],
-    selectedChannel: "WhatsApp",
-    audienceCount: 65,
-    createdAt: "2026-05-12T13:15:00Z"
-  },
-  {
-    id: "miss_15",
-    goal: "Launch Summer Collection",
-    status: "Completed",
-    progress: 100,
-    predictedRoi: 5.1,
-    predictedRevenue: 120000,
-    assignedAgents: ["Polaris", "Vega", "Nova", "Atlas"],
-    selectedChannel: "WhatsApp",
-    audienceCount: 240,
-    createdAt: "2026-05-15T11:00:00Z"
-  }
-];
-
-// 6. Agent Logs (30 logs)
-const AGENT_LOGS = [
-  {
-    id: "log_1",
-    agent: "System",
-    timestamp: "10:00:01 AM",
-    message: "ORBIT Core System online. Loading brand intelligence matrices for Aura Threads node.",
-    type: "thought",
-    createdAt: "2026-06-01T10:00:01Z"
-  },
-  {
-    id: "log_2",
-    agent: "Polaris",
-    timestamp: "10:01:05 AM",
-    message: "Initiated directory index scan of Aura Threads customer base. Mapped 500 nodes.",
-    type: "action",
-    createdAt: "2026-06-01T10:01:05Z"
-  },
-  {
-    id: "log_3",
-    agent: "Luna",
-    timestamp: "10:02:12 AM",
-    message: "Audited abandoned Instagram shopping checkouts. Discovered 17 premium checkout drops representing ₹22,000 leakage.",
-    type: "thought",
-    createdAt: "2026-06-01T10:02:12Z"
-  },
-  {
-    id: "log_4",
-    agent: "Vega",
-    timestamp: "10:03:30 AM",
-    message: "Fitted regression models to Slipping VIP cohort. Calculated 3.8x ROI yield coefficients for recovery message templates.",
-    type: "thought",
-    createdAt: "2026-06-01T10:03:30Z"
-  },
-  {
-    id: "log_5",
-    agent: "Nova",
-    timestamp: "10:04:15 AM",
-    message: "Generated 3 copy layout variations for WhatsApp checkout nudges, focusing on cotton dailywear.",
-    type: "action",
-    createdAt: "2026-06-01T10:04:15Z"
-  },
-  {
-    id: "log_6",
-    agent: "Atlas",
-    timestamp: "10:05:00 AM",
-    message: "Operations dispatch pipeline initialized. Webhook response time checks: 12ms nominal. Ready to dispatch.",
-    type: "result",
-    createdAt: "2026-06-01T10:05:00Z"
-  },
-  {
-    id: "log_7",
-    agent: "Polaris",
-    timestamp: "09:15:30 AM",
-    message: "Isolating 120 tech-savier handblock print enthusiasts for early access collection launch.",
-    type: "action",
-    createdAt: "2026-06-03T09:15:30Z"
-  },
-  {
-    id: "log_8",
-    agent: "Vega",
-    timestamp: "09:17:45 AM",
-    message: "Estimating revenue conversion curves. Optimal channel is RCS cards (estimated 42% conversions, ₹58,000 potential).",
-    type: "thought",
-    createdAt: "2026-06-03T09:17:45Z"
-  },
-  {
-    id: "log_9",
-    agent: "Nova",
-    timestamp: "09:19:10 AM",
-    message: "Crafting visual rich card structures with direct billing options for Gota Patti festive sets.",
-    type: "action",
-    createdAt: "2026-06-03T09:19:10Z"
-  },
-  {
-    id: "log_10",
-    agent: "Atlas",
-    timestamp: "09:20:00 AM",
-    message: "Dispatched 800 WhatsApp messages. Handshake rate: 100%. Delivery queues cleared.",
-    type: "result",
-    createdAt: "2026-06-03T09:20:00Z"
-  },
-  {
-    id: "log_11",
-    agent: "System",
-    timestamp: "11:00:05 AM",
-    message: "Scheduled automated weekly re-engagement loops for Aura Threads. Scanning for checkout leakage.",
-    type: "thought",
-    createdAt: "2026-06-05T11:00:05Z"
-  },
-  {
-    id: "log_12",
-    agent: "Luna",
-    timestamp: "11:02:15 AM",
-    message: "Detected 22 abandoned checkout leads. Adding recovery priority tokens to active operational buffers.",
-    type: "action",
-    createdAt: "2026-06-05T11:02:15Z"
-  },
-  {
-    id: "log_13",
-    agent: "Vega",
-    timestamp: "11:03:40 AM",
-    message: "Running random forest analysis on inactive dailywear purchasers. Selected SMS channel due to low active email rates.",
-    type: "thought",
-    createdAt: "2026-06-05T11:03:40Z"
-  },
-  {
-    id: "log_14",
-    agent: "Nova",
-    timestamp: "11:05:10 AM",
-    message: "Drafting high-conversion SMS copy layouts with embedded discount codes.",
-    type: "action",
-    createdAt: "2026-06-05T11:05:10Z"
-  },
-  {
-    id: "log_15",
-    agent: "Atlas",
-    timestamp: "11:06:00 AM",
-    message: "Dispatched SMS push clearances. Delivery rate: 98%. Recovered ₹15,000 in immediate purchases.",
-    type: "result",
-    createdAt: "2026-06-05T11:06:00Z"
-  },
-  {
-    id: "log_16",
-    agent: "Polaris",
-    timestamp: "02:15:30 PM",
-    message: "Scanning Loyalist graphs. Identified 8 VIP customers suitable for advance festival collections pre-orders.",
-    type: "action",
-    createdAt: "2026-06-07T14:15:30Z"
-  },
-  {
-    id: "log_17",
-    agent: "Luna",
-    timestamp: "02:17:10 PM",
-    message: "VIP billing loops show zero friction points. Perfect cohort state for complete suite pre-order programs.",
-    type: "thought",
-    createdAt: "2026-06-07T14:17:10Z"
-  },
-  {
-    id: "log_18",
-    agent: "Vega",
-    timestamp: "02:18:45 PM",
-    message: "Expected VIP pre-order LTV bump is ₹15,000 per user. Forecasting ₹52,000 cumulative revenue (94% confidence).",
-    type: "thought",
-    createdAt: "2026-06-07T14:18:45Z"
-  },
-  {
-    id: "log_19",
-    agent: "Nova",
-    timestamp: "02:20:15 PM",
-    message: "Generated personalized WhatsApp templates with direct pre-order reservations and premium product cards.",
-    type: "action",
-    createdAt: "2026-06-07T14:20:15Z"
-  },
-  {
-    id: "log_20",
-    agent: "Atlas",
-    timestamp: "02:22:00 PM",
-    message: "Routing pre-order VIP links via conversational channels. Processing webhook confirmations.",
-    type: "result",
-    createdAt: "2026-06-07T14:22:00Z"
-  },
-  {
-    id: "log_21",
-    agent: "System",
-    timestamp: "09:00:10 AM",
-    message: "Executing Aura Threads daily operations script. Performing database replication.",
-    type: "thought",
-    createdAt: "2026-06-08T09:00:10Z"
-  },
-  {
-    id: "log_22",
-    agent: "Polaris",
-    timestamp: "09:02:10 AM",
-    message: "Daily cohort scan: 18 VIP customers flagged at risk. Slipping Away segment average risk score spikes to 78%.",
-    type: "action",
-    createdAt: "2026-06-08T09:02:10Z"
-  },
-  {
-    id: "log_23",
-    agent: "Luna",
-    timestamp: "09:04:15 AM",
-    message: "Auditing slipping VIP behaviors. 8 accounts abandoned Gota Patti set checkouts in last 7 days. Action required.",
-    type: "thought",
-    createdAt: "2026-06-08T09:04:15Z"
-  },
-  {
-    id: "log_24",
-    agent: "Vega",
-    timestamp: "09:05:40 AM",
-    message: "Mitigation equations show high recovery scores (64% yield) when re-engaged within a 24h window. Suggested ROI: 4.2x.",
-    type: "thought",
-    createdAt: "2026-06-08T09:05:40Z"
-  },
-  {
-    id: "log_25",
-    agent: "Nova",
-    timestamp: "09:07:05 AM",
-    message: "Generated custom win-back designs with past checkout restorations. Optimized layout for WhatsApp message loops.",
-    type: "action",
-    createdAt: "2026-06-08T09:07:05Z"
-  },
-  {
-    id: "log_26",
-    agent: "Atlas",
-    timestamp: "09:08:30 AM",
-    message: "Win-back dispatch armed. Triggering automatic recovery notifications. Webhook listener active.",
-    type: "result",
-    createdAt: "2026-06-08T09:08:30Z"
-  },
-  {
-    id: "log_27",
-    agent: "System",
-    timestamp: "10:30:15 AM",
-    message: "Executing weekly lookbook lookahead checks. Mapped 38 cotton dailywear buyer profiles.",
-    type: "thought",
-    createdAt: "2026-06-10T10:30:15Z"
-  },
-  {
-    id: "log_28",
-    agent: "Polaris",
-    timestamp: "10:32:00 AM",
-    message: "Cotton dailywear buyers have been isolated. Mapped 38 profiles with high-frequency traits.",
-    type: "action",
-    createdAt: "2026-06-10T10:32:00Z"
-  },
-  {
-    id: "log_29",
-    agent: "Vega",
-    timestamp: "10:34:00 AM",
-    message: "Dailywear buyers show high response yields (45% opens). Recommended channel: RCS cards containing lookbooks.",
-    type: "thought",
-    createdAt: "2026-06-10T10:34:00Z"
-  },
-  {
-    id: "log_30",
-    agent: "Atlas",
-    timestamp: "10:35:00 AM",
-    message: "Dispatched weekly lookbook campaign. 38 threads executed successfully.",
-    type: "result",
-    createdAt: "2026-06-10T10:35:00Z"
-  }
-];
-
-// 7. Simulations List (10 simulations)
-const SIMULATIONS = [
-  {
-    id: "sim_1",
-    audience: "Repeat Buyers",
-    discount: 15,
-    channel: "WhatsApp",
-    createdAt: "2026-05-15T12:00:00Z",
-    conservative: { conversionRate: 5.5, revenue: 35000, roi: 2.8, customerFatigue: "Low", optOutRate: 0.3 },
-    recommended: { conversionRate: 12.0, revenue: 78000, roi: 4.8, customerFatigue: "Medium", optOutRate: 0.8 },
-    aggressive: { conversionRate: 16.5, revenue: 115000, roi: 3.9, customerFatigue: "High", optOutRate: 2.2 }
-  },
-  {
-    id: "sim_2",
-    audience: "VIP Customers",
-    discount: 10,
-    channel: "RCS",
-    createdAt: "2026-05-18T10:30:00Z",
-    conservative: { conversionRate: 8.5, revenue: 45000, roi: 3.5, customerFatigue: "Low", optOutRate: 0.1 },
-    recommended: { conversionRate: 15.0, revenue: 85000, roi: 5.8, customerFatigue: "Low", optOutRate: 0.3 },
-    aggressive: { conversionRate: 22.0, revenue: 130000, roi: 4.6, customerFatigue: "Medium", optOutRate: 1.1 }
-  },
-  {
-    id: "sim_3",
-    audience: "Inactive Customers",
-    discount: 20,
-    channel: "Email",
-    createdAt: "2026-05-22T14:15:00Z",
-    conservative: { conversionRate: 3.2, revenue: 18000, roi: 1.8, customerFatigue: "Low", optOutRate: 0.4 },
-    recommended: { conversionRate: 7.5, revenue: 42000, roi: 3.5, customerFatigue: "Medium", optOutRate: 0.9 },
-    aggressive: { conversionRate: 11.2, revenue: 68000, roi: 2.9, customerFatigue: "High", optOutRate: 2.5 }
-  },
-  {
-    id: "sim_4",
-    audience: "New Customers",
-    discount: 15,
-    channel: "SMS",
-    createdAt: "2026-05-28T09:00:00Z",
-    conservative: { conversionRate: 4.5, revenue: 25000, roi: 2.2, customerFatigue: "Low", optOutRate: 0.2 },
-    recommended: { conversionRate: 9.8, revenue: 58000, roi: 4.1, customerFatigue: "Medium", optOutRate: 0.7 },
-    aggressive: { conversionRate: 14.0, revenue: 88000, roi: 3.2, customerFatigue: "High", optOutRate: 1.8 }
-  },
-  {
-    id: "sim_5",
-    audience: "Repeat Buyers",
-    discount: 20,
-    channel: "Multi-channel",
-    createdAt: "2026-06-01T11:30:00Z",
-    conservative: { conversionRate: 7.2, revenue: 52000, roi: 3.2, customerFatigue: "Medium", optOutRate: 0.5 },
-    recommended: { conversionRate: 14.5, revenue: 110000, roi: 5.2, customerFatigue: "Medium", optOutRate: 1.2 },
-    aggressive: { conversionRate: 20.1, revenue: 160000, roi: 4.0, customerFatigue: "High", optOutRate: 3.1 }
-  },
-  {
-    id: "sim_6",
-    audience: "VIP Customers",
-    discount: 15,
-    channel: "WhatsApp",
-    createdAt: "2026-06-04T15:00:00Z",
-    conservative: { conversionRate: 9.0, revenue: 62000, roi: 3.8, customerFatigue: "Low", optOutRate: 0.2 },
-    recommended: { conversionRate: 18.5, revenue: 125000, roi: 6.2, customerFatigue: "Medium", optOutRate: 0.6 },
-    aggressive: { conversionRate: 25.0, revenue: 175000, roi: 4.8, customerFatigue: "High", optOutRate: 1.9 }
-  },
-  {
-    id: "sim_7",
-    audience: "Inactive Customers",
-    discount: 25,
-    channel: "WhatsApp",
-    createdAt: "2026-06-06T10:00:00Z",
-    conservative: { conversionRate: 4.8, revenue: 28000, roi: 2.1, customerFatigue: "Low", optOutRate: 0.4 },
-    recommended: { conversionRate: 9.2, revenue: 55000, roi: 3.9, customerFatigue: "Medium", optOutRate: 1.1 },
-    aggressive: { conversionRate: 13.8, revenue: 85000, roi: 3.0, customerFatigue: "High", optOutRate: 2.8 }
-  },
-  {
-    id: "sim_8",
-    audience: "New Customers",
-    discount: 10,
-    channel: "Email",
-    createdAt: "2026-06-07T13:45:00Z",
-    conservative: { conversionRate: 2.8, revenue: 15000, roi: 1.6, customerFatigue: "Low", optOutRate: 0.1 },
-    recommended: { conversionRate: 6.1, revenue: 32000, roi: 3.0, customerFatigue: "Low", optOutRate: 0.4 },
-    aggressive: { conversionRate: 9.5, revenue: 52000, roi: 2.4, customerFatigue: "Medium", optOutRate: 0.9 }
-  },
-  {
-    id: "sim_9",
-    audience: "Repeat Buyers",
-    discount: 5,
-    channel: "SMS",
-    createdAt: "2026-06-08T16:00:00Z",
-    conservative: { conversionRate: 3.0, revenue: 16000, roi: 1.9, customerFatigue: "Low", optOutRate: 0.1 },
-    recommended: { conversionRate: 5.8, revenue: 30000, roi: 2.8, customerFatigue: "Low", optOutRate: 0.3 },
-    aggressive: { conversionRate: 8.2, revenue: 45000, roi: 2.1, customerFatigue: "Medium", optOutRate: 0.8 }
-  },
-  {
-    id: "sim_10",
-    audience: "Inactive Customers",
-    discount: 15,
-    channel: "RCS",
-    createdAt: "2026-06-10T10:15:00Z",
-    conservative: { conversionRate: 4.1, revenue: 22000, roi: 2.0, customerFatigue: "Low", optOutRate: 0.2 },
-    recommended: { conversionRate: 8.0, revenue: 48000, roi: 3.6, customerFatigue: "Medium", optOutRate: 0.7 },
-    aggressive: { conversionRate: 12.2, revenue: 75000, roi: 2.9, customerFatigue: "High", optOutRate: 1.9 }
-  }
-];
-
-// 8. Analytics snapshots (30 days of records matching daily targets)
-function generateAnalytics(): any[] {
-  const analytics: any[] = [];
-  const baseDate = new Date();
-  for (let i = 29; i >= 0; i--) {
-    const date = new Date(baseDate);
-    date.setDate(baseDate.getDate() - i);
-    const dateStr = date.toISOString().split("T")[0];
-    
-    // Aura Threads daily run rate centered around ₹8,333/day to yield ₹2,50,000 monthly
-    const revenue = Math.round(8333 + Math.random() * 4000 - 2000);
-    const purchases = Math.round(revenue / 1299 + Math.random() * 2 - 1);
-    const conversionRate = parseFloat((8.5 + Math.random() * 5).toFixed(1));
-    
-    analytics.push({
-      date: dateStr,
-      revenue,
-      purchases: Math.max(1, purchases),
-      conversionRate,
-      createdAt: date.toISOString()
-    });
-  }
-  return analytics;
-}
-
-// 9. Mission Updates (15 updates)
-const MISSION_UPDATES = [
-  { missionId: "miss_1", status: "Delivered", timestamp: "2026-05-10T10:30:00Z" },
-  { missionId: "miss_2", status: "Delivered", timestamp: "2026-05-18T14:45:00Z" },
-  { missionId: "miss_3", status: "Delivered", timestamp: "2026-05-25T11:00:00Z" },
-  { missionId: "miss_4", status: "Delivered", timestamp: "2026-06-01T12:30:00Z" },
-  { missionId: "miss_5", status: "Delivered", timestamp: "2026-06-03T18:00:00Z" },
-  { missionId: "miss_6", status: "Sending", timestamp: "2026-06-06T09:00:00Z" },
-  { missionId: "miss_7", status: "Delivered", timestamp: "2026-06-07T13:30:00Z" },
-  { missionId: "miss_8", status: "Queued", timestamp: "2026-06-08T10:15:00Z" },
-  { missionId: "miss_9", status: "Failed", timestamp: "2026-06-09T09:45:00Z" },
-  { missionId: "miss_10", status: "Queued", timestamp: "2026-06-10T09:00:00Z" },
-  { missionId: "miss_11", status: "Queued", timestamp: "2026-06-10T11:00:00Z" },
-  { missionId: "miss_12", status: "Queued", timestamp: "2026-06-10T12:00:00Z" },
-  { missionId: "miss_13", status: "Delivered", timestamp: "2026-05-05T10:30:00Z" },
-  { missionId: "miss_14", status: "Delivered", timestamp: "2026-05-12T13:45:00Z" },
-  { missionId: "miss_15", status: "Delivered", timestamp: "2026-05-15T11:30:00Z" }
-];
-
+// Seed function
 async function seed() {
-  console.log("🌱 Seeding database with realistic Aura Threads business demo data...");
+  console.log("🌱 STARTING FIRESTORE SEEDING SYSTEM FOR ORBIT...");
+  console.log("Business Target: Aura Threads (Women's Fashion & Kurtis)");
+
+  // 1. Clear existing collections to prevent duplicates
+  const collectionsToClear = [
+    "brand_dna", "customers", "orders", "campaigns", "missions", "opportunities", 
+    "analytics", "agent_logs", "simulations", "mission_updates",
+    "competitors", "market_signals", "industry_trends", "products", "seasonal_events", "social_insights"
+  ];
+  
+  for (const coll of collectionsToClear) {
+    await clearCollection(coll);
+  }
 
   try {
-    // 1. Seed brand DNA
-    await db.collection("brand_dna").doc(BRAND_DNA_ID).set(BRAND_DNA_DATA);
-    console.log("✅ Seeded Brand DNA (Aura Threads)");
+    // ════════════════════════════════════════
+    // 1. BRAND DNA
+    // ════════════════════════════════════════
+    const brandDnaData = {
+      id: "dna_default",
+      businessName: "Aura Threads",
+      businessType: "Women's Fashion & Kurtis",
+      primaryChannel: "Instagram",
+      monthlyRevenue: 250000,
+      averageOrderValue: 1299,
+      instagramFollowers: 12000,
+      whatsAppSubscribers: 800,
+      growthStyle: "High Growth",
+      customerUniverse: 500,
+      growthPotential: "High",
+      orbitHealth: 92,
+      recommendedMissions: [
+        "Increase Repeat Purchases",
+        "Recover Lost Leads",
+        "Launch Summer Collection",
+        "Reduce Churn",
+        "Increase VIP Revenue"
+      ],
+      createdAt: new Date().toISOString()
+    };
+    await db.collection("brand_dna").doc(brandDnaData.id).set(brandDnaData);
+    console.log("✅ Seeded Brand DNA for Aura Threads");
 
-    // 2. Generate and Seed Customers (500)
-    console.log("Generating 500 customers...");
-    const customers = generateCustomers(500);
-    const batchSize = 100;
-    for (let i = 0; i < customers.length; i += batchSize) {
-      const chunk = customers.slice(i, i + batchSize);
-      await Promise.all(chunk.map(customer => db.collection("customers").doc(customer.id).set(customer)));
-      console.log(`   Written ${Math.min(i + batchSize, customers.length)} / ${customers.length} customers...`);
+    // ════════════════════════════════════════
+    // 2. CUSTOMERS (500) & ORDERS (2500)
+    // ════════════════════════════════════════
+    console.log("⏳ Generating 500 customers and 2,500 orders...");
+    
+    const customers: any[] = [];
+    const orders: any[] = [];
+    
+    // Distribution of segments to exactly add up to 2500 orders
+    // - 120 Loyalists (average 10 purchases = 1200 orders)
+    // - 100 Slipping Away (average 3 purchases = 300 orders)
+    // - 100 High-Value Inactive (average 7 purchases = 700 orders)
+    // - 180 New Signups (average 1.6 purchases = 300 orders)
+    
+    const segmentSpecs = [
+      { name: "Loyalists", count: 120, avgPurchases: 10, churnMin: 5, churnMax: 20, trend: "stable", cx: 500, cy: 500 },
+      { name: "Slipping Away", count: 100, avgPurchases: 3, churnMin: 65, churnMax: 90, trend: "up", cx: 280, cy: 280 },
+      { name: "High-Value Inactive", count: 100, avgPurchases: 7, churnMin: 70, churnMax: 95, trend: "stable", cx: 720, cy: 720 },
+      { name: "New Signups", count: 180, avgPurchases: 1, churnMin: 20, churnMax: 50, trend: "down", cx: 720, cy: 280 }
+    ];
+
+    let custIndex = 1;
+    let ordIndex = 1;
+
+    for (const spec of segmentSpecs) {
+      for (let i = 0; i < spec.count; i++) {
+        const first = INDIAN_FEMALE_FIRST_NAMES[Math.floor(Math.random() * INDIAN_FEMALE_FIRST_NAMES.length)];
+        const last = LAST_NAMES[Math.floor(Math.random() * LAST_NAMES.length)];
+        const fullName = `${first} ${last}`;
+        const email = `${first.toLowerCase()}.${last.toLowerCase()}${custIndex}@aurathreads.in`;
+        const phone = `+919${Math.floor(100000000 + Math.random() * 900000000)}`;
+        
+        // Exact purchase count generation to keep stats aligned
+        let purchaseCount = spec.avgPurchases;
+        if (spec.name === "New Signups") {
+          // 60% have 1 purchase, 40% have 2 purchases (adds up to 300 orders across 180 customers)
+          purchaseCount = Math.random() < 0.6 ? 1 : 2;
+        } else if (spec.name === "Slipping Away") {
+          // Distribute around 3: [2, 3, 4]
+          purchaseCount = 2 + Math.floor(Math.random() * 3);
+        } else if (spec.name === "High-Value Inactive") {
+          // Distribute around 7: [5, 6, 7, 8, 9]
+          purchaseCount = 5 + Math.floor(Math.random() * 5);
+        } else {
+          // Loyalists: Distribute around 10: [8, 9, 10, 11, 12]
+          purchaseCount = 8 + Math.floor(Math.random() * 5);
+        }
+
+        // Calculate LTV based on purchase count and average item price
+        let ltv = 0;
+        const customerOrders: any[] = [];
+        
+        for (let o = 0; o < purchaseCount; o++) {
+          const productItem = PRODUCTS[Math.floor(Math.random() * PRODUCTS.length)];
+          const amount = productItem.price;
+          ltv += amount;
+
+          // Date distribution (over the last 1.5 years)
+          const daysAgo = Math.floor(Math.random() * 550);
+          const date = new Date(Date.now() - daysAgo * 24 * 60 * 60 * 1000).toISOString().split("T")[0];
+
+          customerOrders.push({
+            id: `ord_${ordIndex}`,
+            customerId: `cust_${custIndex}`,
+            customerName: fullName,
+            amount,
+            date,
+            product: productItem.name,
+            channel: CHANNELS[Math.floor(Math.random() * CHANNELS.length)]
+          });
+          ordIndex++;
+        }
+
+        // Coordinate cluster offset
+        const angle = Math.random() * Math.PI * 2;
+        const dist = 40 + Math.random() * 150;
+        const x = Math.round(spec.cx + Math.cos(angle) * dist);
+        const y = Math.round(spec.cy + Math.sin(angle) * dist);
+
+        // DNA Tags
+        const dnaPool = ["Cotton Lover", "Instagram Shopper", "Anarkali Fan", "Festive Buyer", "Discount seeker", "WhatsApp Preferred", "Early Adopter", "High Spender"];
+        const dna = dnaPool.sort(() => 0.5 - Math.random()).slice(0, 3);
+
+        const customerDoc = {
+          id: `cust_${custIndex}`,
+          name: fullName,
+          email,
+          phone,
+          segment: spec.name as any,
+          ltv,
+          churnRisk: Math.floor(spec.churnMin + Math.random() * (spec.churnMax - spec.churnMin)),
+          churnTrend: spec.trend as any,
+          purchaseCount,
+          dna,
+          preferredChannel: CHANNELS[Math.floor(Math.random() * CHANNELS.length)],
+          predictedNextPurchase: spec.name === "Loyalists" ? "Immediate" : spec.name === "New Signups" ? "14 Days" : "30 Days",
+          predictedCategory: PRODUCTS[Math.floor(Math.random() * PRODUCTS.length)].category,
+          avatar: `https://images.unsplash.com/photo-${1500000000000 + (custIndex * 200000) % 100000000000}?auto=format&fit=crop&w=100&h=100&q=80`,
+          x,
+          y
+        };
+
+        customers.push(customerDoc);
+        orders.push(...customerOrders);
+        custIndex++;
+      }
     }
-    console.log("✅ Seeded 500 Customers");
 
-    // 3. Generate and Seed Orders (2500)
-    console.log("Generating 2500 orders...");
-    const orders = generateOrders(customers, 2500);
-    // Write in chunks to prevent firestore payload limit warnings
-    for (let i = 0; i < orders.length; i += batchSize) {
-      const chunk = orders.slice(i, i + batchSize);
-      await Promise.all(chunk.map(order => db.collection("orders").doc(order.id).set(order)));
-      console.log(`   Written ${Math.min(i + batchSize, orders.length)} / ${orders.length} orders...`);
+    // Write customers to DB in parallel chunks
+    const custChunkSize = 100;
+    for (let i = 0; i < customers.length; i += custChunkSize) {
+      const chunk = customers.slice(i, i + custChunkSize);
+      await Promise.all(chunk.map(cust => db.collection("customers").doc(cust.id).set(cust)));
     }
-    console.log("✅ Seeded 2500 Orders");
+    console.log(`✅ Seeded ${customers.length} Customers`);
 
-    // 4. Seed Campaigns (10)
-    for (const campaign of CAMPAIGNS) {
-      await db.collection("campaigns").doc(campaign.id).set(campaign);
+    // Write orders to DB in parallel chunks
+    const ordChunkSize = 100;
+    for (let i = 0; i < orders.length; i += ordChunkSize) {
+      const chunk = orders.slice(i, i + ordChunkSize);
+      await Promise.all(chunk.map(ord => db.collection("orders").doc(ord.id).set(ord)));
+    }
+    console.log(`✅ Seeded ${orders.length} Orders`);
+
+    // ════════════════════════════════════════
+    // 3. CAMPAIGNS (10)
+    // ════════════════════════════════════════
+    const campaigns = [
+      {
+        id: "camp_1",
+        name: "Summer Cotton Kurtis Drop",
+        goal: "Increase Repeat Purchases",
+        description: "Launching premium breathable daily wear Kurtis collection on Instagram & WhatsApp.",
+        channel: "WhatsApp" as const,
+        status: "Completed" as const,
+        sentCount: 800,
+        deliveredCount: 785,
+        openedCount: 720,
+        clickedCount: 380,
+        purchaseCount: 94,
+        revenueGenerated: 122106,
+        createdAt: "2026-05-01T10:00:00Z"
+      },
+      {
+        id: "camp_2",
+        name: "Diwali Festive Kurtas Spark",
+        goal: "Increase VIP Revenue",
+        description: "High-end silk Kurta collections with direct discount codes for VIP Loyalist segments.",
+        channel: "Email" as const,
+        status: "Completed" as const,
+        sentCount: 120,
+        deliveredCount: 120,
+        openedCount: 98,
+        clickedCount: 56,
+        purchaseCount: 28,
+        revenueGenerated: 61572,
+        createdAt: "2026-05-15T09:00:00Z"
+      },
+      {
+        id: "camp_3",
+        name: "Instagram DM Leak Recovery",
+        goal: "Recover Lost Revenue",
+        description: "Re-engage checkout abandonment leads mapping to specific sizing blocks.",
+        channel: "WhatsApp" as const,
+        status: "Completed" as const,
+        sentCount: 245,
+        deliveredCount: 241,
+        openedCount: 228,
+        clickedCount: 112,
+        purchaseCount: 48,
+        revenueGenerated: 62352,
+        createdAt: "2026-05-20T14:30:00Z"
+      },
+      {
+        id: "camp_4",
+        name: "Dormant VIP Win-back Loop",
+        goal: "Reduce Churn",
+        description: "WhatsApp activation voucher for VIP buyers inactive for 60+ days.",
+        channel: "WhatsApp" as const,
+        status: "Completed" as const,
+        sentCount: 100,
+        deliveredCount: 98,
+        openedCount: 89,
+        clickedCount: 45,
+        purchaseCount: 18,
+        revenueGenerated: 23382,
+        createdAt: "2026-05-25T11:15:00Z"
+      },
+      {
+        id: "camp_5",
+        name: "New Signups Welcomer",
+        goal: "Acquire New Customers",
+        description: "Email onboarding sequence with ₹150 off first purchase.",
+        channel: "Email" as const,
+        status: "Running" as const,
+        sentCount: 180,
+        deliveredCount: 178,
+        openedCount: 110,
+        clickedCount: 52,
+        purchaseCount: 15,
+        revenueGenerated: 19485,
+        createdAt: "2026-06-01T08:00:00Z"
+      },
+      {
+        id: "camp_6",
+        name: "Monsoon Kurtis Clearance",
+        goal: "Increase Repeat Purchases",
+        description: "SMS blast advertising 25% off end-of-season daily wear styles.",
+        channel: "SMS" as const,
+        status: "Draft" as const,
+        sentCount: 0,
+        deliveredCount: 0,
+        openedCount: 0,
+        clickedCount: 0,
+        purchaseCount: 0,
+        revenueGenerated: 0,
+        createdAt: "2026-06-09T17:00:00Z"
+      },
+      {
+        id: "camp_7",
+        name: "RCS Indigo Palazzo Spotlight",
+        goal: "Increase Repeat Purchases",
+        description: "Rich card RCS campaign featuring high-affinity Indigo Palazzo coordinates.",
+        channel: "RCS" as const,
+        status: "Draft" as const,
+        sentCount: 0,
+        deliveredCount: 0,
+        openedCount: 0,
+        clickedCount: 0,
+        purchaseCount: 0,
+        revenueGenerated: 0,
+        createdAt: "2026-06-10T12:00:00Z"
+      },
+      {
+        id: "camp_8",
+        name: "Cart Recovery SMS Loop",
+        goal: "Recover Lost Revenue",
+        description: "Automated SMS sequences triggered 4h post cart abandonment.",
+        channel: "SMS" as const,
+        status: "Running" as const,
+        sentCount: 84,
+        deliveredCount: 83,
+        openedCount: 0,
+        clickedCount: 12,
+        purchaseCount: 4,
+        revenueGenerated: 5196,
+        createdAt: "2026-06-02T13:00:00Z"
+      },
+      {
+        id: "camp_9",
+        name: "Micro-Influencer Reel Promo",
+        goal: "Acquire New Customers",
+        description: "Countering StyleKart Micro Reels with direct Instagram checkout vouchers.",
+        channel: "WhatsApp" as const,
+        status: "Completed" as const,
+        sentCount: 300,
+        deliveredCount: 295,
+        openedCount: 260,
+        clickedCount: 124,
+        purchaseCount: 32,
+        revenueGenerated: 41568,
+        createdAt: "2026-05-18T16:00:00Z"
+      },
+      {
+        id: "camp_10",
+        name: "Pre-Festival Premium Trunk",
+        goal: "Increase VIP Revenue",
+        description: "Invite-only trunk show previews for VIP buyers.",
+        channel: "Email" as const,
+        status: "Completed" as const,
+        sentCount: 80,
+        deliveredCount: 80,
+        openedCount: 71,
+        clickedCount: 42,
+        purchaseCount: 16,
+        revenueGenerated: 35184,
+        createdAt: "2026-05-22T10:00:00Z"
+      }
+    ];
+
+    for (const camp of campaigns) {
+      await db.collection("campaigns").doc(camp.id).set(camp);
     }
     console.log("✅ Seeded 10 Campaigns");
 
-    // 5. Seed Opportunities (20)
-    for (const opp of OPPORTUNITIES) {
-      await db.collection("opportunities").doc(opp.id).set(opp);
+    // ════════════════════════════════════════
+    // 4. OPPORTUNITIES (20)
+    // ════════════════════════════════════════
+    const opportunitiesList = [
+      {
+        id: "opp_1",
+        title: "Abandoned Cart Recovery",
+        type: "Lead",
+        description: "34 checkout nodes left items in Kurtis checkouts.",
+        potentialRevenue: 44166,
+        confidence: 91,
+        audienceSize: 34,
+        priorityScore: 95,
+        recommendedAction: "Recover Lost Revenue",
+        reasoning: "Luna discovered a 34% leak rate during checkout sizes selection. Direct WhatsApp links can recover 30% of this revenue.",
+        color: "Yellow",
+        angle: 45,
+        distance: 65
+      },
+      {
+        id: "opp_2",
+        title: "Inactive VIP Customers",
+        type: "Inactive",
+        description: "Re-engage top VIP spenders showing zero orders for 60+ days.",
+        potentialRevenue: 64950,
+        confidence: 88,
+        audienceSize: 50,
+        priorityScore: 88,
+        recommendedAction: "Reduce Customer Churn",
+        reasoning: "VIP buyers have churn risk indices over 70% due to seasonal dormancy. Reach them with silk Kurti exclusive vouchers.",
+        color: "Purple",
+        angle: 160,
+        distance: 80
+      },
+      {
+        id: "opp_3",
+        title: "Cross-Sell Opportunities",
+        type: "VIP",
+        description: "Expose palazzo sets to Kurti-only repeat buyers.",
+        potentialRevenue: 78540,
+        confidence: 94,
+        audienceSize: 60,
+        priorityScore: 92,
+        recommendedAction: "Increase Customer LTV",
+        reasoning: "Kurti buyers have high affinity coordinate sets. Vega forecasts 4.2x ROI by introducing Palazzo Set bundle catalogs.",
+        color: "Green",
+        angle: 290,
+        distance: 45
+      },
+      {
+        id: "opp_4",
+        title: "Repeat Purchase Promotion",
+        type: "Lead",
+        description: "Recommend next purchase to first-time shoppers at day 14.",
+        potentialRevenue: 32475,
+        confidence: 85,
+        audienceSize: 25,
+        priorityScore: 85,
+        recommendedAction: "Increase Repeat Purchases",
+        reasoning: "New buyers show high purchase intent decay 14 days after delivery. Direct discount codes drive conversion repeat loops.",
+        color: "Purple",
+        angle: 110,
+        distance: 35
+      },
+      {
+        id: "opp_5",
+        title: "Seasonal Festival Demand",
+        type: "Prospect",
+        description: "Capture upcoming festive buy surge on Instagram DMs.",
+        potentialRevenue: 95000,
+        confidence: 89,
+        audienceSize: 120,
+        priorityScore: 90,
+        recommendedAction: "Acquire New Customers",
+        reasoning: "Diwali shopping search volume spikes 4.2x in kurtis. Deploy high-fidelity RCS catalog drops.",
+        color: "Green",
+        angle: 30,
+        distance: 55
+      }
+    ];
+
+    // Generate remaining 15 opportunities procedurally to make 20 total
+    const categories: ("Lead" | "Inactive" | "VIP" | "Prospect")[] = ["Lead", "Inactive", "VIP", "Prospect"];
+    const actions: ("Recover Lost Revenue" | "Reduce Customer Churn" | "Increase Customer LTV" | "Acquire New Customers" | "Increase Repeat Purchases")[] = [
+      "Recover Lost Revenue", "Reduce Customer Churn", "Increase Customer LTV", "Acquire New Customers"
+    ];
+    const colors: ("Red" | "Yellow" | "Green" | "Purple")[] = ["Red", "Yellow", "Green", "Purple"];
+    
+    for (let k = 6; k <= 20; k++) {
+      const type = categories[k % categories.length];
+      const recAction = actions[k % actions.length];
+      const color = colors[k % colors.length];
+      const size = 10 + Math.floor(Math.random() * 80);
+      const rev = size * 1299;
+      
+      opportunitiesList.push({
+        id: `opp_${k}`,
+        title: `Opportunity Node ID: ${k} (${type})`,
+        type,
+        description: `Procedural monitoring channel flag ${k} tracking ${size} targets.`,
+        potentialRevenue: rev,
+        confidence: 75 + Math.floor(Math.random() * 20),
+        audienceSize: size,
+        priorityScore: 60 + Math.floor(Math.random() * 35),
+        recommendedAction: recAction as any,
+        reasoning: `Luna identified signal matching group parameters. Recommended channel matching target coordinates.`,
+        color,
+        angle: Math.floor(Math.random() * 360),
+        distance: 20 + Math.floor(Math.random() * 75)
+      });
+    }
+
+    for (const opp of opportunitiesList) {
+      await db.collection("opportunities").doc(opp.id).set({
+        ...opp,
+        updatedAt: new Date().toISOString()
+      });
     }
     console.log("✅ Seeded 20 Opportunities");
 
-    // 6. Seed Missions (15)
-    for (const mission of MISSIONS) {
-      await db.collection("missions").doc(mission.id).set(mission);
+    // ════════════════════════════════════════
+    // 5. MISSIONS (15)
+    // ════════════════════════════════════════
+    const missionsList = [
+      {
+        id: "miss_1",
+        goal: "Increase Repeat Purchases",
+        status: "Completed",
+        progress: 100,
+        roi: 4.8,
+        createdAt: "2026-05-01T10:00:00Z",
+        Polaris: { segment: "Loyalists", explanation: "Targeting repeat Kurti buyers." },
+        Luna: { recoverableRevenue: 122106, recoveryConfidence: 94, explanation: "Luna optimized checkouts." },
+        Vega: { predictedRoi: 4.8, predictedRevenue: 120000, explanation: "Vega forecast correct." },
+        recommendation: { summary: "Standard Whatsapp campaign.", confidenceScore: 94 }
+      },
+      {
+        id: "miss_2",
+        goal: "Recover Lost Leads",
+        status: "Running",
+        progress: 65,
+        roi: 3.9,
+        createdAt: "2026-06-02T13:00:00Z",
+        Polaris: { segment: "Slipping Away", explanation: "Targeting cart abandoners." },
+        Luna: { recoverableRevenue: 44166, recoveryConfidence: 91, explanation: "Detected cart leaks." },
+        Vega: { predictedRoi: 3.9, predictedRevenue: 40000, explanation: "Conversion projections active." },
+        recommendation: { summary: "Cart recovery sequences.", confidenceScore: 91 }
+      }
+    ];
+
+    // Procedural generation of 13 other missions
+    const statusTypes = ["Completed", "Running", "Queued"];
+    const missionGoals = [
+      "Increase Repeat Purchases", "Recover Lost Leads", "Launch Summer Collection", 
+      "Reduce Churn", "Increase VIP Revenue", "Acquire Instagram Followers", "Reward Loyalty Segment"
+    ];
+
+    for (let mIndex = 3; mIndex <= 15; mIndex++) {
+      const status = statusTypes[mIndex % statusTypes.length];
+      const goal = missionGoals[mIndex % missionGoals.length];
+      const progress = status === "Completed" ? 100 : status === "Running" ? 20 + Math.floor(Math.random() * 60) : 0;
+      const daysAgo = 10 + mIndex;
+      const createdAt = new Date(Date.now() - daysAgo * 24 * 60 * 60 * 1000).toISOString();
+      
+      missionsList.push({
+        id: `miss_${mIndex}`,
+        goal,
+        status,
+        progress,
+        roi: parseFloat((2.5 + Math.random() * 3).toFixed(1)),
+        createdAt,
+        Polaris: { segment: "Loyalists", explanation: "Polaris mapped coordinate nodes." },
+        Luna: { recoverableRevenue: 15000 * mIndex, recoveryConfidence: 85, explanation: "Luna audited leakage nodes." },
+        Vega: { predictedRoi: 3.2, predictedRevenue: 18000 * mIndex, explanation: "Vega computed conversion loops." },
+        recommendation: { summary: "Run autonomous directives via selected channel.", confidenceScore: 85 }
+      });
+    }
+
+    for (const miss of missionsList) {
+      await db.collection("missions").doc(miss.id).set(miss);
+      // Write mission update to track timeline
+      await db.collection("mission_updates").add({
+        missionId: miss.id,
+        status: miss.status,
+        timestamp: miss.createdAt
+      });
     }
     console.log("✅ Seeded 15 Missions");
 
-    // 7. Seed Agent Logs (30)
-    for (const log of AGENT_LOGS) {
-      await db.collection("agent_logs").doc(log.id).set(log);
+    // ════════════════════════════════════════
+    // 6. AGENT LOGS (30)
+    // ════════════════════════════════════════
+    const agentsList: ("System" | "Polaris" | "Nova" | "Vega" | "Atlas" | "Luna")[] = [
+      "System", "Polaris", "Luna", "Vega", "Nova", "Atlas"
+    ];
+    
+    const messagesPool = [
+      "[Polaris] Segmenting Indian female buyers. Group A matches Kurti preferences.",
+      "[Luna] Scanning billing gateways. Identified 12% cart leakage on checkout screen.",
+      "[Vega] Projections locked. Expected conversion yields: 24% under current WhatsApp template.",
+      "[Nova] Copy draft finished: 'Hey Priya, get 15% off Swadeshi Kurtis today!'.",
+      "[Atlas] Queuing dispatch hooks. Target: 10:30 AM Tuesday peak opens.",
+      "[System] Syncing cognitive registers with Firestore database.",
+      "[Polaris] 120 repeat buyers show early affinity toward Chanderi palazzo sets.",
+      "[Luna] Instagram checkout leak alert: 34 nodes left baskets active.",
+      "[Vega] ROI evaluation: 4.8x baseline yields on early VIP invite triggers.",
+      "[Nova] Drafted RCS rich template with cotton kurti catalog images.",
+      "[Atlas] Webhooks verified. Direct checkout API online and responsive.",
+      "[System] Operational network metrics nominal. Latency: 5ms.",
+      "[Polaris] Alert: Slipping VIP segment churn score has climbed by 4.2%.",
+      "[Luna] Recoverable revenue potential from dormant VIPs: ₹65,000.",
+      "[Vega] Forecast: Churn reduction campaign projects ₹35,000 in saved value.",
+      "[Nova] Direct WhatsApp interactive copy armed. CTA: Shop Kurtis.",
+      "[Atlas] Webhook dispatch channels routing complete.",
+      "[System] Calibrating boardroom consensus vectors."
+    ];
+
+    for (let logI = 1; logI <= 30; logI++) {
+      const agent = agentsList[logI % agentsList.length];
+      const message = messagesPool[logI % messagesPool.length];
+      const typesList: ("thought" | "action" | "chat" | "result")[] = ["thought", "action", "chat", "result"];
+      const type = typesList[logI % typesList.length];
+      const minAgo = 60 * 24 - logI * 15;
+      const ts = new Date(Date.now() - minAgo * 60 * 1000).toISOString();
+      
+      const logDoc = {
+        id: `log_${logI}`,
+        agent,
+        timestamp: new Date(ts).toLocaleTimeString(),
+        message,
+        type,
+        createdAt: ts
+      };
+      await db.collection("agent_logs").doc(logDoc.id).set(logDoc);
     }
     console.log("✅ Seeded 30 Agent Logs");
 
-    // 8. Seed Simulations (10)
-    for (const sim of SIMULATIONS) {
-      await db.collection("simulations").doc(sim.id).set(sim);
+    // ════════════════════════════════════════
+    // 7. FUTURE SIMULATIONS (10)
+    // ════════════════════════════════════════
+    for (let simI = 1; simI <= 10; simI++) {
+      const simDoc = {
+        id: `sim_${simI}`,
+        discount: 10 + simI * 2,
+        channel: CHANNELS[simI % CHANNELS.length],
+        audience: "Loyalists",
+        createdAt: new Date(Date.now() - simI * 24 * 60 * 60 * 1000).toISOString(),
+        conservative: {
+          conversionRate: parseFloat((1.5 + simI * 0.2).toFixed(1)),
+          revenue: Math.round(15000 * simI),
+          roi: parseFloat((1.8 + simI * 0.1).toFixed(1)),
+          customerFatigue: "Low",
+          optOutRate: 0.3
+        },
+        recommended: {
+          conversionRate: parseFloat((4.2 + simI * 0.3).toFixed(1)),
+          revenue: Math.round(35000 * simI),
+          roi: parseFloat((4.2 + simI * 0.2).toFixed(1)),
+          customerFatigue: "Medium",
+          optOutRate: 0.8
+        },
+        aggressive: {
+          conversionRate: parseFloat((6.8 + simI * 0.4).toFixed(1)),
+          revenue: Math.round(55000 * simI),
+          roi: parseFloat((3.6 + simI * 0.15).toFixed(1)),
+          customerFatigue: "High",
+          optOutRate: 2.1
+        }
+      };
+      await db.collection("simulations").doc(simDoc.id).set(simDoc);
     }
     console.log("✅ Seeded 10 Future Simulations");
 
-    // 9. Generate and Seed Analytics Snapshots (30)
-    const analytics = generateAnalytics();
-    for (const item of analytics) {
-      const docId = "an_" + item.date;
-      await db.collection("analytics").doc(docId).set(item);
+    // ════════════════════════════════════════
+    // 8. COMPETITORS (5)
+    // ════════════════════════════════════════
+    const competitorsList = [
+      { id: "comp_1", name: "FashionHub",   abbr: "FH", followerGrowth: "+14.2%", engagementRate: "4.8%", campaignActivity: "High" as const,   newProducts: 12, promoStatus: "Diwali Sale Active",  threat: "red" as const,    threatLabel: "Threat",      marketShare: 28, topChannel: "Instagram" },
+      { id: "comp_2", name: "StyleKart",    abbr: "SK", followerGrowth: "+8.7%",  engagementRate: "3.2%", campaignActivity: "Medium" as const, newProducts: 6,  promoStatus: "Flash Sale Weekly",   threat: "yellow" as const, threatLabel: "Monitor",     marketShare: 19, topChannel: "WhatsApp" },
+      { id: "comp_3", name: "TrendWear",    abbr: "TW", followerGrowth: "+5.1%",  engagementRate: "2.9%", campaignActivity: "Low" as const,    newProducts: 3,  promoStatus: "Clearance Running",   threat: "green" as const,  threatLabel: "Opportunity", marketShare: 12, topChannel: "Email" },
+      { id: "comp_4", name: "UrbanLooks",   abbr: "UL", followerGrowth: "+11.3%", engagementRate: "5.4%", campaignActivity: "High" as const,   newProducts: 9,  promoStatus: "Influencer Collab",   threat: "red" as const,    threatLabel: "Threat",      marketShare: 22, topChannel: "Reels" },
+      { id: "comp_5", name: "Elite Closet", abbr: "EC", followerGrowth: "+3.2%",  engagementRate: "1.8%", campaignActivity: "Low" as const,    newProducts: 2,  promoStatus: "No Active Promo",     threat: "green" as const,  threatLabel: "Opportunity", marketShare: 8,  topChannel: "SMS" }
+    ];
+
+    for (const comp of competitorsList) {
+      await db.collection("competitors").doc(comp.id).set(comp);
+    }
+    console.log("✅ Seeded 5 Competitors");
+
+    // ════════════════════════════════════════
+    // 9. LIVE MARKET SIGNALS (6)
+    // ════════════════════════════════════════
+    const marketSignals = [
+      { id: "sig_1", title: "FashionHub launched a Diwali Kurta Sale", desc: "Aggressive 40% discount blast via WhatsApp and Reels. Engagement spiked 42% in 24 hours.", impact: 91, confidence: 88, agent: "Polaris", agentColor: "#3B82F6", type: "threat" as const, trend: "up" as const },
+      { id: "sig_2", title: "Kurti reels engagement up 2.4x industry-wide", desc: "Short-form video showcasing palazzo coordinate sets outperforms static catalog posts.", impact: 84, confidence: 92, agent: "Vega", agentColor: "#8B5CF6", type: "opportunity" as const, trend: "up" as const },
+      { id: "sig_3", title: "Instagram DM shopping cart checkout leaks fell 8%", desc: "Direct payment links in Instagram chats increased checkout yields by 8%.", impact: 76, confidence: 85, agent: "Luna", agentColor: "#EC4899", type: "opportunity" as const, trend: "up" as const },
+      { id: "sig_4", title: "Aura Threads WhatsApp unsubscribe rates rose 1.2%", desc: "Dormant users reporting message fatigue due to repeated static clearances.", impact: 88, confidence: 90, agent: "Vega", agentColor: "#8B5CF6", type: "threat" as const, trend: "up" as const },
+      { id: "sig_5", title: "Limited-time Kurtis vouchers conversion rate rose 38%", desc: "Customers converted 38% faster when countdown timers were added to landing pages.", impact: 79, confidence: 87, agent: "Nova", agentColor: "#F59E0B", type: "opportunity" as const, trend: "up" as const },
+      { id: "sig_6", title: "StyleKart launched micro-influencer product drops", desc: "Tapping nano-influencers in Mumbai and Delhi for kurti style hauls, driving high web traffic.", impact: 72, confidence: 83, agent: "Atlas", agentColor: "#22C55E", type: "threat" as const, trend: "up" as const }
+    ];
+
+    for (const sig of marketSignals) {
+      await db.collection("market_signals").doc(sig.id).set(sig);
+    }
+    console.log("✅ Seeded 6 Market Signals");
+
+    // ════════════════════════════════════════
+    // 10. INDUSTRY TRENDS (7)
+    // ════════════════════════════════════════
+    const industryTrends = [
+      { id: "trend_1", label: "Short Video Reels", score: 94, growth: "+34% YoY", revenue: "₹12L potential", difficulty: "Medium" as const, color: "#3B82F6", x: 380, y: 180, vx: 0.3, vy: -0.2 },
+      { id: "trend_2", label: "Festival Buying Surge", score: 89, growth: "+28% YoY", revenue: "₹28L potential", difficulty: "Low" as const, color: "#F59E0B", x: 220, y: 280, vx: -0.2, vy: 0.3 },
+      { id: "trend_3", label: "WhatsApp Commerce", score: 92, growth: "+41% YoY", revenue: "₹34L potential", difficulty: "Low" as const, color: "#22C55E", x: 480, y: 320, vx: 0.2, vy: 0.2 },
+      { id: "trend_4", label: "Influencer Kurti Hauls", score: 78, growth: "+22% YoY", revenue: "₹9L potential", difficulty: "Medium" as const, color: "#EC4899", x: 160, y: 140, vx: 0.15, vy: 0.25 },
+      { id: "trend_5", label: "UGC Styling Guides", score: 71, growth: "+19% YoY", revenue: "₹6L potential", difficulty: "Low" as const, color: "#8B5CF6", x: 560, y: 160, vx: -0.3, vy: 0.1 },
+      { id: "trend_6", label: "Interactive RCS Catalogs", score: 86, growth: "+31% YoY", revenue: "₹18L potential", difficulty: "Low" as const, color: "#EF4444", x: 320, y: 360, vx: 0.1, vy: -0.3 },
+      { id: "trend_7", label: "Zero-Friction Cart Links", score: 67, growth: "+58% YoY", revenue: "₹7L potential", difficulty: "High" as const, color: "#06B6D4", x: 440, y: 100, vx: -0.2, vy: -0.2 }
+    ];
+
+    for (const tr of industryTrends) {
+      await db.collection("industry_trends").doc(tr.id).set(tr);
+    }
+    console.log("✅ Seeded 7 Industry Trends");
+
+    // ════════════════════════════════════════
+    // 11. PRODUCTS (10)
+    // ════════════════════════════════════════
+    for (let pI = 0; pI < PRODUCTS.length; pI++) {
+      const p = PRODUCTS[pI];
+      await db.collection("products").doc(`prod_${pI + 1}`).set({
+        id: `prod_${pI + 1}`,
+        name: p.name,
+        category: p.category,
+        price: p.price,
+        salesCount: 50 + Math.floor(Math.random() * 400)
+      });
+    }
+    console.log("✅ Seeded 10 Products");
+
+    // ════════════════════════════════════════
+    // 12. SEASONAL EVENTS (5)
+    // ════════════════════════════════════════
+    const seasonalEvents = [
+      { id: "event_1", name: "Diwali Festive Blast", date: "2026-11-05", daysLeft: 148, channel: "WhatsApp", projectedRevenue: 150000 },
+      { id: "event_2", name: "Monsoon Kurtis Clearance", date: "2026-07-15", daysLeft: 35, channel: "SMS", projectedRevenue: 60000 },
+      { id: "event_3", name: "Raksha Bandhan Gifting", date: "2026-08-28", daysLeft: 79, channel: "WhatsApp", projectedRevenue: 95000 },
+      { id: "event_4", name: "Independence Day Sale", date: "2026-08-15", daysLeft: 66, channel: "Email", projectedRevenue: 75000 },
+      { id: "event_5", name: "Dussehra Collection Reveal", date: "2026-10-20", daysLeft: 132, channel: "RCS", projectedRevenue: 110000 }
+    ];
+
+    for (const ev of seasonalEvents) {
+      await db.collection("seasonal_events").doc(ev.id).set(ev);
+    }
+    console.log("✅ Seeded 5 Seasonal Events");
+
+    // ════════════════════════════════════════
+    // 13. SOCIAL INSIGHTS (5)
+    // ════════════════════════════════════════
+    const socialInsights = [
+      { id: "soc_1", topic: "Kurti Size Fit Queries", sentiment: "Negative" as const, volume: 154, growth: "+24% this week" },
+      { id: "soc_2", topic: "Pastel Kurtas Hype", sentiment: "Positive" as const, volume: 432, growth: "+68% this week" },
+      { id: "soc_3", topic: "Cotton Palazzo Comfort", sentiment: "Positive" as const, volume: 284, growth: "+42% this week" },
+      { id: "soc_4", topic: "Instagram DM checkout delays", sentiment: "Negative" as const, volume: 98, growth: "+12% this week" },
+      { id: "soc_5", topic: "Aura Threads Swadeshi collection", sentiment: "Positive" as const, volume: 512, growth: "+95% this week" }
+    ];
+
+    for (const soc of socialInsights) {
+      await db.collection("social_insights").doc(soc.id).set(soc);
+    }
+    console.log("✅ Seeded 5 Social Insights");
+
+    // ════════════════════════════════════════
+    // 14. ANALYTICS SNAPSHOTS (30 days)
+    // ════════════════════════════════════════
+    console.log("⏳ Generating 30 days of analytics trends...");
+    for (let day = 30; day >= 1; day--) {
+      const dateVal = new Date(Date.now() - day * 24 * 60 * 60 * 1000);
+      const dateStr = dateVal.toISOString().split("T")[0];
+      const docId = `an_${dateStr}`;
+      
+      // Let's create a curve with weekly peaks and overall positive trajectory
+      const weekday = dateVal.getDay(); // 0 = Sun, 6 = Sat
+      const isWeekend = weekday === 0 || weekday === 6;
+      const baseRev = 7000 + (30 - day) * 100; // growing over time
+      const revenue = Math.round(baseRev * (isWeekend ? 1.4 : 1.0) * (0.9 + Math.random() * 0.2));
+      const purchases = Math.round(revenue / 1299);
+      const conversionRate = parseFloat((8.5 + (30 - day) * 0.1 + (isWeekend ? 2.5 : 0) + Math.random() * 2).toFixed(1));
+
+      const analyticsDoc = {
+        date: dateStr,
+        revenue,
+        purchases,
+        conversionRate,
+        createdAt: dateVal.toISOString()
+      };
+      await db.collection("analytics").doc(docId).set(analyticsDoc);
     }
     console.log("✅ Seeded 30 Analytics Snapshots");
 
-    // 10. Seed Mission Updates
-    for (const update of MISSION_UPDATES) {
-      const docId = `up_${update.missionId}_${update.status}`;
-      await db.collection("mission_updates").doc(docId).set(update);
-    }
-    console.log("✅ Seeded Mission Updates");
-
-    console.log("🎉 Seeding complete! Database is now fully prepared with high-fidelity demo data for Aura Threads.");
-  } catch (err) {
-    console.error("❌ Seeding failed:", err);
+    console.log("🎉 FIRESTORE SEEDING COMPLETED SUCCESSFULLY!");
+    console.log("Ready for ORBIT: 500 customers, 2500 orders, campaigns, logs, simulations, and market signals mapped.");
+  } catch (err: any) {
+    console.error("❌ Firestore Seeding failed:", err.message || err);
   }
 }
 

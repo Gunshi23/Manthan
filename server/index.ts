@@ -17,6 +17,7 @@ import analyticsRouter from "./routes/analytics";
 import customersRouter from "./routes/customers";
 import ordersRouter from "./routes/orders";
 import agentLogsRouter from "./routes/agentLogs";
+import competitorIntelRouter from "./routes/competitorIntel";
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -52,6 +53,7 @@ app.use("/api/analytics", analyticsRouter);
 app.use("/api/customers", customersRouter);
 app.use("/api/orders", ordersRouter);
 app.use("/api/agent-logs", agentLogsRouter);
+app.use("/api/competitor-intel", competitorIntelRouter);
 
 // Start server
 if (process.env.NODE_ENV !== "production") {

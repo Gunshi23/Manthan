@@ -1,10 +1,10 @@
-import React, { useState, useRef, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
-  Mail, MessageCircle, Phone, Layers, Sparkles, Edit3, Send, Eye,
-  BarChart3, TrendingUp, RefreshCw, Wand2, Scissors, Dna, Play,
-  Users, Terminal, Zap, Target, Brain, ChevronDown, ChevronUp,
-  CheckCircle2, Clock, Rocket, X, AlertCircle, ArrowRight,
-  Activity, Star, Shield, Cpu, FlaskConical, MessageSquare, Globe
+  Mail, MessageCircle, Phone, Layers, Sparkles, Edit3, Eye,
+  BarChart3, RefreshCw, Wand2, Scissors, Dna, Play,
+  Users, Zap, Target, Brain,
+  CheckCircle2, Rocket, X, AlertCircle, ArrowRight,
+  Activity, Star, Cpu, FlaskConical, MessageSquare, Globe
 } from "lucide-react";
 import { useOrbit } from "../context/OrbitContext";
 import { callGeminiAPI, parseGeminiJson } from "../utils/gemini";
@@ -96,7 +96,7 @@ function buildFallbackPlan(goal: string, businessType: string): MissionPlan {
    GROWTH ENGINE PAGE
 ══════════════════════════════════════════════════════════════ */
 export const GrowthEngine: React.FC = () => {
-  const { customers, campaigns, config, businessType, addAgentLog, launchMissionCampaign, mission, startMission } = useOrbit();
+  const { customers, config, businessType, addAgentLog, launchMissionCampaign, startMission } = useOrbit();
 
   /* ── State ── */
   const [goal, setGoal] = useState("Increase Repeat Purchases by 20%");
@@ -143,7 +143,7 @@ export const GrowthEngine: React.FC = () => {
   const [explainData, setExplainData] = useState<any>(null);
   const [explainLoading, setExplainLoading] = useState(false);
 
-  const chatEndRef = useRef<HTMLDivElement>(null);
+
 
   /* ── Derived data ── */
   const totalCustomers = customers.length;
@@ -259,7 +259,7 @@ export const GrowthEngine: React.FC = () => {
       if (data && data.conservative) {
         setSimData(data);
       } else {
-        const mult = p.Vega.predictedRoi / 4.2;
+
         setSimData({
           conservative: { conversionRate: 2.1, revenue: Math.round(p.Vega.predictedRevenue * 0.6), roi: parseFloat((p.Vega.predictedRoi * 0.65).toFixed(1)), customerFatigue: "Low", optOutRate: 0.4 },
           recommended:  { conversionRate: 4.8, revenue: p.Vega.predictedRevenue, roi: p.Vega.predictedRoi, customerFatigue: "Medium", optOutRate: 0.9 },
@@ -503,7 +503,7 @@ Format as JSON: { "Polaris": "...", "Luna": "...", "Vega": "...", "Nova": "...",
             </div>
 
             <div className="grid grid-cols-5 gap-3">
-              {workflowSteps.map((step, idx) => (
+              {workflowSteps.map((step) => (
                 <div key={step.agent} className={`relative p-3 rounded-xl border transition-all duration-500 ${
                   step.status === "running" ? "border-opacity-60 shadow-lg bg-gray-900/60" :
                   step.status === "done"    ? "bg-gray-900/40 border-opacity-40" :
@@ -897,9 +897,9 @@ Format as JSON: { "Polaris": "...", "Luna": "...", "Vega": "...", "Nova": "...",
             {simData ? (
               <div className="grid grid-cols-3 gap-4">
                 {([
-                  { key: "conservative", label: "Conservative",  color: "#F59E0B", emoji: "📉", gradient: "from-yellow-500/10 to-transparent" },
+                  { key: "conservative", label: "Conservative",  color: "#F59E0B", emoji: "📉", gradient: "from-yellow-500/10 to-transparent", isBest: false },
                   { key: "recommended",  label: "Recommended",   color: "#22C55E", emoji: "🎯", gradient: "from-green-500/10 to-transparent", isBest: true },
-                  { key: "aggressive",   label: "Aggressive",    color: "#EF4444", emoji: "🚀", gradient: "from-red-500/10 to-transparent" },
+                  { key: "aggressive",   label: "Aggressive",    color: "#EF4444", emoji: "🚀", gradient: "from-red-500/10 to-transparent", isBest: false },
                 ] as const).map(scenario => {
                   const data = simData[scenario.key];
                   return (

@@ -1,7 +1,7 @@
 import { GEMINI_API_KEY } from "../config/gemini";
 
 // Helper to call Gemini REST API using native fetch
-async function callGeminiAPI(
+export async function callGeminiAPI(
   prompt: string,
   systemInstruction?: string
 ): Promise<string> {
@@ -82,7 +82,7 @@ async function callGeminiAPI(
 }
 
 // Clean markdown JSON formatting if present
-function parseGeminiJson<T>(text: string, fallback: T): T {
+export function parseGeminiJson<T>(text: string, fallback: T): T {
   try {
     let cleaned = text.trim();
     if (cleaned.startsWith("```")) {
