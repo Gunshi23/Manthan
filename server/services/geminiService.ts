@@ -40,35 +40,45 @@ async function callGeminiAPI(
     };
   }
 
-  const response = await fetch(url, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(requestBody),
-  });
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 5000);
 
-  if (!response.ok) {
-    let errorMsg = `HTTP Error ${response.status}: ${response.statusText}`;
-    try {
-      const errJson = await response.json();
-      if (errJson.error && errJson.error.message) {
-        errorMsg = errJson.error.message;
+  try {
+    const response = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(requestBody),
+      signal: controller.signal,
+    });
+    clearTimeout(timeoutId);
+
+    if (!response.ok) {
+      let errorMsg = `HTTP Error ${response.status}: ${response.statusText}`;
+      try {
+        const errJson = await response.json();
+        if (errJson.error && errJson.error.message) {
+          errorMsg = errJson.error.message;
+        }
+      } catch (e) {
+        // ignore JSON parse errors
       }
-    } catch (e) {
-      // ignore JSON parse errors
+      throw new Error(errorMsg);
     }
-    throw new Error(errorMsg);
+
+    const data = await response.json();
+    const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+
+    if (!text) {
+      throw new Error("Empty response or unexpected format from Gemini API");
+    }
+
+    return text;
+  } catch (err: any) {
+    clearTimeout(timeoutId);
+    throw err;
   }
-
-  const data = await response.json();
-  const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
-
-  if (!text) {
-    throw new Error("Empty response or unexpected format from Gemini API");
-  }
-
-  return text;
 }
 
 // Clean markdown JSON formatting if present

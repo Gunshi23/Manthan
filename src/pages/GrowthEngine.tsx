@@ -631,14 +631,33 @@ export const GrowthEngine: React.FC = () => {
               if (mission.isActive && mission.step === "ready") {
                 launchMissionCampaign(activeChannel);
                 alert(`Campaign dispatched successfully via ${activeChannel}! Check Mission Control to track live engagements.`);
+              } else if (mission.isActive) {
+                alert(`AI Agents are currently preparing the campaign (${mission.step}). Please wait a few seconds.`);
               } else {
                 alert(`Please click "AI Generate Campaign" first to target customer cohorts and prepare the dispatch copy.`);
               }
             }}
-            className="w-full py-3 rounded-xl bg-gradient-to-r from-orbit-success to-emerald-400 text-white font-mono text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 hover:opacity-90 hover:scale-[1.02] active:scale-95 duration-200 cursor-pointer shadow-orbit-glow-green"
+            disabled={mission.isActive && mission.step !== "ready"}
+            className={`w-full py-3 rounded-xl font-mono text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-all ${
+              mission.isActive && mission.step !== "ready"
+                ? "bg-gray-800 text-gray-500 border border-gray-750 cursor-not-allowed"
+                : "bg-gradient-to-r from-orbit-success to-emerald-400 text-white hover:opacity-90 hover:scale-[1.02] active:scale-95 duration-200 cursor-pointer shadow-orbit-glow-green"
+            }`}
           >
-            <Send size={13} />
-            Confirm Dispatch
+            {mission.isActive && mission.step !== "ready" ? (
+              <>
+                <RefreshCw size={13} className="animate-spin text-orbit-success" />
+                {mission.step === "analyzing" && "Polaris Analyzing..."}
+                {mission.step === "segmenting" && "Luna Auditing..."}
+                {mission.step === "predicting" && "Vega Forecasting..."}
+                {mission.step === "generating" && "Nova Copywriting..."}
+              </>
+            ) : (
+              <>
+                <Send size={13} />
+                Confirm Dispatch
+              </>
+            )}
           </button>
         </div>
 

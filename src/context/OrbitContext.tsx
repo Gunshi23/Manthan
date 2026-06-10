@@ -722,14 +722,20 @@ export const OrbitProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     let consolidatedResult: any = null;
     let geminiError: string | null = null;
 
-    // Try to run mission generation on the Express backend
+    // Try to run mission generation on the Express backend with a 3.5-second timeout
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 3500);
+
     try {
       addAgentLog("System", "Initiating AI Mission Plan generation on backend...", "action");
       const res = await fetch("/api/autonomous-mission", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ goal, businessType })
+        body: JSON.stringify({ goal, businessType }),
+        signal: controller.signal
       });
+      clearTimeout(timeoutId);
+
       if (res.ok) {
         consolidatedResult = await res.json();
         addAgentLog("System", "Backend mission plan generated successfully.", "result");
@@ -737,6 +743,7 @@ export const OrbitProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         throw new Error(`HTTP Error ${res.status}`);
       }
     } catch (err: any) {
+      clearTimeout(timeoutId);
       console.warn("Backend autonomous-mission failed. Falling back to client-side logic:", err);
       
       if (config.geminiKey) {
@@ -981,13 +988,19 @@ Do not return any markdown code block formatting. Only return the raw JSON objec
     addAgentLog("Atlas", atlasMsg, "chat");
     bRoomDialogue.push({ agent: "Atlas", text: atlasMsg });
 
-    // Retrieve boardroom dialogue sequence from Express backend
+    // Retrieve boardroom dialogue sequence from Express backend with a 3-second timeout
+    const brController = new AbortController();
+    const brTimeoutId = setTimeout(() => brController.abort(), 3000);
+
     try {
       const boardroomRes = await fetch("/api/boardroom", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ goal, missionPlan: consolidatedResult })
+        body: JSON.stringify({ goal, missionPlan: consolidatedResult }),
+        signal: brController.signal
       });
+      clearTimeout(brTimeoutId);
+
       if (boardroomRes.ok) {
         const brData = await boardroomRes.json();
         if (brData && brData.messages) {
@@ -995,6 +1008,7 @@ Do not return any markdown code block formatting. Only return the raw JSON objec
         }
       }
     } catch (brErr) {
+      clearTimeout(brTimeoutId);
       console.warn("Backend boardroom API failed. Falling back to local dialogue construction:", brErr);
     }
 
