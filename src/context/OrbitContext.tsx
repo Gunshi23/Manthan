@@ -286,7 +286,25 @@ export const OrbitProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [customers, setCustomers] = useState<Customer[]>(() => {
     const saved = localStorage.getItem("orbit_customers");
     const savedType = localStorage.getItem("orbit_business_type") || "Fashion & Apparel";
-    return saved ? JSON.parse(saved) : generateMockCustomers(savedType);
+    if (!saved) return generateMockCustomers(savedType);
+    const parsed: Customer[] = JSON.parse(saved);
+    // Normalize coords for any stale records missing valid x/y
+    const GALAXY_CENTERS: Record<string, { cx: number; cy: number }> = {
+      "Loyalists":           { cx: 500, cy: 500 },
+      "Slipping Away":       { cx: 280, cy: 280 },
+      "High-Value Inactive": { cx: 720, cy: 720 },
+      "New Signups":         { cx: 720, cy: 280 },
+    };
+    return parsed.map(c => {
+      const hasValidCoords =
+        typeof c.x === "number" && typeof c.y === "number" &&
+        c.x > 0 && c.y > 0 && c.x < 1000 && c.y < 850;
+      if (hasValidCoords) return c;
+      const center = GALAXY_CENTERS[c.segment] || { cx: 500, cy: 500 };
+      const angle = Math.random() * Math.PI * 2;
+      const dist  = 40 + Math.random() * 130;
+      return { ...c, x: Math.round(center.cx + Math.cos(angle) * dist), y: Math.round(center.cy + Math.sin(angle) * dist) };
+    });
   });
   
   const [orders, setOrders] = useState<Order[]>(() => {
@@ -501,7 +519,28 @@ export const OrbitProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         if (custRes.ok) {
           const custData = await custRes.json();
           if (custData && custData.length > 0) {
-            setCustomers(custData);
+            // Normalize galaxy coordinates — ensure every customer has valid x/y
+            const GALAXY_CENTERS: Record<string, { cx: number; cy: number }> = {
+              "Loyalists":         { cx: 500, cy: 500 },
+              "Slipping Away":     { cx: 280, cy: 280 },
+              "High-Value Inactive": { cx: 720, cy: 720 },
+              "New Signups":       { cx: 720, cy: 280 },
+            };
+            const normalized = custData.map((c: any) => {
+              const center = GALAXY_CENTERS[c.segment] || { cx: 500, cy: 500 };
+              const hasValidCoords =
+                typeof c.x === "number" && typeof c.y === "number" &&
+                c.x > 0 && c.y > 0 && c.x < 1000 && c.y < 850;
+              if (hasValidCoords) return c;
+              const angle = Math.random() * Math.PI * 2;
+              const dist  = 40 + Math.random() * 130;
+              return {
+                ...c,
+                x: Math.round(center.cx + Math.cos(angle) * dist),
+                y: Math.round(center.cy + Math.sin(angle) * dist),
+              };
+            });
+            setCustomers(normalized);
           }
         }
 
