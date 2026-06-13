@@ -5,7 +5,7 @@ import {
   Activity, ChevronUp, Cpu,
   Layers, X, Play, Pause, RefreshCw, Plus, 
   Trash2, Copy, FileText, Database,
-  Flame, BarChart3
+  Flame, BarChart3, Fingerprint, Crown, ShieldAlert
 } from "lucide-react";
 import { AgentCardModal } from "../components/AgentCardModal";
 import { PageHeaderHUD } from "../components/PageHeaderHUD";
@@ -115,7 +115,8 @@ export const MissionControl: React.FC = () => {
   const {
     campaigns, orders, agentLogs, growthScore, networkHealth,
     revenueGoal, theme, lunaMetrics, customers, addAgentLog,
-    missions, refreshMissions, updateMissionStatus, duplicateMission, deleteMission
+    missions, refreshMissions, updateMissionStatus, duplicateMission, deleteMission,
+    topPersona, riskPersona, growthPersona, highestRevenuePersona
   } = useOrbit();
   
   const isLight = theme === "executive";
@@ -761,6 +762,91 @@ export const MissionControl: React.FC = () => {
                 </div>
               );
             })}
+          </div>
+
+          {/* Persona HUD Grid */}
+          <div className="mt-6 space-y-3">
+            <div className="flex items-center gap-2">
+              <Fingerprint size={14} className="text-orbit-purple" />
+              <span className="font-mono text-[9px] uppercase tracking-wider text-gray-400 font-bold">Persona DNA HUD Intelligence</span>
+            </div>
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+              {/* Top Persona */}
+              <div className={`relative rounded-xl border p-4 flex flex-col gap-2 overflow-hidden transition-all duration-300 ${
+                isLight ? "bg-white border-gray-200" : "bg-[#090b18]/70 border-gray-800 hover:border-purple-500/20"
+              }`} style={{ boxShadow: isLight ? undefined : "0 0 15px rgba(139,92,246,0.05)" }}>
+                <div className="flex justify-between items-center">
+                  <span className="font-mono text-[9px] uppercase tracking-wider text-gray-500">Top Persona</span>
+                  <Fingerprint size={12} className="text-orbit-purple animate-pulse" />
+                </div>
+                <div className="h-9 flex items-center">
+                  <span className="font-space text-xs font-bold tracking-tight text-white line-clamp-2 leading-tight">
+                    {topPersona ? topPersona.name : "Analyzing..."}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center font-mono text-[9px] mt-1 text-gray-400">
+                  <span>Audience Base:</span>
+                  <span className="text-white font-bold">{topPersona ? `${topPersona.customerCount} (${Math.round((topPersona.customerCount / (customers.length || 1)) * 100)}%)` : "0%"}</span>
+                </div>
+              </div>
+
+              {/* Highest Revenue */}
+              <div className={`relative rounded-xl border p-4 flex flex-col gap-2 overflow-hidden transition-all duration-300 ${
+                isLight ? "bg-white border-gray-200" : "bg-[#090b18]/70 border-gray-800 hover:border-emerald-500/20"
+              }`} style={{ boxShadow: isLight ? undefined : "0 0 15px rgba(34,197,94,0.05)" }}>
+                <div className="flex justify-between items-center">
+                  <span className="font-mono text-[9px] uppercase tracking-wider text-gray-500">Highest Revenue</span>
+                  <Crown size={12} className="text-orbit-success" />
+                </div>
+                <div className="h-9 flex items-center">
+                  <span className="font-space text-xs font-bold tracking-tight text-white line-clamp-2 leading-tight">
+                    {highestRevenuePersona ? highestRevenuePersona.name : "Analyzing..."}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center font-mono text-[9px] mt-1 text-gray-400">
+                  <span>Revenue Share:</span>
+                  <span className="text-orbit-success font-bold">{highestRevenuePersona ? `${highestRevenuePersona.revenueContributionPct}%` : "0%"}</span>
+                </div>
+              </div>
+
+              {/* Highest Risk */}
+              <div className={`relative rounded-xl border p-4 flex flex-col gap-2 overflow-hidden transition-all duration-300 ${
+                isLight ? "bg-white border-gray-200" : "bg-[#090b18]/70 border-gray-800 hover:border-red-500/20"
+              }`} style={{ boxShadow: isLight ? undefined : "0 0 15px rgba(239,68,68,0.05)" }}>
+                <div className="flex justify-between items-center">
+                  <span className="font-mono text-[9px] uppercase tracking-wider text-gray-500">Highest Churn Risk</span>
+                  <ShieldAlert size={12} className="text-red-400" />
+                </div>
+                <div className="h-9 flex items-center">
+                  <span className="font-space text-xs font-bold tracking-tight text-white line-clamp-2 leading-tight">
+                    {riskPersona ? riskPersona.name : "Analyzing..."}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center font-mono text-[9px] mt-1 text-gray-400">
+                  <span>Risk Level:</span>
+                  <span className="text-red-400 font-bold">{riskPersona ? `${riskPersona.riskLevel} (${riskPersona.riskScore}%)` : "Low"}</span>
+                </div>
+              </div>
+
+              {/* Growth Opportunity */}
+              <div className={`relative rounded-xl border p-4 flex flex-col gap-2 overflow-hidden transition-all duration-300 ${
+                isLight ? "bg-white border-gray-200" : "bg-[#090b18]/70 border-gray-800 hover:border-amber-500/20"
+              }`} style={{ boxShadow: isLight ? undefined : "0 0 15px rgba(245,158,11,0.05)" }}>
+                <div className="flex justify-between items-center">
+                  <span className="font-mono text-[9px] uppercase tracking-wider text-gray-500">Growth Opportunity</span>
+                  <TrendingUp size={12} className="text-orbit-amber" />
+                </div>
+                <div className="h-9 flex items-center">
+                  <span className="font-space text-xs font-bold tracking-tight text-white line-clamp-2 leading-tight">
+                    {growthPersona ? growthPersona.name : "Analyzing..."}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center font-mono text-[9px] mt-1 text-gray-400">
+                  <span>Potential:</span>
+                  <span className="text-orbit-amber font-bold">₹{growthPersona ? (growthPersona.revenuePotential - growthPersona.predictedLtv).toLocaleString() : "0"}</span>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 

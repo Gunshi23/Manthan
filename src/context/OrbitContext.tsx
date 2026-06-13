@@ -1,10 +1,37 @@
-import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from "react";
+import React, { createContext, useContext, useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { callGeminiAPI, parseGeminiJson } from "../utils/gemini";
 import { sendCampaign } from "../services/twilioService";
 import { sendEmailCampaign } from "../services/resendService";
 
 // Theme types
 export type ThemeMode = "command-center" | "executive";
+
+// Persona Interface
+export interface Persona {
+  id: string;
+  name: string;
+  description: string;
+  motivation: string;
+  buyingPattern: string;
+  preferredChannel: "Email" | "WhatsApp" | "SMS" | "RCS";
+  averageSpend: number;
+  purchaseFrequency: string;
+  loyaltyScore: number;
+  riskScore: number; // 0-100
+  riskLevel: "Low" | "Medium" | "High" | "Critical";
+  predictedLtv: number;
+  revenueContributionPct: number;
+  customerCount: number;
+  growthOpportunity: string;
+  recommendedStrategy: string;
+  whatTheyBuy: string;
+  whyTheyBuy: string;
+  whenTheyBuy: string;
+  bestCommChannel: string;
+  suggestedCampaign: string;
+  avatar: string;
+  revenuePotential: number;
+}
 
 // Customer Interface
 export interface Customer {
@@ -138,6 +165,13 @@ interface OrbitContextType {
   updateMissionStatus: (id: string, status: string) => Promise<void>;
   duplicateMission: (id: string) => Promise<void>;
   deleteMission: (id: string) => Promise<void>;
+  personas: Persona[];
+  topPersona: Persona | null;
+  riskPersona: Persona | null;
+  growthPersona: Persona | null;
+  highestRevenuePersona: Persona | null;
+  personaDistribution: { name: string; percentage: number; count: number; color: string }[];
+  generatePersonas: () => Promise<void>;
 }
 
 const OrbitContext = createContext<OrbitContextType | undefined>(undefined);
@@ -284,7 +318,187 @@ const generateMockOrders = (customers: Customer[], businessType: string = "Fashi
   });
 };
 
+// Dynamic local customer-to-persona clustering mapping helper
+const mapCustomersToPersonas = (customers: Customer[], businessType: string): Persona[] => {
+  const vips = customers.filter(c => c.segment === "Loyalists" && c.ltv >= 4000);
+  const trendSeekers = customers.filter(c => c.segment === "Loyalists" && c.ltv < 4000);
+  const dormant = customers.filter(c => c.segment === "High-Value Inactive");
+  const slipping = customers.filter(c => c.segment === "Slipping Away");
+  const newSignups = customers.filter(c => c.segment === "New Signups");
+
+  const totalLtv = customers.reduce((sum, c) => sum + c.ltv, 0);
+
+  const getContribution = (subList: Customer[]) => {
+    if (totalLtv === 0) return 0;
+    const subLtv = subList.reduce((sum, c) => sum + c.ltv, 0);
+    return Math.round((subLtv / totalLtv) * 100);
+  };
+
+  const getAvgSpend = (subList: Customer[]) => {
+    if (subList.length === 0) return 2500;
+    return Math.round(subList.reduce((sum, c) => sum + c.ltv, 0) / subList.length / 3);
+  };
+
+  const getAvgLtv = (subList: Customer[]) => {
+    if (subList.length === 0) return 5000;
+    return Math.round(subList.reduce((sum, c) => sum + c.ltv, 0) / subList.length);
+  };
+
+  const getAvgRisk = (subList: Customer[]) => {
+    if (subList.length === 0) return 10;
+    return Math.round(subList.reduce((sum, c) => sum + c.churnRisk, 0) / subList.length);
+  };
+
+  const getPreferredChannel = (subList: Customer[]): "Email" | "WhatsApp" | "SMS" | "RCS" => {
+    if (subList.length === 0) return "WhatsApp";
+    const counts = { WhatsApp: 0, Email: 0, SMS: 0, RCS: 0 };
+    subList.forEach(c => {
+      counts[c.preferredChannel] = (counts[c.preferredChannel] || 0) + 1;
+    });
+    let maxChan: "Email" | "WhatsApp" | "SMS" | "RCS" = "WhatsApp";
+    let maxVal = -1;
+    (Object.keys(counts) as Array<keyof typeof counts>).forEach(k => {
+      if (counts[k] > maxVal) {
+        maxVal = counts[k];
+        maxChan = k;
+      }
+    });
+    return maxChan;
+  };
+
+  const isFashion = businessType.toLowerCase().includes("fashion") || businessType.toLowerCase().includes("apparel");
+
+  return [
+    {
+      id: "persona_vip",
+      name: isFashion ? "VIP Fashion Enthusiast" : "Premium VIP Buyer",
+      description: "High-value regular buyers who prioritize premium quality and new arrivals over discounts.",
+      avatar: "crown",
+      averageSpend: getAvgSpend(vips),
+      purchaseFrequency: "Weekly",
+      preferredChannel: getPreferredChannel(vips),
+      loyaltyScore: 95,
+      riskScore: getAvgRisk(vips),
+      predictedLtv: getAvgLtv(vips),
+      growthOpportunity: "Expand access to limited-edition items and exclusive brand events.",
+      motivation: "Status, quality, exclusivity, and personalized service.",
+      buyingPattern: "Purchases brand new collections immediately upon launch. Low price sensitivity.",
+      riskLevel: "Low",
+      revenuePotential: getAvgLtv(vips) * 1.5,
+      revenueContributionPct: getContribution(vips),
+      customerCount: vips.length,
+      recommendedStrategy: "Invite to early access product drops and offer complimentary white-glove delivery.",
+      whatTheyBuy: isFashion ? "Designer collections, limited-run garments, premium shoes." : "Top-tier flagships, premium plans, custom bundles.",
+      whyTheyBuy: "To express status, secure the best quality first, and enjoy premium loyalty perks.",
+      whenTheyBuy: "On collection launch days, during exclusive VIP invitation windows.",
+      bestCommChannel: "Direct WhatsApp concierge or private invitations.",
+      suggestedCampaign: "Exclusive VIP Autumn Collection Launch (Expected ROI: 4.8x)"
+    },
+    {
+      id: "persona_trend",
+      name: isFashion ? "Trend Explorer" : "Early Tech Adopter",
+      description: "Younger, highly engaged buyers who look for new styles and interactive shopping experiences.",
+      avatar: "sparkles",
+      averageSpend: getAvgSpend(trendSeekers),
+      purchaseFrequency: "Bi-weekly",
+      preferredChannel: getPreferredChannel(trendSeekers),
+      loyaltyScore: 82,
+      riskScore: getAvgRisk(trendSeekers),
+      predictedLtv: getAvgLtv(trendSeekers),
+      growthOpportunity: "Encourage user-generated content and social shares via interactive loyalty loops.",
+      motivation: "Novelty, social proof, trend alignment, and interactive copy.",
+      buyingPattern: "Responds strongly to social media visual cues, RCS rich cards, and seasonal trends.",
+      riskLevel: "Low",
+      revenuePotential: getAvgLtv(trendSeekers) * 1.3,
+      revenueContributionPct: getContribution(trendSeekers),
+      customerCount: trendSeekers.length,
+      recommendedStrategy: "Deliver highly visual RCS templates with embedded video previews and catalog buttons.",
+      whatTheyBuy: isFashion ? "Capsule wardrobes, trending streetwear, popular accessories." : "Trending gadgets, smart accessories, social-linked goods.",
+      whyTheyBuy: "To stay ahead of the social trend curve and participate in brand storytelling.",
+      whenTheyBuy: "Weekend evenings, immediately following email/SMS newsletter alerts.",
+      bestCommChannel: "RCS Rich Cards with interactive 3D media elements.",
+      suggestedCampaign: "Interactive RCS Fall Style Guide (Expected ROI: 4.1x)"
+    },
+    {
+      id: "persona_dormant",
+      name: "Dormant High-Value Customer",
+      description: "Historically high-value spenders who have shown zero activity or checkout sessions for 90+ days.",
+      avatar: "battery-low",
+      averageSpend: getAvgSpend(dormant),
+      purchaseFrequency: "Quarterly",
+      preferredChannel: getPreferredChannel(dormant),
+      loyaltyScore: 68,
+      riskScore: getAvgRisk(dormant),
+      predictedLtv: getAvgLtv(dormant),
+      growthOpportunity: "Unlock dormant purchasing power by resolving product issues or offering recovery credits.",
+      motivation: "High value rewards, re-engagement incentives, personal win-back notes.",
+      buyingPattern: "Inactive for over 3 months. Needs high-context re-engagement to reactivate checkout paths.",
+      riskLevel: "High",
+      revenuePotential: getAvgLtv(dormant) * 1.2,
+      revenueContributionPct: getContribution(dormant),
+      customerCount: dormant.length,
+      recommendedStrategy: "Send a personal win-back message with a dedicated ₹500 credit drop automatically loaded.",
+      whatTheyBuy: isFashion ? "Occasional high-end dresses, luxury accessories, winter jackets." : "Core appliances, bundle upgrades, multi-year subscriptions.",
+      whyTheyBuy: "Need-driven purchases, high-consideration items, or specific seasonal necessities.",
+      whenTheyBuy: "Holiday sales, major store clearance events, or when prompted by a win-back offer.",
+      bestCommChannel: "Personalized WhatsApp re-engagement card.",
+      suggestedCampaign: "VIP Credit Drop Win-Back Campaign (Expected ROI: 3.9x)"
+    },
+    {
+      id: "persona_value",
+      name: "Bargain Hunter",
+      description: "Price-sensitive buyers who only purchase during clearance sales, coupon drops, or discounts.",
+      avatar: "percent",
+      averageSpend: getAvgSpend(slipping),
+      purchaseFrequency: "Monthly",
+      preferredChannel: getPreferredChannel(slipping),
+      loyaltyScore: 45,
+      riskScore: getAvgRisk(slipping),
+      predictedLtv: getAvgLtv(slipping),
+      growthOpportunity: "Leverage coupon thresholds to increase average basket values.",
+      motivation: "Discounts, clearance events, free shipping, bundles.",
+      buyingPattern: "Stalls items in cart waiting for discount alerts. Highly active during flash sales.",
+      riskLevel: "Medium",
+      revenuePotential: getAvgLtv(slipping) * 1.1,
+      revenueContributionPct: getContribution(slipping),
+      customerCount: slipping.length,
+      recommendedStrategy: "Send push notifications or SMS alerts containing direct coupon code click-to-copy buttons.",
+      whatTheyBuy: isFashion ? "Sales rack apparel, last-season styles, standard essentials." : "Refurbished stock, entry-level goods, discounted bundles.",
+      whyTheyBuy: "To maximize savings and acquire functional products at the lowest possible price point.",
+      whenTheyBuy: "End-of-season sales, flash coupon windows, holiday discount weeks.",
+      bestCommChannel: "SMS alerts containing direct checkout coupon links.",
+      suggestedCampaign: "Seasonal Flash Clearance Event (Expected ROI: 3.5x)"
+    },
+    {
+      id: "persona_new",
+      name: "New Signups",
+      description: "Freshly registered user accounts who have completed 0 or 1 purchase. High potential but low historical brand familiarity.",
+      avatar: "user-plus",
+      averageSpend: getAvgSpend(newSignups),
+      purchaseFrequency: "One-off",
+      preferredChannel: getPreferredChannel(newSignups),
+      loyaltyScore: 50,
+      riskScore: getAvgRisk(newSignups),
+      predictedLtv: getAvgLtv(newSignups),
+      growthOpportunity: "Convert single purchase accounts into active repeat buyers via onboarding drip campaigns.",
+      motivation: "Introductory offers, welcome incentives, smooth onboarding, brand discovery.",
+      buyingPattern: "Browses multiple categories. High initial sessions that decline rapidly if not re-engaged.",
+      riskLevel: "Medium",
+      revenuePotential: getAvgLtv(newSignups) * 2.0,
+      revenueContributionPct: getContribution(newSignups),
+      customerCount: newSignups.length,
+      recommendedStrategy: "Launch a 3-part welcome email onboarding drip introducing brand values and styling tips.",
+      whatTheyBuy: isFashion ? "Introductory basics, standard t-shirts, entry accessory packs." : "Trial subscriptions, entry-level accessories, single-month keys.",
+      whyTheyBuy: "To test brand delivery speeds, product quality, and check fit/suitability.",
+      whenTheyBuy: "Within 48 hours of initial profile creation or verification.",
+      bestCommChannel: "Rich HTML onboarding emails with a welcome coupon.",
+      suggestedCampaign: "First Purchase Welcome Journey (Expected ROI: 4.2x)"
+    }
+  ];
+};
+
 export const OrbitProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+
   const [theme, setThemeState] = useState<ThemeMode>("command-center");
   const [missions, setMissions] = useState<any[]>([]);
   const [businessType, setBusinessType] = useState<string>(() => {
@@ -383,6 +597,46 @@ export const OrbitProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       }
     ];
   });
+
+  const [personas, setPersonas] = useState<Persona[]>(() => {
+    const saved = localStorage.getItem("orbit_personas");
+    if (saved) return JSON.parse(saved);
+    const savedType = localStorage.getItem("orbit_business_type") || "Fashion & Apparel";
+    const savedCustomers = localStorage.getItem("orbit_customers");
+    const custs = savedCustomers ? JSON.parse(savedCustomers) : generateMockCustomers(savedType);
+    return mapCustomersToPersonas(custs, savedType);
+  });
+
+  const topPersona = useMemo(() => {
+    if (personas.length === 0) return null;
+    return personas.reduce((max, p) => p.customerCount > max.customerCount ? p : max, personas[0]);
+  }, [personas]);
+
+  const riskPersona = useMemo(() => {
+    if (personas.length === 0) return null;
+    return personas.reduce((max, p) => p.riskScore > max.riskScore ? p : max, personas[0]);
+  }, [personas]);
+
+  const growthPersona = useMemo(() => {
+    if (personas.length === 0) return null;
+    return personas.reduce((max, p) => p.revenuePotential > max.revenuePotential ? p : max, personas[0]);
+  }, [personas]);
+
+  const highestRevenuePersona = useMemo(() => {
+    if (personas.length === 0) return null;
+    return personas.reduce((max, p) => p.revenueContributionPct > max.revenueContributionPct ? p : max, personas[0]);
+  }, [personas]);
+
+  const personaDistribution = useMemo(() => {
+    const total = personas.reduce((sum, p) => sum + p.customerCount, 0) || 1;
+    const colors = ["#8B5CF6", "#EC4899", "#3B82F6", "#F59E0B", "#10B981"];
+    return personas.map((p, idx) => ({
+      name: p.name,
+      percentage: Math.round((p.customerCount / total) * 100),
+      count: p.customerCount,
+      color: colors[idx % colors.length]
+    }));
+  }, [personas]);
 
   const [config, setConfig] = useState<SystemConfig>(() => {
     const saved = localStorage.getItem("orbit_config");
@@ -492,6 +746,16 @@ export const OrbitProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   useEffect(() => {
     localStorage.setItem("orbit_business_type", businessType);
   }, [businessType]);
+
+  useEffect(() => {
+    localStorage.setItem("orbit_personas", JSON.stringify(personas));
+  }, [personas]);
+
+  // Sync personas dynamically when customer base changes locally
+  useEffect(() => {
+    const localPersonas = mapCustomersToPersonas(customers, businessType);
+    setPersonas(localPersonas);
+  }, [customers, businessType]);
 
   // Sync state with backend APIs on mount
   useEffect(() => {
@@ -610,6 +874,116 @@ export const OrbitProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const updateLunaMetrics = useCallback((metrics: Partial<LunaMetrics>) => {
     setLunaMetrics(prev => ({ ...prev, ...metrics }));
   }, []);
+
+  const generatePersonas = useCallback(async () => {
+    addAgentLog("System", "Initializing AI Customer DNA Persona analysis...", "thought");
+    
+    if (config.geminiKey) {
+      addAgentLog("Polaris", "Analyzing customer buying profiles, LTV, preferred channels, and transaction registers...", "action");
+      
+      const loyalists = customers.filter(c => c.segment === "Loyalists");
+      const slipping = customers.filter(c => c.segment === "Slipping Away");
+      const inactive = customers.filter(c => c.segment === "High-Value Inactive");
+      const newSignups = customers.filter(c => c.segment === "New Signups");
+      
+      const totalLtv = customers.reduce((sum, c) => sum + c.ltv, 0);
+      const avgLoyalistLtv = loyalists.length > 0 ? Math.round(loyalists.reduce((sum, c) => sum + c.ltv, 0) / loyalists.length) : 0;
+      const avgSlippingLtv = slipping.length > 0 ? Math.round(slipping.reduce((sum, c) => sum + c.ltv, 0) / slipping.length) : 0;
+      const avgSlippingRisk = slipping.length > 0 ? Math.round(slipping.reduce((sum, c) => sum + c.churnRisk, 0) / slipping.length) : 0;
+      const avgInactiveLtv = inactive.length > 0 ? Math.round(inactive.reduce((sum, c) => sum + c.ltv, 0) / inactive.length) : 0;
+      const avgNewLtv = newSignups.length > 0 ? Math.round(newSignups.reduce((sum, c) => sum + c.ltv, 0) / newSignups.length) : 0;
+
+      const channelsCount = customers.reduce((acc, c) => {
+        acc[c.preferredChannel] = (acc[c.preferredChannel] || 0) + 1;
+        return acc;
+      }, { WhatsApp: 0, Email: 0, SMS: 0, RCS: 0 });
+
+      const prompt = `Analyze our customer database summary:
+- Total Customers: ${customers.length} (Total LTV: ₹${totalLtv})
+- Segment breakdown:
+  * Loyalists: ${loyalists.length} customers (average LTV: ₹${avgLoyalistLtv})
+  * Slipping Away: ${slipping.length} customers (average LTV: ₹${avgSlippingLtv}, average churn risk: ${avgSlippingRisk}%)
+  * High-Value Inactive: ${inactive.length} customers (average LTV: ₹${avgInactiveLtv})
+  * New Signups: ${newSignups.length} customers (average LTV: ₹${avgNewLtv})
+- Channel preferences: WhatsApp (${channelsCount.WhatsApp}), Email (${channelsCount.Email}), SMS (${channelsCount.SMS}), RCS (${channelsCount.RCS})
+- Business Type: "${businessType}"
+
+Generate exactly 5 detailed customer personas/archetypes that represent this customer base.
+For each persona, generate:
+1. Name (e.g., 'VIP Fashion Enthusiast', 'Bargain Hunter')
+2. Motivation (What drives their purchases)
+3. Buying Pattern (How and when they purchase)
+4. Risk Level ('Low' | 'Medium' | 'High' | 'Critical')
+5. Risk Score (0-100)
+6. Loyalty Score (0-100)
+7. Preferred Channel ('WhatsApp' | 'Email' | 'SMS' | 'RCS')
+8. Average Spend (e.g. 4500)
+9. Purchase Frequency (e.g. 'Weekly', 'Monthly')
+10. Predicted Lifetime Value (LTV) (e.g. 25000)
+11. Revenue Potential (e.g. 45000)
+12. Customer Count (How many of our ${customers.length} customers belong to this archetype, sum of all counts must equal ${customers.length})
+13. Revenue Contribution % (Percentage of total revenue contributed, e.g., 35)
+14. Growth Opportunity (Growth potential summary)
+15. Recommended Strategy (Actionable next step)
+16. What they buy
+17. Why they buy
+18. When they buy
+19. Best communication channel (elaborated)
+20. Suggested campaign (e.g. campaign name and expected ROI like 'Exclusive Launch Campaign (Expected ROI: 4.8x)')
+
+Return a single valid JSON object with a "personas" array containing these 5 personas. Do not return any markdown code block formatting. Only return the raw JSON object matching this schema:
+{
+  "personas": [
+    {
+      "name": "...",
+      "motivation": "...",
+      "buyingPattern": "...",
+      "riskLevel": "Low" | "Medium" | "High" | "Critical",
+      "riskScore": 25,
+      "loyaltyScore": 85,
+      "preferredChannel": "WhatsApp",
+      "averageSpend": 4500,
+      "purchaseFrequency": "Weekly",
+      "predictedLtv": 25000,
+      "revenuePotential": 45000,
+      "customerCount": 24,
+      "revenueContributionPct": 30,
+      "growthOpportunity": "...",
+      "recommendedStrategy": "...",
+      "whatTheyBuy": "...",
+      "whyTheyBuy": "...",
+      "whenTheyBuy": "...",
+      "bestCommChannel": "...",
+      "suggestedCampaign": "..."
+    }
+  ]
+}
+`;
+
+      try {
+        const sys = "You are the ORBIT Customer DNA Engine. Group the customer base into 5 highly specific archetypes/personas and return a structured JSON response.";
+        const res = await callGeminiAPI(prompt, sys, config.geminiKey);
+        const parsed = parseGeminiJson<any>(res, null);
+        if (parsed && Array.isArray(parsed.personas) && parsed.personas.length > 0) {
+          const avatars = ["crown", "sparkles", "battery-low", "percent", "user-plus"];
+          const finalPersonas: Persona[] = parsed.personas.map((p: any, idx: number) => ({
+            ...p,
+            id: `persona_${idx + 1}`,
+            avatar: avatars[idx % avatars.length]
+          }));
+          setPersonas(finalPersonas);
+          addAgentLog("Polaris", `Successfully mapped ${finalPersonas.length} Customer DNA profiles dynamically using Gemini.`, "result");
+          return;
+        }
+      } catch (err: any) {
+        console.error("Gemini persona generation failed:", err);
+      }
+    }
+
+    const localPersonas = mapCustomersToPersonas(customers, businessType);
+    setPersonas(localPersonas);
+    addAgentLog("Polaris", `Clustered ${localPersonas.length} Customer DNA profiles dynamically using local mapping.`, "result");
+  }, [customers, businessType, config.geminiKey, addAgentLog]);
 
   const personalizeForBusiness = useCallback((type: string) => {
     setBusinessType(type);
@@ -1640,6 +2014,7 @@ Do not return any markdown code block formatting. Only return the raw JSON objec
     localStorage.removeItem("orbit_agent_logs");
     localStorage.removeItem("orbit_luna_metrics");
     localStorage.removeItem("orbit_business_type");
+    localStorage.removeItem("orbit_personas");
     
     setCustomers(generateMockCustomers("Fashion & Apparel"));
     setOrders(generateMockOrders(generateMockCustomers("Fashion & Apparel"), "Fashion & Apparel"));
@@ -1652,6 +2027,7 @@ Do not return any markdown code block formatting. Only return the raw JSON objec
       abandonedLeads: 17,
       recoveryConfidence: 91
     });
+    setPersonas(mapCustomersToPersonas(generateMockCustomers("Fashion & Apparel"), "Fashion & Apparel"));
     setAgentLogs([
       {
         id: "log_init",
@@ -1705,7 +2081,14 @@ Do not return any markdown code block formatting. Only return the raw JSON objec
       refreshMissions,
       updateMissionStatus,
       duplicateMission,
-      deleteMission
+      deleteMission,
+      personas,
+      topPersona,
+      riskPersona,
+      growthPersona,
+      highestRevenuePersona,
+      personaDistribution,
+      generatePersonas
     }}>
       {children}
     </OrbitContext.Provider>

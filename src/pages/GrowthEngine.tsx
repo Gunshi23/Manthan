@@ -7,6 +7,7 @@ import {
   Activity, Star, Cpu, FlaskConical, MessageSquare, Globe
 } from "lucide-react";
 import { useOrbit } from "../context/OrbitContext";
+import type { Persona } from "../context/OrbitContext";
 import { callGeminiAPI, parseGeminiJson } from "../utils/gemini";
 import { PageHeaderHUD } from "../components/PageHeaderHUD";
 import { AgentCardModal } from "../components/AgentCardModal";
@@ -71,24 +72,82 @@ const GOAL_EXAMPLES = [
 /* ─── Helpers ─────────────────────────────────────────────────── */
 const sleep = (ms: number) => new Promise(r => setTimeout(r, ms));
 
-function buildFallbackPlan(goal: string, businessType: string): MissionPlan {
-  const isChurn = /churn|retention|risk/i.test(goal);
-  const isCart = /cart|abandon|recover/i.test(goal);
-  const isVIP = /vip|premium|luxury/i.test(goal);
-  const seg = isChurn ? "Slipping Away" : isCart ? "High-Value Inactive" : isVIP ? "Loyalists" : "Loyalists";
-  const rev = isVIP ? 82000 : isCart ? 65000 : isChurn ? 48000 : 54000;
+function buildFallbackPlan(goal: string, businessType: string, personas?: Persona[]): MissionPlan {
+  let targetPersona: Persona | undefined = undefined;
+  if (personas && personas.length > 0) {
+    targetPersona = personas.find(p => goal.toLowerCase().includes(p.name.toLowerCase()) || goal.toLowerCase().includes(p.id.toLowerCase()));
+  }
+
+  const isVIP = targetPersona ? targetPersona.id.includes("vip") : /vip|premium|luxury/i.test(goal);
+  const isChurn = targetPersona ? targetPersona.id.includes("dormant") || targetPersona.id.includes("value") : /churn|retention|risk|dormant/i.test(goal);
+  const isCart = targetPersona ? targetPersona.id.includes("new") : /cart|abandon|recover/i.test(goal);
+  
+  const seg = targetPersona ? targetPersona.name : (isVIP ? "VIP Fashion Enthusiast" : isChurn ? "Dormant High-Value Customer" : isCart ? "Bargain Hunter" : "Trend Explorer");
+  const channel = targetPersona ? targetPersona.preferredChannel : "WhatsApp";
+  const audience = targetPersona ? targetPersona.customerCount : 45;
+  const rev = targetPersona ? Math.round(targetPersona.revenuePotential) : 54000;
+  const roi = targetPersona ? (targetPersona.id.includes("vip") ? 4.8 : targetPersona.id.includes("trend") ? 4.1 : targetPersona.id.includes("dormant") ? 3.9 : 3.5) : 4.2;
+  const roiText = `${roi}x`;
+
   return {
-    Polaris: { segment: seg, explanation: `Polaris scanned the full customer universe for ${businessType} and isolated the ${seg} cohort as the highest-impact target for this mission.`, audienceSize: isChurn ? 88 : isVIP ? 45 : 120 },
-    Luna: { recoverableRevenue: Math.round(rev * 0.42), inactiveCustomers: 34, abandonedLeads: 18, recoveryConfidence: 91, explanation: `Luna audited transaction logs and found ₹${Math.round(rev * 0.42).toLocaleString()} in recoverable revenue across inactive customer nodes.` },
-    Vega: { predictedRoi: isVIP ? 5.2 : 4.2, predictedRevenue: rev, confidenceScore: 89, explanation: `Vega forecasted ROI based on historical campaign data. The ${seg} cohort yields the best conversion curve at this cadence.` },
-    Nova: {
-      Email: { subject: `Exclusive Offer: ${goal.slice(0, 40)}`, body: `Hi {{name}},\n\nWe noticed you haven't shopped with us recently. As one of our valued customers, we've curated a special offer just for you.\n\nUse code ORBIT20 for 20% off your next purchase.\n\nShop now before it expires!\n\nWarm regards,\nAura Threads` },
-      WhatsApp: { body: `✨ Hey *{{name}}*! \n\nWe miss you! Here's an exclusive offer crafted by our AI just for you.\n\n🎁 20% OFF your next order\n🚚 Free shipping today\n\nTap to claim: https://aurathreads.in/special\n\n_(Reply STOP to opt out)_` },
-      SMS: { body: `Aura Threads: Hi {{name}}, 20% OFF exclusive offer for you. Valid 48hrs. Claim: https://aurathreads.in/off` },
-      RCS: { title: "Your Exclusive Offer Awaits", body: `Hey {{name}}, we've prepared a curated collection drop just for you. Tap below to explore early access.`, mediaUrl: "https://images.unsplash.com/photo-1441984904996-e0b6ba687e04?auto=format&fit=crop&w=600&q=80" }
+    Polaris: { 
+      segment: seg, 
+      explanation: targetPersona 
+        ? `Polaris scanned customer nodes and targeted ${targetPersona.name} representing ${targetPersona.customerCount} customers with ${targetPersona.revenueContributionPct}% revenue share.`
+        : `Polaris scanned the full customer universe for ${businessType} and isolated the ${seg} cohort as the highest-impact target for this mission.`, 
+      audienceSize: audience 
     },
-    Atlas: { selectedChannel: "WhatsApp", explanation: "Atlas verified WhatsApp as the highest-performing delivery channel for this cohort — 92% open rate confirmed." },
-    recommendation: { summary: `Deploy a WhatsApp-first campaign targeting the ${seg} cohort with personalized offers and a 48-hour urgency window.`, confidenceScore: 89, estimatedTimeframe: "14 Days" }
+    Luna: { 
+      recoverableRevenue: Math.round(rev * 0.42), 
+      inactiveCustomers: Math.max(1, Math.round(audience * 0.3)), 
+      abandonedLeads: Math.max(1, Math.round(audience * 0.15)), 
+      recoveryConfidence: targetPersona ? targetPersona.loyaltyScore : 91, 
+      explanation: targetPersona
+        ? `Luna analyzed ${targetPersona.name} accounts and identified ₹${Math.round(rev * 0.42).toLocaleString()} in untapped headroom. Recommended strategy: ${targetPersona.recommendedStrategy}`
+        : `Luna audited transaction logs and found ₹${Math.round(rev * 0.42).toLocaleString()} in recoverable revenue across inactive customer nodes.` 
+    },
+    Vega: { 
+      predictedRoi: roi, 
+      predictedRevenue: rev, 
+      confidenceScore: targetPersona ? targetPersona.loyaltyScore : 89, 
+      explanation: `Vega forecasted ROI at ${roiText} based on historical performance models for ${seg}.` 
+    },
+    Nova: {
+      Email: { 
+        subject: targetPersona ? `Special Drop for our ${targetPersona.name}` : `Exclusive Offer: ${goal.slice(0, 40)}`, 
+        body: targetPersona 
+          ? `Hi {{name}},\n\nWe've crafted a special recommendation just for you. Based on your preferences, we suggest trying our latest collections.\n\nRecommended: ${targetPersona.suggestedCampaign}\n\nUse code ORBIT20 for exclusive perks.\n\nWarm regards,\nOrbit Intelligence`
+          : `Hi {{name}},\n\nWe noticed you haven't shopped with us recently. As one of our valued customers, we've curated a special offer just for you.\n\nUse code ORBIT20 for 20% off your next purchase.\n\nShop now before it expires!\n\nWarm regards,\nAura Threads` 
+      },
+      WhatsApp: { 
+        body: targetPersona
+          ? `✨ Hey *{{name}}*! \n\nWe've designed a special campaign for our *${targetPersona.name}* community.\n\n🎁 Recommended Action: *${targetPersona.suggestedCampaign}*\n🚚 Strategy: ${targetPersona.recommendedStrategy}\n\nTap to explore: https://orbit.ai/dna\n\n_(Reply STOP to opt out)_`
+          : `✨ Hey *{{name}}*! \n\nWe miss you! Here's an exclusive offer crafted by our AI just for you.\n\n🎁 20% OFF your next order\n🚚 Free shipping today\n\nTap to claim: https://aurathreads.in/special\n\n_(Reply STOP to opt out)_` 
+      },
+      SMS: { 
+        body: targetPersona
+          ? `Orbit: Hi {{name}}, exclusive campaign for ${targetPersona.name}: ${targetPersona.suggestedCampaign}. Explore: https://orbit.ai/dna`
+          : `Aura Threads: Hi {{name}}, 20% OFF exclusive offer for you. Valid 48hrs. Claim: https://aurathreads.in/off` 
+      },
+      RCS: { 
+        title: targetPersona ? `Curated for ${targetPersona.name}` : "Your Exclusive Offer Awaits", 
+        body: targetPersona 
+          ? `Hey {{name}}, we've prepared a custom campaign based on your DNA profile. Tap below to explore early access.`
+          : `Hey {{name}}, we've prepared a curated collection drop just for you. Tap below to explore early access.`, 
+        mediaUrl: "https://images.unsplash.com/photo-1441984904996-e0b6ba687e04?auto=format&fit=crop&w=600&q=80" 
+      }
+    },
+    Atlas: { 
+      selectedChannel: channel, 
+      explanation: `Atlas verified ${channel} as the highest-performing delivery channel for the ${seg} cohort.` 
+    },
+    recommendation: { 
+      summary: targetPersona
+        ? `Deploy a ${channel}-first campaign targeting the ${targetPersona.name} segment with ${targetPersona.suggestedCampaign}.`
+        : `Deploy a WhatsApp-first campaign targeting the ${seg} cohort with personalized offers and a 48-hour urgency window.`, 
+      confidenceScore: targetPersona ? targetPersona.loyaltyScore : 89, 
+      estimatedTimeframe: "14 Days" 
+    }
   };
 }
 
@@ -96,10 +155,11 @@ function buildFallbackPlan(goal: string, businessType: string): MissionPlan {
    GROWTH ENGINE PAGE
 ══════════════════════════════════════════════════════════════ */
 export const GrowthEngine: React.FC = () => {
-  const { customers, config, businessType, addAgentLog, launchMissionCampaign, startMission } = useOrbit();
+  const { customers, config, businessType, addAgentLog, launchMissionCampaign, startMission, personas } = useOrbit();
 
   /* ── State ── */
   const [goal, setGoal] = useState("Increase Repeat Purchases by 20%");
+  const [selectedPersonaId, setSelectedPersonaId] = useState<string>("");
   const [activeChannel, setActiveChannel] = useState<ChannelType>("WhatsApp");
   const [activeVariant, setActiveVariant] = useState<VariantKey>("A");
   const [isPreview, setIsPreview] = useState(false);
@@ -202,9 +262,9 @@ export const GrowthEngine: React.FC = () => {
           body: JSON.stringify({ goal, businessType }),
         });
         const data = res.ok ? await res.json() : null;
-        plan = data && data.Polaris ? data : buildFallbackPlan(goal, businessType);
+        plan = data && data.Polaris ? data : buildFallbackPlan(goal, businessType, personas);
       } catch {
-        plan = buildFallbackPlan(goal, businessType);
+        plan = buildFallbackPlan(goal, businessType, personas);
       }
 
       setStep(0, "done");
@@ -444,14 +504,40 @@ Format as JSON: { "Polaris": "...", "Luna": "...", "Vega": "...", "Nova": "...",
               </div>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-[1fr_auto] gap-4 items-end">
+            <div className="grid grid-cols-1 md:grid-cols-[250px_1fr_auto] gap-4 items-end">
+              <div className="space-y-2">
+                <label className="font-mono text-[9px] text-gray-550 uppercase tracking-wider block">Target Persona</label>
+                <select
+                  value={selectedPersonaId}
+                  onChange={e => {
+                    const val = e.target.value;
+                    setSelectedPersonaId(val);
+                    if (val) {
+                      const matched = personas.find(p => p.id === val);
+                      if (matched) {
+                        setGoal(`Target Persona: ${matched.name}. Strategy: ${matched.recommendedStrategy}`);
+                      }
+                    }
+                  }}
+                  className="w-full bg-gray-950 border border-gray-800 rounded-xl px-4 py-3 font-mono text-xs text-white focus:outline-none focus:border-blue-500/60"
+                >
+                  <option value="">-- Autodetect Target --</option>
+                  {personas.map(p => (
+                    <option key={p.id} value={p.id}>{p.name}</option>
+                  ))}
+                </select>
+              </div>
+
               <div className="space-y-2">
                 <label className="font-mono text-[9px] text-gray-500 uppercase tracking-wider block">Growth Objective</label>
                 <div className="relative">
                   <input
                     type="text"
                     value={goal}
-                    onChange={e => setGoal(e.target.value)}
+                    onChange={e => {
+                      setGoal(e.target.value);
+                      setSelectedPersonaId("");
+                    }}
                     onKeyDown={e => e.key === "Enter" && handleGenerateStrategy()}
                     placeholder="What growth objective should ORBIT achieve?"
                     className="w-full bg-gray-950 border border-gray-800 rounded-xl px-4 py-3 font-mono text-sm text-white focus:outline-none focus:border-blue-500/60 placeholder-gray-600 pr-32"

@@ -15,16 +15,20 @@ export const OrbitAnalytics: React.FC = () => {
     campaigns: contextCampaigns, 
     orders: contextOrders, 
     customers, 
+    theme,
     businessType, 
     config, 
     addAgentLog,
-    lunaMetrics
+    lunaMetrics,
+    personas
   } = useOrbit();
+
+  const isLight = theme === "executive";
 
   // Local state for live reactivity when launching missions
   const [localCampaigns, setLocalCampaigns] = useState<any[]>([]);
   const [localOrders, setLocalOrders] = useState<any[]>([]);
-  const [activeTab, setActiveTab] = useState<"overview" | "funnel" | "diagnostics" | "forecast">("overview");
+  const [activeTab, setActiveTab] = useState<"overview" | "funnel" | "diagnostics" | "forecast" | "personas">("overview");
   const [selectedAgent, setSelectedAgent] = useState<"Polaris" | "Vega" | "Nova" | "Atlas" | "Luna" | null>(null);
 
   // Revenue Panel breakdown control
@@ -777,7 +781,7 @@ Overall campaign open rates hit **${avgOpenRate}%** with a click-through rate of
           onSelectAgent={setSelectedAgent}
           actions={
             <div className="flex items-center gap-1 bg-gray-950 p-1 rounded-xl border border-gray-900 font-mono text-[9px] font-bold">
-              {["overview", "funnel", "diagnostics", "forecast"].map((tab) => (
+              {["overview", "funnel", "diagnostics", "forecast", "personas"].map((tab) => (
                 <button
                   key={tab}
                   onClick={() => setActiveTab(tab as any)}
@@ -1569,6 +1573,149 @@ Overall campaign open rates hit **${avgOpenRate}%** with a click-through rate of
                 ))}
               </div>
 
+            </div>
+          </div>
+        )}
+
+        {activeTab === "personas" && (
+          <div className="space-y-6 animate-fade-in-up">
+            {/* Top row overview */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+              {personas.map((p) => {
+                return (
+                  <div key={p.id} className={`p-4 rounded-xl border ${isLight ? "bg-white border-gray-200" : "bg-[#0c0f20]/60 border-gray-800"}`}>
+                    <div className="flex justify-between items-center mb-1">
+                      <span className="font-mono text-[9px] uppercase tracking-wider text-gray-500 truncate max-w-[120px]">{p.name}</span>
+                      <span className={`w-1.5 h-1.5 rounded-full ${p.id.includes("vip") ? "bg-purple-500" : p.id.includes("trend") ? "bg-pink-500" : p.id.includes("dormant") ? "bg-amber-500" : p.id.includes("value") ? "bg-orange-500" : "bg-emerald-500"}`} />
+                    </div>
+                    <span className="font-space text-base font-bold block text-white">₹{(p.predictedLtv * p.customerCount).toLocaleString()}</span>
+                    <span className="font-mono text-[9px] text-gray-400">LTV Value ({p.revenueContributionPct}% share)</span>
+                  </div>
+                );
+              })}
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Persona Revenue Contribution Chart */}
+              <div className={`p-5 rounded-xl border ${isLight ? "bg-white border-gray-200" : "bg-[#0f172a]/60 border-gray-800/80"}`}>
+                <h3 className="font-space text-xs font-bold text-white uppercase tracking-wider mb-4">
+                  Persona Revenue Contribution Chart
+                </h3>
+                <div className="space-y-4">
+                  {personas.map((p) => {
+                    const contributionPct = p.revenueContributionPct;
+                    return (
+                      <div key={p.id} className="space-y-1">
+                        <div className="flex justify-between font-mono text-[10px]">
+                          <span className="text-gray-300">{p.name}</span>
+                          <span className="text-white font-bold">{contributionPct}%</span>
+                        </div>
+                        <div className="h-2 bg-gray-950 rounded-full overflow-hidden border border-gray-900">
+                          <div 
+                            className="h-full rounded-full bg-gradient-to-r from-orbit-blue to-orbit-purple"
+                            style={{ width: `${contributionPct}%` }}
+                          />
+                        </div>
+                        <span className="font-mono text-[8px] text-gray-500 block">Contrib value: ₹{(p.predictedLtv * p.customerCount).toLocaleString()} LTV</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Persona Risk Heatmap */}
+              <div className={`p-5 rounded-xl border ${isLight ? "bg-white border-gray-200" : "bg-[#0f172a]/60 border-gray-800/80"}`}>
+                <h3 className="font-space text-xs font-bold text-white uppercase tracking-wider mb-4">
+                  Persona Risk Heatmap
+                </h3>
+                <div className="space-y-3">
+                  {[...personas].sort((a,b) => b.riskScore - a.riskScore).map((p) => {
+                    const score = p.riskScore;
+                    let badgeColor = "bg-green-500/10 text-green-400 border border-green-500/25";
+                    if (score >= 70) badgeColor = "bg-red-500/20 text-red-400 border border-red-500/30 animate-pulse shadow-[0_0_10px_rgba(239,68,68,0.2)]";
+                    else if (score >= 40) badgeColor = "bg-orange-500/15 text-orange-400 border border-orange-500/25";
+                    else if (score >= 20) badgeColor = "bg-yellow-500/10 text-yellow-400 border border-yellow-500/25";
+
+                    return (
+                      <div key={p.id} className="flex justify-between items-center p-3 rounded-lg bg-gray-950/40 border border-gray-900 font-mono text-[10px]">
+                        <div>
+                          <span className="text-gray-300 block font-bold">{p.name}</span>
+                          <span className="text-[8px] text-gray-500">Churn trend indicators: {p.riskScore >= 50 ? "Unstable / Inactive" : "Stable / Active"}</span>
+                        </div>
+                        <span className={`font-bold px-2 py-0.5 rounded-full text-[9px] uppercase ${badgeColor}`}>
+                          {p.riskLevel} ({score}%)
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Persona Growth Potential Chart */}
+              <div className={`p-5 rounded-xl border ${isLight ? "bg-white border-gray-200" : "bg-[#0f172a]/60 border-gray-800/80"}`}>
+                <h3 className="font-space text-xs font-bold text-white uppercase tracking-wider mb-4">
+                  Persona Growth Potential Chart
+                </h3>
+                <div className="space-y-4 font-mono text-[10px]">
+                  {personas.map((p) => {
+                    const current = p.predictedLtv;
+                    const potential = p.revenuePotential;
+                    const pct = Math.round((current / (potential || 1)) * 100);
+                    return (
+                      <div key={p.id} className="space-y-2">
+                        <div className="flex justify-between text-gray-350">
+                          <span>{p.name}</span>
+                          <span className="text-white font-bold">₹{current.toLocaleString()} / ₹{potential.toLocaleString()} ({pct}%)</span>
+                        </div>
+                        <div className="h-2 bg-gray-950 rounded-full overflow-hidden border border-gray-900 relative">
+                          <div 
+                            className="h-full rounded-full bg-orbit-success"
+                            style={{ width: `${pct}%` }}
+                          />
+                        </div>
+                        <div className="flex justify-between text-[8px] text-gray-500">
+                          <span>Current value realized</span>
+                          <span className="text-orbit-blue">Growth Headroom: ₹{(potential - current).toLocaleString()}</span>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Persona Channel Preference Breakdown */}
+              <div className={`p-5 rounded-xl border ${isLight ? "bg-white border-gray-200" : "bg-[#0f172a]/60 border-gray-800/80"}`}>
+                <h3 className="font-space text-xs font-bold text-white uppercase tracking-wider mb-4">
+                  Persona Channel Preference Breakdown
+                </h3>
+                <div className="space-y-3.5">
+                  {["WhatsApp", "Email", "SMS", "RCS"].map((channel) => {
+                    const channelPersonas = personas.filter(p => p.preferredChannel === channel);
+                    const totalChannelCustomers = channelPersonas.reduce((sum, p) => sum + p.customerCount, 0);
+                    const pct = Math.round((totalChannelCustomers / (customers.length || 1)) * 100);
+                    return (
+                      <div key={channel} className="space-y-1.5 font-mono text-[10px]">
+                        <div className="flex justify-between items-baseline">
+                          <span className="text-white font-bold uppercase">{channel}</span>
+                          <span className="text-gray-400">{totalChannelCustomers} customers ({pct}%)</span>
+                        </div>
+                        <div className="h-1.5 bg-gray-950 rounded-full overflow-hidden border border-gray-900">
+                          <div 
+                            className="h-full rounded-full bg-orbit-blue"
+                            style={{ width: `${pct}%` }}
+                          />
+                        </div>
+                        <div className="flex flex-wrap gap-1 text-[8px] text-gray-500">
+                          {channelPersonas.map(p => (
+                            <span key={p.id} className="px-1.5 py-0.5 rounded bg-gray-900 border border-gray-800 text-[7.5px] uppercase">{p.name}</span>
+                          ))}
+                          {channelPersonas.length === 0 && <span className="text-gray-600">No segment assigned</span>}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
             </div>
           </div>
         )}

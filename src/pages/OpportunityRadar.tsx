@@ -27,7 +27,7 @@ interface OpportunityRadarProps {
 }
 
 export const OpportunityRadar: React.FC<OpportunityRadarProps> = ({ onNavigate }) => {
-  const { lunaMetrics, updateLunaMetrics, startMission } = useOrbit();
+  const { lunaMetrics, updateLunaMetrics, startMission, personas } = useOrbit();
   const [selectedAgent, setSelectedAgent] = useState<"Polaris" | "Vega" | "Nova" | "Atlas" | "Luna" | null>(null);
 
   const [opportunitiesData, setOpportunitiesData] = useState<{
@@ -52,57 +52,82 @@ export const OpportunityRadar: React.FC<OpportunityRadarProps> = ({ onNavigate }
     totalPotentialRevenue: number;
     highestPriority: string;
     opportunities: OpportunityNode[];
-  } => ({
-    totalPotentialRevenue: 45600,
-    highestPriority: "Abandoned Cart Recovery",
-    opportunities: [
-      {
-        id: "opp_cart_recovery",
-        title: "Abandoned Cart Recovery",
-        type: "Lead",
-        description: "17 customer nodes left checkout with items.",
-        potentialRevenue: 11919,
-        confidence: 91,
-        audienceSize: 17,
-        priorityScore: 95,
-        recommendedAction: "Recover Lost Revenue",
-        reasoning: "Luna detected a 34% increase in abandoned checkout events over the last 7 days. Customers who abandoned carts have historically converted at 28% when contacted via WhatsApp within 24 hours.",
-        color: "Yellow",
-        angle: 45,
-        distance: 65
-      },
-      {
-        id: "opp_inactive_winback",
-        title: "Inactive Customer Win-back",
-        type: "Inactive",
-        description: "Re-engage top VIP tier spenders inactive for 60+ days.",
-        potentialRevenue: 15400,
-        confidence: 88,
-        audienceSize: 12,
-        priorityScore: 88,
-        recommendedAction: "Reduce Customer Churn",
-        reasoning: "These high-value accounts have churn risk scores over 75% due to 60+ days of dormancy, representing a total revenue leak of ₹15,400.",
-        color: "Purple",
-        angle: 160,
-        distance: 80
-      },
-      {
-        id: "opp_vip_early_access",
-        title: "VIP Early Access Opportunity",
-        type: "VIP",
-        description: "Reward top active VIP customers with early collection drops.",
-        potentialRevenue: 18281,
-        confidence: 94,
-        audienceSize: 8,
-        priorityScore: 92,
-        recommendedAction: "Increase Customer LTV",
-        reasoning: "Top loyalty tier customers exhibit positive feedback loops when engaged with early product releases, increasing LTV capacity.",
-        color: "Green",
-        angle: 290,
-        distance: 45
-      }
-    ]
-  });
+  } => {
+    if (personas && personas.length > 0) {
+      const opps = personas.map((p, idx): OpportunityNode => {
+        let nodeType: "Lead" | "Inactive" | "VIP" | "Prospect" = "Lead";
+        if (p.id.includes("vip")) nodeType = "VIP";
+        else if (p.id.includes("dormant")) nodeType = "Inactive";
+        else if (p.id.includes("new")) nodeType = "Prospect";
+
+        let recommendedAction: OpportunityNode["recommendedAction"] = "Increase Customer LTV";
+        if (p.id.includes("vip")) recommendedAction = "Increase Customer LTV";
+        else if (p.id.includes("dormant")) recommendedAction = "Reduce Customer Churn";
+        else if (p.id.includes("value")) recommendedAction = "Recover Lost Revenue";
+        else if (p.id.includes("new")) recommendedAction = "Acquire New Customers";
+
+        let color: "Purple" | "Yellow" | "Green" | "Red" = "Yellow";
+        if (p.id.includes("vip")) color = "Purple";
+        else if (p.id.includes("dormant")) color = "Yellow";
+        else if (p.id.includes("trend")) color = "Green";
+        else if (p.id.includes("value")) color = "Red";
+        else if (p.id.includes("new")) color = "Green";
+
+        const angles = [45, 160, 290, 110, 220];
+        const distances = [65, 80, 45, 70, 55];
+
+        const potentialRev = Math.round(p.revenuePotential) || 15000;
+
+        return {
+          id: `opp_${p.id}`,
+          title: p.name,
+          type: nodeType,
+          description: p.recommendedStrategy,
+          potentialRevenue: potentialRev,
+          confidence: p.loyaltyScore,
+          audienceSize: p.customerCount,
+          priorityScore: Math.round((p.revenueContributionPct + p.loyaltyScore) / 2),
+          recommendedAction,
+          reasoning: `${p.name} represents ${p.customerCount} customers contributing ${p.revenueContributionPct}% of revenue. Recommended Strategy: ${p.recommendedStrategy}. Why they buy: ${p.whyTheyBuy}`,
+          color,
+          angle: angles[idx % angles.length],
+          distance: distances[idx % distances.length]
+        };
+      });
+
+      const totalPotentialRevenue = opps.reduce((sum, o) => sum + o.potentialRevenue, 0);
+      const highestPriority = opps.reduce((max, o) => o.priorityScore > max.priorityScore ? o : max, opps[0]).title;
+
+      return {
+        totalPotentialRevenue,
+        highestPriority,
+        opportunities: opps
+      };
+    }
+
+    // Default static fallback if personas empty
+    return {
+      totalPotentialRevenue: 45600,
+      highestPriority: "Abandoned Cart Recovery",
+      opportunities: [
+        {
+          id: "opp_cart_recovery",
+          title: "Abandoned Cart Recovery",
+          type: "Lead",
+          description: "17 customer nodes left checkout with items.",
+          potentialRevenue: 11919,
+          confidence: 91,
+          audienceSize: 17,
+          priorityScore: 95,
+          recommendedAction: "Recover Lost Revenue",
+          reasoning: "Luna detected a 34% increase in abandoned checkout events over the last 7 days. Customers who abandoned carts have historically converted at 28% when contacted via WhatsApp within 24 hours.",
+          color: "Yellow",
+          angle: 45,
+          distance: 65
+        }
+      ]
+    };
+  };
 
   const performScan = async () => {
     setIsScanning(true);
@@ -129,13 +154,16 @@ export const OpportunityRadar: React.FC<OpportunityRadarProps> = ({ onNavigate }
         setScanLogs(prev => [...prev, `[System] Node ${i + 1}/5: ${logs[i]}`]);
       }
 
-      const data = await fetchPromise;
+      let data = await fetchPromise;
+      if (personas && personas.length > 0) {
+        data = getFallbackPayload();
+      }
       setOpportunitiesData(data);
       
       if (data && data.opportunities) {
         updateLunaMetrics({
           recoverableRevenue: data.totalPotentialRevenue || 45600,
-          abandonedLeads: data.opportunities.filter((o: any) => o.type === "Lead").reduce((sum: number, o: any) => sum + (o.audienceSize || 0), 0),
+          abandonedLeads: data.opportunities.filter((o: any) => o.type === "Lead" || o.type === "Prospect").reduce((sum: number, o: any) => sum + (o.audienceSize || 0), 0),
           inactiveCustomers: data.opportunities.filter((o: any) => o.type === "Inactive").reduce((sum: number, o: any) => sum + (o.audienceSize || 0), 0),
           recoveryConfidence: Math.round(data.opportunities.reduce((sum: number, o: any) => sum + (o.confidence || 0), 0) / data.opportunities.length) || 90
         });

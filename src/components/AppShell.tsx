@@ -2,7 +2,8 @@ import React, { useState, useRef, useEffect } from "react";
 import { 
   Terminal, Activity, Star, Zap, Users, Mic, BarChart2, 
   Moon, Sun, Radio, ChevronRight, Cpu,
-  Compass, Sparkles, MicOff, Send, MessageSquare, X, ArrowRight, LogOut
+  Compass, Sparkles, MicOff, Send, MessageSquare, X, ArrowRight, LogOut,
+  Fingerprint
 } from "lucide-react";
 import { useOrbit } from "../context/OrbitContext";
 import { callGeminiAPI, parseGeminiJson } from "../utils/gemini";
@@ -11,6 +12,7 @@ type Page =
   | "command-center" 
   | "mission-control" 
   | "customer-galaxy" 
+  | "orbit-personas"
   | "growth-engine" 
   | "future-simulator"
   | "opportunity-radar"
@@ -30,6 +32,7 @@ const navItems: { id: Page; icon: React.FC<any>; label: string; shortLabel: stri
   { id: "command-center", icon: Terminal, label: "Command Center", shortLabel: "CMD" },
   { id: "mission-control", icon: Activity, label: "Mission Control", shortLabel: "MCT" },
   { id: "customer-galaxy", icon: Star, label: "Customer Galaxy", shortLabel: "GLX" },
+  { id: "orbit-personas", icon: Fingerprint, label: "Orbit Personas", shortLabel: "DNA" },
   { id: "growth-engine", icon: Zap, label: "Growth Engine", shortLabel: "GRW" },
   { id: "future-simulator", icon: Cpu, label: "Future Simulator", shortLabel: "FUT" },
   { id: "opportunity-radar", icon: Radio, label: "Opportunity Radar", shortLabel: "RDR" },

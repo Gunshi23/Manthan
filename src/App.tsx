@@ -11,6 +11,7 @@ import { CustomerGalaxy } from './pages/CustomerGalaxy';
 import { GrowthEngine } from './pages/GrowthEngine';
 import { AgentBoardroom } from './pages/AgentBoardroom';
 import { OrbitAnalytics } from './pages/OrbitAnalytics';
+import { OrbitPersonas } from './pages/OrbitPersonas';
 
 import { FutureSimulator } from './pages/FutureSimulator';
 import { OpportunityRadar } from './pages/OpportunityRadar';
@@ -19,7 +20,7 @@ import { auth } from './services/firebase';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
 
 type AppStage = 'landing' | 'auth' | 'init' | 'profile-setup' | 'setup' | 'app';
-type AppPage = 'command-center' | 'mission-control' | 'customer-galaxy' | 'growth-engine' | 'agent-boardroom' | 'analytics' | 'future-simulator' | 'opportunity-radar' | 'competitor-intel';
+type AppPage = 'command-center' | 'mission-control' | 'customer-galaxy' | 'growth-engine' | 'agent-boardroom' | 'analytics' | 'future-simulator' | 'opportunity-radar' | 'competitor-intel' | 'orbit-personas';
 
 function App() {
   const [stage, setStage] = useState<AppStage>('landing');
@@ -93,7 +94,7 @@ function App() {
 
   return (
     <AppShell
-      activePage={activePage}
+      activePage={activePage as any}
       onNavigate={(page) => setActivePage(page as AppPage)}
       missionGoal={missionGoal}
       onLogout={handleLogout}
@@ -107,6 +108,7 @@ function App() {
       {activePage === 'future-simulator' && <FutureSimulator />}
       {activePage === 'opportunity-radar' && <OpportunityRadar onNavigate={setActivePage} />}
       {activePage === 'competitor-intel' && <CompetitorIntelligence />}
+      {activePage === 'orbit-personas' && <OrbitPersonas />}
     </AppShell>
   );
 }
