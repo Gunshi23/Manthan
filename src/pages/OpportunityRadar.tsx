@@ -56,25 +56,25 @@ export const OpportunityRadar: React.FC<OpportunityRadarProps> = ({ onNavigate }
     if (personas && personas.length > 0) {
       const opps = personas.map((p, idx): OpportunityNode => {
         let nodeType: "Lead" | "Inactive" | "VIP" | "Prospect" = "Lead";
-        if (p.id.includes("vip")) nodeType = "VIP";
-        else if (p.id.includes("dormant")) nodeType = "Inactive";
-        else if (p.id.includes("new")) nodeType = "Prospect";
+        if (p.id.includes("vip") || p.id.includes("premium")) nodeType = "VIP";
+        else if (p.id.includes("dormant") || p.id.includes("homemaker") || p.id.includes("traditional") || p.id.includes("festival")) nodeType = "Inactive";
+        else if (p.id.includes("new") || p.id.includes("genz")) nodeType = "Prospect";
 
         let recommendedAction: OpportunityNode["recommendedAction"] = "Increase Customer LTV";
-        if (p.id.includes("vip")) recommendedAction = "Increase Customer LTV";
-        else if (p.id.includes("dormant")) recommendedAction = "Reduce Customer Churn";
-        else if (p.id.includes("value")) recommendedAction = "Recover Lost Revenue";
-        else if (p.id.includes("new")) recommendedAction = "Acquire New Customers";
+        if (p.id.includes("vip") || p.id.includes("premium")) recommendedAction = "Increase Customer LTV";
+        else if (p.id.includes("dormant") || p.id.includes("homemaker") || p.id.includes("traditional")) recommendedAction = "Reduce Customer Churn";
+        else if (p.id.includes("value") || p.id.includes("festival")) recommendedAction = "Recover Lost Revenue";
+        else if (p.id.includes("new") || p.id.includes("genz") || p.id.includes("professional")) recommendedAction = "Acquire New Customers";
 
         let color: "Purple" | "Yellow" | "Green" | "Red" = "Yellow";
-        if (p.id.includes("vip")) color = "Purple";
-        else if (p.id.includes("dormant")) color = "Yellow";
-        else if (p.id.includes("trend")) color = "Green";
+        if (p.id.includes("vip") || p.id.includes("premium")) color = "Purple";
+        else if (p.id.includes("dormant") || p.id.includes("homemaker") || p.id.includes("traditional")) color = "Yellow";
+        else if (p.id.includes("trend") || p.id.includes("festival")) color = "Red";
         else if (p.id.includes("value")) color = "Red";
-        else if (p.id.includes("new")) color = "Green";
+        else if (p.id.includes("new") || p.id.includes("genz") || p.id.includes("professional")) color = "Green";
 
-        const angles = [45, 160, 290, 110, 220];
-        const distances = [65, 80, 45, 70, 55];
+        const angles = [45, 110, 160, 220, 290, 340, 75, 200];
+        const distances = [65, 80, 45, 70, 55, 75, 60, 85];
 
         const potentialRev = Math.round(p.revenuePotential) || 15000;
 

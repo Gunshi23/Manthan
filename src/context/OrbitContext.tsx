@@ -31,6 +31,13 @@ export interface Persona {
   suggestedCampaign: string;
   avatar: string;
   revenuePotential: number;
+  
+  // Demographic and Classification fields
+  ageRange: string;
+  lifestyle: string;
+  buyingTriggers: string;
+  preferredProducts: string;
+  aiInsightsTargeting: string;
 }
 
 // Customer Interface
@@ -320,11 +327,12 @@ const generateMockOrders = (customers: Customer[], businessType: string = "Fashi
 
 // Dynamic local customer-to-persona clustering mapping helper
 const mapCustomersToPersonas = (customers: Customer[], businessType: string): Persona[] => {
-  const vips = customers.filter(c => c.segment === "Loyalists" && c.ltv >= 4000);
-  const trendSeekers = customers.filter(c => c.segment === "Loyalists" && c.ltv < 4000);
-  const dormant = customers.filter(c => c.segment === "High-Value Inactive");
-  const slipping = customers.filter(c => c.segment === "Slipping Away");
-  const newSignups = customers.filter(c => c.segment === "New Signups");
+  const genz = customers.filter(c => c.segment === "New Signups");
+  const professionals = customers.filter(c => c.segment === "Loyalists" && c.ltv < 4000);
+  const homemakers = customers.filter(c => c.segment === "Slipping Away" && c.purchaseCount < 4);
+  const traditional = customers.filter(c => c.segment === "Slipping Away" && c.purchaseCount >= 4);
+  const premium = customers.filter(c => c.segment === "Loyalists" && c.ltv >= 4000);
+  const festival = customers.filter(c => c.segment === "High-Value Inactive");
 
   const totalLtv = customers.reduce((sum, c) => sum + c.ltv, 0);
 
@@ -370,132 +378,187 @@ const mapCustomersToPersonas = (customers: Customer[], businessType: string): Pe
 
   return [
     {
-      id: "persona_vip",
-      name: isFashion ? "VIP Fashion Enthusiast" : "Premium VIP Buyer",
-      description: "High-value regular buyers who prioritize premium quality and new arrivals over discounts.",
-      avatar: "crown",
-      averageSpend: getAvgSpend(vips),
-      purchaseFrequency: "Weekly",
-      preferredChannel: getPreferredChannel(vips),
-      loyaltyScore: 95,
-      riskScore: getAvgRisk(vips),
-      predictedLtv: getAvgLtv(vips),
-      growthOpportunity: "Expand access to limited-edition items and exclusive brand events.",
-      motivation: "Status, quality, exclusivity, and personalized service.",
-      buyingPattern: "Purchases brand new collections immediately upon launch. Low price sensitivity.",
-      riskLevel: "Low",
-      revenuePotential: getAvgLtv(vips) * 1.5,
-      revenueContributionPct: getContribution(vips),
-      customerCount: vips.length,
-      recommendedStrategy: "Invite to early access product drops and offer complimentary white-glove delivery.",
-      whatTheyBuy: isFashion ? "Designer collections, limited-run garments, premium shoes." : "Top-tier flagships, premium plans, custom bundles.",
-      whyTheyBuy: "To express status, secure the best quality first, and enjoy premium loyalty perks.",
-      whenTheyBuy: "On collection launch days, during exclusive VIP invitation windows.",
-      bestCommChannel: "Direct WhatsApp concierge or private invitations.",
-      suggestedCampaign: "Exclusive VIP Autumn Collection Launch (Expected ROI: 4.8x)"
-    },
-    {
-      id: "persona_trend",
-      name: isFashion ? "Trend Explorer" : "Early Tech Adopter",
-      description: "Younger, highly engaged buyers who look for new styles and interactive shopping experiences.",
+      id: "persona_genz",
+      name: "Student / Gen Z",
+      description: "Young trend-focused mobile-first shoppers who respond rapidly to social discovery and visuals.",
       avatar: "sparkles",
-      averageSpend: getAvgSpend(trendSeekers),
+      averageSpend: getAvgSpend(genz),
       purchaseFrequency: "Bi-weekly",
-      preferredChannel: getPreferredChannel(trendSeekers),
-      loyaltyScore: 82,
-      riskScore: getAvgRisk(trendSeekers),
-      predictedLtv: getAvgLtv(trendSeekers),
-      growthOpportunity: "Encourage user-generated content and social shares via interactive loyalty loops.",
-      motivation: "Novelty, social proof, trend alignment, and interactive copy.",
-      buyingPattern: "Responds strongly to social media visual cues, RCS rich cards, and seasonal trends.",
-      riskLevel: "Low",
-      revenuePotential: getAvgLtv(trendSeekers) * 1.3,
-      revenueContributionPct: getContribution(trendSeekers),
-      customerCount: trendSeekers.length,
-      recommendedStrategy: "Deliver highly visual RCS templates with embedded video previews and catalog buttons.",
-      whatTheyBuy: isFashion ? "Capsule wardrobes, trending streetwear, popular accessories." : "Trending gadgets, smart accessories, social-linked goods.",
-      whyTheyBuy: "To stay ahead of the social trend curve and participate in brand storytelling.",
-      whenTheyBuy: "Weekend evenings, immediately following email/SMS newsletter alerts.",
-      bestCommChannel: "RCS Rich Cards with interactive 3D media elements.",
-      suggestedCampaign: "Interactive RCS Fall Style Guide (Expected ROI: 4.1x)"
-    },
-    {
-      id: "persona_dormant",
-      name: "Dormant High-Value Customer",
-      description: "Historically high-value spenders who have shown zero activity or checkout sessions for 90+ days.",
-      avatar: "battery-low",
-      averageSpend: getAvgSpend(dormant),
-      purchaseFrequency: "Quarterly",
-      preferredChannel: getPreferredChannel(dormant),
-      loyaltyScore: 68,
-      riskScore: getAvgRisk(dormant),
-      predictedLtv: getAvgLtv(dormant),
-      growthOpportunity: "Unlock dormant purchasing power by resolving product issues or offering recovery credits.",
-      motivation: "High value rewards, re-engagement incentives, personal win-back notes.",
-      buyingPattern: "Inactive for over 3 months. Needs high-context re-engagement to reactivate checkout paths.",
-      riskLevel: "High",
-      revenuePotential: getAvgLtv(dormant) * 1.2,
-      revenueContributionPct: getContribution(dormant),
-      customerCount: dormant.length,
-      recommendedStrategy: "Send a personal win-back message with a dedicated ₹500 credit drop automatically loaded.",
-      whatTheyBuy: isFashion ? "Occasional high-end dresses, luxury accessories, winter jackets." : "Core appliances, bundle upgrades, multi-year subscriptions.",
-      whyTheyBuy: "Need-driven purchases, high-consideration items, or specific seasonal necessities.",
-      whenTheyBuy: "Holiday sales, major store clearance events, or when prompted by a win-back offer.",
-      bestCommChannel: "Personalized WhatsApp re-engagement card.",
-      suggestedCampaign: "VIP Credit Drop Win-Back Campaign (Expected ROI: 3.9x)"
-    },
-    {
-      id: "persona_value",
-      name: "Bargain Hunter",
-      description: "Price-sensitive buyers who only purchase during clearance sales, coupon drops, or discounts.",
-      avatar: "percent",
-      averageSpend: getAvgSpend(slipping),
-      purchaseFrequency: "Monthly",
-      preferredChannel: getPreferredChannel(slipping),
-      loyaltyScore: 45,
-      riskScore: getAvgRisk(slipping),
-      predictedLtv: getAvgLtv(slipping),
-      growthOpportunity: "Leverage coupon thresholds to increase average basket values.",
-      motivation: "Discounts, clearance events, free shipping, bundles.",
-      buyingPattern: "Stalls items in cart waiting for discount alerts. Highly active during flash sales.",
+      preferredChannel: getPreferredChannel(genz),
+      loyaltyScore: 78,
+      riskScore: getAvgRisk(genz),
+      predictedLtv: getAvgLtv(genz),
+      growthOpportunity: "Deploy visual RCS carousels showcasing trending aesthetics and micro-influencer items.",
+      motivation: "Status alignment, aesthetics, peer trends, and instant gratification.",
+      buyingPattern: "Mobile-first shopping cycles. Spontaneous checkouts triggered by direct alerts.",
       riskLevel: "Medium",
-      revenuePotential: getAvgLtv(slipping) * 1.1,
-      revenueContributionPct: getContribution(slipping),
-      customerCount: slipping.length,
-      recommendedStrategy: "Send push notifications or SMS alerts containing direct coupon code click-to-copy buttons.",
-      whatTheyBuy: isFashion ? "Sales rack apparel, last-season styles, standard essentials." : "Refurbished stock, entry-level goods, discounted bundles.",
-      whyTheyBuy: "To maximize savings and acquire functional products at the lowest possible price point.",
-      whenTheyBuy: "End-of-season sales, flash coupon windows, holiday discount weeks.",
-      bestCommChannel: "SMS alerts containing direct checkout coupon links.",
-      suggestedCampaign: "Seasonal Flash Clearance Event (Expected ROI: 3.5x)"
+      revenuePotential: getAvgLtv(genz) * 1.8,
+      revenueContributionPct: getContribution(genz),
+      customerCount: genz.length,
+      recommendedStrategy: "Send a visual style drop with countdown timers to prompt spontaneous checkouts.",
+      whatTheyBuy: isFashion ? "Graphic tees, trending streetwear, mini accessories." : "Starter subscriptions, cloud keys, mobile accessories.",
+      whyTheyBuy: "To look on-trend, fit in socially, and experience immediate styling upgrades.",
+      whenTheyBuy: "Social feeds scrolling hours, late-night sessions, instant discount drops.",
+      bestCommChannel: "Rich RCS carousels with direct click-to-buy links.",
+      suggestedCampaign: "Gen Z Streetwear Style Drop (Expected ROI: 4.2x)",
+      ageRange: "18 - 24",
+      lifestyle: "Digital native, highly active on social media, mobile-first, and value-oriented.",
+      buyingTriggers: "Social media visual updates, micro-influencer looks, and checkout coupon code alerts.",
+      preferredProducts: isFashion ? "Streetwear, accessories, capsule basics" : "App subscriptions, gadget skins, mobile mounts",
+      aiInsightsTargeting: "Gen Z represents the future loyalty pipeline. Engaging them with visual assets, social proof, and seamless mobile checkouts maximizes early lifetime value."
     },
     {
-      id: "persona_new",
-      name: "New Signups",
-      description: "Freshly registered user accounts who have completed 0 or 1 purchase. High potential but low historical brand familiarity.",
+      id: "persona_professional",
+      name: "Young Working Professional",
+      description: "Fast-paced urban professionals valuing convenience, premium quality, and effortless workwear edits.",
       avatar: "user-plus",
-      averageSpend: getAvgSpend(newSignups),
-      purchaseFrequency: "One-off",
-      preferredChannel: getPreferredChannel(newSignups),
-      loyaltyScore: 50,
-      riskScore: getAvgRisk(newSignups),
-      predictedLtv: getAvgLtv(newSignups),
-      growthOpportunity: "Convert single purchase accounts into active repeat buyers via onboarding drip campaigns.",
-      motivation: "Introductory offers, welcome incentives, smooth onboarding, brand discovery.",
-      buyingPattern: "Browses multiple categories. High initial sessions that decline rapidly if not re-engaged.",
+      averageSpend: getAvgSpend(professionals),
+      purchaseFrequency: "Weekly",
+      preferredChannel: getPreferredChannel(professionals),
+      loyaltyScore: 88,
+      riskScore: getAvgRisk(professionals),
+      predictedLtv: getAvgLtv(professionals),
+      growthOpportunity: "Bundle styling recommendations to simplify the buying path for professional wear.",
+      motivation: "Professional status, styling efficiency, convenience, and build quality.",
+      buyingPattern: "Consistently purchases smart-casual fits. High repeat potential on workday drops.",
+      riskLevel: "Low",
+      revenuePotential: getAvgLtv(professionals) * 1.5,
+      revenueContributionPct: getContribution(professionals),
+      customerCount: professionals.length,
+      recommendedStrategy: "Deliver smart workwear edits and payday promotions via Email on Thursday evenings.",
+      whatTheyBuy: isFashion ? "Smart blazers, tailored shirts, sleek office trousers." : "Team collaboration packages, dual-screen docks, pro sleeves.",
+      whyTheyBuy: "To express confidence, look professional in the workplace, and save shopping time.",
+      whenTheyBuy: "Midday work breaks, Thursday evenings (weekend preparation), and payday windows.",
+      bestCommChannel: "Sleek professional HTML email campaigns.",
+      suggestedCampaign: "Desk to Dinner Curated Edits (Expected ROI: 4.5x)",
+      ageRange: "25 - 34",
+      lifestyle: "Fast-paced urban corporate career, balances work-life, values time-saving solutions.",
+      buyingTriggers: "Curated workwear alerts, paycheck deposits, convenience shipping options.",
+      preferredProducts: isFashion ? "Office wear, smart jackets, utility accessories" : "Software bundles, premium tech sleeves, charging stations",
+      aiInsightsTargeting: "Professionals have high disposable income but limited time. Streamlining their choice with pre-styled bundles and desktop-friendly email edits drives rapid repeat purchases."
+    },
+    {
+      id: "persona_homemaker",
+      name: "Homemaker",
+      description: "Value-conscious decision makers buying comfortable apparel and versatile family goods.",
+      avatar: "percent",
+      averageSpend: getAvgSpend(homemakers),
+      purchaseFrequency: "Monthly",
+      preferredChannel: getPreferredChannel(homemakers),
+      loyaltyScore: 75,
+      riskScore: getAvgRisk(homemakers),
+      predictedLtv: getAvgLtv(homemakers),
+      growthOpportunity: "Introduce family bundle coupon drops to increase average cart sizes.",
+      motivation: "Family comfort, versatile wear, product durability, and budgetary savings.",
+      buyingPattern: "Occasional bulk purchases. Highly discount-sensitive and tracks clearance calendars.",
       riskLevel: "Medium",
-      revenuePotential: getAvgLtv(newSignups) * 2.0,
-      revenueContributionPct: getContribution(newSignups),
-      customerCount: newSignups.length,
-      recommendedStrategy: "Launch a 3-part welcome email onboarding drip introducing brand values and styling tips.",
-      whatTheyBuy: isFashion ? "Introductory basics, standard t-shirts, entry accessory packs." : "Trial subscriptions, entry-level accessories, single-month keys.",
-      whyTheyBuy: "To test brand delivery speeds, product quality, and check fit/suitability.",
-      whenTheyBuy: "Within 48 hours of initial profile creation or verification.",
-      bestCommChannel: "Rich HTML onboarding emails with a welcome coupon.",
-      suggestedCampaign: "First Purchase Welcome Journey (Expected ROI: 4.2x)"
+      revenuePotential: getAvgLtv(homemakers) * 1.3,
+      revenueContributionPct: getContribution(homemakers),
+      customerCount: homemakers.length,
+      recommendedStrategy: "Deliver family bundle offers and loungewear clearance highlights via WhatsApp.",
+      whatTheyBuy: isFashion ? "Loungewear sets, versatile denims, kidswear bundles." : "Smart home security keys, multi-device plans, durable protective cases.",
+      whyTheyBuy: "To secure comfort, versatility, and high value for the entire household budget.",
+      whenTheyBuy: "Morning hours post-commute, mid-season clearance windows, major festival holiday weeks.",
+      bestCommChannel: "Conversational WhatsApp catalogs containing copyable coupon alerts.",
+      suggestedCampaign: "Family Comfort Loungewear Blast (Expected ROI: 3.8x)",
+      ageRange: "35 - 50",
+      lifestyle: "Family-centric, runs household logistics, values comfort, versatile fits, and durable products.",
+      buyingTriggers: "BOGO coupon alerts, free delivery milestones, clearance calendar notifications.",
+      preferredProducts: isFashion ? "Comfort loungewear, kids wear, everyday denims" : "Family license packs, smart home plugs, kitchen scale accessories",
+      aiInsightsTargeting: "Homemakers prioritize versatility and family budget metrics. Delivering multi-item discounts and loungewear comfort highlights via WhatsApp recovers checkout cart sessions effectively."
+    },
+    {
+      id: "persona_traditional",
+      name: "Traditional Buyer",
+      description: "Established consumers preferring classic styling, direct clear fit guides, and simple messaging.",
+      avatar: "battery-low",
+      averageSpend: getAvgSpend(traditional),
+      purchaseFrequency: "Quarterly",
+      preferredChannel: getPreferredChannel(traditional),
+      loyaltyScore: 82,
+      riskScore: getAvgRisk(traditional),
+      predictedLtv: getAvgLtv(traditional),
+      growthOpportunity: "Provide high-touch offline booking features and detailed fabric specifications.",
+      motivation: "Fabric/product durability, simple classic styling, high-touch support, and returns reliability.",
+      buyingPattern: "Low frequency, high consideration. Relies on classic lookbooks and repeat style purchases.",
+      riskLevel: "Medium",
+      revenuePotential: getAvgLtv(traditional) * 1.2,
+      revenueContributionPct: getContribution(traditional),
+      customerCount: traditional.length,
+      recommendedStrategy: "Send straightforward SMS notifications highlighting classic collection catalog releases.",
+      whatTheyBuy: isFashion ? "Tailored knitwear, classic polos, high-comfort trousers." : "Legacy accounting keys, high-support desktop monitors, desktop accessories.",
+      whyTheyBuy: "To maintain a classic, reliable appearance without tracking volatile trend lines.",
+      whenTheyBuy: "Seasonal changeover months, major annual milestone sales, early morning hours.",
+      bestCommChannel: "Simple, high-contrast SMS notifications with direct telephone hotline links.",
+      suggestedCampaign: "Classic Heritage Fall Release (Expected ROI: 3.5x)",
+      ageRange: "50+",
+      lifestyle: "Established career or retired, seeks simplicity, appreciates classic styles, highly loyal to trusted brands.",
+      buyingTriggers: "Straightforward SMS alerts, brand heritage notifications, simplified checkout flows.",
+      preferredProducts: isFashion ? "Classic knitwear, structured polos, premium leather shoes" : "On-premise software licenses, keyboard upgrades, desk planners",
+      aiInsightsTargeting: "Traditional buyers show lower digital sessions but highly stable lifetime value. Keeping copy direct and avoiding slang or complex interactive UI elements optimizes their checkout completion."
+    },
+    {
+      id: "persona_premium",
+      name: "Premium Fashion Enthusiast",
+      description: "Status-driven luxury shoppers seeking limited-edition drops and premium brand capsules.",
+      avatar: "crown",
+      averageSpend: getAvgSpend(premium),
+      purchaseFrequency: "Weekly",
+      preferredChannel: getPreferredChannel(premium),
+      loyaltyScore: 95,
+      riskScore: getAvgRisk(premium),
+      predictedLtv: getAvgLtv(premium),
+      growthOpportunity: "Invite to early access product drops and offer private designer capsules.",
+      motivation: "Exclusivity, status display, premium fabric craft, and personal styling support.",
+      buyingPattern: "Instant purchase upon limited-edition launch. Insensitive to high-tier pricing.",
+      riskLevel: "Low",
+      revenuePotential: getAvgLtv(premium) * 1.6,
+      revenueContributionPct: getContribution(premium),
+      customerCount: premium.length,
+      recommendedStrategy: "Deliver private pre-order catalog drops via dedicated WhatsApp concierge.",
+      whatTheyBuy: isFashion ? "Limited outerwear, luxury designer collaborations, premium accessories." : "Enterprise custom packages, developer API plans, dedicated hosting.",
+      whyTheyBuy: "To express status, secure premium design first, and command white-glove service perks.",
+      whenTheyBuy: "Private pre-release windows, major capsule launch times, night hours.",
+      bestCommChannel: "Personalized WhatsApp VIP styling concierge.",
+      suggestedCampaign: "Private VIP Early Collection Pre-Order (Expected ROI: 5.2x)",
+      ageRange: "28 - 45",
+      lifestyle: "Status-conscious, tracks international design houses, values global travel and premium services.",
+      buyingTriggers: "Early access invitations, limited stock alerts, white-glove packaging promises.",
+      preferredProducts: isFashion ? "Designer wear, leather outer garments, luxury bags" : "Enterprise API support, workstation keys, hardware integrations",
+      aiInsightsTargeting: "Enthusiasts represent our highest margin segments. Providing private VIP pre-orders and direct concierge communication unlocks massive untapped discretionary spend."
+    },
+    {
+      id: "persona_festival",
+      name: "Festival Shopper",
+      description: "High-volume event shoppers buying expressive items around holiday calendars.",
+      avatar: "sparkles",
+      averageSpend: getAvgSpend(festival),
+      purchaseFrequency: "Quarterly",
+      preferredChannel: getPreferredChannel(festival),
+      loyaltyScore: 70,
+      riskScore: getAvgRisk(festival),
+      predictedLtv: getAvgLtv(festival),
+      growthOpportunity: "Deploy event-countdown notifications and expressive styling lookbooks.",
+      motivation: "Expressive holiday styles, festive lookbook designs, seasonal promotions.",
+      buyingPattern: "Concentrated seasonal spending spikes. High cart abandonments outside festival months.",
+      riskLevel: "High",
+      revenuePotential: getAvgLtv(festival) * 1.5,
+      revenueContributionPct: getContribution(festival),
+      customerCount: festival.length,
+      recommendedStrategy: "Deliver occasion-countdown catalogs and express shipping alerts via RCS.",
+      whatTheyBuy: isFashion ? "Festive collections, vibrant occasion wear, statement designer belts." : "Holiday smart lighting nodes, festival sound modules, promo credits.",
+      whyTheyBuy: "To dress up for social gatherings, celebrate milestones, and share looks.",
+      whenTheyBuy: "Diwali/Holi countdown weeks, major holiday gift seasons, summer weekend periods.",
+      bestCommChannel: "Visual RCS templates containing occasion countdown timers.",
+      suggestedCampaign: "Festive Occasion Style Guide (Expected ROI: 4.8x)",
+      ageRange: "21 - 40",
+      lifestyle: "Socially active, plans weekends around cultural festivals and occasion gatherings.",
+      buyingTriggers: "Holiday calendar milestones, shipping cutoff countdowns, styling capsules.",
+      preferredProducts: isFashion ? "Festive wear, statement items, bright outer garments" : "Seasonal tech kits, portable bluetooth accessories, light bars",
+      aiInsightsTargeting: "Festival shoppers buy in large batches but exhibit high dormancy. Re-engaging them with holiday lookbooks and guaranteed cutoff delivery times captures seasonal peaks."
     }
   ];
-};
+};;
 
 export const OrbitProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
@@ -908,34 +971,48 @@ export const OrbitProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 - Channel preferences: WhatsApp (${channelsCount.WhatsApp}), Email (${channelsCount.Email}), SMS (${channelsCount.SMS}), RCS (${channelsCount.RCS})
 - Business Type: "${businessType}"
 
-Generate exactly 5 detailed customer personas/archetypes that represent this customer base.
-For each persona, generate:
-1. Name (e.g., 'VIP Fashion Enthusiast', 'Bargain Hunter')
-2. Motivation (What drives their purchases)
-3. Buying Pattern (How and when they purchase)
-4. Risk Level ('Low' | 'Medium' | 'High' | 'Critical')
-5. Risk Score (0-100)
-6. Loyalty Score (0-100)
-7. Preferred Channel ('WhatsApp' | 'Email' | 'SMS' | 'RCS')
-8. Average Spend (e.g. 4500)
-9. Purchase Frequency (e.g. 'Weekly', 'Monthly')
-10. Predicted Lifetime Value (LTV) (e.g. 25000)
-11. Revenue Potential (e.g. 45000)
-12. Customer Count (How many of our ${customers.length} customers belong to this archetype, sum of all counts must equal ${customers.length})
-13. Revenue Contribution % (Percentage of total revenue contributed, e.g., 35)
-14. Growth Opportunity (Growth potential summary)
-15. Recommended Strategy (Actionable next step)
-16. What they buy
-17. Why they buy
-18. When they buy
-19. Best communication channel (elaborated)
-20. Suggested campaign (e.g. campaign name and expected ROI like 'Exclusive Launch Campaign (Expected ROI: 4.8x)')
+Generate exactly 6 customer personas/archetypes representing this customer base:
+1. Student / Gen Z (Age Range 18-24, digital-native, budget-conscious)
+2. Young Working Professional (Age Range 25-34, fast-paced, convenience-oriented)
+3. Homemaker (Age Range 35-50, family-centric, comfort/value-focused)
+4. Traditional Buyer (Age Range 50+, classic styling, low digital engagement)
+5. Premium Fashion Enthusiast (Age Range 28-45, luxury, status-driven)
+6. Festival Shopper (Age Range 21-40, high-volume event/occasion seasonal purchases)
 
-Return a single valid JSON object with a "personas" array containing these 5 personas. Do not return any markdown code block formatting. Only return the raw JSON object matching this schema:
+For each persona, generate:
+1. Name (exactly one of the 6 names above)
+2. Description (A brief demographic summary)
+3. Motivation (What drives their lifestyle and purchasing)
+4. Buying Pattern (How and when they purchase)
+5. Risk Level ('Low' | 'Medium' | 'High' | 'Critical')
+6. Risk Score (0-100)
+7. Loyalty Score (0-100)
+8. Preferred Channel ('WhatsApp' | 'Email' | 'SMS' | 'RCS')
+9. Average Spend (number, e.g. 4500)
+10. Purchase Frequency (e.g. 'Weekly', 'Monthly')
+11. Predicted Lifetime Value (LTV) (number, e.g. 25000)
+12. Revenue Potential (number, e.g. 45000)
+13. Customer Count (How many of our ${customers.length} customers belong to this archetype, sum of all counts must equal ${customers.length})
+14. Revenue Contribution % (Percentage of total LTV revenue, e.g. 20)
+15. Growth Opportunity (Growth potential summary)
+16. Recommended Strategy (Actionable targeting step)
+17. What they buy
+18. Why they buy
+19. When they buy
+20. Best communication channel (elaborated)
+21. Suggested campaign (e.g. campaign name and expected ROI like 'Diwali Flash Sale (Expected ROI: 4.5x)')
+22. ageRange (Age range, e.g. "18 - 24")
+23. lifestyle (Lifestyle Description)
+24. buyingTriggers (Buying triggers/prompts)
+25. preferredProducts (Preferred products/categories)
+26. aiInsightsTargeting (AI insights explaining why they matter and how ORBIT should target them)
+
+Return a single valid JSON object with a "personas" array containing these 6 personas. Do not return any markdown code block formatting. Only return the raw JSON object matching this schema:
 {
   "personas": [
     {
       "name": "...",
+      "description": "...",
       "motivation": "...",
       "buyingPattern": "...",
       "riskLevel": "Low" | "Medium" | "High" | "Critical",
@@ -954,18 +1031,23 @@ Return a single valid JSON object with a "personas" array containing these 5 per
       "whyTheyBuy": "...",
       "whenTheyBuy": "...",
       "bestCommChannel": "...",
-      "suggestedCampaign": "..."
+      "suggestedCampaign": "...",
+      "ageRange": "...",
+      "lifestyle": "...",
+      "buyingTriggers": "...",
+      "preferredProducts": "...",
+      "aiInsightsTargeting": "..."
     }
   ]
 }
 `;
 
       try {
-        const sys = "You are the ORBIT Customer DNA Engine. Group the customer base into 5 highly specific archetypes/personas and return a structured JSON response.";
+        const sys = "You are the ORBIT Customer DNA Engine. Group the customer base into 6 demographic archetypes and return a structured JSON response.";
         const res = await callGeminiAPI(prompt, sys, config.geminiKey);
         const parsed = parseGeminiJson<any>(res, null);
         if (parsed && Array.isArray(parsed.personas) && parsed.personas.length > 0) {
-          const avatars = ["crown", "sparkles", "battery-low", "percent", "user-plus"];
+          const avatars = ["sparkles", "user-plus", "percent", "battery-low", "crown", "sparkles"];
           const finalPersonas: Persona[] = parsed.personas.map((p: any, idx: number) => ({
             ...p,
             id: `persona_${idx + 1}`,

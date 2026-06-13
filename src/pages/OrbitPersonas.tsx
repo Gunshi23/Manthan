@@ -183,9 +183,12 @@ export const OrbitPersonas: React.FC = () => {
                     </div>
                   </div>
 
-                  <h3 className="font-space font-bold text-sm tracking-tight text-white mb-1 group-hover:text-orbit-blue transition-colors">
-                    {persona.name}
-                  </h3>
+                  <div className="flex items-baseline justify-between mb-1 gap-2">
+                    <h3 className="font-space font-bold text-sm tracking-tight text-white group-hover:text-orbit-blue transition-colors truncate">
+                      {persona.name}
+                    </h3>
+                    <span className="font-mono text-[9px] text-orbit-purple font-bold shrink-0">Age: {persona.ageRange || "18-24"}</span>
+                  </div>
                   <p className="text-[10px] text-gray-400 line-clamp-2 h-7 font-mono leading-normal mb-3">
                     {persona.description}
                   </p>
@@ -208,6 +211,11 @@ export const OrbitPersonas: React.FC = () => {
                       <span className="text-gray-500 block text-[9px] uppercase">Pred LTV</span>
                       <span className="font-bold text-orbit-blue">₹{(persona.predictedLtv).toLocaleString()}</span>
                     </div>
+                  </div>
+
+                  <div className="mt-2.5 text-[8.5px] font-mono text-gray-500 border-t border-[rgba(255,255,255,0.04)] pt-2 flex justify-between gap-2">
+                    <span className="shrink-0 uppercase">Preferred Products:</span>
+                    <span className="text-gray-300 font-bold truncate max-w-[150px]">{persona.preferredProducts || "N/A"}</span>
                   </div>
                 </div>
               );
@@ -263,46 +271,53 @@ export const OrbitPersonas: React.FC = () => {
                       {React.createElement(getAvatarIcon(activePersona.avatar), { size: 20 })}
                     </div>
                     <div>
-                      <span className="font-mono text-[9px] text-gray-500 uppercase tracking-widest block">Customer DNA Archtype</span>
+                      <span className="font-mono text-[9px] text-gray-500 uppercase tracking-widest block">Customer DNA Archetype</span>
                       <h3 className="font-space font-bold text-base text-white">{activePersona.name}</h3>
+                      <div className="flex flex-wrap gap-2 items-center mt-1 text-[9px] font-mono text-orbit-purple font-bold">
+                        <span>Age Range: {activePersona.ageRange}</span>
+                        <span className="text-gray-750 font-normal">•</span>
+                        <span>Channel: {activePersona.preferredChannel}</span>
+                      </div>
                     </div>
                   </div>
 
-                  <p className="text-xs font-mono leading-relaxed text-gray-300 bg-gray-950/30 p-3 rounded-lg border border-[rgba(255,255,255,0.04)]">
-                    {activePersona.description}
-                  </p>
+                  <div className="space-y-1 bg-gray-950/40 p-3 rounded-lg border border-[rgba(255,255,255,0.04)] font-mono text-[10px]">
+                    <span className="text-gray-500 uppercase text-[8px] tracking-wider block">Lifestyle & Description</span>
+                    <p className="text-white leading-relaxed">{activePersona.description}</p>
+                    <p className="text-gray-400 leading-relaxed mt-1">{activePersona.lifestyle}</p>
+                  </div>
 
                   <div className="space-y-3.5 pt-2">
                     <div>
                       <div className="flex items-center gap-1.5 font-space text-xs font-bold text-white mb-1 uppercase tracking-wider">
                         <TrendingUp size={12} className="text-orbit-purple" />
-                        <span>Why this persona matters</span>
+                        <span>Buying Motivation</span>
                       </div>
                       <p className="text-[11px] font-mono text-gray-400 pl-4">{activePersona.motivation}</p>
                     </div>
 
                     <div>
                       <div className="flex items-center gap-1.5 font-space text-xs font-bold text-white mb-1 uppercase tracking-wider">
-                        <Award size={12} className="text-orbit-blue" />
-                        <span>What they buy</span>
-                      </div>
-                      <p className="text-[11px] font-mono text-gray-400 pl-4">{activePersona.whatTheyBuy}</p>
-                    </div>
-
-                    <div>
-                      <div className="flex items-center gap-1.5 font-space text-xs font-bold text-white mb-1 uppercase tracking-wider">
                         <Target size={12} className="text-orbit-pink" />
-                        <span>Why they buy</span>
+                        <span>Buying Triggers</span>
                       </div>
-                      <p className="text-[11px] font-mono text-gray-400 pl-4">{activePersona.whyTheyBuy}</p>
+                      <p className="text-[11px] font-mono text-gray-400 pl-4">{activePersona.buyingTriggers}</p>
                     </div>
 
                     <div>
                       <div className="flex items-center gap-1.5 font-space text-xs font-bold text-white mb-1 uppercase tracking-wider">
-                        <RefreshCw size={12} className="text-orbit-amber" />
-                        <span>When they buy</span>
+                        <Award size={12} className="text-orbit-blue" />
+                        <span>Preferred Products</span>
                       </div>
-                      <p className="text-[11px] font-mono text-gray-400 pl-4">{activePersona.whenTheyBuy}</p>
+                      <p className="text-[11px] font-mono text-gray-400 pl-4">{activePersona.preferredProducts} (e.g. {activePersona.whatTheyBuy})</p>
+                    </div>
+
+                    <div>
+                      <div className="flex items-center gap-1.5 font-space text-xs font-bold text-white mb-1 uppercase tracking-wider">
+                        <Zap size={12} className="text-orbit-amber" />
+                        <span>AI Insights & Targeting Strategy</span>
+                      </div>
+                      <p className="text-[11px] font-mono text-gray-300 pl-4 leading-normal bg-blue-500/5 p-2 rounded border border-blue-500/10">{activePersona.aiInsightsTargeting}</p>
                     </div>
 
                     <div>
@@ -310,7 +325,7 @@ export const OrbitPersonas: React.FC = () => {
                         <MessageSquare size={12} className="text-emerald-400" />
                         <span>Best Communication Channel</span>
                       </div>
-                      <p className="text-[11px] font-mono text-gray-400 pl-4">{activePersona.bestCommChannel} ({activePersona.preferredChannel})</p>
+                      <p className="text-[11px] font-mono text-gray-400 pl-4">{activePersona.bestCommChannel}</p>
                     </div>
 
                     <div className="pt-3 border-t border-[rgba(255,255,255,0.06)] space-y-2 bg-purple-950/5 p-3 rounded-lg border border-purple-500/10">
