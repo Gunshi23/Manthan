@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useOrbit } from "../context/OrbitContext";
+import type { BoardroomVerdict } from "../context/OrbitContext";
 import { callGeminiAPI, parseGeminiJson } from "../utils/gemini";
 import { 
   Zap, MessageSquare, Cpu, Users, BarChart2, Sparkles, 
   Radio, CheckCircle2, Activity, ChevronDown, ChevronUp, 
-  Terminal, Play, Pause, Square
+  Terminal, Play, Pause, Square, MapPin, Award, Clock, ArrowRight, RefreshCw
 } from "lucide-react";
 import { AgentCardModal } from "../components/AgentCardModal";
 import { PageHeaderHUD } from "../components/PageHeaderHUD";
@@ -17,7 +18,7 @@ interface BoardroomMessage {
   message: string;
   confidence: number;
   reasoning: string;
-  timestamp: string;
+  timestamp?: string;
   stats?: string;
 }
 
@@ -532,14 +533,356 @@ const AGENT_META = {
 };
 
 /* ─────────────────────────────────────────────────────────────
+   TREND INTELLIGENCE & DEMAND PREDICTION HELPERS
+ ───────────────────────────────────────────────────────────── */
+const getTrendAnalysis = (_region: string, persona: string, businessType: string) => {
+  const isFashion = businessType.toLowerCase().includes("fashion") || businessType.toLowerCase().includes("apparel");
+  const isBeauty = businessType.toLowerCase().includes("beauty") || businessType.toLowerCase().includes("skincare");
+  const isFood = businessType.toLowerCase().includes("food") || businessType.toLowerCase().includes("bakery");
+
+  let currentTrend = "Traditional Styles";
+  let emergingTrend = "Modern Functional Basics";
+  let decliningTrend = "Outdated Heavy Fabrics";
+  let predictedTrend = "Smart Minimal Utility Designs";
+
+  if (isFashion) {
+    if (persona === "Student / Gen Z") {
+      currentTrend = "Oversized Korean Fashion";
+      emergingTrend = "Minimal Streetwear";
+      decliningTrend = "Neon Y2K Cropped Tops";
+      predictedTrend = "Minimalist Utility Streetwear";
+    } else if (persona === "Young Working Professional") {
+      currentTrend = "Heavy Formal Blazers";
+      emergingTrend = "Relaxed Smart-Casual Separates";
+      decliningTrend = "Ultra-Slim Tailored Suits";
+      predictedTrend = "Hybrid Comfort Workwear";
+    } else if (persona === "Premium Fashion Enthusiast") {
+      currentTrend = "Logomania Luxury Outerwear";
+      emergingTrend = "Quiet Luxury / Silent Branding";
+      decliningTrend = "Fast Fashion Collabs";
+      predictedTrend = "Exclusive Artisanal Monograms";
+    } else if (persona === "Homemaker") {
+      currentTrend = "Traditional Cotton Salwars";
+      emergingTrend = "Easy-Wear Knit Co-ord Sets";
+      decliningTrend = "Synthetic Sarees";
+      predictedTrend = "Bamboo-Fiber Loungewear Capsules";
+    } else if (persona === "Traditional Buyer") {
+      currentTrend = "Heavy Silk Brocades";
+      emergingTrend = "Lighter Linen Heritage Drapes";
+      decliningTrend = "Stiff Synthetic Blends";
+      predictedTrend = "Wrinkle-Free Premium Cottons";
+    } else {
+      currentTrend = "Glitter-Heavy Traditional wear";
+      emergingTrend = "Fusion Indo-Western Jackets";
+      decliningTrend = "Monochrome Lehengas";
+      predictedTrend = "Lightweight Metallic Organzas";
+    }
+  } else if (isBeauty) {
+    if (persona === "Student / Gen Z") {
+      currentTrend = "Heavy Dewy Glass Skin Mists";
+      emergingTrend = "Barrier Repair Cica Balms";
+      decliningTrend = "Alcohol-Based Toner Pads";
+      predictedTrend = "Microbiome Acne Patch Nodes";
+    } else {
+      currentTrend = "Chemical Peels";
+      emergingTrend = "Clean Bio-Ferment Serums";
+      decliningTrend = "Sulfate Exfoliators";
+      predictedTrend = "Adaptogenic Peptide Creams";
+    }
+  } else if (isFood) {
+    if (persona === "Student / Gen Z") {
+      currentTrend = "Sugary Bubble Tea Matrices";
+      emergingTrend = "Prebiotic Matcha Cold Foams";
+      decliningTrend = "Artificial Flavored Sodas";
+      predictedTrend = "Adaptogen Oat Energy Brews";
+    } else {
+      currentTrend = "White Flour Croissants";
+      emergingTrend = "Artisanal Sourdough Cronuts";
+      decliningTrend = "Processed Sugar Cakes";
+      predictedTrend = "Keto Prebiotic Pastries";
+    }
+  } else {
+    if (persona === "Student / Gen Z") {
+      currentTrend = "Basic App Licenses";
+      emergingTrend = "Custom Mobile SDK Keys";
+      decliningTrend = "Desktop Offline Tools";
+      predictedTrend = "Decentralized Web3 API Nodes";
+    } else {
+      currentTrend = "SaaS Cluster Monitoring";
+      emergingTrend = "Serverless LLM Gateway Keys";
+      decliningTrend = "Heavy On-Premise Support";
+      predictedTrend = "Cognitive Edge Node Subscriptions";
+    }
+  }
+
+  return { currentTrend, emergingTrend, decliningTrend, predictedTrend };
+};
+
+const getTimeMachineSimulation = (days: number, region: string, persona: string, businessType: string) => {
+  const trends = getTrendAnalysis(region, persona, businessType);
+  const isFashion = businessType.toLowerCase().includes("fashion") || businessType.toLowerCase().includes("apparel");
+  
+  let topProduct = isFashion ? "Minimalist Utility Vest" : "API Gateway Keys";
+  if (isFashion) {
+    if (persona === "Student / Gen Z") topProduct = "Minimal Cargo Pants";
+    else if (persona === "Young Working Professional") topProduct = "Relaxed Linen Blazers";
+    else if (persona === "Premium Fashion Enthusiast") topProduct = "Quiet Luxury Silk Caps";
+  }
+
+  if (days === 30) {
+    return {
+      topPersona: persona,
+      topProduct,
+      trendChanges: `Emerging trend (${trends.emergingTrend}) adoption rises to 15%.`,
+      revenueImpact: `+₹${Math.round(22000).toLocaleString()}`,
+      riskAreas: "Low inventory of test batch styles causing stockouts."
+    };
+  } else if (days === 60) {
+    return {
+      topPersona: persona,
+      topProduct,
+      trendChanges: `Emerging trend (${trends.emergingTrend}) accelerates, now capturing 40% volume.`,
+      revenueImpact: `+₹${Math.round(68000).toLocaleString()}`,
+      riskAreas: "Supply chain shipping delays from regional warehouse nodes."
+    };
+  } else {
+    return {
+      topPersona: persona,
+      topProduct,
+      trendChanges: `Predicted trend (${trends.predictedTrend}) dominates the market. Current trend (${trends.currentTrend}) is fully obsolete.`,
+      revenueImpact: `+₹${Math.round(145000).toLocaleString()}`,
+      riskAreas: "Market saturation risk. Fast-followers copying design language."
+    };
+  }
+};
+
+const generateDynamicFallbackScript = (region: string, persona: string, businessType: string): BoardroomMessage[] => {
+  const trends = getTrendAnalysis(region, persona, businessType);
+  const isFashion = businessType.toLowerCase().includes("fashion") || businessType.toLowerCase().includes("apparel");
+  const pName = persona;
+
+  const script: BoardroomMessage[] = [
+    // ROUND 1: DISCOVERY & SCANS
+    {
+      agent: "Polaris",
+      message: `Sector scan complete for ${region}. Identified active profiles matching the '${pName}' archetype. Segment demand index stands at 92%.`,
+      confidence: 94,
+      reasoning: `Matched segment parameters against active customer DB. Found high cluster density in ${region} region.`,
+      stats: `${pName} segment mapped`
+    },
+    {
+      agent: "Luna",
+      message: `Audit of regional sales logs complete. Growth of current trend (${trends.currentTrend}) is slowing down. However, search trends show emerging demand for ${trends.emergingTrend} (+28% MoM).`,
+      confidence: 93,
+      reasoning: `Queried product order logs and compared last 30 days vs previous 30 days. Emerging trend momentum is high.`,
+      stats: `${trends.emergingTrend} emerging`
+    },
+    {
+      agent: "Vega",
+      message: `Modeling 30-Day Demand forecast. Remaining on the current trend returns a flat revenue curve. Transitioning to ${trends.emergingTrend} yields a projected ₹45K revenue spike.`,
+      confidence: 88,
+      reasoning: `Regression model based on regional conversion rate (4.2%) and average basket value (₹3,200).`,
+      stats: `30d: Stable / +₹45K`
+    },
+    {
+      agent: "Nova",
+      message: `Creative positioning prepared. Proposing campaign: '${isFashion ? "NEXT DROP" : "ORBIT COGNITIVE CORE"}'. We will focus styling around ${trends.emergingTrend} to target ${region} audiences.`,
+      confidence: 91,
+      reasoning: `A/B testing shows visual grids containing minimalist aesthetics drive 25% higher CTR on Gen Z & Professionals.`,
+      stats: "Campaign draft ready"
+    },
+    {
+      agent: "Atlas",
+      message: `Operations check. Standard delivery dispatch channels are responsive. We recommend scheduling dispatch on Tuesday 10:30 AM via RCS for maximum visual impact.`,
+      confidence: 95,
+      reasoning: `Checked API gateway queues, zero latency detected. SMS backup routes configured for push-disabled profiles.`,
+      stats: "Channels standby"
+    },
+    // ROUND 2: DEEPER DEMOGRAPHICS & TRENDS
+    {
+      agent: "Polaris",
+      message: `Auditing audience demographics. This segment in ${region} is mostly aged ${persona.includes("Gen Z") ? "18-24" : "25-45"}, with high mobile engagement. They represent a high-value growth opportunity.`,
+      confidence: 92,
+      reasoning: `Aggregated age brackets and preferred channels for target customers. Mobile session count averages 6.2 per week.`,
+      stats: "Demographics mapped"
+    },
+    {
+      agent: "Luna",
+      message: `Analyzing buying triggers. The audience is motivated by exclusivity and aesthetic drops. We see a declining trend in ${trends.decliningTrend}, indicating we must shift stock immediately.`,
+      confidence: 91,
+      reasoning: `Isolating abandonment reasons. Coupon code sensitivities are high, but brand design matches the primary trigger index.`,
+      stats: `Declining: ${trends.decliningTrend}`
+    },
+    {
+      agent: "Vega",
+      message: `60-Day demand simulation complete. If we pivot stock, we forecast a cumulative revenue impact of ₹85K. If we delay, we risk losing 18% of this cohort's LTV.`,
+      confidence: 90,
+      reasoning: `Calculated churn hazard rates against delay times. Every week of delay increases cohort exit rate by 2.4%.`,
+      stats: "60d: Growth / +₹85K"
+    },
+    {
+      agent: "Nova",
+      message: `Refining copywriting direction. I will generate copy variants that emphasize clean aesthetics, quick delivery, and limited stock to leverage FOMO triggers.`,
+      confidence: 92,
+      reasoning: `FOMO-framed subject lines boost email open rates by 34% and WhatsApp link CTR by 19% in active test cells.`,
+      stats: "Copy triggers set"
+    },
+    {
+      agent: "Atlas",
+      message: `Inventory logistics check. Recommended action: reduce ${trends.currentTrend} inventory by 20% and allocate 35% more budget to ${trends.emergingTrend} to prevent stockouts.`,
+      confidence: 96,
+      reasoning: `Compared inventory turnover rate with estimated demand scale. Optimal safety stock level is 3.5 weeks.`,
+      stats: "Inventory shift recommended"
+    },
+    // ROUND 3: REGIONAL INTELLIGENCE & FORECAST
+    {
+      agent: "Polaris",
+      message: `Analyzing regional density. ${region} accounts for 38% of total purchases in this category. Location affinity for ${trends.emergingTrend} is higher here than in other regions.`,
+      confidence: 93,
+      reasoning: `Computed regional purchase metrics and normalized by population density index.`,
+      stats: `${region} affinity: High`
+    },
+    {
+      agent: "Luna",
+      message: `Trend momentum is accelerating. Luna metrics indicate that ${trends.emergingTrend} is gaining traction rapidly in high-engagement circles, driven by social discovery.`,
+      confidence: 94,
+      reasoning: `Scanned social referral webhooks and external search velocity logs for ${region}.`,
+      stats: "Trend Momentum: 85%"
+    },
+    {
+      agent: "Vega",
+      message: `90-Day forecast shows peak adoption. We predict ${trends.predictedTrend} will become the dominant category. The total revenue opportunity stands at ₹1.45L.`,
+      confidence: 89,
+      reasoning: `Multi-variable regression models indicate full trend flip will occur in weeks 8 to 11.`,
+      stats: `90d: Peak / +₹145K`
+    },
+    {
+      agent: "Nova",
+      message: `Visual layout finalized. The campaign will utilize a high-fidelity dark-mode cyberpunk theme matching ORBIT's signature brand design.`,
+      confidence: 93,
+      reasoning: `Brand compliance check returned 100% match. Theme elements aligned with premium aesthetics.`,
+      stats: "Aesthetics locked"
+    },
+    {
+      agent: "Atlas",
+      message: `Campaign deployment staging is complete. We can configure automated trigger nodes to launch the campaign within 14 days.`,
+      confidence: 95,
+      reasoning: `Staged webhook templates, verified routing table configs. Ready for queue injection.`,
+      stats: "Staging finalized"
+    },
+    // ROUND 4: CONSOLIDATION & OPTIMIZATION
+    {
+      agent: "Polaris",
+      message: `Refining target segments. We will exclude accounts with open support tickets or active refund requests to preserve segment health.`,
+      confidence: 91,
+      reasoning: `Excluding frustrated nodes prevents adverse marketing reviews and increases net conversion value.`,
+      stats: "Support filter applied"
+    },
+    {
+      agent: "Luna",
+      message: `Verified coupon parameters. Allocating a 10% early access discount code for the loyalist sub-cohort to maximize immediate pre-order checkouts.`,
+      confidence: 92,
+      reasoning: `Pre-order coupon code redemption velocity is historically 2.8x higher than standard launch discounts.`,
+      stats: "Pre-order coupon active"
+    },
+    {
+      agent: "Vega",
+      message: `Discount simulation yields: 10% coupon compression is offset by a 15% increase in conversion volume. Net revenue forecast adjusted to ₹1.5L, expected ROI 4.5x.`,
+      confidence: 90,
+      reasoning: `Price elasticity models show inelastic response on luxury streetwear, but high elastic volume on Gen Z/Students.`,
+      stats: "ROI: 4.5x projected"
+    },
+    {
+      agent: "Nova",
+      message: `Secondary email creative variants ready for transactional fallbacks. Injects personalized list of past purchased categories.`,
+      confidence: 91,
+      reasoning: `Correlating past category names boosts user click affinity indexes by 42%.`,
+      stats: "Fallback templates ready"
+    },
+    {
+      agent: "Atlas",
+      message: `Channel throttling parameters configured. Dispatch rate capped to 45 transactions per second to avoid carrier spam triggers.`,
+      confidence: 94,
+      reasoning: `Optimized SMTP and SMS carrier gateway queue parameters to fit standard service level agreements.`,
+      stats: "Throttling set to 45 TPS"
+    },
+    // ROUND 5: CONSENSUS REACHED
+    {
+      agent: "Polaris",
+      message: `Target segment synced. Polaris consensus reached. Audience confidence stands at 95%. Ready for strategic execution.`,
+      confidence: 97,
+      reasoning: `Verified target lists, synchronized segment attributes across databases.`,
+      stats: "Polaris consensus"
+    },
+    {
+      agent: "Luna",
+      message: `Product affinities and leakage prevention webhooks are online. Luna consensus reached. Ready to track conversions.`,
+      confidence: 96,
+      reasoning: `Handshake tests completed successfully on conversion tracker webhooks.`,
+      stats: "Luna consensus"
+    },
+    {
+      agent: "Vega",
+      message: `Yield projections, ROI curves, and Time Machine demand simulators locked. Vega consensus reached. Expected ROI is 4.5x.`,
+      confidence: 92,
+      reasoning: `Approved final regression model, verified statistical p-value at < 0.01.`,
+      stats: "Vega consensus"
+    },
+    {
+      agent: "Nova",
+      message: `All styling guides, copy templates, and visual assets uploaded to primary CDNs. Nova consensus reached.`,
+      confidence: 95,
+      reasoning: `Static layout checks and responsiveness tests passed across standard client templates.`,
+      stats: "Nova consensus"
+    },
+    {
+      agent: "Atlas",
+      message: `Deployment queue armed. Execution pipeline in standby. Awaiting launch authorization. Atlas consensus reached.`,
+      confidence: 98,
+      reasoning: `SMTP endpoints validated, SMS channels armed, webhook listener status is green.`,
+      stats: "Atlas consensus"
+    }
+  ];
+
+  return script;
+};
+
+/* ─────────────────────────────────────────────────────────────
    AGENT BOARDROOM
  ───────────────────────────────────────────────────────────── */
 export const AgentBoardroom: React.FC = () => {
-  const { addAgentLog, config, businessType } = useOrbit();
+  const { addAgentLog, config, businessType, latestVerdict, updateLatestVerdict } = useOrbit();
   const [selectedScenario, setSelectedScenario] = useState(0);
   const [debateActive, setDebateActive] = useState(false);
   const [debateMsgs, setDebateMsgs] = useState<BoardroomMessage[]>([]);
   const [activeSpeaker, setActiveSpeaker] = useState<"Polaris" | "Nova" | "Vega" | "Atlas" | "Luna" | null>(null);
+
+  // Selected Region and Persona states (Trend Intelligence)
+  const [selectedRegion, setSelectedRegion] = useState<string>("North Delhi");
+  const [selectedPersona, setSelectedPersona] = useState<string>("Student / Gen Z");
+
+  // Scanned trends state
+  const [isScanningTrends, setIsScanningTrends] = useState<boolean>(false);
+  const [scannedTrends, setScannedTrends] = useState({
+    currentTrend: businessType.toLowerCase().includes("fashion") || businessType.toLowerCase().includes("apparel") ? "Oversized Korean Fashion" : "SaaS Cluster Monitoring",
+    emergingTrend: businessType.toLowerCase().includes("fashion") || businessType.toLowerCase().includes("apparel") ? "Minimal Streetwear" : "Serverless LLM Gateway Keys",
+    decliningTrend: businessType.toLowerCase().includes("fashion") || businessType.toLowerCase().includes("apparel") ? "Neon Y2K Cropped Tops" : "Heavy On-Premise Support",
+    predictedTrend: businessType.toLowerCase().includes("fashion") || businessType.toLowerCase().includes("apparel") ? "Minimalist Utility Streetwear" : "Cognitive Edge Node Subscriptions"
+  });
+
+  const triggerTrendScan = () => {
+    setIsScanningTrends(true);
+    addTelemetry(`[System] Initializing trend scan for ${selectedRegion} and ${selectedPersona}...`);
+    setTimeout(() => {
+      const trends = getTrendAnalysis(selectedRegion, selectedPersona, businessType);
+      setScannedTrends(trends);
+      setIsScanningTrends(false);
+      addTelemetry(`[System] Scan complete. Found trends - Current: ${trends.currentTrend}, Emerging: ${trends.emergingTrend}`);
+    }, 1200);
+  };
+
+  // Time machine simulation day state
+  const [timeMachineDays, setTimeMachineDays] = useState<30 | 60 | 90>(30);
 
   /* selected agent profile card state */
   const [selectedAgent, setSelectedAgent] = useState<"Polaris" | "Vega" | "Nova" | "Atlas" | "Luna" | null>(null);
@@ -663,6 +1006,33 @@ export const AgentBoardroom: React.FC = () => {
               setActiveSpeaker(null);
               setIsThinking(false);
               addTelemetry("Boardroom consensus reached. Operational directive armed.");
+              
+              // Compute and sync final verdict
+              const finalTrends = getTrendAnalysis(selectedRegion, selectedPersona, businessType);
+              const isFashion = businessType.toLowerCase().includes("fashion") || businessType.toLowerCase().includes("apparel");
+              const targetRoi = 4.5;
+              const revenueOpportunity = 145000;
+              
+              const verdict: BoardroomVerdict = {
+                scenarioName: currentScenarioName,
+                scenarioDescription: currentScenarioDescription,
+                targetPersona: selectedPersona,
+                region: selectedRegion,
+                currentTrend: finalTrends.currentTrend,
+                futureTrend: finalTrends.predictedTrend,
+                revenueOpportunity,
+                expectedRoi: targetRoi,
+                launchDate: "Immediate (within 14 days)",
+                confidenceScore: 92,
+                forecast: {
+                  d30: isFashion ? `Trend Stable - ${finalTrends.currentTrend} remains high volume but flat.` : "Trend Stable - Baseline SaaS monitoring remains steady.",
+                  d60: isFashion ? `Growth Slowing - Initial ${finalTrends.emergingTrend} collections show 15% adoption.` : `Growth Slowing - Initial ${finalTrends.emergingTrend} show 10% adoption.`,
+                  d90: isFashion ? `${finalTrends.predictedTrend} becomes dominant - expected shift of 60% market share.` : `${finalTrends.predictedTrend} becomes dominant - expected shift of 50% volume.`
+                },
+                timestamp: new Date().toISOString()
+              };
+              
+              updateLatestVerdict(verdict);
               return -1;
             } else {
               // Transition to next agent
@@ -683,7 +1053,7 @@ export const AgentBoardroom: React.FC = () => {
     }, 100);
 
     return () => clearInterval(interval);
-  }, [debateActive, isPaused, currentStepIdx, debateScript, secondsPerMessage]);
+  }, [debateActive, isPaused, currentStepIdx, debateScript, secondsPerMessage, selectedRegion, selectedPersona, businessType, currentScenarioName, currentScenarioDescription, updateLatestVerdict]);
 
   /* Initialize Debate Scenario */
   const triggerBoardroomDebate = async () => {
@@ -698,9 +1068,8 @@ export const AgentBoardroom: React.FC = () => {
       setSelectedScenario(nextScenario);
     }
     
-    const fallbackScenario = SCENARIOS[nextScenario];
-    let activeName = fallbackScenario.name;
-    let activeDesc = fallbackScenario.description;
+    let activeName = `${selectedRegion} ${selectedPersona} Strategic Pivot`;
+    let activeDesc = `Formulating pivot strategy for ${selectedPersona} in ${selectedRegion} from ${scannedTrends.currentTrend} to ${scannedTrends.emergingTrend}.`;
 
     // Temporarily set details, will update dynamically if Gemini succeeds
     setCurrentScenarioName(activeName);
@@ -726,12 +1095,12 @@ export const AgentBoardroom: React.FC = () => {
 
     try {
       if (config.geminiKey) {
-        addTelemetry("Querying Gemini to generate a unique random boardroom topic and debate...");
+        addTelemetry(`Querying Gemini to generate debate for ${selectedRegion} and ${selectedPersona}...`);
         try {
           const sys = `You are the ORBIT Neural Boardroom coordinator.
-1. Generate an entirely unique random business marketing scenario name and description for an e-commerce or retail SaaS platform. Avoid standard churn or win-back topics if possible; think of interesting growth, seasonal sales, cart recovery, inventory surplus, VIP loyalty campaigns, localization, or holiday events.
-2. Simulate a detailed, multi-round debate among 5 AI agents for this new scenario.
-The debate MUST consist of exactly 15 messages (3 rounds where the 5 agents: Polaris, Luna, Vega, Nova, and Atlas speak in sequence) discussing, analyzing, challenging, and aligning on a strategy.
+1. Formulate a marketing strategy debate for target region: "${selectedRegion}", target persona: "${selectedPersona}", current trend: "${scannedTrends.currentTrend}", and emerging trend: "${scannedTrends.emergingTrend}".
+2. Simulate a detailed, multi-round debate among 5 AI agents for this scenario.
+The debate MUST consist of exactly 25 messages (5 rounds where the 5 agents: Polaris, Luna, Vega, Nova, and Atlas speak in sequence: Round 1, Round 2, Round 3, Round 4, Round 5) discussing, analyzing, challenging, and aligning on a strategy.
 
 The agents are:
 - Polaris (Audience Intelligence): Analyzes cohorts and identifies target groups.
@@ -742,7 +1111,7 @@ The agents are:
 
 Format your response as a single valid JSON object matching this schema:
 {
-  "scenarioName": "Name of the generated scenario (e.g., 'Diwali Inventory Clearance')",
+  "scenarioName": "Name of the generated scenario (e.g., '${selectedRegion} ${selectedPersona} Strategic Pivot')",
   "scenarioDescription": "Description of the scenario (1-2 sentences)",
   "messages": [
     {
@@ -757,7 +1126,7 @@ Format your response as a single valid JSON object matching this schema:
 }
 Do not return any markdown code block formatting. Only return the raw JSON object.`;
 
-          const prompt = `Business type: "${businessType}". Please initialize a random unique scenario and simulate a 15-message debate between the agents.`;
+          const prompt = `Business type: "${businessType}". Region: "${selectedRegion}". Persona: "${selectedPersona}". Current Trend: "${scannedTrends.currentTrend}". Emerging Trend: "${scannedTrends.emergingTrend}". Please generate a 25-message (5 rounds) debate between the agents.`;
           const res = await callGeminiAPI(prompt, sys, config.geminiKey);
           const parsed = parseGeminiJson<any>(res, null);
           
@@ -777,8 +1146,12 @@ Do not return any markdown code block formatting. Only return the raw JSON objec
 
       // If Gemini failed or key not present, use the fallback script
       if (generatedScript.length === 0) {
-        addTelemetry(`Running pre-defined topic: ${activeName}`);
-        generatedScript = fallbackScenario.script as any;
+        addTelemetry(`Generating dynamic debate for ${selectedRegion} - ${selectedPersona}...`);
+        generatedScript = generateDynamicFallbackScript(selectedRegion, selectedPersona, businessType);
+        activeName = `${selectedRegion} ${selectedPersona} Strategic Pivot`;
+        activeDesc = `Formulating pivot strategy for ${selectedPersona} in ${selectedRegion} from ${scannedTrends.currentTrend} to ${scannedTrends.emergingTrend}.`;
+        setCurrentScenarioName(activeName);
+        setCurrentScenarioDescription(activeDesc);
       }
 
       // Load script and kick off state machine
@@ -810,35 +1183,85 @@ Do not return any markdown code block formatting. Only return the raw JSON objec
           LEFT PANEL — MISSION CONTEXT & AGENT STATS
       ════════════════════════════════════════ */}
       <aside className="w-64 shrink-0 flex flex-col border-r border-gray-800/60 bg-gray-950/45 backdrop-blur-md p-4 space-y-4 overflow-y-auto relative z-10">
-        {/* Mission Context */}
+        {/* Trend Intelligence Context */}
         <div className="orbit-panel p-3.5 border border-gray-850 bg-gray-900/10 space-y-3 relative overflow-hidden">
           <div className="absolute top-0 right-0 w-16 h-16 bg-orbit-glow-blue opacity-25 pointer-events-none" />
           <h2 className="font-space text-xs font-bold text-white uppercase tracking-wider flex items-center gap-1.5 border-b border-gray-800/60 pb-2">
             <Cpu size={13} className="text-blue-400" />
-            Executive Context
+            Trend Intel Lab
           </h2>
-          <div className="space-y-2.5">
+          
+          <div className="space-y-3 font-mono">
+            {/* Region Selector */}
             <div>
-              <span className="font-mono text-[8px] text-gray-550 uppercase tracking-wider block">Directive Agenda</span>
+              <span className="font-mono text-[8px] text-gray-555 uppercase tracking-wider block">Target Region</span>
               <select
-                value={selectedScenario}
+                value={selectedRegion}
                 onChange={e => {
-                  const idx = Number(e.target.value);
-                  setSelectedScenario(idx);
-                  setCurrentScenarioName(SCENARIOS[idx].name);
-                  setCurrentScenarioDescription(SCENARIOS[idx].description);
+                  setSelectedRegion(e.target.value);
+                  addTelemetry(`[System] Region target switched to ${e.target.value}. Rescan recommended.`);
                 }}
                 disabled={debateActive}
-                className="w-full bg-gray-950 border border-gray-800 rounded-lg p-2 font-mono text-[10px] text-white focus:outline-none focus:border-blue-500/50 mt-1 cursor-pointer"
+                className="w-full bg-gray-950 border border-gray-800 rounded-lg p-2 text-[10px] text-white focus:outline-none focus:border-blue-500/50 mt-1 cursor-pointer"
               >
-                {SCENARIOS.map((sc, idx) => (
-                  <option key={idx} value={idx}>{sc.name.toUpperCase()}</option>
+                {["North Delhi", "South Delhi", "Mumbai", "Bangalore", "Lucknow", "Noida"].map(r => (
+                  <option key={r} value={r}>{r.toUpperCase()}</option>
                 ))}
               </select>
             </div>
-            <p className="font-mono text-[9px] text-gray-400 leading-relaxed bg-black/40 p-2 rounded-lg border border-gray-900">
-              {currentScenarioDescription}
-            </p>
+
+            {/* Persona Selector */}
+            <div>
+              <span className="font-mono text-[8px] text-gray-555 uppercase tracking-wider block">Target Persona</span>
+              <select
+                value={selectedPersona}
+                onChange={e => {
+                  setSelectedPersona(e.target.value);
+                  addTelemetry(`[System] Persona target switched to ${e.target.value}. Rescan recommended.`);
+                }}
+                disabled={debateActive}
+                className="w-full bg-gray-950 border border-gray-800 rounded-lg p-2 text-[10px] text-white focus:outline-none focus:border-purple-500/50 mt-1 cursor-pointer"
+              >
+                {["Student / Gen Z", "Young Working Professional", "Homemaker", "Traditional Buyer", "Premium Fashion Enthusiast", "Festival Shopper"].map(p => (
+                  <option key={p} value={p}>{p.toUpperCase()}</option>
+                ))}
+              </select>
+            </div>
+
+            {/* Scan button */}
+            <button
+              onClick={triggerTrendScan}
+              disabled={debateActive || isScanningTrends}
+              className="w-full py-1.5 rounded bg-blue-500/10 border border-blue-500/30 hover:bg-blue-500/20 text-blue-400 font-bold text-[9px] uppercase tracking-wider transition-all cursor-pointer flex items-center justify-center gap-1"
+            >
+              <RefreshCw size={10} className={isScanningTrends ? "animate-spin" : ""} />
+              {isScanningTrends ? "Scanning..." : "Scan Regional Trends"}
+            </button>
+
+            {/* Scanned trends dashboard */}
+            <div className="space-y-2 pt-2 border-t border-gray-900">
+              <span className="text-[7.5px] text-gray-555 uppercase tracking-widest block">Scanned Trend State</span>
+              
+              <div className="bg-gray-950/40 border border-gray-900 rounded p-2 text-[9px] space-y-2">
+                <div>
+                  <span className="text-[7px] text-gray-600 block uppercase">Current Trend:</span>
+                  <span className="text-white font-bold block truncate">{scannedTrends.currentTrend}</span>
+                </div>
+                <div>
+                  <span className="text-[7px] text-orbit-success/70 block uppercase">Emerging Trend:</span>
+                  <span className="text-orbit-success font-bold block truncate">{scannedTrends.emergingTrend}</span>
+                </div>
+                <div>
+                  <span className="text-[7px] text-red-500/70 block uppercase">Declining Trend:</span>
+                  <span className="text-red-400 font-bold block truncate">{scannedTrends.decliningTrend}</span>
+                </div>
+                <div>
+                  <span className="text-[7px] text-orbit-purple/70 block uppercase">Predicted Trend:</span>
+                  <span className="text-orbit-purple font-bold block truncate">{scannedTrends.predictedTrend}</span>
+                </div>
+              </div>
+            </div>
+
           </div>
         </div>
 
@@ -1285,13 +1708,117 @@ Do not return any markdown code block formatting. Only return the raw JSON objec
           </div>
         </div>
 
+        {/* AI Time Machine Simulator */}
+        <div className="orbit-panel p-3.5 border border-gray-850 bg-gray-900/10 space-y-3">
+          <h3 className="font-space text-xs font-bold text-white uppercase tracking-wider flex items-center gap-1.5 border-b border-gray-800/60 pb-2">
+            <Clock size={13} className="text-orbit-purple" />
+            AI Time Machine
+          </h3>
+          <p className="font-mono text-[8px] text-gray-555 uppercase">Future Demand Predictor</p>
+          
+          <div className="flex items-center bg-gray-950 border border-gray-800 rounded-lg p-0.5 w-full">
+            {([30, 60, 90] as const).map(days => (
+              <button
+                key={days}
+                onClick={() => {
+                  setTimeMachineDays(days);
+                  addTelemetry(`[Time Machine] Simulating future state at T+${days} days.`);
+                }}
+                className={`flex-1 py-1 rounded font-mono text-[9px] font-bold uppercase tracking-wider cursor-pointer transition-all ${
+                  timeMachineDays === days
+                    ? "bg-orbit-purple text-white shadow-[0_0_8px_rgba(139,92,246,0.3)]"
+                    : "text-gray-400 hover:text-white"
+                }`}
+              >
+                T+{days}d
+              </button>
+            ))}
+          </div>
+
+          {(() => {
+            const sim = getTimeMachineSimulation(timeMachineDays, selectedRegion, selectedPersona, businessType);
+            return (
+              <div className="bg-gray-950/40 border border-gray-900 rounded p-2.5 space-y-2 font-mono text-[9.5px]">
+                <div>
+                  <span className="text-[7px] text-gray-600 block uppercase">Top Target Persona:</span>
+                  <span className="text-white font-bold block">{sim.topPersona}</span>
+                </div>
+                <div>
+                  <span className="text-[7px] text-gray-600 block uppercase">Predicted Hero Product:</span>
+                  <span className="text-blue-400 font-bold block">{sim.topProduct}</span>
+                </div>
+                <div>
+                  <span className="text-[7px] text-gray-600 block uppercase">Trend Trajectory:</span>
+                  <span className="text-gray-300 block leading-tight">{sim.trendChanges}</span>
+                </div>
+                <div className="flex justify-between items-center pt-1 border-t border-gray-900/60 font-mono">
+                  <div>
+                    <span className="text-[7px] text-orbit-success/70 block uppercase">Est. Revenue:</span>
+                    <span className="text-orbit-success font-bold block">{sim.revenueImpact}</span>
+                  </div>
+                  <div className="text-right">
+                    <span className="text-[7px] text-red-500/70 block uppercase">Risk Exposure:</span>
+                    <span className="text-red-400 font-bold block text-[8px] max-w-[100px] truncate" title={sim.riskAreas}>{sim.riskAreas}</span>
+                  </div>
+                </div>
+              </div>
+            );
+          })()}
+        </div>
+
+        {/* Latest Verdict Card */}
+        {latestVerdict && (
+          <div className="orbit-panel p-3.5 border border-gray-850 bg-gray-900/10 space-y-3">
+            <h3 className="font-space text-xs font-bold text-white uppercase tracking-wider flex items-center gap-1.5 border-b border-gray-800/60 pb-2">
+              <Award size={13} className="text-orbit-success" />
+              Latest Verdict
+            </h3>
+            
+            <div className="bg-gray-950/40 border border-gray-900 rounded p-2.5 space-y-2.5 font-mono text-[9.5px]">
+              <div>
+                <span className="text-[7px] text-gray-655 block uppercase">Target Segment</span>
+                <span className="text-white font-bold block">{latestVerdict.targetPersona}</span>
+                <span className="text-gray-500 text-[8.5px] flex items-center gap-1 mt-0.5">
+                  <MapPin size={9} className="text-gray-400" />
+                  {latestVerdict.region}
+                </span>
+              </div>
+
+              <div>
+                <span className="text-[7px] text-gray-655 block uppercase">Strategic Direction</span>
+                <div className="text-gray-300 leading-tight">
+                  <span className="text-red-400 font-bold">{latestVerdict.currentTrend}</span>
+                  <ArrowRight size={10} className="inline mx-1 text-gray-500" />
+                  <span className="text-orbit-success font-bold">{latestVerdict.futureTrend}</span>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-2 pt-1 border-t border-gray-900/60">
+                <div>
+                  <span className="text-[7px] text-gray-600 block uppercase">ROI Forecast</span>
+                  <span className="text-blue-400 font-bold block">{latestVerdict.expectedRoi}x ROI</span>
+                </div>
+                <div>
+                  <span className="text-[7px] text-gray-600 block uppercase">Est. Opportunity</span>
+                  <span className="text-orbit-success font-bold block">₹{latestVerdict.revenueOpportunity.toLocaleString()}</span>
+                </div>
+              </div>
+
+              <div className="bg-[#050816] border border-green-500/20 rounded p-1.5 flex items-center gap-1.5 mt-1 justify-center">
+                <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-ping" />
+                <span className="text-[7.5px] text-green-400 font-bold uppercase tracking-widest">Synced with ORBIT Core</span>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* System Activity Feed Ticker */}
-        <div className="flex-1 flex flex-col min-h-0 space-y-2">
+        <div className="h-44 flex flex-col space-y-2">
           <h3 className="font-space text-xs font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
             <Activity size={13} className="text-blue-400" />
             Executive Activity Feed
           </h3>
-          <p className="font-mono text-[8px] text-gray-550 uppercase">Background operations log</p>
+          <p className="font-mono text-[8px] text-gray-555 uppercase">Background operations log</p>
 
           <div className="flex-1 overflow-y-auto bg-black/60 border border-gray-900 rounded-xl p-3 font-mono text-[8px] text-gray-450 space-y-2 scrollbar-thin">
             {telemetry.length === 0 ? (

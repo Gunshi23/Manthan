@@ -58,6 +58,7 @@ export interface Customer {
   avatar: string;
   x: number; // Galaxy coordinate
   y: number; // Galaxy coordinate
+  region: string;
 }
 
 // Campaign Interface
@@ -143,6 +144,25 @@ export interface MissionState {
   boardroomDialogue?: { agent: "Polaris" | "Luna" | "Vega" | "Nova" | "Atlas"; message: string }[];
 }
 
+export interface BoardroomVerdict {
+  scenarioName: string;
+  scenarioDescription: string;
+  targetPersona: string;
+  region: string;
+  currentTrend: string;
+  futureTrend: string;
+  revenueOpportunity: number;
+  expectedRoi: number;
+  launchDate: string;
+  confidenceScore: number;
+  forecast: {
+    d30: string;
+    d60: string;
+    d90: string;
+  };
+  timestamp: string;
+}
+
 interface OrbitContextType {
   theme: ThemeMode;
   setTheme: (theme: ThemeMode) => void;
@@ -179,6 +199,8 @@ interface OrbitContextType {
   highestRevenuePersona: Persona | null;
   personaDistribution: { name: string; percentage: number; count: number; color: string }[];
   generatePersonas: () => Promise<void>;
+  latestVerdict: BoardroomVerdict | null;
+  updateLatestVerdict: (verdict: BoardroomVerdict) => void;
 }
 
 const OrbitContext = createContext<OrbitContextType | undefined>(undefined);
@@ -229,6 +251,7 @@ const generateMockCustomers = (businessType: string = "Fashion & Apparel"): Cust
     categories = ["Server Cluster Licenses", "Dedicated API Gateways", "Cognitive Nodes SaaS", "Master DB Integrations", "Orbit Cloud Access", "SLA Support Nodes"];
   }
 
+  const regions = ["North Delhi", "South Delhi", "Mumbai", "Bangalore", "Lucknow", "Noida"];
   const list: Customer[] = [];
 
   for (let i = 0; i < 80; i++) {
@@ -282,7 +305,8 @@ const generateMockCustomers = (businessType: string = "Fashion & Apparel"): Cust
       predictedCategory,
       avatar: `https://images.unsplash.com/photo-${1500000000000 + (i * 100000)}?auto=format&fit=crop&w=100&h=100&q=80`,
       x,
-      y
+      y,
+      region: regions[i % regions.length]
     });
   }
 
@@ -563,10 +587,40 @@ const mapCustomersToPersonas = (customers: Customer[], businessType: string): Pe
 export const OrbitProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
   const [theme, setThemeState] = useState<ThemeMode>("command-center");
-  const [missions, setMissions] = useState<any[]>([]);
   const [businessType, setBusinessType] = useState<string>(() => {
     return localStorage.getItem("orbit_business_type") || "Fashion & Apparel";
   });
+
+  const [latestVerdict, setLatestVerdict] = useState<BoardroomVerdict | null>(() => {
+    const saved = localStorage.getItem("orbit_latest_verdict");
+    if (saved) return JSON.parse(saved);
+    const isFashion = businessType.toLowerCase().includes("fashion") || businessType.toLowerCase().includes("apparel");
+    return {
+      scenarioName: "North Delhi Minimal Streetwear Launch",
+      scenarioDescription: "Targeting Students/Gen Z in North Delhi shifting from Korean Fashion to Minimal Streetwear.",
+      targetPersona: "Student / Gen Z",
+      region: "North Delhi",
+      currentTrend: isFashion ? "Oversized Korean Fashion" : "SaaS Cluster Monitoring",
+      futureTrend: isFashion ? "Minimal Streetwear" : "Serverless LLM Gateway Keys",
+      revenueOpportunity: 145000,
+      expectedRoi: 4.5,
+      launchDate: "Immediate (within 14 days)",
+      confidenceScore: 92,
+      forecast: {
+        d30: isFashion ? "Trend Stable - Oversized Korean Fashion remains high volume but flat." : "Trend Stable - SaaS monitoring continues solid baseline.",
+        d60: isFashion ? "Growth Slowing - Initial minimal streetwear collections show 15% adoption." : "Growth Slowing - Initial Serverless LLM Gateway keys show 10% adoption.",
+        d90: isFashion ? "Minimal Streetwear becomes dominant - expected shift of 60% Gen Z market share." : "Serverless LLM Gateway becomes dominant - expected shift of 50% developer volume."
+      },
+      timestamp: new Date().toISOString()
+    };
+  });
+
+  const updateLatestVerdict = useCallback((verdict: BoardroomVerdict) => {
+    setLatestVerdict(verdict);
+    localStorage.setItem("orbit_latest_verdict", JSON.stringify(verdict));
+  }, []);
+
+  const [missions, setMissions] = useState<any[]>([]);
 
   const [customers, setCustomers] = useState<Customer[]>(() => {
     const saved = localStorage.getItem("orbit_customers");
@@ -584,11 +638,18 @@ export const OrbitProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       const hasValidCoords =
         typeof c.x === "number" && typeof c.y === "number" &&
         c.x > 0 && c.y > 0 && c.x < 1000 && c.y < 850;
-      if (hasValidCoords) return c;
+      const regions = ["North Delhi", "South Delhi", "Mumbai", "Bangalore", "Lucknow", "Noida"];
+      const region = c.region || regions[Math.floor(Math.random() * regions.length)];
+      if (hasValidCoords) return { ...c, region };
       const center = GALAXY_CENTERS[c.segment] || { cx: 500, cy: 500 };
       const angle = Math.random() * Math.PI * 2;
       const dist  = 40 + Math.random() * 130;
-      return { ...c, x: Math.round(center.cx + Math.cos(angle) * dist), y: Math.round(center.cy + Math.sin(angle) * dist) };
+      return { 
+        ...c, 
+        x: Math.round(center.cx + Math.cos(angle) * dist), 
+        y: Math.round(center.cy + Math.sin(angle) * dist),
+        region
+      };
     });
   });
   
@@ -2170,7 +2231,9 @@ Do not return any markdown code block formatting. Only return the raw JSON objec
       growthPersona,
       highestRevenuePersona,
       personaDistribution,
-      generatePersonas
+      generatePersonas,
+      latestVerdict,
+      updateLatestVerdict
     }}>
       {children}
     </OrbitContext.Provider>

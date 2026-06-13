@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useEffect, useRef } from "react";
 import { 
-  Radio, ArrowRight, Sparkles, RefreshCw, Terminal
+  Radio, ArrowRight, Sparkles, RefreshCw, Terminal,
+  MapPin, Award, ShieldAlert, TrendingUp
 } from "lucide-react";
 import { useOrbit } from "../context/OrbitContext";
 import { PageHeaderHUD } from "../components/PageHeaderHUD";
@@ -27,7 +28,7 @@ interface OpportunityRadarProps {
 }
 
 export const OpportunityRadar: React.FC<OpportunityRadarProps> = ({ onNavigate }) => {
-  const { lunaMetrics, updateLunaMetrics, startMission, personas } = useOrbit();
+  const { lunaMetrics, updateLunaMetrics, startMission, personas, latestVerdict } = useOrbit();
   const [selectedAgent, setSelectedAgent] = useState<"Polaris" | "Vega" | "Nova" | "Atlas" | "Luna" | null>(null);
 
   const [opportunitiesData, setOpportunitiesData] = useState<{
@@ -535,8 +536,67 @@ export const OpportunityRadar: React.FC<OpportunityRadarProps> = ({ onNavigate }
             </button>
           </div>
         ) : (
-          <div className="orbit-panel p-4 text-center text-gray-550 font-mono text-[9.5px]">
-            No opportunity node focused. Run a scan to discover active nodes.
+          <div className="space-y-3">
+            {latestVerdict ? (
+              <div className="orbit-panel p-4 space-y-3 text-left">
+                <h3 className="font-space text-xs font-bold text-white uppercase tracking-wider flex items-center gap-1.5 border-b border-gray-900 pb-2">
+                  <ShieldAlert size={12} className="text-pink-500 animate-pulse" />
+                  Active Trend Intel
+                </h3>
+                
+                <div className="font-mono text-[9px] space-y-2.5">
+                  {/* Trend Shift Alert */}
+                  <div className="space-y-1">
+                    <span className="text-[7.5px] text-gray-500 uppercase font-bold tracking-wider block flex items-center gap-1">
+                      <TrendingUp size={9} className="text-pink-400" />
+                      Trend Shift Alert
+                    </span>
+                    <p className="text-gray-300 leading-relaxed bg-black/20 p-2 rounded border border-gray-900">
+                      Active consumer demand shift in <span className="text-white font-bold">{latestVerdict.region}</span> from <span className="text-red-400 font-semibold">{latestVerdict.currentTrend}</span> to <span className="text-orbit-success font-semibold">{latestVerdict.futureTrend}</span>.
+                    </p>
+                  </div>
+
+                  {/* Persona Demand Changes */}
+                  <div className="space-y-1">
+                    <span className="text-[7.5px] text-gray-500 uppercase font-bold tracking-wider block flex items-center gap-1">
+                      <Award size={9} className="text-blue-400" />
+                      Persona Demand Changes
+                    </span>
+                    <div className="bg-black/20 p-2 rounded border border-gray-900 space-y-1 text-gray-400">
+                      <div>
+                        Cohort: <span className="text-blue-400 font-bold">{latestVerdict.targetPersona}</span>
+                      </div>
+                      <div>
+                        Adoption Speed: <span className="text-white">Accelerating</span>
+                      </div>
+                      <div>
+                        Target ROI: <span className="text-white font-bold">{latestVerdict.expectedRoi}x</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Regional Opportunities */}
+                  <div className="space-y-1">
+                    <span className="text-[7.5px] text-gray-500 uppercase font-bold tracking-wider block flex items-center gap-1">
+                      <MapPin size={9} className="text-orbit-purple" />
+                      Regional Opportunity
+                    </span>
+                    <div className="bg-black/20 p-2 rounded border border-gray-900 flex items-center justify-between text-gray-450">
+                      <div>
+                        Zone: <span className="text-white font-bold">{latestVerdict.region}</span>
+                      </div>
+                      <div>
+                        Value: <span className="text-orbit-success font-bold">₹{latestVerdict.revenueOpportunity.toLocaleString()}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="orbit-panel p-4 text-center text-gray-555 font-mono text-[9.5px]">
+                No opportunity node focused. Run a scan to discover active nodes.
+              </div>
+            )}
           </div>
         )}
 

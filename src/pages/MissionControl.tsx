@@ -5,7 +5,8 @@ import {
   Activity, ChevronUp, Cpu,
   Layers, X, Play, Pause, RefreshCw, Plus, 
   Trash2, Copy, FileText, Database,
-  Flame, BarChart3, Fingerprint, Crown, ShieldAlert
+  Flame, BarChart3, Fingerprint, Crown, ShieldAlert,
+  MapPin, ArrowRight, Clock, Award
 } from "lucide-react";
 import { AgentCardModal } from "../components/AgentCardModal";
 import { PageHeaderHUD } from "../components/PageHeaderHUD";
@@ -116,7 +117,8 @@ export const MissionControl: React.FC = () => {
     campaigns, orders, agentLogs, growthScore, networkHealth,
     revenueGoal, theme, lunaMetrics, customers, addAgentLog,
     missions, refreshMissions, updateMissionStatus, duplicateMission, deleteMission,
-    topPersona, riskPersona, growthPersona, highestRevenuePersona
+    topPersona, riskPersona, growthPersona, highestRevenuePersona,
+    latestVerdict
   } = useOrbit();
   
   const isLight = theme === "executive";
@@ -1143,6 +1145,86 @@ export const MissionControl: React.FC = () => {
           {/* COLUMN 3: REVENUE ATTRIBUTION, MISSION HEALTH, timeline & COMMANDS */}
           <div className="space-y-6">
             
+            {/* Latest Boardroom Verdict */}
+            {latestVerdict && (
+              <div className={`rounded-xl border p-5 space-y-4 ${isLight ? "bg-white border-gray-200" : "bg-gray-900/40 border-gray-800"}`}>
+                <div className="flex justify-between items-center border-b border-gray-800/60 pb-2">
+                  <span className="font-space text-xs font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
+                    <Award size={13} className="text-orbit-success animate-pulse" />
+                    Latest Boardroom Verdict
+                  </span>
+                  <span className="font-mono text-[8px] text-gray-550 flex items-center gap-1">
+                    <span className="w-1 h-1 rounded-full bg-green-400 animate-ping" />
+                    SYNCED
+                  </span>
+                </div>
+                
+                <div className="space-y-3 font-mono text-[9.5px]">
+                  <div>
+                    <span className="text-[7.5px] text-gray-500 uppercase block">Directive Agenda</span>
+                    <span className="text-white font-bold text-[11px] block">{latestVerdict.scenarioName}</span>
+                    <span className="text-gray-400 block text-[9px] leading-relaxed mt-0.5">{latestVerdict.scenarioDescription}</span>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3 bg-black/40 border border-gray-850/40 rounded-lg p-2.5">
+                    <div>
+                      <span className="text-[7px] text-gray-550 uppercase block">Target Segment</span>
+                      <span className="text-blue-400 font-bold block">{latestVerdict.targetPersona}</span>
+                    </div>
+                    <div>
+                      <span className="text-[7px] text-gray-555 uppercase block">Region</span>
+                      <span className="text-purple-400 font-bold block flex items-center gap-0.5">
+                        <MapPin size={9} />
+                        {latestVerdict.region}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div>
+                    <span className="text-[7.5px] text-gray-500 uppercase block">Trend Strategic Pivot</span>
+                    <div className="text-gray-300 flex items-center gap-1.5 mt-0.5">
+                      <span className="text-red-400 font-semibold">{latestVerdict.currentTrend}</span>
+                      <ArrowRight size={10} className="text-gray-500" />
+                      <span className="text-orbit-success font-semibold">{latestVerdict.futureTrend}</span>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3 pt-2 border-t border-gray-900">
+                    <div>
+                      <span className="text-[7.5px] text-gray-555 uppercase block">Projected Revenue</span>
+                      <span className="text-orbit-success font-bold block text-[10.5px]">₹{latestVerdict.revenueOpportunity.toLocaleString()}</span>
+                    </div>
+                    <div>
+                      <span className="text-[7.5px] text-gray-555 uppercase block">Expected ROI</span>
+                      <span className="text-blue-400 font-bold block text-[10.5px]">{latestVerdict.expectedRoi}x</span>
+                    </div>
+                  </div>
+
+                  {/* 30/60/90 Forecast sub-panel */}
+                  <div className="space-y-2 pt-2 border-t border-gray-900">
+                    <span className="text-[7.5px] text-gray-500 uppercase block tracking-wider flex items-center gap-1">
+                      <Clock size={10} className="text-orbit-purple" />
+                      Time Machine Forecast
+                    </span>
+                    <div className="space-y-1.5 text-[8.5px] text-gray-450">
+                      <div className="flex gap-2">
+                        <span className="text-orbit-purple font-bold shrink-0 w-8">T+30d:</span>
+                        <span className="leading-tight">{latestVerdict.forecast.d30}</span>
+                      </div>
+                      <div className="flex gap-2">
+                        <span className="text-orbit-purple font-bold shrink-0 w-8">T+60d:</span>
+                        <span className="leading-tight">{latestVerdict.forecast.d60}</span>
+                      </div>
+                      <div className="flex gap-2">
+                        <span className="text-orbit-purple font-bold shrink-0 w-8">T+90d:</span>
+                        <span className="leading-tight">{latestVerdict.forecast.d90}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* Revenue Attribution Panel */}
             <div className={`rounded-xl border p-5 space-y-4 ${isLight ? "bg-white border-gray-200" : "bg-gray-900/40 border-gray-800"}`}>
               <div className="flex justify-between items-center border-b border-gray-800/60 pb-2">
