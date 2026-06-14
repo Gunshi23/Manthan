@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { LandingPage } from './pages/LandingPage';
 import { AuthFlow } from './pages/AuthFlow';
 import { OrbitInitialization } from './pages/OrbitInitialization';
 import { BusinessProfileSetup } from './pages/BusinessProfileSetup';
@@ -21,11 +22,11 @@ import { auth } from './services/firebase';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { useOrbit } from './context/OrbitContext';
 
-type AppStage = 'auth' | 'init' | 'profile-setup' | 'setup' | 'app';
+type AppStage = 'landing' | 'auth' | 'init' | 'profile-setup' | 'setup' | 'app';
 type AppPage = 'command-center' | 'mission-control' | 'customer-galaxy' | 'growth-engine' | 'agent-boardroom' | 'analytics' | 'future-simulator' | 'opportunity-radar' | 'competitor-intel' | 'orbit-personas' | 'seasonal-intelligence' | 'regional-intelligence';
 
 function App() {
-  const [stage, setStage] = useState<AppStage>('auth');
+  const [stage, setStage] = useState<AppStage>('landing');
   const [activePage, setActivePage] = useState<AppPage>('command-center');
   const [missionGoal, setMissionGoal] = useState<string>('');
   const [onboardingCompleted, setOnboardingCompleted] = useState<boolean>(false);
@@ -33,7 +34,7 @@ function App() {
 
   // Redirect if no workspace exists or onboarding is not completed
   useEffect(() => {
-    if (stage === 'auth' || stage === 'init') return;
+    if (stage === 'landing' || stage === 'auth' || stage === 'init') return;
 
     if (!onboardingCompleted) {
       // Force users to stay in profile-setup or setup if onboarding is not completed
@@ -57,14 +58,22 @@ function App() {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
-        setStage(prev => (prev === 'auth') ? 'init' : prev);
+        setStage(prev => (prev === 'landing' || prev === 'auth') ? 'init' : prev);
       } else {
-        setStage('auth');
+        setStage(prev => (prev !== 'landing' && prev !== 'auth') ? 'landing' : prev);
         setOnboardingCompleted(false);
       }
     });
     return unsubscribe;
   }, []);
+
+  const handleEnterOS = () => {
+    if (auth.currentUser) {
+      setStage('init');
+    } else {
+      setStage('auth');
+    }
+  };
 
   const handleLoginSuccess = () => setStage('init');
   const handleInitComplete = () => setStage('profile-setup');
@@ -92,11 +101,15 @@ function App() {
       console.error("Firebase SignOut error:", err);
     }
     setOnboardingCompleted(false);
-    setStage('auth');
+    setStage('landing');
   };
 
+  if (stage === 'landing') {
+    return <LandingPage onEnterOS={handleEnterOS} />;
+  }
+
   if (stage === 'auth') {
-    return <AuthFlow onLoginSuccess={handleLoginSuccess} />;
+    return <AuthFlow onLoginSuccess={handleLoginSuccess} onBack={() => setStage('landing')} />;
   }
 
   if (stage === 'init') {

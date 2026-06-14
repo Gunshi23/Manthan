@@ -8,7 +8,7 @@ interface AuthFlowProps {
   onBack?: () => void;
 }
 
-export const AuthFlow: React.FC<AuthFlowProps> = ({ onLoginSuccess }) => {
+export const AuthFlow: React.FC<AuthFlowProps> = ({ onLoginSuccess, onBack }) => {
   const [mode, setMode] = useState<"login" | "signup">("login");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -48,68 +48,36 @@ export const AuthFlow: React.FC<AuthFlowProps> = ({ onLoginSuccess }) => {
     setIsLoggingIn(true);
     const opEmail = username.trim();
 
-    if (mode === "login") {
-      setLogs(prev => [
-        ...prev,
-        `LOG: VERIFYING OPERATOR ACCESS FOR: ${opEmail.toUpperCase()}`,
-        "LOG: AUTHENTICATING DEEP LEARNING SCHEMAS..."
-      ]);
-
-      try {
+    try {
+      if (mode === "login") {
+        setLogs(prev => [...prev, `LOG: INITIATING ACCESS VERIFICATION FOR ACCOUNT: ${opEmail.toUpperCase()}`]);
         await signInWithEmailAndPassword(auth, opEmail, password);
-        setLogs(prev => [
-          ...prev,
-          "LOG: BIO-SIGNATURE MATCH CONFIRMED.",
-          "LOG: ACCESS GRANTED. INITIALIZING CORE BOOT..."
-        ]);
+        setLogs(prev => [...prev, "LOG: AUTHENTICATION GRANTED. SYNCING SYSTEM STATE..."]);
         setTimeout(() => {
           onLoginSuccess();
-        }, 1500);
-      } catch (err: any) {
-        let cleanErr = err.message || "Unknown error";
-        if (err.code === "auth/invalid-credential") {
-          cleanErr = "Invalid Operator Credentials.";
-        } else if (err.code === "auth/invalid-email") {
-          cleanErr = "Invalid Email Schema Format.";
-        }
-        setLogs(prev => [
-          ...prev,
-          `ERR: ACCESS PROTOCOL VIOLATED - ${cleanErr.toUpperCase()}`
-        ]);
-        setIsLoggingIn(false);
-      }
-    } else {
-      setLogs(prev => [
-        ...prev,
-        `LOG: GENERATING NEW OPERATOR NODE FOR: ${opEmail.toUpperCase()}`,
-        "LOG: SEEDING CRYPTO KEYS TO VAULT..."
-      ]);
-
-      try {
+        }, 800);
+      } else {
+        setLogs(prev => [...prev, `LOG: REGISTERING NEW SYSTEM CORE OPERATOR: ${opEmail.toUpperCase()}`]);
         await createUserWithEmailAndPassword(auth, opEmail, password);
-        setLogs(prev => [
-          ...prev,
-          "LOG: OPERATOR REGISTRATION REGISTERED.",
-          "LOG: NEW OPERATOR KEY GENERATED. LOADING OS PORTAL..."
-        ]);
+        setLogs(prev => [...prev, "LOG: REGISTRATION SUCCESSFUL. INITIALIZING USER INTERFACE..."]);
         setTimeout(() => {
           onLoginSuccess();
-        }, 1500);
-      } catch (err: any) {
-        let cleanErr = err.message || "Unknown error";
-        if (err.code === "auth/email-already-in-use") {
-          cleanErr = "Operator Key ID already registered.";
-        } else if (err.code === "auth/weak-password") {
-          cleanErr = "Passcode security index too low (min 6 characters).";
-        } else if (err.code === "auth/invalid-email") {
-          cleanErr = "Invalid Email Schema Format.";
-        }
-        setLogs(prev => [
-          ...prev,
-          `ERR: OPERATOR REGISTRATION FAILURE - ${cleanErr.toUpperCase()}`
-        ]);
-        setIsLoggingIn(false);
+        }, 800);
       }
+    } catch (error: any) {
+      console.error("Firebase auth error:", error);
+      let errorMsg = "VERIFICATION FAILURE: UNKNOWN ERROR ENCOUNTERED.";
+      if (error.code === "auth/invalid-credential" || error.code === "auth/wrong-password" || error.code === "auth/user-not-found") {
+        errorMsg = "VERIFICATION FAILURE: INVALID SYSTEM CREDENTIALS.";
+      } else if (error.code === "auth/email-already-in-use") {
+        errorMsg = "REGISTRATION FAILURE: EMAIL ADDRESS REGISTERED ELSEWHERE.";
+      } else if (error.code === "auth/weak-password") {
+        errorMsg = "REGISTRATION FAILURE: CREDENTIAL COMPLEXITY UNDER STANDARD.";
+      } else if (error.code === "auth/invalid-email") {
+        errorMsg = "VERIFICATION FAILURE: IMPROPER EMAIL FORMAT.";
+      }
+      setLogs(prev => [...prev, `ERR: ${errorMsg.toUpperCase()}`]);
+      setIsLoggingIn(false);
     }
   };
 
@@ -138,9 +106,20 @@ export const AuthFlow: React.FC<AuthFlowProps> = ({ onLoginSuccess }) => {
               Manthan SECURE SHELL {mode === "login" ? "v4.81-LOGIN" : "v4.81-REGISTER"}
             </span>
           </div>
-          <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-Manthan-success animate-pulse" />
-            <span className="text-[10px] font-mono text-gray-500 uppercase">[ Secure Connection ]</span>
+          <div className="flex items-center gap-3">
+            {onBack && (
+              <button 
+                onClick={onBack}
+                type="button"
+                className="text-[10px] font-mono text-gray-400 hover:text-white transition-colors uppercase cursor-pointer"
+              >
+                [ Cancel Boot ]
+              </button>
+            )}
+            <div className="flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-Manthan-success animate-pulse" />
+              <span className="text-[10px] font-mono text-gray-500 uppercase">[ Secure Connection ]</span>
+            </div>
           </div>
         </div>
 
