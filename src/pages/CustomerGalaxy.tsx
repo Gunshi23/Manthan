@@ -1014,15 +1014,23 @@ export const CustomerGalaxy: React.FC = () => {
           RIGHT PANEL — STAR INSPECTOR / DNA
       ════════════════════════════════════════ */}
       {selected && (
-        <aside className="fixed inset-y-0 right-0 z-50 w-full sm:w-80 sm:relative sm:shrink-0 sm:inset-y-0 sm:z-10 flex flex-col border-l border-[rgba(255,255,255,0.08)] bg-[#1E293B]/95 backdrop-blur-xl p-5 space-y-4 overflow-y-auto h-full sm:h-auto animate-fade-in-up">
-          <div className="flex items-start justify-between border-b border-[rgba(255,255,255,0.08)] pb-3">
+        <aside className={`fixed inset-y-0 right-0 z-50 w-full sm:w-80 sm:relative sm:shrink-0 sm:inset-y-0 sm:z-10 flex flex-col border-l p-5 space-y-4 overflow-y-auto h-full sm:h-auto animate-fade-in-up ${
+          isLight ? "bg-white border-slate-200" : "border-[rgba(255,255,255,0.08)] bg-[#1E293B]/95 backdrop-blur-xl"
+        }`}>
+          <div className={`flex items-start justify-between border-b pb-3 ${
+            isLight ? "border-slate-100" : "border-[rgba(255,255,255,0.08)]"
+          }`}>
             <div>
-              <h2 className="font-space text-base font-bold text-white tracking-tight leading-snug">{selected.name}</h2>
-              <span className="font-mono text-[9px] text-gray-400">{selected.email}</span>
+              <h2 className={`font-space text-base font-bold tracking-tight leading-snug ${
+                isLight ? "text-slate-800" : "text-white"
+              }`}>{selected.name}</h2>
+              <span className={`font-mono text-[9px] ${isLight ? "text-slate-500" : "text-gray-400"}`}>{selected.email}</span>
             </div>
             <button
               onClick={() => setSelected(null)}
-              className="p-1 rounded-lg border border-[rgba(255,255,255,0.08)] hover:border-gray-700 text-gray-500 hover:text-white transition-colors cursor-pointer"
+              className={`p-1 rounded-lg border transition-colors cursor-pointer ${
+                isLight ? "border-slate-200 hover:border-slate-350 text-slate-500 hover:text-slate-800" : "border-[rgba(255,255,255,0.08)] hover:border-gray-700 text-gray-500 hover:text-white"
+              }`}
             >
               <X size={13} />
             </button>
@@ -1045,16 +1053,26 @@ export const CustomerGalaxy: React.FC = () => {
               { label: "Churn Risk Score", value: `${selected.churnRisk}%` },
               { label: "Preferred Node", value: selected.preferredChannel },
             ].map((kpi, i) => (
-              <div key={i} className="bg-[#0F172A] border border-[rgba(255,255,255,0.08)] hover:border-[rgba(255,255,255,0.15)] rounded-xl p-3.5 shadow-sm transition-all duration-300">
-                <span className="font-mono text-[8.5px] text-gray-400 uppercase tracking-wider block">{kpi.label}</span>
-                <span className="font-space text-base font-bold text-white mt-1 block">{kpi.value}</span>
+              <div key={i} className={`rounded-xl p-3.5 shadow-sm transition-all duration-300 border ${
+                isLight 
+                  ? "bg-slate-50 border-slate-200 hover:border-slate-350" 
+                  : "bg-[#0F172A] border-[rgba(255,255,255,0.08)] hover:border-[rgba(255,255,255,0.15)]"
+              }`}>
+                <span className={`font-mono text-[8.5px] uppercase tracking-wider block ${
+                  isLight ? "text-slate-500" : "text-gray-400"
+                }`}>{kpi.label}</span>
+                <span className={`font-space text-base font-bold mt-1 block ${
+                  isLight ? "text-slate-800" : "text-white"
+                }`}>{kpi.value}</span>
               </div>
             ))}
           </div>
 
           {/* Churn Trend indicators */}
-          <div className="flex items-center justify-between p-2.5 rounded-xl border border-gray-900 bg-gray-950/40 font-mono text-[10px]">
-            <span className="text-gray-400 uppercase tracking-wider">Churn Risk Trend</span>
+          <div className={`flex items-center justify-between p-2.5 rounded-xl border font-mono text-[10px] ${
+            isLight ? "border-slate-200 bg-slate-50 text-slate-700" : "border-gray-900 bg-gray-950/40"
+          }`}>
+            <span className={isLight ? "text-slate-500 uppercase tracking-wider" : "text-gray-400 uppercase tracking-wider"}>Churn Risk Trend</span>
             <div className="flex items-center gap-1.5 font-bold">
               {selected.churnTrend === "up" ? (
                 <span className="text-red-400 flex items-center gap-1">

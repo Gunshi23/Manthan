@@ -422,16 +422,18 @@ export const CommandCenter: React.FC = () => {
           {!missionStarted && (
             <div className="flex flex-col items-center justify-center min-h-[360px] text-center gap-8 animate-orbit-pulse">
               <div className="relative">
-                <div className="w-20 h-20 rounded-2xl bg-gradient-to-tr from-orbit-blue to-orbit-purple flex items-center justify-center shadow-[0_0_40px_rgba(59,130,246,0.3)] border border-white/10">
+                <div className={`w-20 h-20 rounded-2xl bg-gradient-to-tr from-orbit-blue to-orbit-purple flex items-center justify-center border ${
+                  isLight ? "shadow-[0_8px_30px_rgba(59,130,246,0.15)] border-blue-200" : "shadow-[0_0_40px_rgba(59,130,246,0.3)] border-white/10"
+                }`}>
                   <Cpu size={32} className="text-white animate-pulse" />
                 </div>
-                <div className="absolute -inset-3 rounded-3xl border border-orbit-blue/20 animate-ping opacity-60" />
+                <div className={`absolute -inset-3 rounded-3xl border animate-ping opacity-60 ${isLight ? "border-blue-300/30" : "border-orbit-blue/20"}`} />
               </div>
               <div className="space-y-2">
-                <h2 className="font-space text-2xl font-bold text-white tracking-tight">
+                <h2 className={`font-space text-2xl font-bold tracking-tight ${isLight ? "text-slate-900" : "text-white"}`}>
                   Initiate Autonomous Mission Directive
                 </h2>
-                <p className="font-mono text-[11px] text-gray-500 max-w-sm leading-relaxed mx-auto">
+                <p className={`font-mono text-[11px] max-w-sm leading-relaxed mx-auto ${isLight ? "text-slate-500" : "text-gray-500"}`}>
                   Submit a critical business objective. ORBIT's neural agents will formulate cohorts, project conversions, write creatives, and launch.
                 </p>
               </div>
@@ -443,16 +445,28 @@ export const CommandCenter: React.FC = () => {
                     <button
                       key={i}
                       onClick={() => handleSubmit(cmd.label)}
-                      className="flex items-center gap-3 p-3.5 rounded-xl border border-gray-850 bg-gray-900/10 hover:border-blue-500/40 hover:bg-blue-500/5 hover:shadow-[0_0_15px_rgba(59,130,246,0.08)] transition-all text-left group cursor-pointer duration-300"
+                      className={`flex items-center gap-3 p-3.5 rounded-xl border transition-all text-left group cursor-pointer duration-300 ${
+                        isLight 
+                          ? "border-slate-200 bg-white hover:border-blue-500 hover:bg-blue-50/10 hover:shadow-[0_4px_12px_rgba(37,99,235,0.05)]" 
+                          : "border-gray-850 bg-gray-900/10 hover:border-blue-500/40 hover:bg-blue-500/5 hover:shadow-[0_0_15px_rgba(59,130,246,0.08)]"
+                      }`}
                     >
-                      <div className="p-2 rounded-lg bg-gray-950 border border-gray-800 group-hover:border-blue-500/20 group-hover:bg-blue-500/10 transition-colors">
-                        <Icon size={14} className="text-gray-500 group-hover:text-blue-450 transition-colors shrink-0" />
+                      <div className={`p-2 rounded-lg border transition-colors ${
+                        isLight 
+                          ? "bg-slate-50 border-slate-200 group-hover:border-blue-500/20 group-hover:bg-blue-50/20" 
+                          : "bg-gray-950 border-gray-800 group-hover:border-blue-500/20 group-hover:bg-blue-500/10"
+                      }`}>
+                        <Icon size={14} className="text-gray-500 group-hover:text-blue-500 transition-colors shrink-0" />
                       </div>
                       <div>
-                        <span className="font-space text-[11px] font-semibold text-gray-300 group-hover:text-white transition-colors leading-snug block">
+                        <span className={`font-space text-[11px] font-semibold transition-colors leading-snug block ${
+                          isLight ? "text-slate-700 group-hover:text-blue-650" : "text-gray-300 group-hover:text-white"
+                        }`}>
                           {cmd.label}
                         </span>
-                        <span className="font-mono text-[8px] text-gray-600 group-hover:text-blue-400 uppercase tracking-wider mt-0.5 block">
+                        <span className={`font-mono text-[8px] uppercase tracking-wider mt-0.5 block ${
+                          isLight ? "text-slate-400 group-hover:text-blue-550" : "text-gray-600 group-hover:text-blue-400"
+                        }`}>
                           {cmd.tag} DIRECTIVE
                         </span>
                       </div>
@@ -462,43 +476,59 @@ export const CommandCenter: React.FC = () => {
               </div>
             </div>
           )}
-
+ 
           {/* ── ACTIVATION SEQUENCE (As requested) ── */}
           {activationPhase && (
             <div 
-              className="rounded-2xl border border-emerald-500/20 bg-gray-950/90 p-8 flex flex-col items-center justify-center relative overflow-hidden space-y-6 min-h-[300px] border-glow shadow-[0_0_40px_rgba(16,185,129,0.08)]"
+              className={`rounded-2xl border p-8 flex flex-col items-center justify-center relative overflow-hidden space-y-6 min-h-[300px] ${
+                isLight 
+                  ? "bg-white border-emerald-300/50 shadow-md" 
+                  : "rounded-2xl border border-emerald-500/20 bg-gray-950/90 border-glow shadow-[0_0_40px_rgba(16,185,129,0.08)]"
+              }`}
               style={{
                 animation: "fadeInUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards"
               }}
             >
-              <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-emerald-500/20 to-transparent animate-scan-beam pointer-events-none" />
-
-              <div className="w-full max-w-sm font-mono text-xs space-y-3 bg-black/80 border border-emerald-500/20 p-6 rounded-lg text-emerald-400 relative shadow-2xl">
-                <div className="absolute top-2 right-3 flex items-center gap-1.5 text-[8px] text-emerald-600 font-bold">
+              <div className={`absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-emerald-500/20 to-transparent animate-scan-beam pointer-events-none`} />
+ 
+              <div className={`w-full max-w-sm font-mono text-xs space-y-3 p-6 rounded-lg relative shadow-2xl border ${
+                isLight 
+                  ? "bg-emerald-50/20 border-emerald-300/40 text-emerald-800" 
+                  : "bg-black/80 border-emerald-500/20 text-emerald-400"
+              }`}>
+                <div className={`absolute top-2 right-3 flex items-center gap-1.5 text-[8px] font-bold ${
+                  isLight ? "text-emerald-600" : "text-emerald-600"
+                }`}>
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" />
                   CONNECTING
                 </div>
                 
-                <div className="border-b border-emerald-500/10 pb-2 mb-3 text-[10px] uppercase text-emerald-600 font-semibold tracking-widest">
+                <div className={`border-b pb-2 mb-3 text-[10px] uppercase font-semibold tracking-widest ${
+                  isLight ? "border-emerald-300/20 text-emerald-600" : "border-emerald-500/10 text-emerald-600"
+                }`}>
                   SYS.STATUS: INITIATION
                 </div>
                 
-                <div className="font-mono font-bold tracking-widest text-emerald-300 text-sm animate-pulse mb-4">
+                <div className={`font-mono font-bold tracking-widest text-sm animate-pulse mb-4 ${
+                  isLight ? "text-emerald-700" : "text-emerald-300"
+                }`}>
                   &gt; MISSION RECEIVED
                 </div>
-
+ 
                 <div className="space-y-2">
                   {["Polaris", "Nova", "Vega", "Atlas", "Luna"].map((agent) => {
                     const isOnline = agentsOnline.includes(agent);
                     return (
                       <div key={agent} className="flex items-center gap-2 font-mono h-5">
                         {isOnline ? (
-                          <div className="flex items-center gap-2 text-emerald-300 font-bold tracking-wide">
+                          <div className={`flex items-center gap-2 font-bold tracking-wide ${
+                            isLight ? "text-emerald-700" : "text-emerald-300"
+                          }`}>
                             <span>✦</span>
                             <span>{agent} Online</span>
                           </div>
                         ) : (
-                          <div className="flex items-center gap-2 text-emerald-700">
+                          <div className={`flex items-center gap-2 ${isLight ? "text-emerald-600/60" : "text-emerald-700"}`}>
                             <Loader2 size={10} className="animate-spin" />
                             <span>{agent} Connecting...</span>
                           </div>
@@ -508,9 +538,11 @@ export const CommandCenter: React.FC = () => {
                   })}
                 </div>
               </div>
-
+ 
               {activationDone && (
-                <div className="flex items-center gap-2 font-mono text-[10px] text-emerald-400 animate-pulse mt-2 uppercase tracking-widest">
+                <div className={`flex items-center gap-2 font-mono text-[10px] animate-pulse mt-2 uppercase tracking-widest ${
+                  isLight ? "text-emerald-600" : "text-emerald-400"
+                }`}>
                   <span className="animate-spin text-sm">✦</span>
                   All agents online · Beginning reasoning timeline
                 </div>

@@ -1593,8 +1593,8 @@ Please generate a 25-message (5 rounds) debate between the agents (Polaris, Luna
               </defs>
 
               {/* Central table perimeter ring */}
-              <circle cx="120" cy="120" r="70" fill="none" stroke="rgba(255,255,255,0.03)" strokeWidth="3" />
-              <circle cx="120" cy="120" r="70" fill="none" stroke="rgba(139,92,246,0.15)" strokeWidth="1" strokeDasharray="3, 6" />
+              <circle cx="120" cy="120" r="70" fill="none" stroke={isLight ? "rgba(0,0,0,0.04)" : "rgba(255,255,255,0.03)"} strokeWidth="3" />
+              <circle cx="120" cy="120" r="70" fill="none" stroke={isLight ? "rgba(139,92,246,0.2)" : "rgba(139,92,246,0.15)"} strokeWidth="1" strokeDasharray="3, 6" />
 
               {/* Laser connecting lines from active speaker to table core */}
               {activeSpeaker && (
@@ -1606,7 +1606,7 @@ Please generate a 25-message (5 rounds) debate between the agents (Polaris, Luna
                   stroke={isThinking ? "url(#laserGradThinking)" : "url(#laserGrad)"}
                   strokeWidth="3.5"
                   strokeDasharray={isThinking ? "4, 4" : undefined}
-                  style={{ filter: `drop-shadow(0 0 8px ${AGENT_META[activeSpeaker].color})` }}
+                  style={isLight ? undefined : { filter: `drop-shadow(0 0 8px ${AGENT_META[activeSpeaker].color})` }}
                   className="animate-pulse"
                 />
               )}
@@ -1638,15 +1638,15 @@ Please generate a 25-message (5 rounds) debate between the agents (Polaris, Luna
                       cx={meta.x}
                       cy={meta.y}
                       r="18"
-                      fill="#050816"
-                      stroke={isSpeaking ? meta.color : "rgba(255,255,255,0.05)"}
+                      fill={isLight ? "#ffffff" : "#050816"}
+                      stroke={isSpeaking ? meta.color : (isLight ? "rgba(0,0,0,0.08)" : "rgba(255,255,255,0.05)")}
                       strokeWidth={isSpeaking ? "2" : "1"}
-                      style={isSpeaking ? { filter: `drop-shadow(0 0 8px ${meta.color})` } : {}}
+                      style={isSpeaking && !isLight ? { filter: `drop-shadow(0 0 8px ${meta.color})` } : isSpeaking && isLight ? { filter: `drop-shadow(0 4px 12px ${meta.color}35)` } : {}}
                     />
 
                     {/* Agent Icon */}
                     <foreignObject x={meta.x - 7} y={meta.y - 7} width="14" height="14">
-                      <Icon size={14} style={{ color: isSpeaking ? "#ffffff" : "#4b5563" }} />
+                      <Icon size={14} style={{ color: isSpeaking ? (isLight ? "#0f172a" : "#ffffff") : (isLight ? "#64748b" : "#4b5563") }} />
                     </foreignObject>
 
                     {/* Micro sound wave equalizer bars if speaking */}
@@ -1678,7 +1678,7 @@ Please generate a 25-message (5 rounds) debate between the agents (Polaris, Luna
                       fontFamily="monospace"
                       fontSize="7"
                       fontWeight="bold"
-                      fill={isSpeaking ? "#ffffff" : "#4b5563"}
+                      fill={isSpeaking ? (isLight ? "#0f172a" : "#ffffff") : (isLight ? "#64748b" : "#4b5563")}
                       textAnchor="middle"
                       letterSpacing="1px"
                     >
@@ -1924,39 +1924,43 @@ Please generate a 25-message (5 rounds) debate between the agents (Polaris, Luna
               Latest Verdict
             </h3>
             
-            <div className="bg-gray-950/40 border border-gray-900 rounded p-2.5 space-y-2.5 font-mono text-[9.5px]">
+            <div className={`rounded p-2.5 space-y-2.5 font-mono text-[9.5px] border ${
+              isLight ? "bg-white border-slate-200 shadow-sm" : "bg-gray-950/40 border-gray-900"
+            }`}>
               <div>
-                <span className="text-[7px] text-gray-655 block uppercase">Target Segment</span>
-                <span className="text-white font-bold block">{latestVerdict.targetPersona}</span>
-                <span className="text-gray-500 text-[8.5px] flex items-center gap-1 mt-0.5">
+                <span className={`text-[7px] block uppercase ${isLight ? "text-slate-400" : "text-gray-655"}`}>Target Segment</span>
+                <span className={`font-bold block ${isLight ? "text-slate-800" : "text-white"}`}>{latestVerdict.targetPersona}</span>
+                <span className={`text-[8.5px] flex items-center gap-1 mt-0.5 ${isLight ? "text-slate-500" : "text-gray-500"}`}>
                   <MapPin size={9} className="text-gray-400" />
                   {latestVerdict.region}
                 </span>
               </div>
 
               <div>
-                <span className="text-[7px] text-gray-655 block uppercase">Strategic Direction</span>
-                <div className="text-gray-300 leading-tight">
-                  <span className="text-red-400 font-bold">{latestVerdict.currentTrend}</span>
+                <span className={`text-[7px] block uppercase ${isLight ? "text-slate-400" : "text-gray-655"}`}>Strategic Direction</span>
+                <div className={`leading-tight ${isLight ? "text-slate-700" : "text-gray-300"}`}>
+                  <span className="text-red-500 font-bold">{latestVerdict.currentTrend}</span>
                   <ArrowRight size={10} className="inline mx-1 text-gray-500" />
                   <span className="text-orbit-success font-bold">{latestVerdict.futureTrend}</span>
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-2 pt-1 border-t border-gray-900/60">
+              <div className={`grid grid-cols-2 gap-2 pt-1 border-t ${isLight ? "border-slate-150" : "border-gray-900/60"}`}>
                 <div>
-                  <span className="text-[7px] text-gray-600 block uppercase">ROI Forecast</span>
-                  <span className="text-blue-400 font-bold block">{latestVerdict.expectedRoi}x ROI</span>
+                  <span className={`text-[7px] block uppercase ${isLight ? "text-slate-400" : "text-gray-600"}`}>ROI Forecast</span>
+                  <span className={`font-bold block ${isLight ? "text-blue-655" : "text-blue-400"}`}>{latestVerdict.expectedRoi}x ROI</span>
                 </div>
                 <div>
-                  <span className="text-[7px] text-gray-600 block uppercase">Est. Opportunity</span>
+                  <span className={`text-[7px] block uppercase ${isLight ? "text-slate-400" : "text-gray-600"}`}>Est. Opportunity</span>
                   <span className="text-orbit-success font-bold block">₹{latestVerdict.revenueOpportunity.toLocaleString()}</span>
                 </div>
               </div>
 
-              <div className="bg-[#050816] border border-green-500/20 rounded p-1.5 flex items-center gap-1.5 mt-1 justify-center">
+              <div className={`rounded p-1.5 flex items-center gap-1.5 mt-1 justify-center border ${
+                isLight ? "bg-emerald-50/20 border-emerald-300/40 text-emerald-700" : "bg-[#050816] border-green-500/20 text-green-400"
+              }`}>
                 <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-ping" />
-                <span className="text-[7.5px] text-green-400 font-bold uppercase tracking-widest">Synced with ORBIT Core</span>
+                <span className="text-[7.5px] font-bold uppercase tracking-widest">Synced with ORBIT Core</span>
               </div>
             </div>
           </div>
