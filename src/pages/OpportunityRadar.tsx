@@ -677,7 +677,7 @@ export const OpportunityRadar: React.FC<OpportunityRadarProps> = ({ onNavigate }
                   className={`border p-2.5 rounded-lg space-y-1 font-mono text-[8.5px] transition-all duration-300 hover:scale-[1.02] cursor-pointer text-left ${
                     isSelected 
                       ? isLight ? "border-blue-400 bg-blue-50/50 shadow-sm" : "border-pink-500/50 bg-pink-500/5 shadow-[0_0_10px_rgba(236,72,153,0.1)]" 
-                      : isLight ? "border-slate-200 bg-white hover:border-slate-350" : `${colorConfig.border} bg-[#0F172A]/80 hover:border-gray-800`
+                      : isLight ? "border-slate-200 bg-white hover:border-slate-300" : `${colorConfig.border} bg-[#0F172A]/80 hover:border-gray-800`
                   }`}
                 >
                   <div className="flex items-center justify-between">
