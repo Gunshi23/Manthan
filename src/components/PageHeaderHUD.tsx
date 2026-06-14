@@ -236,7 +236,7 @@ export const PageHeaderHUD: React.FC<PageHeaderHUDProps> = ({
               title="Configure API Keys"
             >
               <span className={`w-1.5 h-1.5 rounded-full animate-pulse ${config.geminiKey ? "bg-orbit-success" : "bg-red-500"}`} />
-              <span className={isLight ? "text-gray-505" : "text-gray-400"}>COGNITIVE NODE:</span>
+              <span className={isLight ? "text-gray-500" : "text-gray-400"}>COGNITIVE NODE:</span>
               <span className={config.geminiKey ? "text-orbit-success font-bold" : "text-red-400 font-bold"}>
                 {config.geminiKey ? "ONLINE" : "OFFLINE"}
               </span>
@@ -258,7 +258,7 @@ export const PageHeaderHUD: React.FC<PageHeaderHUDProps> = ({
               title={config.deepgramKey ? "Open Neural Voice Uplink" : "Configure Deepgram Key to Enable Voice"}
             >
               <span className={`w-1.5 h-1.5 rounded-full ${config.deepgramKey ? "bg-orbit-success animate-pulse" : "bg-red-500"}`} />
-              <span className={isLight ? "text-gray-550" : "text-gray-400"}>VOICE NODE:</span>
+              <span className={isLight ? "text-gray-500" : "text-gray-400"}>VOICE NODE:</span>
               <span className={config.deepgramKey ? "text-orbit-success font-bold" : "text-red-400 font-bold"}>
                 {config.deepgramKey ? "UPLINK READY" : "OFFLINE"}
               </span>
@@ -274,7 +274,7 @@ export const PageHeaderHUD: React.FC<PageHeaderHUDProps> = ({
           {actions && <div className="flex items-center gap-2 max-w-full overflow-x-auto scrollbar-none">{actions}</div>}
         </div>
         <p className={`text-[10px] font-mono mt-1 tracking-widest uppercase ${
-          isLight ? "text-gray-550" : "text-gray-450"
+          isLight ? "text-gray-500" : "text-gray-400"
         }`}>
           {subtitle}
         </p>
@@ -321,7 +321,7 @@ export const PageHeaderHUD: React.FC<PageHeaderHUDProps> = ({
             >
               <span className="w-1 h-1 rounded-full bg-orbit-success animate-pulse"
                 style={{ animationDelay: `${i * 0.3}s` }} />
-              <span className={`font-mono text-[8px] uppercase tracking-wider ${isLight ? "text-gray-550" : "text-gray-400"}`}>{a}</span>
+              <span className={`font-mono text-[8px] uppercase tracking-wider ${isLight ? "text-gray-500" : "text-gray-400"}`}>{a}</span>
             </div>
           ))}
         </div>
@@ -467,7 +467,7 @@ export const PageHeaderHUD: React.FC<PageHeaderHUDProps> = ({
                         ? "bg-blue-50 border-blue-100 text-blue-900 font-medium" 
                         : "bg-blue-950/20 border-blue-900/30 text-blue-200 font-medium"
                   }`}>
-                    <div className="text-[7.5px] uppercase tracking-wider text-gray-550 mb-1">
+                    <div className="text-[7.5px] uppercase tracking-wider text-gray-500 mb-1">
                       {log.role === "user" ? "Operator Node" : "ORBIT Core Voice"}
                     </div>
                     <div>{log.text}</div>
@@ -484,7 +484,7 @@ export const PageHeaderHUD: React.FC<PageHeaderHUDProps> = ({
                   className={`w-full py-2 rounded-lg border font-bold uppercase text-[9px] tracking-widest transition-colors cursor-pointer ${
                     isMuted 
                       ? "bg-amber-500/10 border-amber-500/30 text-amber-400 hover:bg-amber-500/20"
-                      : "bg-gray-500/10 border-gray-500/20 text-gray-455 hover:bg-gray-500/20"
+                      : "bg-gray-500/10 border-gray-500/20 text-gray-400 hover:bg-gray-500/20"
                   }`}
                 >
                   {isMuted ? "Unmute Microphone" : "Mute Microphone"}

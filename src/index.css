@@ -2,16 +2,46 @@
 
 @import "tailwindcss";
 
-@theme {
-  --color-orbit-bg: #050816;
-  --color-orbit-card: #0F172A;
-  --color-orbit-elevated: #1E293B;
-  --color-orbit-darkBorder: rgba(255, 255, 255, 0.08);
+:root {
+  --orbit-bg: #050816;
+  --orbit-card: #0F172A;
+  --orbit-elevated: #1E293B;
+  --orbit-border: rgba(255, 255, 255, 0.08);
+  --orbit-text-primary: #FFFFFF;
+  --orbit-text-secondary: #94a3b8;
+  --orbit-text-muted: #64748b;
   
-  --color-gray-950: #050816;
-  --color-gray-900: #0F172A;
-  --color-gray-850: #162032;
-  --color-gray-800: #1E293B;
+  --orbit-gray-950: #050816;
+  --orbit-gray-900: #0F172A;
+  --orbit-gray-850: #162032;
+  --orbit-gray-800: #1E293B;
+}
+
+.light {
+  --orbit-bg: #F8FAFC;
+  --orbit-card: #FFFFFF;
+  --orbit-elevated: #FFFFFF;
+  --orbit-border: #E2E8F0;
+  --orbit-text-primary: #0F172A;
+  --orbit-text-secondary: #475569;
+  --orbit-text-muted: #64748B;
+  
+  --orbit-gray-950: #F8FAFC;
+  --orbit-gray-900: #FFFFFF;
+  --orbit-gray-850: #EFF6FF;
+  --orbit-gray-800: #E2E8F0;
+}
+
+@theme {
+  --color-orbit-bg: var(--orbit-bg);
+  --color-orbit-card: var(--orbit-card);
+  --color-orbit-elevated: var(--orbit-elevated);
+  --color-orbit-darkBorder: var(--orbit-border);
+  
+  --color-gray-950: var(--orbit-gray-950);
+  --color-gray-900: var(--orbit-gray-900);
+  --color-gray-850: var(--orbit-gray-850);
+  --color-gray-800: var(--orbit-gray-800);
   
   /* Agent brand colors */
   --color-orbit-blue: #3B82F6;
@@ -87,8 +117,8 @@
 
 @layer base {
   body {
-    background-color: #050816;
-    color: white;
+    background-color: var(--orbit-bg);
+    color: var(--orbit-text-primary);
     font-family: 'Inter', sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -157,10 +187,19 @@
 
 /* Light theme overrides */
 .light .orbit-panel {
-  @apply bg-white/70 backdrop-blur-md border border-gray-200/80 rounded-xl shadow-sm;
+  @apply bg-white border border-[#E2E8F0] rounded-2xl transition-all duration-300;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.06);
+}
+.light .orbit-panel:hover {
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
 }
 .light .orbit-panel-elevated {
-  @apply bg-gray-50/90 backdrop-blur-md border border-gray-300/80 rounded-xl shadow-md;
+  @apply bg-white border border-[#E2E8F0] rounded-2xl transition-all duration-300;
+  box-shadow: 0 6px 16px rgba(15, 23, 42, 0.07);
+}
+.light .orbit-panel-hero {
+  @apply bg-white border border-[#E2E8F0] rounded-2xl transition-all duration-300;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
 }
 
 
@@ -187,6 +226,25 @@
 .card-secondary:hover {
   border-color: rgba(255,255,255,0.12);
   background: rgba(15, 23, 42, 0.8);
+}
+
+/* Light theme overrides for card system */
+.light .card-primary {
+  background: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.06);
+}
+.light .card-primary:hover {
+  border-color: #CBD5E1;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+}
+.light .card-secondary {
+  background: #FFFFFF;
+  border: 1px solid #E2E8F0;
+}
+.light .card-secondary:hover {
+  background: #EFF6FF;
+  border-color: #BFDBFE;
 }
 
 
@@ -273,6 +331,34 @@
 }
 .btn-primary-glow:active {
   transform: scale(0.97);
+}
+
+/* Light theme overrides for buttons and overlays */
+.light .btn-primary-glow {
+  background: #2563EB;
+  color: #FFFFFF;
+  box-shadow: none;
+}
+.light .btn-primary-glow:hover {
+  background: #1D4ED8;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+  transform: translateY(-1px);
+}
+.light .scanlines {
+  display: none !important;
+}
+.light .bg-orbit-glow-blue, 
+.light .bg-orbit-glow-purple, 
+.light .bg-orbit-glow-green, 
+.light .bg-orbit-glow-amber, 
+.light .bg-orbit-glow-pink,
+.light .bg-orbit-glow-blue-strong, 
+.light .bg-orbit-glow-purple-strong, 
+.light .bg-orbit-glow-green-strong, 
+.light .bg-orbit-glow-amber-strong, 
+.light .bg-orbit-glow-pink-strong {
+  background: transparent !important;
+  box-shadow: none !important;
 }
 
 

@@ -28,8 +28,10 @@ interface OpportunityRadarProps {
 }
 
 export const OpportunityRadar: React.FC<OpportunityRadarProps> = ({ onNavigate }) => {
-  const { lunaMetrics, updateLunaMetrics, startMission, personas, latestVerdict } = useOrbit();
+  const { theme, lunaMetrics, updateLunaMetrics, startMission, personas, latestVerdict } = useOrbit();
   const [selectedAgent, setSelectedAgent] = useState<"Polaris" | "Vega" | "Nova" | "Atlas" | "Luna" | null>(null);
+
+  const isLight = theme === "executive";
 
   const [opportunitiesData, setOpportunitiesData] = useState<{
     totalPotentialRevenue: number;
@@ -230,47 +232,49 @@ export const OpportunityRadar: React.FC<OpportunityRadarProps> = ({ onNavigate }
     switch (colorName) {
       case "Red":
         return {
-          text: "text-red-400",
-          bg: "bg-red-400",
-          border: "border-red-500/35",
-          glow: "shadow-orbit-glow-red bg-gradient-to-br from-[#0F172A] to-[#1E293B]"
+          text: isLight ? "text-red-600" : "text-red-400",
+          bg: isLight ? "bg-red-500" : "bg-red-400",
+          border: isLight ? "border-red-200" : "border-red-500/35",
+          glow: isLight ? "bg-white shadow-sm border border-slate-200" : "shadow-orbit-glow-red bg-gradient-to-br from-[#0F172A] to-[#1E293B]"
         };
       case "Yellow":
         return {
-          text: "text-amber-400",
-          bg: "bg-amber-400",
-          border: "border-amber-500/35",
-          glow: "shadow-orbit-glow-amber bg-gradient-to-br from-[#0F172A] to-[#1E293B]"
+          text: isLight ? "text-amber-600" : "text-amber-400",
+          bg: isLight ? "bg-amber-500" : "bg-amber-400",
+          border: isLight ? "border-amber-200" : "border-amber-500/35",
+          glow: isLight ? "bg-white shadow-sm border border-slate-200" : "shadow-orbit-glow-amber bg-gradient-to-br from-[#0F172A] to-[#1E293B]"
         };
       case "Green":
         return {
-          text: "text-orbit-success",
-          bg: "bg-orbit-success",
-          border: "border-green-500/35",
-          glow: "shadow-orbit-glow-green bg-gradient-to-br from-[#0F172A] to-[#1E293B]"
+          text: isLight ? "text-emerald-600" : "text-orbit-success",
+          bg: isLight ? "bg-emerald-500" : "bg-orbit-success",
+          border: isLight ? "border-emerald-200" : "border-green-500/35",
+          glow: isLight ? "bg-white shadow-sm border border-slate-200" : "shadow-orbit-glow-green bg-gradient-to-br from-[#0F172A] to-[#1E293B]"
         };
       case "Purple":
       default:
         return {
-          text: "text-orbit-purple",
-          bg: "bg-orbit-purple",
-          border: "border-purple-500/35",
-          glow: "shadow-orbit-glow-purple bg-gradient-to-br from-[#0F172A] to-[#1E293B]"
+          text: isLight ? "text-purple-600" : "text-orbit-purple",
+          bg: isLight ? "bg-purple-500" : "bg-orbit-purple",
+          border: isLight ? "border-purple-200" : "border-purple-500/35",
+          glow: isLight ? "bg-white shadow-sm border border-slate-200" : "shadow-orbit-glow-purple bg-gradient-to-br from-[#0F172A] to-[#1E293B]"
         };
     }
   };
 
   return (
-    <div className="flex-1 flex overflow-hidden bg-[#050816] relative font-inter">
+    <div className={`flex-1 flex overflow-hidden relative font-inter ${isLight ? "bg-slate-50" : "bg-[#050816]"}`}>
       {/* Background Matrix overlays */}
-      <div className="pointer-events-none absolute inset-0 space-grid opacity-30 z-0" />
+      <div className={`pointer-events-none absolute inset-0 space-grid z-0 ${isLight ? "opacity-15" : "opacity-30"}`} />
       <div className="pointer-events-none absolute inset-0 bg-orbit-glow-blue opacity-10 z-0" />
-      <div className="scanlines" />
+      {!isLight && <div className="scanlines" />}
 
       {/* ════════════════════════════════════════
           LEFT PANEL: RADAR GRAPHICS CHAMBER
       ════════════════════════════════════════ */}
-      <main className="flex-1 flex flex-col p-4 lg:p-6 overflow-y-auto relative z-10 border-r border-gray-900">
+      <main className={`flex-1 flex flex-col p-4 lg:p-6 overflow-y-auto relative z-10 border-r ${
+        isLight ? "border-slate-200" : "border-gray-900"
+      }`}>
         
         {/* Header */}
         <PageHeaderHUD
@@ -281,7 +285,9 @@ export const OpportunityRadar: React.FC<OpportunityRadarProps> = ({ onNavigate }
             <button
               onClick={performScan}
               disabled={isScanning}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-950 border border-gray-900 rounded-lg text-gray-450 font-mono text-[9px] cursor-pointer hover:border-gray-800 hover:text-white transition-all disabled:opacity-50"
+              className={`flex items-center gap-1.5 px-3 py-1.5 border rounded-lg font-mono text-[9px] cursor-pointer transition-all disabled:opacity-50 ${
+                isLight ? "bg-white border-slate-200 text-slate-600 hover:text-slate-800 hover:border-slate-300 shadow-sm" : "bg-gray-950 border-gray-900 text-gray-455 hover:border-gray-800 hover:text-white"
+              }`}
             >
               <RefreshCw size={11} className={isScanning ? "animate-spin" : ""} />
               <span>Scan Channels</span>
@@ -291,27 +297,35 @@ export const OpportunityRadar: React.FC<OpportunityRadarProps> = ({ onNavigate }
 
         {/* Sleek Summary Ribbon */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6 mt-4 font-mono text-[9px]">
-          <div className="orbit-panel p-3 bg-gray-950/45 border border-gray-900 rounded-xl flex flex-col space-y-1 relative overflow-hidden text-left">
-            <span className="text-gray-550 text-[7.5px] uppercase tracking-wider">Recoverable Revenue</span>
-            <span className="text-orbit-success text-sm font-bold tracking-tight">
+          <div className={`orbit-panel p-3 border rounded-xl flex flex-col space-y-1 relative overflow-hidden text-left ${
+            isLight ? "bg-white border-slate-200 shadow-sm" : "bg-gray-950/45 border-gray-900"
+          }`}>
+            <span className="text-gray-555 text-[7.5px] uppercase tracking-wider">Recoverable Revenue</span>
+            <span className="text-emerald-600 text-sm font-bold tracking-tight">
               {opportunitiesData ? `₹${opportunitiesData.totalPotentialRevenue.toLocaleString()}` : "₹0"}
             </span>
             <div className="absolute top-1 right-2 w-1.5 h-1.5 rounded-full bg-orbit-success/40 animate-pulse" />
           </div>
-          <div className="orbit-panel p-3 bg-gray-950/45 border border-gray-900 rounded-xl flex flex-col space-y-1 relative overflow-hidden text-left">
-            <span className="text-gray-550 text-[7.5px] uppercase tracking-wider">Active Nodes</span>
-            <span className="text-white text-sm font-bold tracking-tight">
+          <div className={`orbit-panel p-3 border rounded-xl flex flex-col space-y-1 relative overflow-hidden text-left ${
+            isLight ? "bg-white border-slate-200 shadow-sm" : "bg-gray-950/45 border-gray-900"
+          }`}>
+            <span className="text-gray-555 text-[7.5px] uppercase tracking-wider">Active Nodes</span>
+            <span className={`text-sm font-bold tracking-tight ${isLight ? "text-slate-800" : "text-white"}`}>
               {opportunitiesData ? `${opportunitiesData.opportunities.length} Nodes` : "0 Nodes"}
             </span>
           </div>
-          <div className="orbit-panel p-3 bg-gray-950/45 border border-gray-900 rounded-xl flex flex-col space-y-1 relative overflow-hidden text-left">
-            <span className="text-gray-550 text-[7.5px] uppercase tracking-wider">Highest Priority</span>
-            <span className="text-pink-400 text-sm font-bold tracking-tight uppercase truncate block max-w-full">
+          <div className={`orbit-panel p-3 border rounded-xl flex flex-col space-y-1 relative overflow-hidden text-left ${
+            isLight ? "bg-white border-slate-200 shadow-sm" : "bg-gray-950/45 border-gray-900"
+          }`}>
+            <span className="text-gray-555 text-[7.5px] uppercase tracking-wider">Highest Priority</span>
+            <span className="text-pink-500 text-sm font-bold tracking-tight uppercase truncate block max-w-full">
               {opportunitiesData ? opportunitiesData.highestPriority : "Scanning..."}
             </span>
           </div>
-          <div className="orbit-panel p-3 bg-gray-950/45 border border-gray-900 rounded-xl flex flex-col space-y-1 relative overflow-hidden text-left">
-            <span className="text-gray-550 text-[7.5px] uppercase tracking-wider">Avg AI Confidence</span>
+          <div className={`orbit-panel p-3 border rounded-xl flex flex-col space-y-1 relative overflow-hidden text-left ${
+            isLight ? "bg-white border-slate-200 shadow-sm" : "bg-gray-950/45 border-gray-900"
+          }`}>
+            <span className="text-gray-555 text-[7.5px] uppercase tracking-wider">Avg AI Confidence</span>
             <span className="text-orbit-purple text-sm font-bold tracking-tight">
               {opportunitiesData && opportunitiesData.opportunities.length > 0
                 ? `${Math.round(opportunitiesData.opportunities.reduce((acc, o) => acc + o.confidence, 0) / opportunitiesData.opportunities.length)}%` 
@@ -326,18 +340,20 @@ export const OpportunityRadar: React.FC<OpportunityRadarProps> = ({ onNavigate }
           {/* Main concentric radar frame */}
           <div className="relative w-80 h-80 flex items-center justify-center">
             {/* outer rings */}
-            <div className="absolute inset-0 rounded-full border border-pink-500/10" />
-            <div className="absolute inset-8 rounded-full border border-pink-500/10" />
-            <div className="absolute inset-16 rounded-full border border-pink-500/15" />
-            <div className="absolute inset-24 rounded-full border border-dashed border-pink-500/20" />
-            <div className="absolute inset-32 rounded-full border border-pink-500/25 flex items-center justify-center">
-              <Radio size={24} className="text-pink-400 animate-ping" />
+            <div className={`absolute inset-0 rounded-full border ${isLight ? "border-blue-500/10" : "border-pink-500/10"}`} />
+            <div className={`absolute inset-8 rounded-full border ${isLight ? "border-blue-500/10" : "border-pink-500/10"}`} />
+            <div className={`absolute inset-16 rounded-full border ${isLight ? "border-blue-500/15" : "border-pink-500/15"}`} />
+            <div className={`absolute inset-24 rounded-full border border-dashed ${isLight ? "border-blue-500/20" : "border-pink-500/20"}`} />
+            <div className={`absolute inset-32 rounded-full border ${isLight ? "border-blue-500/25" : "border-pink-500/25"} flex items-center justify-center`}>
+              <Radio size={24} className={`${isLight ? "text-blue-500" : "text-pink-400"} animate-ping`} />
             </div>
 
             {/* Sweep sweep scanning line */}
             {isScanning && (
               <div 
-                className="absolute inset-0 rounded-full bg-gradient-to-tr from-transparent via-pink-500/5 to-transparent pointer-events-none animate-radar-sweep"
+                className={`absolute inset-0 rounded-full bg-gradient-to-tr from-transparent to-transparent pointer-events-none animate-radar-sweep ${
+                  isLight ? "via-blue-500/5" : "via-pink-500/5"
+                }`}
                 style={{ transformOrigin: "center center" }}
               />
             )}
@@ -365,14 +381,22 @@ export const OpportunityRadar: React.FC<OpportunityRadarProps> = ({ onNavigate }
                   className="absolute group cursor-pointer z-20 focus:outline-none"
                 >
                   <span className={`absolute -inset-2.5 rounded-full border animate-ping ${
-                    isSelected ? "border-pink-400 bg-pink-400/5 opacity-80" : "border-gray-800 opacity-20"
+                    isSelected 
+                      ? isLight ? "border-blue-400 bg-blue-400/5 opacity-80" : "border-pink-400 bg-pink-400/5 opacity-80" 
+                      : "border-gray-800 opacity-20"
                   }`} style={{ animationDuration: '3s' }} />
-                  <span className={`w-3.5 h-3.5 rounded-full border-2 border-[#050816] flex items-center justify-center transition-all ${
-                    isSelected ? "bg-pink-400 scale-125 shadow-[0_0_15px_rgba(236,72,153,0.6)]" : `${colorConfig.bg} hover:scale-110`
+                  <span className={`w-3.5 h-3.5 rounded-full border-2 flex items-center justify-center transition-all ${
+                    isLight ? "border-white" : "border-[#050816]"
+                  } ${
+                    isSelected 
+                      ? isLight ? "bg-blue-600 scale-125 shadow-[0_0_15px_rgba(37,99,235,0.6)]" : "bg-pink-400 scale-125 shadow-[0_0_15px_rgba(236,72,153,0.6)]"
+                      : `${colorConfig.bg} hover:scale-110`
                   }`} />
                   
                   {/* Tooltip detail tag */}
-                  <span className="absolute left-5 top-0 bg-gray-950 border border-gray-900 rounded px-1.5 py-0.5 text-[8px] font-mono text-gray-400 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50">
+                  <span className={`absolute left-5 top-0 border rounded px-1.5 py-0.5 text-[8px] font-mono pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 ${
+                    isLight ? "bg-white border-slate-200 text-slate-600 shadow-md" : "bg-gray-950 border-gray-900 text-gray-400"
+                  }`}>
                     ₹{n.potentialRevenue.toLocaleString()} ({n.type})
                   </span>
                 </button>
@@ -388,13 +412,17 @@ export const OpportunityRadar: React.FC<OpportunityRadarProps> = ({ onNavigate }
         </div>
 
         {/* Telemetry Console Log */}
-        <div className="mt-4 border border-gray-900 bg-gray-950/70 rounded-xl p-3 flex flex-col space-y-1 font-mono text-[9px] leading-relaxed select-none relative overflow-hidden">
+        <div className={`mt-4 border rounded-xl p-3 flex flex-col space-y-1 font-mono text-[9px] leading-relaxed select-none relative overflow-hidden text-left ${
+          isLight ? "bg-white border-slate-200 shadow-sm" : "border-gray-900 bg-gray-950/70"
+        }`}>
           <div className="absolute top-2 right-3 flex items-center gap-1.5">
-            <span className={`w-1.5 h-1.5 rounded-full ${isScanning ? "bg-amber-400 animate-ping" : "bg-orbit-success animate-pulse"}`} />
+            <span className={`w-1.5 h-1.5 rounded-full ${isScanning ? "bg-amber-400 animate-ping" : "bg-emerald-600 animate-pulse"}`} />
             <span className="text-[7.5px] text-gray-550 uppercase tracking-widest">{isScanning ? "Scanning Channels" : "Telemetry Standby"}</span>
           </div>
-          <div className="text-gray-500 font-bold border-b border-gray-900 pb-1.5 mb-1.5 flex items-center gap-1 text-left">
-            <Terminal size={11} className="text-pink-400" />
+          <div className={`font-bold border-b pb-1.5 mb-1.5 flex items-center gap-1 text-left ${
+            isLight ? "border-slate-100 text-slate-600" : "border-gray-900 text-gray-500"
+          }`}>
+            <Terminal size={11} className={isLight ? "text-blue-500" : "text-pink-400"} />
             <span>CHANNEL DISCOVERY TELEMETRY CONSOLE</span>
           </div>
           
@@ -403,14 +431,14 @@ export const OpportunityRadar: React.FC<OpportunityRadarProps> = ({ onNavigate }
               <div className="text-gray-655 italic">System ready. Click "Scan Channels" to initiate detection.</div>
             ) : (
               scanLogs.map((log, idx) => {
-                let colorClass = "text-gray-450";
-                if (log.includes("[Warning]")) colorClass = "text-red-400";
-                else if (log.includes("[System]")) colorClass = "text-pink-400 font-bold";
-                else if (log.includes("[Luna]")) colorClass = "text-amber-400";
-                else if (log.includes("[Polaris]")) colorClass = "text-orbit-blue";
-                else if (log.includes("[Vega]")) colorClass = "text-orbit-purple";
-                else if (log.includes("[Nova]")) colorClass = "text-pink-400";
-                else if (log.includes("[Atlas]")) colorClass = "text-orbit-success";
+                let colorClass = isLight ? "text-slate-600" : "text-gray-450";
+                if (log.includes("[Warning]")) colorClass = "text-red-500";
+                else if (log.includes("[System]")) colorClass = isLight ? "text-blue-600 font-bold" : "text-pink-400 font-bold";
+                else if (log.includes("[Luna]")) colorClass = "text-amber-600";
+                else if (log.includes("[Polaris]")) colorClass = "text-blue-600";
+                else if (log.includes("[Vega]")) colorClass = "text-purple-600";
+                else if (log.includes("[Nova]")) colorClass = isLight ? "text-pink-600 animate-pulse" : "text-pink-400";
+                else if (log.includes("[Atlas]")) colorClass = "text-emerald-600";
                 
                 return (
                   <div key={idx} className={`${colorClass} flex gap-1.5`}>
@@ -421,10 +449,10 @@ export const OpportunityRadar: React.FC<OpportunityRadarProps> = ({ onNavigate }
               })
             )}
             {isScanning && (
-              <div className="flex gap-1.5 text-pink-400/70 text-[9px]">
+              <div className={`text-[9px] flex gap-1.5 ${isLight ? "text-blue-500/80" : "text-pink-400/70"}`}>
                 <span className="text-gray-650 font-bold select-none">&gt;&gt;</span>
                 <span className="animate-pulse">Mapping digital coordinates...</span>
-                <span className="inline-block w-1 bg-pink-400 animate-pulse h-3" />
+                <span className={`inline-block w-1 animate-pulse h-3 ${isLight ? "bg-blue-500" : "bg-pink-400"}`} />
               </div>
             )}
             <div ref={logsEndRef} />
@@ -435,25 +463,31 @@ export const OpportunityRadar: React.FC<OpportunityRadarProps> = ({ onNavigate }
       {/* ════════════════════════════════════════
           RIGHT COLUMN: DETAILS & ACTIONS
       ════════════════════════════════════════ */}
-      <aside className="w-72 lg:w-80 shrink-0 flex flex-col bg-gray-950/45 backdrop-blur-md p-4 space-y-4 overflow-y-auto relative z-10">
+      <aside className={`w-72 lg:w-80 shrink-0 flex flex-col p-4 space-y-4 overflow-y-auto relative z-10 border-l ${
+        isLight ? "bg-white border-slate-200" : "bg-gray-950/45 border-gray-900/60 backdrop-blur-md"
+      }`}>
         
         {/* Opportunity Score Indicator */}
-        <div className="orbit-panel p-4 flex flex-col items-center justify-center text-center space-y-3 relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-16 h-16 bg-pink-500/10 pointer-events-none filter blur-xl" />
-          <h2 className="font-space text-xs font-bold text-white uppercase tracking-wider block border-b border-gray-900 w-full pb-2 mb-1">
+        <div className={`orbit-panel p-4 flex flex-col items-center justify-center text-center space-y-3 relative overflow-hidden ${
+          isLight ? "bg-slate-50 border-slate-200" : "bg-gray-950/45 border-gray-900"
+        }`}>
+          <div className={`absolute top-0 right-0 w-16 h-16 pointer-events-none filter blur-xl ${isLight ? "bg-blue-500/5" : "bg-pink-500/10"}`} />
+          <h2 className={`font-space text-xs font-bold uppercase tracking-wider block border-b w-full pb-2 mb-1 ${
+            isLight ? "border-slate-200 text-slate-700" : "border-gray-900 text-white"
+          }`}>
             Global Revenue Leakage
           </h2>
           
           <div className="relative w-28 h-28 flex items-center justify-center">
             {/* SVG circle meter */}
             <svg className="w-full h-full transform -rotate-90">
-              <circle cx="56" cy="56" r="46" fill="transparent" stroke="#111827" strokeWidth="6" />
+              <circle cx="56" cy="56" r="46" fill="transparent" stroke={isLight ? "#E2E8F0" : "#111827"} strokeWidth="6" />
               <circle 
                 cx="56" 
                 cy="56" 
                 r="46" 
                 fill="transparent" 
-                stroke="#EC4899" 
+                stroke={isLight ? "#2563EB" : "#EC4899"} 
                 strokeWidth="6" 
                 strokeDasharray={2 * Math.PI * 46} 
                 strokeDashoffset={2 * Math.PI * 46 * (1 - (lunaMetrics.opportunityScore || 85) / 100)} 
@@ -462,59 +496,69 @@ export const OpportunityRadar: React.FC<OpportunityRadarProps> = ({ onNavigate }
             </svg>
             <div className="absolute inset-0 flex flex-col items-center justify-center font-mono">
               <span className="text-[7px] text-gray-550 uppercase">Opportunity</span>
-              <span className="text-xl font-bold text-white tracking-tight">{lunaMetrics.opportunityScore || 85}%</span>
-              <span className="text-[7px] text-pink-400 font-bold uppercase mt-0.5">Optimal</span>
+              <span className={`text-xl font-bold tracking-tight ${isLight ? "text-slate-800" : "text-white"}`}>{lunaMetrics.opportunityScore || 85}%</span>
+              <span className={`text-[7px] font-bold uppercase mt-0.5 ${isLight ? "text-blue-600" : "text-pink-400"}`}>Optimal</span>
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-2 w-full text-left font-mono text-[9px] border-t border-gray-900 pt-3">
+          <div className={`grid grid-cols-2 gap-2 w-full text-left font-mono text-[9px] border-t pt-3 ${
+            isLight ? "border-slate-200" : "border-gray-900"
+          }`}>
             <div>
               <span className="text-gray-555 block text-[7px] uppercase font-semibold">Recoverable Rev</span>
-              <span className="text-orbit-success font-bold">₹{(lunaMetrics.recoverableRevenue || 0).toLocaleString()}</span>
+              <span className="text-emerald-600 font-bold">₹{(lunaMetrics.recoverableRevenue || 0).toLocaleString()}</span>
             </div>
             <div>
               <span className="text-gray-555 block text-[7px] uppercase font-semibold">Target Leaks</span>
-              <span className="text-white font-bold">{(lunaMetrics.abandonedLeads || 0) + (lunaMetrics.inactiveCustomers || 0)} nodes</span>
+              <span className={`font-bold ${isLight ? "text-slate-800" : "text-white"}`}>{(lunaMetrics.abandonedLeads || 0) + (lunaMetrics.inactiveCustomers || 0)} nodes</span>
             </div>
           </div>
         </div>
 
         {/* Selected blip node breakdown */}
         {selectedNode ? (
-          <div className={`orbit-panel p-4 space-y-3.5 transition-all duration-300 border ${
-            getColorClasses(selectedNode.color).border
-          } bg-gradient-to-br from-[#0F172A] to-[#1E293B] shadow-lg rounded-xl text-left`}>
-            <div className="border-b border-gray-900/60 pb-2.5">
-              <span className="font-mono text-[8px] text-gray-550 uppercase tracking-widest block">Opportunity Node Focus</span>
-              <h3 className="font-space text-xs font-bold text-white uppercase tracking-tight mt-0.5">{selectedNode.title}</h3>
+          <div className={`orbit-panel p-4 space-y-3.5 transition-all duration-300 border shadow-lg rounded-xl text-left ${
+            isLight ? "bg-white border-slate-200" : `bg-gradient-to-br from-[#0F172A] to-[#1E293B] ${getColorClasses(selectedNode.color).border}`
+          }`}>
+            <div className={`border-b pb-2.5 ${isLight ? "border-slate-100" : "border-gray-900/60"}`}>
+              <span className="font-mono text-[8px] text-gray-555 uppercase tracking-widest block">Opportunity Node Focus</span>
+              <h3 className={`font-space text-xs font-bold uppercase tracking-tight mt-0.5 ${
+                isLight ? "text-slate-800" : "text-white"
+              }`}>{selectedNode.title}</h3>
             </div>
 
-            <div className="space-y-2.5 font-mono text-[9px]">
+            <div className={`space-y-2.5 font-mono text-[9px] ${isLight ? "text-slate-650" : "text-gray-300"}`}>
               <div className="flex justify-between">
-                <span className="text-gray-500">Segment category:</span>
-                <span className="text-white font-bold uppercase">{selectedNode.type}</span>
+                <span className="text-gray-555">Segment category:</span>
+                <span className={`font-bold uppercase ${isLight ? "text-slate-700" : "text-white"}`}>{selectedNode.type}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-gray-500">Node volume:</span>
-                <span className="text-white font-bold">{selectedNode.audienceSize} targets</span>
+                <span className="text-gray-555">Node volume:</span>
+                <span className={`font-bold ${isLight ? "text-slate-700" : "text-white"}`}>{selectedNode.audienceSize} targets</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-gray-500">Potential revenue yield:</span>
-                <span className="text-orbit-success font-bold">₹{selectedNode.potentialRevenue.toLocaleString()}</span>
+                <span className="text-gray-555">Potential revenue yield:</span>
+                <span className="text-emerald-600 font-bold">₹{selectedNode.potentialRevenue.toLocaleString()}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-gray-500">AI Confidence:</span>
-                <span className="text-pink-400 font-bold">{selectedNode.confidence}%</span>
+                <span className="text-gray-555">AI Confidence:</span>
+                <span className={`font-bold ${isLight ? "text-blue-600" : "text-pink-400"}`}>{selectedNode.confidence}%</span>
               </div>
               
-              <p className="text-gray-450 text-[8.5px] leading-relaxed border-t border-gray-900/60 pt-2.5 mt-2.5">
+              <p className={`text-[8.5px] leading-relaxed border-t pt-2.5 mt-2.5 ${
+                isLight ? "border-slate-100 text-slate-500" : "border-gray-900/60 text-gray-450"
+              }`}>
                 {selectedNode.description}
               </p>
 
               {/* WHY LUNA FOUND THIS */}
-              <div className="border-t border-gray-900/60 pt-2.5 mt-2.5">
-                <span className="font-bold text-white block mb-1 uppercase text-[8px] tracking-wider text-pink-400">Why Luna Found This:</span>
-                <p className="text-gray-450 text-[8.5px] leading-relaxed italic bg-black/20 p-2 rounded border border-gray-900">
+              <div className={`border-t pt-2.5 mt-2.5 ${isLight ? "border-slate-100" : "border-gray-900/60"}`}>
+                <span className={`font-bold block mb-1 uppercase text-[8px] tracking-wider ${
+                  isLight ? "text-blue-600" : "text-pink-400"
+                }`}>Why Luna Found This:</span>
+                <p className={`text-[8.5px] leading-relaxed italic p-2 rounded border ${
+                  isLight ? "bg-slate-50 border-slate-150 text-slate-600" : "bg-black/20 border-gray-900 text-gray-455"
+                }`}>
                   "{selectedNode.reasoning}"
                 </p>
               </div>
@@ -523,7 +567,9 @@ export const OpportunityRadar: React.FC<OpportunityRadarProps> = ({ onNavigate }
             <button
               onClick={() => handleLaunchCampaign(selectedNode.recommendedAction)}
               disabled={isLaunching}
-              className="w-full py-2.5 bg-pink-500 hover:bg-pink-600 text-white font-mono text-[9px] font-bold uppercase tracking-widest rounded-xl transition-all flex items-center justify-center gap-1 cursor-pointer disabled:opacity-50"
+              className={`w-full py-2.5 font-mono text-[9px] font-bold uppercase tracking-widest rounded-xl transition-all flex items-center justify-center gap-1 cursor-pointer disabled:opacity-50 ${
+                isLight ? "bg-blue-600 hover:bg-blue-700 text-white shadow-sm" : "bg-pink-500 hover:bg-pink-600 text-white"
+              }`}
             >
               {isLaunching ? (
                 <span className="animate-pulse">{launchStatus}</span>
@@ -538,9 +584,11 @@ export const OpportunityRadar: React.FC<OpportunityRadarProps> = ({ onNavigate }
         ) : (
           <div className="space-y-3">
             {latestVerdict ? (
-              <div className="orbit-panel p-4 space-y-3 text-left">
-                <h3 className="font-space text-xs font-bold text-white uppercase tracking-wider flex items-center gap-1.5 border-b border-gray-900 pb-2">
-                  <ShieldAlert size={12} className="text-pink-500 animate-pulse" />
+              <div className={`orbit-panel p-4 space-y-3 text-left ${isLight ? "bg-slate-50 border-slate-200" : "bg-gray-900 border-gray-800"}`}>
+                <h3 className={`font-space text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 border-b pb-2 ${
+                  isLight ? "border-slate-200 text-slate-800" : "border-gray-900 text-white"
+                }`}>
+                  <ShieldAlert size={12} className={`${isLight ? "text-blue-500" : "text-pink-500"} animate-pulse`} />
                   Active Trend Intel
                 </h3>
                 
@@ -548,29 +596,33 @@ export const OpportunityRadar: React.FC<OpportunityRadarProps> = ({ onNavigate }
                   {/* Trend Shift Alert */}
                   <div className="space-y-1">
                     <span className="text-[7.5px] text-gray-500 uppercase font-bold tracking-wider block flex items-center gap-1">
-                      <TrendingUp size={9} className="text-pink-400" />
+                      <TrendingUp size={9} className={isLight ? "text-blue-500" : "text-pink-400"} />
                       Trend Shift Alert
                     </span>
-                    <p className="text-gray-300 leading-relaxed bg-black/20 p-2 rounded border border-gray-900">
-                      Active consumer demand shift in <span className="text-white font-bold">{latestVerdict.region}</span> from <span className="text-red-400 font-semibold">{latestVerdict.currentTrend}</span> to <span className="text-orbit-success font-semibold">{latestVerdict.futureTrend}</span>.
+                    <p className={`text-xs leading-relaxed p-2 rounded border ${
+                      isLight ? "bg-white border-slate-200 text-slate-700" : "bg-black/20 border-gray-900 text-gray-300"
+                    }`}>
+                      Active consumer demand shift in <span className={`font-bold ${isLight ? "text-slate-800" : "text-white"}`}>{latestVerdict.region}</span> from <span className="text-red-500 font-semibold">{latestVerdict.currentTrend}</span> to <span className="text-emerald-600 font-semibold">{latestVerdict.futureTrend}</span>.
                     </p>
                   </div>
 
                   {/* Persona Demand Changes */}
                   <div className="space-y-1">
                     <span className="text-[7.5px] text-gray-500 uppercase font-bold tracking-wider block flex items-center gap-1">
-                      <Award size={9} className="text-blue-400" />
+                      <Award size={9} className="text-blue-500" />
                       Persona Demand Changes
                     </span>
-                    <div className="bg-black/20 p-2 rounded border border-gray-900 space-y-1 text-gray-400">
+                    <div className={`p-2 rounded border space-y-1 ${
+                      isLight ? "bg-white border-slate-200 text-slate-600" : "bg-black/20 border-gray-900 text-gray-400"
+                    }`}>
                       <div>
-                        Cohort: <span className="text-blue-400 font-bold">{latestVerdict.targetPersona}</span>
+                        Cohort: <span className="text-blue-600 font-bold">{latestVerdict.targetPersona}</span>
                       </div>
                       <div>
-                        Adoption Speed: <span className="text-white">Accelerating</span>
+                        Adoption Speed: <span className={isLight ? "text-slate-800" : "text-white"}>Accelerating</span>
                       </div>
                       <div>
-                        Target ROI: <span className="text-white font-bold">{latestVerdict.expectedRoi}x</span>
+                        Target ROI: <span className={`font-bold ${isLight ? "text-slate-850" : "text-white"}`}>{latestVerdict.expectedRoi}x</span>
                       </div>
                     </div>
                   </div>
@@ -581,12 +633,14 @@ export const OpportunityRadar: React.FC<OpportunityRadarProps> = ({ onNavigate }
                       <MapPin size={9} className="text-orbit-purple" />
                       Regional Opportunity
                     </span>
-                    <div className="bg-black/20 p-2 rounded border border-gray-900 flex items-center justify-between text-gray-450">
+                    <div className={`p-2 rounded border flex items-center justify-between ${
+                      isLight ? "bg-white border-slate-200 text-slate-600" : "bg-black/20 border-gray-900 text-gray-455"
+                    }`}>
                       <div>
-                        Zone: <span className="text-white font-bold">{latestVerdict.region}</span>
+                        Zone: <span className={isLight ? "text-slate-850 font-bold" : "text-white font-bold"}>{latestVerdict.region}</span>
                       </div>
                       <div>
-                        Value: <span className="text-orbit-success font-bold">₹{latestVerdict.revenueOpportunity.toLocaleString()}</span>
+                        Value: <span className="text-emerald-600 font-bold">₹{latestVerdict.revenueOpportunity.toLocaleString()}</span>
                       </div>
                     </div>
                   </div>
@@ -601,8 +655,12 @@ export const OpportunityRadar: React.FC<OpportunityRadarProps> = ({ onNavigate }
         )}
 
         {/* AI Recommendations */}
-        <div className="orbit-panel p-4 space-y-3 flex-1 flex flex-col min-h-[220px]">
-          <h3 className="font-space text-xs font-bold text-white uppercase tracking-wider flex items-center gap-1.5 border-b border-gray-900 pb-2 shrink-0 text-left">
+        <div className={`orbit-panel p-4 space-y-3 flex-1 flex flex-col min-h-[220px] ${
+          isLight ? "bg-slate-50 border-slate-200" : "bg-gray-950/45 border-gray-900"
+        }`}>
+          <h3 className={`font-space text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 border-b pb-2 shrink-0 text-left ${
+            isLight ? "border-slate-200 text-slate-800" : "border-gray-900 text-white"
+          }`}>
             <Sparkles size={12} className="text-orbit-purple" />
             Luna Actions
           </h3>
@@ -616,17 +674,21 @@ export const OpportunityRadar: React.FC<OpportunityRadarProps> = ({ onNavigate }
                 <div 
                   key={opp.id} 
                   onClick={() => setSelectedNodeId(opp.id)}
-                  className={`border p-2.5 rounded-lg space-y-1 font-mono text-[8.5px] bg-[#0F172A]/80 transition-all duration-300 hover:scale-[1.02] cursor-pointer text-left ${
-                    isSelected ? "border-pink-500/50 bg-pink-500/5 shadow-[0_0_10px_rgba(236,72,153,0.1)]" : `${colorConfig.border} hover:border-gray-800`
+                  className={`border p-2.5 rounded-lg space-y-1 font-mono text-[8.5px] transition-all duration-300 hover:scale-[1.02] cursor-pointer text-left ${
+                    isSelected 
+                      ? isLight ? "border-blue-400 bg-blue-50/50 shadow-sm" : "border-pink-500/50 bg-pink-500/5 shadow-[0_0_10px_rgba(236,72,153,0.1)]" 
+                      : isLight ? "border-slate-200 bg-white hover:border-slate-350" : `${colorConfig.border} bg-[#0F172A]/80 hover:border-gray-800`
                   }`}
                 >
                   <div className="flex items-center justify-between">
                     <span className={`font-bold ${colorConfig.text}`}>{opp.title}</span>
-                    <span className="text-orbit-success font-bold">₹{opp.potentialRevenue.toLocaleString()}</span>
+                    <span className="text-emerald-600 font-bold">₹{opp.potentialRevenue.toLocaleString()}</span>
                   </div>
-                  <p className="text-gray-300 leading-normal line-clamp-2">{opp.description}</p>
-                  <div className="flex justify-between text-[7.5px] border-t border-[rgba(255,255,255,0.06)] pt-1 mt-1">
-                    <span className="text-gray-400">Confidence: {opp.confidence}%</span>
+                  <p className={`leading-normal line-clamp-2 ${isLight ? "text-slate-500" : "text-gray-300"}`}>{opp.description}</p>
+                  <div className={`flex justify-between text-[7.5px] border-t pt-1 mt-1 ${
+                    isLight ? "border-slate-100" : "border-[rgba(255,255,255,0.06)]"
+                  }`}>
+                    <span className="text-gray-555">Confidence: {opp.confidence}%</span>
                     <span 
                       className={`font-semibold hover:underline cursor-pointer ${colorConfig.text}`} 
                       onClick={(e) => {

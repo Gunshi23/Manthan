@@ -1,6 +1,6 @@
 # Walkthrough: Customer Intelligence & Synchronization
 
-This document summarizes the changes made to build a Single Source Customer Intelligence Architecture and the Dual Customer Galaxy System inside ORBIT.
+This document summarizes the changes made to build a Single Source Customer Intelligence Architecture, the Dual Customer Galaxy System, the Regional Intelligence Engine, the Navigation Restructure, and the Onboarding Questionnaire update inside ORBIT.
 
 ---
 
@@ -30,7 +30,35 @@ This document summarizes the changes made to build a Single Source Customer Inte
 - Consumed `personas` and `customers` from `useOrbit()`. The target persona dropdown dynamically displays options mapped to the active business type's persona names.
 - Implemented `getBoardroomCohortStats` helper to query the database and calculate cohort metrics: size, average risk, total LTV, preferred channel, primary sentiment, and a sample review quote matching the active region and persona.
 - Injected these compiled metrics directly into the debate dialogue templates inside `generateDynamicFallbackScript`.
-- Passed the calculated calculated cohort statistics to the Gemini prompt inside `triggerBoardroomDebate` to enable live discussion of live database parameters.
+- Passed the calculated cohort statistics to the Gemini prompt inside `triggerBoardroomDebate` to enable live discussion of live database parameters.
+
+### 5. Regional Intelligence Engine (`RegionalIntelligence.tsx`)
+- Extended the customer data model to support geography metrics: `city`, `state`, `pincode`, and `country`.
+- Added a new 6-tab **Regional Intelligence** dashboard:
+  - **Geo-Insights**: Real-time revenue maps, top performing, emerging, and low performing regional grids.
+  - **Geo-Personas**: Location-based customer archetype overlays (e.g. North Delhi Students, Mumbai Professionals) displaying revenue contribution and growth indices.
+  - **Opportunity Radar**: Multi-axis opportunity analysis pinpointing geo-specific demand shifts and regional market risks.
+  - **Regional Seasons**: Local calendar events (e.g. Diwali in Lucknow) mapped to target personas and lifecycle stages, with instant growth-engine campaign linkages.
+  - **Regional Boardroom**: Collaborative agent alignment debates focused on regional market dynamics.
+  - **City Drill-Down**: In-depth profiling of customer segments, lifecycles, and preferences for 10 key Indian metropolitan hubs.
+
+### 6. Workflow-Driven Navigation Restructure (`AppShell.tsx`, `App.tsx`)
+- Restructured the sidebar navigation hierarchy into a 6-phase growth workflow sequence:
+  - **HUB** (Command Center)
+  - **DATA** (Customer Galaxy, Personas)
+  - **INTELLIGENCE** (Seasonal Intel, Regional Intel, Competitor Intel)
+  - **STRATEGY** (Opportunity Radar, Boardroom)
+  - **EXECUTION** (Growth Engine, Mission Control)
+  - **ANALYTICS** (Analytics, Future Simulator)
+- Integrated subtle visual flow connectors, step index badges, and unique phase-based color glow systems in the sidebar.
+- Added a dynamic **Workflow Progress bar** showing active step progress (e.g. Step 3/11).
+- Implemented a sticky **Workflow Breadcrumb Strip** at the top of the interface displaying the active stage, step indices, and a mini clickable navigation ribbon representing the full growth workflow.
+
+### 7. Conditional Onboarding Questionnaire Flow (`BusinessProfileSetup.tsx`)
+- Conditionalized the onboarding questionnaire to target live dataset uploads only:
+  - **Live Workspace (File Upload)**: Once the raw CSV/JSON/XLSX file is processed and analyzed, the system initiates the 4-step wizard questionnaire (credentials, scale, targets, and operating style) followed by the AI Decoded Brand DNA Briefing panel.
+  - **Demo Workspace (One-Click Selection)**: Bypasses the questionnaire and boots directly to setup/dashboard views, preserving the frictionless demo experience ("else keep it same").
+- Smart Autocompletion: Extracted attributes from the parsed dataset (e.g., detected category, primary channels, customer counts) are mapped to pre-populate the questionnaire steps automatically, providing a fast-track tailored wizard.
 
 ---
 
@@ -38,37 +66,4 @@ This document summarizes the changes made to build a Single Source Customer Inte
 
 - **TypeScript Compilation**: Checked with `cmd /c npx tsc -b --noEmit` and confirmed **zero type errors or compiler warnings**.
 - **Real-Time Data Synchronization**: Verified that updating a customer's review or sentiment in the Galaxy drawer instantly alters counts and text feeds in both the Boardroom debates and Analytics dashboards.
-
----
-
-## 🎯 Lifecycle Automation Campaigns
-
-A dedicated "Lifecycle Automation" tab has been added to the **Growth Engine** workspace. It provides automated target campaign dispatches based on real-time customer data from the Customer Galaxy.
-
-### 1. Recency Segmentation & Dashboard stats
-- Calculates dynamic `daysSincePurchase` for all customers relative to the master platform clock `2026-06-14`.
-- Segments the customer database into 5 active cohorts:
-  - **Review Request**: purchased within $\le 7$ days.
-  - **Check-In Nurture**: purchased $8\text{--}15$ days ago.
-  - **Miss You Recovery**: purchased $16\text{--}30$ days ago.
-  - **Win-Back Offer**: purchased $31\text{--}60$ days ago.
-  - **Dormant Recovery**: purchased $>60$ days ago.
-- Displays a real-time summary dashboard of counts for each category and a **Potential Recovery Headroom** metric (calculated as 15% of the total LTV of slipping/dormant customers).
-
-### 2. Campaign Generator Recency Presets (Manual Mode Additions)
-- Integrated a **Recency Campaigns (Purchase History Presets)** panel inside the manual Campaign Generator interface.
-- Users can instantly pre-populate campaign objectives, targets, and copy versions by selecting one of three cohorts:
-  - **Within 7 Days (Review)**: Automatically drafts a WhatsApp-first review request directed at recent buyers.
-  - **Missing from 15 Days**: Automatically drafts relationship building check-ins.
-  - **Last 1 Month Inactive**: Automatically drafts win-back discount campaigns (e.g. Email first with welcome-back privileges) for customers with no purchase in the last month.
-- Displays live recipient eligibility counts for each cohort on the preset buttons.
-
-### 3. Message Composer & Gemini-Powered Optimization
-- Provides an interactive text editor for active cohort message templates.
-- Includes an **Optimize via Gemini** button that uses AI to customize copies depending on business type, cohort, and target personas (e.g. adding structured collections for Working Professionals, trend drops for students/Gen Z, and high-priority recovery incentives for dormant buyers).
-
-### 3. Twilio/Resend Dispatch Gateways & Preview List
-- Implements simulated API selectors for WhatsApp, Email, and SMS.
-- Triggers dispatch simulation states ("Queued", "Dispatched") for targets and logs gateway handshakes to the agent logs.
-- Displays a detailed customer preview roster listing Name, Persona, Days Since Purchase, preferred Channel, and real-time dispatch state.
-- Stores dispatched campaigns in the Firestore database to keep Mission Control charts and logs updated.
+- **Onboarding Pipeline Flow**: Verified that picking demo workspaces directly loads the application, whereas dragging and dropping files transitions the user through the ORBIT Analyzer pipeline and subsequently opens the personalized Brand DNA questionnaire pages.

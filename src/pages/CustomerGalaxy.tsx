@@ -48,13 +48,15 @@ const generateAiSummary = (cust: Customer) => {
    CUSTOMER GALAXY PAGE
 ───────────────────────────────────────────────────────────── */
 export const CustomerGalaxy: React.FC = () => {
-  const { customers, orders } = useOrbit();
+  const { theme, customers, orders } = useOrbit();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [selected, setSelected] = useState<Customer | null>(null);
   const [hovered, setHovered] = useState<Customer | null>(null);
   const [selectedAgent, setSelectedAgent] = useState<"Polaris" | "Vega" | "Nova" | "Atlas" | "Luna" | null>(null);
   const [viewMode, setViewMode] = useState<"galaxy" | "list">("galaxy");
   const [showCrmFilters, setShowCrmFilters] = useState(false);
+
+  const isLight = theme === "executive";
 
   // Sorting
   const [sortField, setSortField] = useState<string>("ltv");
@@ -65,10 +67,10 @@ export const CustomerGalaxy: React.FC = () => {
   const itemsPerPage = 15;
 
   const segmentColorsMap: Record<Customer["segment"], string> = {
-    "Loyalists": "text-orbit-success border-orbit-success/30 bg-orbit-success/5",
-    "Slipping Away": "text-orbit-pink border-orbit-pink/30 bg-orbit-pink/5",
-    "High-Value Inactive": "text-orbit-amber border-orbit-amber/30 bg-orbit-amber/5",
-    "New Signups": "text-orbit-blue border-orbit-blue/30 bg-orbit-blue/5",
+    "Loyalists": isLight ? "text-blue-600 border-blue-200 bg-blue-50/50" : "text-orbit-success border-orbit-success/30 bg-orbit-success/5",
+    "Slipping Away": isLight ? "text-red-600 border-red-200 bg-red-50/50" : "text-orbit-pink border-orbit-pink/30 bg-orbit-pink/5",
+    "High-Value Inactive": isLight ? "text-amber-600 border-amber-200 bg-amber-50/50" : "text-orbit-amber border-orbit-amber/30 bg-orbit-amber/5",
+    "New Signups": isLight ? "text-purple-600 border-purple-200 bg-purple-50/50" : "text-orbit-blue border-orbit-blue/30 bg-orbit-blue/5",
   };
 
   /* Camera State */
@@ -101,10 +103,10 @@ export const CustomerGalaxy: React.FC = () => {
   const [preferredChannel, setPreferredChannel] = useState<string>("All");
 
   const segmentColors: Record<Customer["segment"], string> = {
-    "Loyalists": "#22C55E",
-    "Slipping Away": "#EC4899",
-    "High-Value Inactive": "#F59E0B",
-    "New Signups": "#3B82F6",
+    "Loyalists": isLight ? "#2563EB" : "#22C55E",
+    "Slipping Away": isLight ? "#EF4444" : "#EC4899",
+    "High-Value Inactive": isLight ? "#F59E0B" : "#F59E0B",
+    "New Signups": isLight ? "#8B5CF6" : "#3B82F6",
   };
 
   /* Initial Camera Centering */
@@ -205,8 +207,13 @@ export const CustomerGalaxy: React.FC = () => {
 
     // Deep space background gradient
     const spaceGrad = ctx.createRadialGradient(canvas.width / 2, canvas.height / 2, 10, canvas.width / 2, canvas.height / 2, canvas.width);
-    spaceGrad.addColorStop(0, "#0a0d24");
-    spaceGrad.addColorStop(1, "#03040c");
+    if (isLight) {
+      spaceGrad.addColorStop(0, "#FFFFFF");
+      spaceGrad.addColorStop(1, "#F8FAFC");
+    } else {
+      spaceGrad.addColorStop(0, "#0a0d24");
+      spaceGrad.addColorStop(1, "#03040c");
+    }
     ctx.fillStyle = spaceGrad;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
@@ -215,9 +222,9 @@ export const CustomerGalaxy: React.FC = () => {
     ctx.scale(zoom, zoom);
 
     // Background Dust Particles
-    ctx.fillStyle = "#ffffff";
+    ctx.fillStyle = isLight ? "#94A3B8" : "#ffffff";
     spaceDust.forEach(dust => {
-      ctx.globalAlpha = dust.opacity * (0.5 + 0.5 * Math.sin(tick * 0.008 + dust.x));
+      ctx.globalAlpha = dust.opacity * (isLight ? 0.35 : (0.5 + 0.5 * Math.sin(tick * 0.008 + dust.x)));
       ctx.beginPath();
       ctx.arc(dust.x, dust.y, dust.size, 0, Math.PI * 2);
       ctx.fill();
@@ -250,7 +257,7 @@ export const CustomerGalaxy: React.FC = () => {
       const c1 = customers[i];
       if (filteredOutIds.has(c1.id)) continue;
       const color = segmentColors[c1.segment];
-      ctx.strokeStyle = color + "20"; // very faint color
+      ctx.strokeStyle = isLight ? "#CBD5E1" : color + "20"; // very faint color
 
       for (let j = i + 1; j < customers.length; j++) {
         const c2 = customers[j];
@@ -312,7 +319,7 @@ export const CustomerGalaxy: React.FC = () => {
 
       // Star Core
       ctx.globalAlpha = twinkle;
-      ctx.fillStyle = "#ffffff";
+      ctx.fillStyle = isLight ? "#1E293B" : "#ffffff";
       ctx.beginPath();
       ctx.arc(cust.x, cust.y, size * 0.4, 0, Math.PI * 2);
       ctx.fill();
@@ -393,7 +400,7 @@ export const CustomerGalaxy: React.FC = () => {
 
       // Monospace star name tooltip
       ctx.font = "bold 8px monospace";
-      ctx.fillStyle = "#ffffff";
+      ctx.fillStyle = isLight ? "#1E293B" : "#ffffff";
       ctx.textAlign = "center";
       ctx.fillText(hovered.name.toUpperCase(), hovered.x, hovered.y - 15);
     }
@@ -547,27 +554,30 @@ export const CustomerGalaxy: React.FC = () => {
   });
 
   return (
-    <div className="flex-1 flex overflow-hidden bg-[#050816] relative">
+    <div className={`flex-1 flex overflow-hidden relative ${isLight ? "bg-gray-50 text-gray-900" : "bg-[#050816] text-white"}`}>
       {/* Background Matrix overlays */}
-      <div className="pointer-events-none absolute inset-0 space-grid opacity-35 z-0" />
-      <div className="pointer-events-none absolute inset-0 bg-orbit-glow-blue opacity-15 z-0" />
+      <div className={`pointer-events-none absolute inset-0 space-grid opacity-35 z-0 ${isLight ? "hidden" : ""}`} />
+      <div className={`pointer-events-none absolute inset-0 bg-orbit-glow-blue opacity-15 z-0 ${isLight ? "hidden" : ""}`} />
 
       {/* ════════════════════════════════════════
           LEFT PANEL — GALAXY CONTROLS
       ════════════════════════════════════════ */}
-      <aside className={`w-64 shrink-0 flex flex-col border-r border-gray-800/60 bg-[#050816]/95 lg:bg-gray-950/45 backdrop-blur-md p-4 space-y-5 overflow-y-auto relative z-30 transition-all duration-300
-        ${showCrmFilters ? "fixed inset-y-0 left-0 w-64 h-full border-r border-gray-850 flex" : "hidden lg:flex"}`}>
+      <aside className={`w-64 shrink-0 flex flex-col border-r p-4 space-y-5 overflow-y-auto relative z-30 transition-all duration-300
+        ${showCrmFilters ? "fixed inset-y-0 left-0 w-64 h-full border-r flex" : "hidden lg:flex"}
+        ${isLight ? "border-gray-200 bg-white" : "border-gray-800/60 bg-[#050816]/95 lg:bg-gray-950/45 backdrop-blur-md"}`}>
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="font-space text-sm font-bold text-white uppercase tracking-wider flex items-center gap-1.5 mb-1">
-              <SlidersHorizontal size={14} className="text-blue-400" />
+            <h2 className={`font-space text-sm font-bold uppercase tracking-wider flex items-center gap-1.5 mb-1 ${isLight ? "text-gray-900" : "text-white"}`}>
+              <SlidersHorizontal size={14} className={isLight ? "text-blue-600" : "text-blue-400"} />
               Galaxy Filters
             </h2>
-            <p className="font-mono text-[8px] text-gray-550 uppercase">Isolate sectors of customer space</p>
+            <p className={`font-mono text-[8px] uppercase ${isLight ? "text-gray-500" : "text-gray-550"}`}>Isolate sectors of customer space</p>
           </div>
           <button 
             onClick={() => setShowCrmFilters(false)}
-            className="lg:hidden p-1 rounded-lg border border-gray-800 text-gray-400 hover:text-white transition-colors cursor-pointer"
+            className={`lg:hidden p-1 rounded-lg border transition-colors cursor-pointer ${
+              isLight ? "border-gray-200 text-gray-500 hover:text-gray-900" : "border-gray-800 text-gray-400 hover:text-white"
+            }`}
           >
             <X size={14} />
           </button>
@@ -575,7 +585,7 @@ export const CustomerGalaxy: React.FC = () => {
 
         {/* Segment Toggles */}
         <div className="space-y-2">
-          <label className="font-mono text-[9px] text-gray-400 uppercase tracking-wider block">Constellations</label>
+          <label className={`font-mono text-[9px] uppercase tracking-wider block ${isLight ? "text-gray-500" : "text-gray-400"}`}>Constellations</label>
           <div className="flex flex-col gap-1.5">
             {(["Loyalists", "Slipping Away", "High-Value Inactive", "New Signups"] as const).map(seg => {
               const active = selectedSegments.includes(seg);
@@ -586,16 +596,16 @@ export const CustomerGalaxy: React.FC = () => {
                   onClick={() => handleSegmentToggle(seg)}
                   className={`flex items-center justify-between p-2 rounded-lg border text-left font-mono text-[10px] cursor-pointer transition-all ${
                     active 
-                      ? "bg-gray-900/65" 
-                      : "border-gray-900 bg-transparent opacity-40 hover:opacity-75"
+                      ? isLight ? "bg-gray-50" : "bg-gray-900/65" 
+                      : "border-gray-200 bg-transparent opacity-40 hover:opacity-75"
                   }`}
-                  style={{ borderColor: active ? `${color}40` : "transparent" }}
+                  style={{ borderColor: active ? `${color}40` : undefined }}
                 >
                   <div className="flex items-center gap-2">
                     <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: color }} />
-                    <span className="text-gray-300 font-semibold">{seg}</span>
+                    <span className={`font-semibold ${isLight ? "text-gray-800" : "text-gray-300"}`}>{seg}</span>
                   </div>
-                  <span className="text-gray-500 text-[9px]">
+                  <span className={`text-[9px] ${isLight ? "text-gray-400" : "text-gray-500"}`}>
                     {customers.filter(c => c.segment === seg).length}*
                   </span>
                 </button>
@@ -707,13 +717,15 @@ export const CustomerGalaxy: React.FC = () => {
                 </button>
 
                 {/* View Switcher Toggle */}
-                <div className="flex items-center rounded-lg bg-gray-950 p-0.5 border border-gray-900 font-mono text-[9px]">
+                <div className={`flex items-center rounded-lg p-0.5 border font-mono text-[9px] ${
+                  isLight ? "bg-gray-100 border-gray-200" : "bg-gray-950 border-gray-900"
+                }`}>
                   <button
                     onClick={() => setViewMode("galaxy")}
                     className={`flex items-center gap-1 px-2.5 py-1 rounded-md transition-all cursor-pointer ${
                       viewMode === "galaxy"
                         ? "bg-blue-600 text-white font-bold"
-                        : "text-gray-400 hover:text-white"
+                        : isLight ? "text-gray-500 hover:text-gray-900" : "text-gray-400 hover:text-white"
                     }`}
                   >
                     <Compass size={11} />
@@ -724,7 +736,7 @@ export const CustomerGalaxy: React.FC = () => {
                     className={`flex items-center gap-1 px-2.5 py-1 rounded-md transition-all cursor-pointer ${
                       viewMode === "list"
                         ? "bg-blue-600 text-white font-bold"
-                        : "text-gray-400 hover:text-white"
+                        : isLight ? "text-gray-500 hover:text-gray-900" : "text-gray-400 hover:text-white"
                     }`}
                   >
                     <List size={11} />
@@ -732,8 +744,10 @@ export const CustomerGalaxy: React.FC = () => {
                   </button>
                 </div>
 
-                <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded bg-gray-900/30 border border-gray-800 font-mono text-[9px] text-gray-500">
-                  <Eye size={11} className="text-blue-400" />
+                <div className={`hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded border font-mono text-[9px] ${
+                  isLight ? "bg-gray-50 border-gray-200 text-gray-500" : "bg-gray-900/30 border-gray-800 text-gray-500"
+                }`}>
+                  <Eye size={11} className={isLight ? "text-blue-600" : "text-blue-400"} />
                   <span>STARS VISIBLE: {filteredCustomers.length} / {customers.length}</span>
                 </div>
               </div>
@@ -743,7 +757,7 @@ export const CustomerGalaxy: React.FC = () => {
 
         {viewMode === "galaxy" ? (
           /* Canvas Workspace */
-          <div className="flex-1 relative overflow-hidden bg-[#03040c]">
+          <div className={`flex-1 relative overflow-hidden ${isLight ? "bg-gray-50" : "bg-[#03040c]"}`}>
             <canvas
               ref={canvasRef}
               width={1000}

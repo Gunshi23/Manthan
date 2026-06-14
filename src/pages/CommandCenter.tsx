@@ -6,7 +6,7 @@ import {
   CheckCircle2, Circle, Loader2, AlertTriangle,
   ArrowRight, Play, TrendingUp, Shield, Cpu, Activity
 } from "lucide-react";
-import { AgentCardModal } from "../components/AgentCardModal";
+
 import { PageHeaderHUD } from "../components/PageHeaderHUD";
 
 /* ─────────────────────────────────────────────────────────────
@@ -116,12 +116,13 @@ const StepIndicator: React.FC<{ status: ReasoningStep["status"]; color: string }
 ───────────────────────────────────────────────────────────── */
 export const CommandCenter: React.FC = () => {
   const {
-    mission, startMission, launchMissionCampaign, cancelMission,
+    theme, mission, startMission, launchMissionCampaign, cancelMission,
     agentLogs, customers, campaigns, config, lunaMetrics
   } = useOrbit();
+  const isLight = theme === "executive";
 
   /* selected agent profile card state */
-  const [selectedAgent, setSelectedAgent] = useState<"Polaris" | "Vega" | "Nova" | "Atlas" | "Luna" | null>(null);
+  const [_selectedAgent, setSelectedAgent] = useState<"Polaris" | "Vega" | "Nova" | "Atlas" | "Luna" | null>(null);
 
   /* mobile sidebar drawers state */
   const [showQuickMissions, setShowQuickMissions] = useState(false);
@@ -258,22 +259,26 @@ export const CommandCenter: React.FC = () => {
      RENDER
   ───────────────────────────────────────────── */
   return (
-    <div className="flex-1 flex overflow-hidden bg-[#050816] relative">
+    <div className={`flex-1 flex overflow-hidden relative ${isLight ? "bg-[#F8FAFC]" : "bg-[#050816]"}`}>
       {/* ── AMBIENT CYBER GRIDS & GLOWS ── */}
       <div className="pointer-events-none absolute inset-0 space-grid opacity-30 z-0 animate-orbit-pulse" />
-      <div className="pointer-events-none absolute inset-0 bg-orbit-glow-blue opacity-25 z-0" />
+      {!isLight && <div className="pointer-events-none absolute inset-0 bg-orbit-glow-blue opacity-25 z-0" />}
       <div className="pointer-events-none absolute top-10 right-10 w-96 h-96 rounded-full bg-orbit-glow-purple opacity-20 z-0" />
 
       {/* ════════════════════════════════════════
           LEFT SIDEBAR — Suggested Commands
       ════════════════════════════════════════ */}
-      <aside className={`w-58 shrink-0 flex flex-col border-r border-gray-800/60 bg-gray-950/40 backdrop-blur-md overflow-y-auto relative z-10 transition-all duration-300
-        ${showQuickMissions ? "fixed inset-y-12 left-0 w-64 z-30 bg-[#050816] border-r border-gray-800 flex h-[calc(100vh-3rem)]" : "hidden xl:flex"}`}>
-        <div className="p-4 border-b border-gray-800/60 flex items-center justify-between">
-          <p className="font-mono text-[9px] text-gray-550 uppercase tracking-[0.15em]">Quick Missions</p>
-          <button onClick={() => setShowQuickMissions(false)} className="xl:hidden text-gray-550 hover:text-white cursor-pointer">✕</button>
+      <aside className={`w-58 shrink-0 flex flex-col backdrop-blur-md overflow-y-auto relative z-10 transition-all duration-300
+        ${isLight ? "border-r border-gray-200 bg-white" : "border-r border-gray-800/60 bg-gray-950/40"}
+        ${showQuickMissions 
+          ? `fixed inset-y-12 left-0 w-64 z-30 flex h-[calc(100vh-3rem)] border-r ${isLight ? "bg-white border-gray-200" : "bg-[#050816] border-gray-800"}` 
+          : "hidden xl:flex"
+        }`}>
+        <div className={`p-4 border-b flex items-center justify-between ${isLight ? "border-gray-100" : "border-gray-800/60"}`}>
+          <p className={`font-mono text-[9px] uppercase tracking-[0.15em] ${isLight ? "text-gray-500" : "text-gray-400"}`}>Quick Missions</p>
+          <button onClick={() => setShowQuickMissions(false)} className={`xl:hidden cursor-pointer ${isLight ? "text-gray-400 hover:text-gray-900" : "text-gray-500 hover:text-white"}`}>✕</button>
         </div>
-        <div className="p-4 border-b border-gray-800/60">
+        <div className={`p-4 border-b ${isLight ? "border-gray-100" : "border-gray-800/60"}`}>
           <div className="flex flex-col gap-1.5">
             {SUGGESTED_COMMANDS.map((cmd, i) => {
               const Icon = cmd.icon;
@@ -281,12 +286,20 @@ export const CommandCenter: React.FC = () => {
                 <button
                   key={i}
                   onClick={() => { setInputVal(cmd.label); inputRef.current?.focus(); setShowQuickMissions(false); }}
-                  className="group flex items-start gap-2 p-2.5 rounded-lg border border-gray-850 bg-gray-900/10 hover:border-blue-500/30 hover:bg-blue-500/5 hover:shadow-[0_0_15px_rgba(59,130,246,0.1)] transition-all text-left cursor-pointer duration-200"
+                  className={`group flex items-start gap-2 p-2.5 rounded-lg border transition-all text-left cursor-pointer duration-200 ${
+                    isLight 
+                      ? "border-gray-200 bg-white hover:border-blue-500 hover:bg-blue-50/20" 
+                      : "border-gray-850 bg-gray-900/10 hover:border-blue-500/30 hover:bg-blue-500/5 hover:shadow-[0_0_15px_rgba(59,130,246,0.1)]"
+                  }`}
                 >
                   <Icon size={12} className="text-gray-500 group-hover:text-blue-400 shrink-0 mt-0.5 transition-colors" />
                   <div>
-                    <p className="font-mono text-[10px] text-gray-300 group-hover:text-white leading-snug transition-colors">{cmd.label}</p>
-                    <span className="font-mono text-[8px] text-gray-600 group-hover:text-blue-400 mt-0.5 inline-block">{cmd.tag} DIRECTIVE</span>
+                    <p className={`font-mono text-[10px] leading-snug transition-colors ${
+                      isLight ? "text-gray-700 group-hover:text-blue-600" : "text-gray-300 group-hover:text-white"
+                    }`}>{cmd.label}</p>
+                    <span className={`font-mono text-[8px] mt-0.5 inline-block ${
+                      isLight ? "text-gray-400 group-hover:text-blue-600" : "text-gray-600 group-hover:text-blue-400"
+                    }`}>{cmd.tag} DIRECTIVE</span>
                   </div>
                 </button>
               );
@@ -299,10 +312,14 @@ export const CommandCenter: React.FC = () => {
           <p className="font-mono text-[9px] text-gray-500 uppercase tracking-[0.15em] mb-3">Recent Missions</p>
           <div className="flex flex-col gap-1.5">
             {campaigns.slice(0, 5).map((c, i) => (
-              <div key={i} className="p-2.5 rounded-lg border border-gray-850 bg-gray-900/10 flex flex-col gap-1 hover:border-gray-800 transition-colors">
-                <p className="font-mono text-[10px] text-gray-300 truncate">{c.name}</p>
+              <div key={i} className={`p-2.5 rounded-lg border flex flex-col gap-1 transition-colors ${
+                isLight 
+                  ? "border-gray-200 bg-white hover:border-gray-300" 
+                  : "border-gray-850 bg-gray-900/10 hover:border-gray-800"
+              }`}>
+                <p className={`font-mono text-[10px] truncate ${isLight ? "text-gray-700 font-medium" : "text-gray-300"}`}>{c.name}</p>
                 <div className="flex items-center justify-between">
-                  <span className="font-mono text-[8px] text-gray-550">{c.channel}</span>
+                  <span className={`font-mono text-[8px] ${isLight ? "text-gray-400" : "text-gray-500"}`}>{c.channel}</span>
                   <span className={`font-mono text-[8px] font-bold ${c.status === "Completed" ? "text-orbit-success animate-pulse" : "text-orbit-blue"}`}>
                     {c.status}
                   </span>
@@ -316,12 +333,12 @@ export const CommandCenter: React.FC = () => {
         </div>
 
         {/* System status */}
-        <div className="p-4 border-t border-gray-800/60 bg-gray-950/20">
+        <div className={`p-4 border-t bg-gray-950/10 ${isLight ? "border-gray-100 bg-gray-550/10" : "border-gray-800/60 bg-gray-950/20"}`}>
           <div className="flex flex-wrap gap-x-4 gap-y-1.5">
             {["Polaris", "Nova", "Vega", "Atlas", "Luna"].map(a => (
               <div key={a} className="flex items-center gap-1.5 min-w-[70px]">
                 <span className="w-1.5 h-1.5 rounded-full bg-orbit-success animate-pulse" />
-                <span className="font-mono text-[9px] text-gray-400">{a}</span>
+                <span className={`font-mono text-[9px] ${isLight ? "text-gray-650" : "text-gray-400"}`}>{a}</span>
               </div>
             ))}
           </div>
@@ -334,7 +351,7 @@ export const CommandCenter: React.FC = () => {
       <main className="flex-1 flex flex-col min-w-0 overflow-hidden relative z-10">
 
         {/* ── CENTER HEADER ── */}
-        <div className="shrink-0 px-6 pt-4 bg-gray-950/30 backdrop-blur-md">
+        <div className={`shrink-0 px-6 pt-4 backdrop-blur-md ${isLight ? "bg-white/50" : "bg-gray-950/30"}`}>
           <PageHeaderHUD
             title="Command Center"
             subtitle="ORBIT BRAIN · AUTONOMOUS OPERATIONS NODE"
@@ -345,16 +362,20 @@ export const CommandCenter: React.FC = () => {
                 <div className="xl:hidden flex items-center gap-1.5">
                   <button 
                     onClick={() => { setShowQuickMissions(!showQuickMissions); setShowAgentFeed(false); }}
-                    className={`px-2 py-1 rounded border font-mono text-[8.5px] cursor-pointer hover:border-gray-750 transition-colors ${
-                      showQuickMissions ? "bg-orbit-blue/20 text-orbit-blue border-orbit-blue/30" : "border-gray-800 bg-gray-950/40 text-gray-400"
+                    className={`px-2 py-1 rounded border font-mono text-[8.5px] cursor-pointer transition-colors ${
+                      showQuickMissions 
+                        ? "bg-orbit-blue/20 text-orbit-blue border-orbit-blue/30" 
+                        : isLight ? "border-gray-200 bg-white text-gray-600 hover:border-gray-300" : "border-gray-800 bg-gray-950/40 text-gray-450 hover:border-gray-750"
                     }`}
                   >
                     Missions
                   </button>
                   <button 
                     onClick={() => { setShowAgentFeed(!showAgentFeed); setShowQuickMissions(false); }}
-                    className={`lg:hidden px-2 py-1 rounded border font-mono text-[8.5px] cursor-pointer hover:border-gray-750 transition-colors ${
-                      showAgentFeed ? "bg-orbit-purple/20 text-orbit-purple border-orbit-purple/30" : "border-gray-800 bg-gray-950/40 text-gray-400"
+                    className={`lg:hidden px-2 py-1 rounded border font-mono text-[8.5px] cursor-pointer transition-colors ${
+                      showAgentFeed 
+                        ? "bg-orbit-purple/20 text-orbit-purple border-orbit-purple/30" 
+                        : isLight ? "border-gray-200 bg-white text-gray-600 hover:border-gray-300" : "border-gray-800 bg-gray-950/40 text-gray-450 hover:border-gray-750"
                     }`}
                   >
                     Feed
@@ -362,12 +383,14 @@ export const CommandCenter: React.FC = () => {
                 </div>
 
                 {/* HUD Diagnostic readout */}
-                <div className="hidden lg:flex items-center gap-4 font-mono text-[9px] text-gray-550 border border-gray-800/80 bg-gray-950/20 px-3 py-1.5 rounded-lg">
+                <div className={`hidden lg:flex items-center gap-4 font-mono text-[9px] px-3 py-1.5 rounded-lg border ${
+                  isLight ? "text-gray-500 border-gray-200 bg-gray-50" : "text-gray-400 border-gray-800/80 bg-gray-950/20"
+                }`}>
                   <div className="flex items-center gap-1">
                     <span className={`w-1.5 h-1.5 rounded-full animate-pulse ${config.geminiKey ? "bg-orbit-success" : "bg-red-500"}`} />
                     <span>COGNITIVE NODE: {config.geminiKey ? "ONLINE" : "OFFLINE"}</span>
                   </div>
-                  <span className="text-gray-800">|</span>
+                  <span className={isLight ? "text-gray-300" : "text-gray-850"}>|</span>
                   <div className="flex items-center gap-1">
                     <span className="w-1.5 h-1.5 rounded-full bg-orbit-success animate-pulse" />
                     <span>CORE SYNC: NOMINAL</span>
@@ -502,12 +525,14 @@ export const CommandCenter: React.FC = () => {
 
           {/* ── REASONING TIMELINE ── */}
           {steps.length > 0 && (
-            <div className="rounded-2xl border border-gray-800/80 bg-gray-900/40 backdrop-blur-md p-5 space-y-1 relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-orbit-glow-purple pointer-events-none opacity-10" />
+            <div className={`rounded-2xl border p-5 space-y-1 relative overflow-hidden backdrop-blur-md ${
+              isLight ? "border-gray-200 bg-white shadow-sm" : "border-gray-800/80 bg-gray-900/40"
+            }`}>
+              {!isLight && <div className="absolute top-0 right-0 w-32 h-32 bg-orbit-glow-purple pointer-events-none opacity-10" />}
               
-              <div className="flex items-center gap-2 border-b border-gray-800 pb-3 mb-4">
+              <div className={`flex items-center gap-2 border-b pb-3 mb-4 ${isLight ? "border-gray-100" : "border-gray-800"}`}>
                 <Cpu size={13} className="text-orbit-purple animate-pulse" />
-                <span className="font-mono text-[10px] font-bold text-gray-300 uppercase tracking-widest">
+                <span className={`font-mono text-[10px] font-bold uppercase tracking-widest ${isLight ? "text-gray-700" : "text-gray-300"}`}>
                   AI Reasoning Timeline
                 </span>
                 {mission.step !== "idle" && mission.step !== "ready" && mission.step !== "dispatched" && (
@@ -542,19 +567,19 @@ export const CommandCenter: React.FC = () => {
                         <div
                           className={`p-4 rounded-xl border transition-all duration-500 ${
                             step.status === "running"
-                              ? "bg-[#1E293B]"
+                              ? isLight ? "bg-blue-50/40" : "bg-[#1E293B]"
                               : step.status === "done"
-                                ? "border-[rgba(255,255,255,0.08)] bg-[#0F172A]/80 shadow-sm"
-                                : "border-[rgba(255,255,255,0.04)] bg-transparent opacity-45"
+                                ? isLight ? "border-gray-200 bg-gray-50/40 shadow-sm" : "border-[rgba(255,255,255,0.08)] bg-[#0F172A]/80 shadow-sm"
+                                : isLight ? "border-gray-100 bg-transparent opacity-45" : "border-[rgba(255,255,255,0.04)] bg-transparent opacity-45"
                           }`}
-                          style={step.status === "running" ? { borderColor: meta.color, boxShadow: `0 0 25px ${meta.color}40` } : {}}
+                          style={step.status === "running" && !isLight ? { borderColor: meta.color, boxShadow: `0 0 25px ${meta.color}40` } : step.status === "running" && isLight ? { borderColor: meta.color } : {}}
                         >
                           <div className="flex items-start justify-between gap-3">
                             <div className="flex items-center gap-2 flex-1">
-                              <Icon size={13} style={{ color: step.status !== "pending" ? meta.color : "#374151" }} />
+                              <Icon size={13} style={{ color: step.status !== "pending" ? meta.color : "#6b7280" }} />
                               <div>
                                 <div className="flex items-center gap-2">
-                                  <span className="font-mono text-[10px] font-bold text-white capitalize">{step.label}</span>
+                                  <span className={`font-mono text-[10px] font-bold capitalize ${isLight ? "text-gray-900" : "text-white"}`}>{step.label}</span>
                                   <span 
                                     onClick={() => step.agent !== "System" && setSelectedAgent(step.agent)}
                                     className="font-mono text-[8px] font-bold uppercase px-1.5 py-0.5 rounded animate-pulse cursor-pointer hover:opacity-85"
@@ -567,7 +592,7 @@ export const CommandCenter: React.FC = () => {
                                 {step.status !== "pending" && (() => {
                                   const agentLog = agentLogs.find(l => l.agent === step.agent);
                                   return (
-                                    <p className="font-mono text-[9px] text-gray-400 mt-0.5 leading-relaxed">
+                                    <p className={`font-mono text-[9px] mt-0.5 leading-relaxed ${isLight ? "text-gray-600" : "text-gray-400"}`}>
                                       {agentLog ? agentLog.message : step.detail}
                                     </p>
                                   );
@@ -579,7 +604,7 @@ export const CommandCenter: React.FC = () => {
                                 <span className="font-mono text-[9px] font-bold" style={{ color: meta.color }}>{step.metric}</span>
                               )}
                               {step.ts && (
-                                <span className="font-mono text-[8px] text-gray-600 block">{step.ts}</span>
+                                <span className="font-mono text-[8px] text-gray-500 block">{step.ts}</span>
                               )}
                             </div>
                           </div>
@@ -616,14 +641,16 @@ export const CommandCenter: React.FC = () => {
 
           {/* ── POST-LAUNCH CONFIRMATION ── */}
           {launchFired && (
-            <div className="rounded-2xl border border-orbit-success/30 bg-orbit-success/5 p-6 text-center space-y-3"
-              style={{ boxShadow: "0 0 40px rgba(34,197,94,0.12)" }}>
+            <div className={`rounded-2xl border p-6 text-center space-y-3 ${
+              isLight ? "border-emerald-200 bg-emerald-50/15" : "border-orbit-success/30 bg-orbit-success/5"
+            }`}
+              style={isLight ? undefined : { boxShadow: "0 0 40px rgba(34,197,94,0.12)" }}>
               <div className="flex items-center justify-center gap-3">
                 <CheckCircle2 size={24} className="text-orbit-success animate-bounce" />
-                <span className="font-space text-lg font-bold text-white tracking-tight">Mission Dispatched</span>
+                <span className={`font-space text-lg font-bold tracking-tight ${isLight ? "text-gray-900" : "text-white"}`}>Mission Dispatched</span>
               </div>
-              <p className="font-mono text-[10px] text-gray-400">
-                Atlas is routing {mission.audienceCount} targets via <span className="text-white font-bold">{mission.selectedChannel}</span>.
+              <p className={`font-mono text-[10px] ${isLight ? "text-gray-600" : "text-gray-400"}`}>
+                Atlas is routing {mission.audienceCount} targets via <span className={`font-bold ${isLight ? "text-gray-950" : "text-white"}`}>{mission.selectedChannel}</span>.
                 Track progress in Mission Control.
               </p>
               <div className="flex justify-center gap-3">
@@ -638,9 +665,15 @@ export const CommandCenter: React.FC = () => {
         </div>
 
         {/* ── INPUT BAR ── */}
-        <div className="shrink-0 px-6 py-4 border-t border-[rgba(255,255,255,0.08)] bg-[#050816]/90 backdrop-blur-md relative z-10">
+        <div className={`shrink-0 px-6 py-4 border-t relative z-10 backdrop-blur-md ${
+          isLight ? "border-gray-200 bg-white/90" : "border-[rgba(255,255,255,0.08)] bg-[#050816]/90"
+        }`}>
           <div
-            className="flex items-end gap-3 rounded-2xl border border-[rgba(255,255,255,0.12)] bg-[#0F172A]/85 p-3.5 transition-all duration-200 focus-within:border-orbit-blue/50 focus-within:shadow-[0_0_20px_rgba(59,130,246,0.15)]"
+            className={`flex items-end gap-3 rounded-2xl border p-3.5 transition-all duration-200 ${
+              isLight 
+                ? "border-gray-200 bg-white focus-within:border-orbit-blue/50 focus-within:shadow-[0_0_20px_rgba(37,99,235,0.08)]" 
+                : "border-[rgba(255,255,255,0.12)] bg-[#0F172A]/85 focus-within:border-orbit-blue/50 focus-within:shadow-[0_0_20px_rgba(59,130,246,0.15)]"
+            }`}
           >
             {isListening ? (
               <div className="flex-1 flex items-center gap-3 px-2 h-10 animate-pulse">
@@ -656,7 +689,7 @@ export const CommandCenter: React.FC = () => {
                     />
                   ))}
                 </div>
-                <span className="font-mono text-xs text-blue-400 tracking-wider animate-pulse uppercase">
+                <span className="font-mono text-xs text-blue-500 tracking-wider animate-pulse uppercase">
                   ORBIT Voice Input Active · Listening for directive...
                 </span>
               </div>
@@ -668,7 +701,9 @@ export const CommandCenter: React.FC = () => {
                 onChange={e => setInputVal(e.target.value)}
                 onKeyDown={handleKeyDown}
                 placeholder="Enter a business goal… e.g. Increase repeat purchases by 20%"
-                className="flex-1 bg-transparent text-sm font-inter text-white placeholder-gray-600 resize-none focus:outline-none leading-relaxed"
+                className={`flex-1 bg-transparent text-sm font-inter placeholder-gray-500 resize-none focus:outline-none leading-relaxed ${
+                  isLight ? "text-gray-900" : "text-white"
+                }`}
                 style={{ maxHeight: 120, minHeight: 24 }}
               />
             )}
@@ -679,7 +714,7 @@ export const CommandCenter: React.FC = () => {
                 className={`p-2.5 rounded-xl border transition-all cursor-pointer ${
                   isListening
                     ? "border-red-500/50 bg-red-500/20 text-red-400 shadow-[0_0_20px_rgba(239,68,68,0.4)] animate-pulse"
-                    : "border-gray-800 text-gray-500 hover:border-gray-700 hover:text-gray-300"
+                    : isLight ? "border-gray-200 text-gray-400 hover:bg-gray-50 hover:text-gray-700" : "border-gray-800 text-gray-500 hover:border-gray-700 hover:text-gray-300"
                 }`}
               >
                 {isListening ? <MicOff size={15} /> : <Mic size={15} />}
@@ -690,7 +725,7 @@ export const CommandCenter: React.FC = () => {
                 className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-mono text-[11px] font-bold uppercase tracking-wider transition-all cursor-pointer ${
                   inputVal.trim()
                     ? "bg-gradient-to-r from-orbit-blue to-orbit-purple text-white shadow-[0_0_20px_rgba(59,130,246,0.4)] hover:shadow-[0_0_20px_rgba(139,92,246,0.5)] hover:opacity-90 active:scale-95"
-                    : "bg-[#162032] text-gray-650 cursor-not-allowed border border-[rgba(255,255,255,0.04)]"
+                    : isLight ? "bg-gray-100 text-gray-400 cursor-not-allowed border border-gray-200" : "bg-[#162032] text-gray-500 cursor-not-allowed border border-[rgba(255,255,255,0.04)]"
                 }`}
               >
                 <Send size={13} />
@@ -698,23 +733,26 @@ export const CommandCenter: React.FC = () => {
               </button>
             </div>
           </div>
-          <p className="font-mono text-[9px] text-gray-600 text-center mt-2 uppercase tracking-wide">
-            Press Enter to launch sequence · Shift+Enter for newline · Voice control synced
-          </p>
         </div>
       </main>
 
       {/* ════════════════════════════════════════
-          RIGHT PANEL — Live Agent Activity
+          RIGHT SIDEBAR — Agent Feed
       ════════════════════════════════════════ */}
-      <aside className={`w-64 shrink-0 flex flex-col border-l border-gray-800/60 bg-gray-950/40 backdrop-blur-md overflow-hidden relative z-10 transition-all duration-300
-        ${showAgentFeed ? "fixed inset-y-12 right-0 w-72 z-30 bg-[#050816] border-l border-gray-800 flex h-[calc(100vh-3rem)]" : "hidden lg:flex"}`}>
-        <div className="p-4 border-b border-gray-800/60 flex items-center justify-between bg-gray-950/20">
+      <aside className={`w-64 shrink-0 flex flex-col backdrop-blur-md overflow-hidden relative z-10 transition-all duration-300
+        ${isLight ? "border-l border-gray-200 bg-white" : "border-l border-gray-800/60 bg-gray-950/40"}
+        ${showAgentFeed 
+          ? `fixed inset-y-12 right-0 w-72 z-30 flex h-[calc(100vh-3rem)] border-l ${isLight ? "bg-white border-gray-200" : "bg-[#050816] border-l border-gray-800"}` 
+          : "hidden lg:flex"
+        }`}>
+        <div className={`p-4 border-b flex items-center justify-between ${
+          isLight ? "border-gray-100 bg-gray-50/50" : "border-gray-800/60 bg-gray-950/20"
+        }`}>
           <div className="flex items-center gap-2">
             <Radio size={12} className="text-orbit-success animate-pulse" />
-            <span className="font-mono text-[9px] font-bold text-white uppercase tracking-widest">Live Agent Feed</span>
+            <span className={`font-mono text-[9px] font-bold uppercase tracking-widest ${isLight ? "text-gray-700" : "text-white"}`}>Live Agent Feed</span>
           </div>
-          <button onClick={() => setShowAgentFeed(false)} className="lg:hidden text-gray-550 hover:text-white cursor-pointer">✕</button>
+          <button onClick={() => setShowAgentFeed(false)} className={`lg:hidden cursor-pointer ${isLight ? "text-gray-400 hover:text-gray-900" : "text-gray-550 hover:text-white"}`}>✕</button>
         </div>
 
         <div className="flex-1 overflow-y-auto p-3 space-y-2">
@@ -723,14 +761,18 @@ export const CommandCenter: React.FC = () => {
             return (
               <div
                 key={log.id}
-                className={`p-3.5 rounded-xl border transition-all hover:bg-[#1E293B] ${
-                  i === 0
-                    ? "bg-[#1E293B] border-[rgba(255,255,255,0.12)] shadow-md"
-                    : "bg-[#0F172A] border-[rgba(255,255,255,0.06)]"
+                className={`p-3.5 rounded-xl border transition-all ${
+                  isLight 
+                    ? i === 0
+                      ? "bg-blue-50/20 border-blue-200 shadow-sm hover:bg-blue-50/40"
+                      : "bg-white border-gray-200 hover:bg-gray-50"
+                    : i === 0
+                      ? "bg-[#1E293B] border-[rgba(255,255,255,0.12)] shadow-md hover:bg-[#1E293B]"
+                      : "bg-[#0F172A] border-[rgba(255,255,255,0.06)] hover:bg-[#1E293B]"
                 }`}
                 style={{
                   borderLeft: `3px solid ${meta.color}`,
-                  boxShadow: i === 0 ? `0 0 20px ${meta.color}18` : undefined,
+                  boxShadow: i === 0 && !isLight ? `0 0 20px ${meta.color}18` : undefined,
                   animation: i === 0 ? "fadeInUp 0.35s ease both" : undefined
                 }}
               >
@@ -741,15 +783,15 @@ export const CommandCenter: React.FC = () => {
                       {log.agent}
                     </span>
                   </div>
-                  <span className="font-mono text-[7px] text-gray-600">{log.timestamp}</span>
+                  <span className="font-mono text-[7px] text-gray-500">{log.timestamp}</span>
                 </div>
-                <p className="font-mono text-[9px] text-gray-300 leading-relaxed">{log.message}</p>
+                <p className={`font-mono text-[9px] leading-relaxed ${isLight ? "text-gray-700" : "text-gray-300"}`}>{log.message}</p>
                 <div className="mt-1.5">
                   <span className={`font-mono text-[7px] uppercase px-1.5 py-0.5 rounded ${
                     log.type === "chat"    ? "bg-orbit-blue/10 text-orbit-blue" :
                     log.type === "action"  ? "bg-orbit-purple/10 text-orbit-purple" :
                     log.type === "result"  ? "bg-orbit-success/10 text-orbit-success" :
-                    "bg-gray-800 text-gray-500"
+                    isLight ? "bg-gray-105 text-gray-500" : "bg-gray-800 text-gray-500"
                   }`}>
                     {log.type}
                   </span>
@@ -761,7 +803,9 @@ export const CommandCenter: React.FC = () => {
         </div>
 
         {/* Agent mini-grid at bottom with load meters */}
-        <div className="shrink-0 p-3 border-t border-gray-800/60 grid grid-cols-2 gap-2 bg-gray-950/40">
+        <div className={`shrink-0 p-3 border-t grid grid-cols-2 gap-2 ${
+          isLight ? "border-gray-200 bg-gray-50" : "border-gray-800/60 bg-gray-950/40"
+        }`}>
           {(["Polaris", "Nova", "Vega", "Atlas", "Luna"] as const).map(agent => {
             const meta = AGENT_META[agent];
             const lastLog = agentLogs.find(l => l.agent === agent);
@@ -770,66 +814,77 @@ export const CommandCenter: React.FC = () => {
               <div
                 key={agent}
                 onClick={() => setSelectedAgent(agent)}
-                className={`p-2.5 rounded-lg border cursor-pointer hover:border-current hover:scale-[1.02] ${meta.border} ${meta.bg} flex flex-col gap-1.5 hover:shadow-[0_0_10px_rgba(59,130,246,0.05)] transition-all`}
+                className={`p-2.5 rounded-lg border cursor-pointer hover:border-current hover:scale-[1.02] ${
+                  isLight ? "border-gray-200 bg-white" : `${meta.border} ${meta.bg}`
+                } flex flex-col gap-1.5 hover:shadow-[0_0_10px_rgba(59,130,246,0.05)] transition-all`}
                 title={`Click to open ${agent} premium card`}
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-1.5">
                     <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ backgroundColor: meta.color }} />
-                    <span className="font-space font-bold text-[10px] text-white">{agent}</span>
+                    <span className={`font-space font-bold text-[10px] ${isLight ? "text-gray-800" : "text-white"}`}>{agent}</span>
                   </div>
-                  <span className="font-mono text-[8px] text-gray-600">{cpuLoad}% load</span>
+                  <span className="font-mono text-[8px] text-gray-500">{cpuLoad}% load</span>
                 </div>
-                <div className="w-full h-1 bg-gray-900 rounded-full overflow-hidden">
+                <div className="w-full h-1 bg-gray-100 rounded-full overflow-hidden">
                   <div className="h-full rounded-full" style={{ width: `${cpuLoad}%`, backgroundColor: meta.color }} />
                 </div>
                 {lastLog ? (
-                  <p className="font-mono text-[8px] text-gray-550 leading-snug line-clamp-2 border-t border-gray-800/40 pt-1 mt-0.5">{lastLog.message}</p>
+                  <p className={`font-mono text-[8px] leading-snug line-clamp-2 border-t pt-1 mt-0.5 ${
+                    isLight ? "border-gray-100 text-gray-500" : "border-gray-800/40 text-gray-400"
+                  }`}>{lastLog.message}</p>
                 ) : (
-                  <p className="font-mono text-[8px] text-gray-600 leading-snug line-clamp-2 border-t border-gray-800/40 pt-1 mt-0.5">Awaiting directive...</p>
+                  <p className={`font-mono text-[8px] leading-snug line-clamp-2 border-t pt-1 mt-0.5 ${
+                    isLight ? "border-gray-100 text-gray-450" : "border-gray-800/40 text-gray-600"
+                  }`}>Awaiting directive...</p>
                 )}
               </div>
             );
           })}
         </div>
       </aside>
-
-      <AgentCardModal agent={selectedAgent} onClose={() => setSelectedAgent(null)} />
     </div>
   );
 };
 
 /* ─────────────────────────────────────────────────────────────
-   MISSION BANNER COMPONENT
+   MISSION BANNER
 ───────────────────────────────────────────────────────────── */
 const MissionBanner: React.FC<{
   mission: ReturnType<typeof useOrbit>["mission"];
-  customers: ReturnType<typeof useOrbit>["customers"];
+  customers: any[];
   onCancel: () => void;
-}> = ({ mission, onCancel }) => {
-  const heading = useTypingText("MISSION ACTIVE", 60);
-  const stepLabels: Record<string, string> = {
-    analyzing:   "Analyzing customers...",
-    segmenting:  "Finding audience segment...",
-    predicting:  "Forecasting conversions and revenue...",
-    generating:  "Generating campaign layouts...",
-    ready:       "Mission parameters verified & armed",
-    dispatched:  "Mission active in field",
-    idle:        "Standby",
+}> = ({ mission, customers: _customers, onCancel }) => {
+  const heading = mission.step === "ready" || mission.step === "dispatched" ? "Mission Complete" : "Mission In-Progress";
+  const stepLabels = {
+    analyzing: "Analyzing customer data...",
+    segmenting: "Segmenting target audience...",
+    predicting: "Calculating revenue forecast...",
+    generating: "Generating creative assets...",
+    ready: "Mission ready for dispatch",
+    dispatched: "Mission running",
+    idle: "Waiting..."
   };
-  const stepPct: Record<string, number> = {
-    analyzing: 20, segmenting: 40, predicting: 60, generating: 80, ready: 100, dispatched: 100, idle: 0
-  };
-  const pct = stepPct[mission.step] ?? 0;
+  const stepWeights = { analyzing: 20, segmenting: 40, predicting: 60, generating: 80, ready: 100, dispatched: 100, idle: 0 };
+  const pct = stepWeights[mission.step];
+
+  const { theme } = useOrbit();
+  const isLight = theme === "executive";
 
   return (
     <div
-      className="rounded-2xl border border-orbit-blue/40 bg-gradient-to-r from-orbit-blue/15 via-[#0F172A] to-orbit-purple/15 p-6 relative overflow-hidden transition-all duration-300"
-      style={{ boxShadow: "0 0 45px rgba(59,130,246,0.22)" }}
+      className={`rounded-2xl border p-6 relative overflow-hidden transition-all duration-300 ${
+        isLight 
+          ? "border-gray-200 bg-gradient-to-r from-blue-50/50 via-white to-purple-50/50 shadow-sm"
+          : "border-orbit-blue/40 bg-gradient-to-r from-orbit-blue/15 via-[#0F172A] to-orbit-purple/15"
+      }`}
+      style={isLight ? undefined : { boxShadow: "0 0 45px rgba(59,130,246,0.22)" }}
     >
       {/* Background glow sweep */}
-      <div className="absolute inset-0 pointer-events-none"
-        style={{ background: "linear-gradient(135deg, rgba(59,130,246,0.08) 0%, transparent 60%)" }} />
+      {!isLight && (
+        <div className="absolute inset-0 pointer-events-none"
+          style={{ background: "linear-gradient(135deg, rgba(59,130,246,0.08) 0%, transparent 60%)" }} />
+      )}
 
       <div className="relative flex flex-col gap-4">
         {/* Header row */}
@@ -840,14 +895,18 @@ const MissionBanner: React.FC<{
               <span className="font-mono text-[10px] font-bold text-orbit-blue uppercase tracking-[0.2em]">
                 {heading}
               </span>
-              <p className="font-space text-base font-bold text-white mt-0.5 leading-snug">
+              <p className={`font-space text-base font-bold mt-0.5 leading-snug ${isLight ? "text-gray-900" : "text-white"}`}>
                 {mission.goal}
               </p>
             </div>
           </div>
           <button
             onClick={onCancel}
-            className="p-1.5 rounded-lg border border-gray-700 hover:border-red-400/30 hover:bg-red-400/10 text-gray-500 hover:text-red-400 transition-all shrink-0 cursor-pointer"
+            className={`p-1.5 rounded-lg border transition-all shrink-0 cursor-pointer ${
+              isLight 
+                ? "border-gray-200 hover:bg-gray-100 text-gray-400 hover:text-red-500" 
+                : "border-gray-700 hover:border-red-400/30 hover:bg-red-400/10 text-gray-500 hover:text-red-400"
+            }`}
           >
             <X size={13} />
           </button>
@@ -855,7 +914,7 @@ const MissionBanner: React.FC<{
 
         {/* Lead agents row */}
         <div className="flex flex-wrap items-center gap-3">
-          <span className="font-mono text-[9px] text-gray-500 uppercase tracking-wider">Lead Agents</span>
+          <span className={`font-mono text-[9px] uppercase tracking-wider ${isLight ? "text-gray-400" : "text-gray-500"}`}>Lead Agents</span>
           {(["Polaris", "Vega", "Nova", "Atlas", "Luna"] as const).map(a => {
             const meta = AGENT_META[a];
             return (
@@ -877,11 +936,11 @@ const MissionBanner: React.FC<{
               {(mission.step === "ready" || mission.step === "dispatched") && (
                 <CheckCircle2 size={11} className="text-orbit-success" />
               )}
-              <span className="font-mono text-[10px] text-gray-300">{stepLabels[mission.step]}</span>
+              <span className={`font-mono text-[10px] ${isLight ? "text-gray-700" : "text-gray-300"}`}>{stepLabels[mission.step]}</span>
             </div>
             <span className="font-mono text-[10px] text-orbit-blue font-bold">{pct}%</span>
           </div>
-          <div className="w-full h-1.5 bg-gray-800 rounded-full overflow-hidden">
+          <div className={`w-full h-1.5 rounded-full overflow-hidden ${isLight ? "bg-gray-100" : "bg-gray-800"}`}>
             <div
               className="h-full rounded-full transition-all duration-750"
               style={{
@@ -889,7 +948,7 @@ const MissionBanner: React.FC<{
                 background: pct === 100
                   ? "linear-gradient(90deg, #22C55E, #16A34A)"
                   : "linear-gradient(90deg, #3B82F6, #8B5CF6)",
-                boxShadow: `0 0 10px ${pct === 100 ? "#22C55E60" : "#3B82F660"}`,
+                boxShadow: isLight ? undefined : `0 0 10px ${pct === 100 ? "#22C55E60" : "#3B82F660"}`,
               }}
             />
           </div>
@@ -897,34 +956,34 @@ const MissionBanner: React.FC<{
 
         {/* Metrics row (visible once we have data) */}
         {mission.audienceCount > 0 && (
-          <div className="flex items-center gap-4 pt-1 border-t border-gray-800/60">
+          <div className={`flex items-center gap-4 pt-1 border-t ${isLight ? "border-gray-100" : "border-gray-800/60"}`}>
             <div className="flex items-center gap-1.5">
               <Users size={11} className="text-orbit-blue animate-pulse" />
-              <span className="font-mono text-[10px] text-gray-300">
-                <span className="text-white font-bold">{mission.audienceCount}</span> targets
+              <span className={`font-mono text-[10px] ${isLight ? "text-gray-600" : "text-gray-300"}`}>
+                <span className={`font-bold ${isLight ? "text-gray-950" : "text-white"}`}>{mission.audienceCount}</span> targets
               </span>
             </div>
             {mission.predictedRevenue > 0 && (
               <div className="flex items-center gap-1.5">
                 <TrendingUp size={11} className="text-orbit-success animate-pulse" />
-                <span className="font-mono text-[10px] text-gray-300">
+                <span className={`font-mono text-[10px] ${isLight ? "text-gray-650" : "text-gray-300"}`}>
                   <span className="text-orbit-success font-bold">₹{mission.predictedRevenue.toLocaleString()}</span> forecast
                 </span>
               </div>
             )}
             {mission.predictedRoi > 0 && (
               <div className="flex items-center gap-1.5">
-                <Zap size={11} className="text-yellow-455 animate-pulse" />
-                <span className="font-mono text-[10px] text-gray-300">
-                  <span className="text-yellow-400 font-bold">{mission.predictedRoi}x</span> ROI
+                <Zap size={11} className="text-yellow-500 animate-pulse" />
+                <span className={`font-mono text-[10px] ${isLight ? "text-gray-655" : "text-gray-300"}`}>
+                  <span className="text-yellow-600 font-bold">{mission.predictedRoi}x</span> ROI
                 </span>
               </div>
             )}
             {mission.selectedChannel && mission.step !== "analyzing" && (
               <div className="ml-auto flex items-center gap-1.5 font-mono text-[10px]">
                 <span>{CHANNEL_ICONS[mission.selectedChannel] || "✉"}</span>
-                <span className="text-gray-400">{mission.selectedChannel}</span>
-                <span className="text-gray-600">recommended</span>
+                <span className={`${isLight ? "text-gray-500" : "text-gray-400"}`}>{mission.selectedChannel}</span>
+                <span className={`${isLight ? "text-gray-400" : "text-gray-600"}`}>recommended</span>
               </div>
             )}
           </div>
@@ -941,6 +1000,9 @@ const MissionOutcomeCards: React.FC<{
   mission: ReturnType<typeof useOrbit>["mission"];
   onSelectAgent: (agent: "Polaris" | "Vega" | "Nova" | "Atlas" | "Luna") => void;
 }> = ({ mission, onSelectAgent }) => {
+  const { theme } = useOrbit();
+  const isLight = theme === "executive";
+
   const cards = [
     {
       agent: "Polaris" as const,
@@ -997,10 +1059,14 @@ const MissionOutcomeCards: React.FC<{
         return (
           <div
             key={i}
-            className={`rounded-2xl border ${meta.border} ${meta.bg} p-4 flex flex-col gap-3 hover:scale-[1.01] transition-transform`}
+            className={`rounded-2xl border p-4 flex flex-col gap-3 hover:scale-[1.01] transition-all duration-300 ${
+              isLight 
+                ? "border-gray-200 bg-white shadow-sm hover:border-gray-300 hover:shadow-md" 
+                : `${meta.border} ${meta.bg}`
+            }`}
             style={{
               animation: `fadeInUp 0.4s ease ${i * 0.08}s both`,
-              boxShadow: `0 0 20px ${meta.glow}`,
+              boxShadow: isLight ? undefined : `0 0 20px ${meta.glow}`,
             }}
           >
             <div className="flex items-center justify-between">
@@ -1015,12 +1081,12 @@ const MissionOutcomeCards: React.FC<{
               </span>
             </div>
             <div>
-              <p className="font-mono text-[10px] text-gray-450 uppercase tracking-wider">{card.title}</p>
-              <p className="font-space text-lg font-bold text-white mt-0.5" style={{ color: card.color }}>
+              <p className={`font-mono text-[10px] uppercase tracking-wider ${isLight ? "text-gray-500" : "text-gray-450"}`}>{card.title}</p>
+              <p className="font-space text-lg font-bold mt-0.5" style={{ color: card.color }}>
                 {card.value}
               </p>
             </div>
-            <p className="font-mono text-[9px] text-gray-400 leading-relaxed">{card.detail}</p>
+            <p className={`font-mono text-[9px] leading-relaxed ${isLight ? "text-gray-600" : "text-gray-400"}`}>{card.detail}</p>
             <div className="mt-auto flex items-center gap-1 font-mono text-[9px] cursor-pointer" style={{ color: card.color }}>
               <span>{card.action}</span>
               <ChevronRight size={10} />
@@ -1040,6 +1106,8 @@ const LaunchSequence: React.FC<{
   onLaunch: () => void;
   onCancel: () => void;
 }> = ({ mission, onLaunch, onCancel }) => {
+  const { theme } = useOrbit();
+  const isLight = theme === "executive";
   const [countdown, setCountdown] = useState<number | null>(null);
 
   const handleArm = () => {
@@ -1055,14 +1123,19 @@ const LaunchSequence: React.FC<{
 
   return (
     <div
-      className="rounded-2xl border border-orbit-success/30 bg-orbit-success/5 p-5 space-y-4"
-      style={{ boxShadow: "0 0 40px rgba(34,197,94,0.1)", animation: "fadeInUp 0.5s ease both" }}
+      className={`rounded-2xl border p-5 space-y-4 ${
+        isLight ? "border-emerald-200 bg-emerald-50/20 shadow-sm" : "border-orbit-success/30 bg-orbit-success/5"
+      }`}
+      style={{ 
+        boxShadow: isLight ? undefined : "0 0 40px rgba(34,197,94,0.1)", 
+        animation: "fadeInUp 0.5s ease both" 
+      }}
     >
       <div className="flex items-center gap-3">
         <Play size={16} className="text-orbit-success animate-pulse" />
         <div>
           <p className="font-mono text-[10px] font-bold text-orbit-success uppercase tracking-widest">Launch Sequence Ready</p>
-          <p className="font-mono text-[9px] text-gray-500 mt-0.5">All neural components aligned. Atlas dispatch buffer cleared.</p>
+          <p className={`font-mono text-[9px] mt-0.5 ${isLight ? "text-gray-500" : "text-gray-500"}`}>All neural components aligned. Atlas dispatch buffer cleared.</p>
         </div>
       </div>
 
@@ -1135,19 +1208,3 @@ const LaunchSequence: React.FC<{
   );
 };
 
-/* ─────────────────────────────────────────────────────────────
-   TYPING TEXT HOOK
-───────────────────────────────────────────────────────────── */
-function useTypingText(text: string, speed = 28) {
-  const [displayed, setDisplayed] = useState("");
-  useEffect(() => {
-    setDisplayed("");
-    let i = 0;
-    const iv = setInterval(() => {
-      if (i < text.length) { setDisplayed(text.slice(0, ++i)); }
-      else clearInterval(iv);
-    }, speed);
-    return () => clearInterval(iv);
-  }, [text, speed]);
-  return displayed;
-}

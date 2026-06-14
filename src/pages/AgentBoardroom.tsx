@@ -934,7 +934,8 @@ const generateDynamicFallbackScript = (region: string, persona: string, business
    AGENT BOARDROOM
  ───────────────────────────────────────────────────────────── */
 export const AgentBoardroom: React.FC = () => {
-  const { addAgentLog, config, businessType, latestVerdict, updateLatestVerdict, personas, customers } = useOrbit();
+  const { theme, addAgentLog, config, businessType, latestVerdict, updateLatestVerdict, personas, customers } = useOrbit();
+  const isLight = theme === "executive";
   const [selectedScenario, setSelectedScenario] = useState(0);
   const [debateActive, setDebateActive] = useState(false);
   const [debateMsgs, setDebateMsgs] = useState<BoardroomMessage[]>([]);
@@ -1276,27 +1277,33 @@ Please generate a 25-message (5 rounds) debate between the agents (Polaris, Luna
   };
 
   return (
-    <div className="flex-1 flex overflow-hidden bg-[#050816] relative">
+    <div className={`flex-1 flex overflow-hidden relative ${isLight ? "bg-gray-50 text-gray-900" : "bg-[#050816] text-white"}`}>
       {/* Background Matrix overlays */}
-      <div className="pointer-events-none absolute inset-0 space-grid opacity-35 z-0" />
-      <div className="pointer-events-none absolute inset-0 bg-orbit-glow-blue opacity-15 z-0" />
+      <div className={`pointer-events-none absolute inset-0 space-grid opacity-35 z-0 ${isLight ? "hidden" : ""}`} />
+      <div className={`pointer-events-none absolute inset-0 bg-orbit-glow-blue opacity-15 z-0 ${isLight ? "hidden" : ""}`} />
 
       {/* ════════════════════════════════════════
           LEFT PANEL — MISSION CONTEXT & AGENT STATS
       ════════════════════════════════════════ */}
-      <aside className="w-64 shrink-0 flex flex-col border-r border-gray-800/60 bg-gray-950/45 backdrop-blur-md p-4 space-y-4 overflow-y-auto relative z-10">
+      <aside className={`w-64 shrink-0 flex flex-col border-r p-4 space-y-4 overflow-y-auto relative z-10 ${
+        isLight ? "border-gray-200 bg-white" : "border-gray-800/60 bg-gray-950/45 backdrop-blur-md"
+      }`}>
         {/* Trend Intelligence Context */}
-        <div className="orbit-panel p-3.5 border border-gray-850 bg-gray-900/10 space-y-3 relative overflow-hidden">
+        <div className={`orbit-panel p-3.5 border space-y-3 relative overflow-hidden ${
+          isLight ? "border-gray-200 bg-slate-50/50" : "border-gray-850 bg-gray-900/10"
+        }`}>
           <div className="absolute top-0 right-0 w-16 h-16 bg-orbit-glow-blue opacity-25 pointer-events-none" />
-          <h2 className="font-space text-xs font-bold text-white uppercase tracking-wider flex items-center gap-1.5 border-b border-gray-800/60 pb-2">
-            <Cpu size={13} className="text-blue-400" />
+          <h2 className={`font-space text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 border-b pb-2 ${
+            isLight ? "text-gray-900 border-gray-200" : "text-white border-gray-800/60"
+          }`}>
+            <Cpu size={13} className={isLight ? "text-blue-600" : "text-blue-400"} />
             Trend Intel Lab
           </h2>
           
           <div className="space-y-3 font-mono">
             {/* Region Selector */}
             <div>
-              <span className="font-mono text-[8px] text-gray-555 uppercase tracking-wider block">Target Region</span>
+              <span className={`font-mono text-[8px] uppercase tracking-wider block ${isLight ? "text-gray-500" : "text-gray-400"}`}>Target Region</span>
               <select
                 value={selectedRegion}
                 onChange={e => {
@@ -1304,7 +1311,7 @@ Please generate a 25-message (5 rounds) debate between the agents (Polaris, Luna
                   addTelemetry(`[System] Region target switched to ${e.target.value}. Rescan recommended.`);
                 }}
                 disabled={debateActive}
-                className="w-full bg-gray-950 border border-gray-800 rounded-lg p-2 text-[10px] text-white focus:outline-none focus:border-blue-500/50 mt-1 cursor-pointer"
+                className={`w-full border rounded-lg p-2 text-[10px] focus:outline-none mt-1 cursor-pointer ${isLight ? "bg-white border-gray-200 text-gray-900 focus:border-blue-500" : "bg-gray-950 border-gray-800 text-white focus:border-blue-500/50"}`}
               >
                 {["North Delhi", "South Delhi", "Mumbai", "Bangalore", "Lucknow", "Noida"].map(r => (
                   <option key={r} value={r}>{r.toUpperCase()}</option>
@@ -1314,7 +1321,7 @@ Please generate a 25-message (5 rounds) debate between the agents (Polaris, Luna
 
             {/* Persona Selector */}
             <div>
-              <span className="font-mono text-[8px] text-gray-555 uppercase tracking-wider block">Target Persona</span>
+              <span className={`font-mono text-[8px] uppercase tracking-wider block ${isLight ? "text-gray-500" : "text-gray-400"}`}>Target Persona</span>
               <select
                 value={selectedPersona}
                 onChange={e => {
@@ -1322,7 +1329,7 @@ Please generate a 25-message (5 rounds) debate between the agents (Polaris, Luna
                   addTelemetry(`[System] Persona target switched to ${e.target.value}. Rescan recommended.`);
                 }}
                 disabled={debateActive}
-                className="w-full bg-gray-950 border border-gray-800 rounded-lg p-2 text-[10px] text-white focus:outline-none focus:border-purple-500/50 mt-1 cursor-pointer"
+                className={`w-full border rounded-lg p-2 text-[10px] focus:outline-none mt-1 cursor-pointer ${isLight ? "bg-white border-gray-200 text-gray-900 focus:border-purple-500" : "bg-gray-950 border-gray-800 text-white focus:border-purple-500/50"}`}
               >
                 {(personas && personas.length > 0 ? personas : [
                   { name: "Student / Gen Z" },
@@ -1341,32 +1348,32 @@ Please generate a 25-message (5 rounds) debate between the agents (Polaris, Luna
             <button
               onClick={triggerTrendScan}
               disabled={debateActive || isScanningTrends}
-              className="w-full py-1.5 rounded bg-blue-500/10 border border-blue-500/30 hover:bg-blue-500/20 text-blue-400 font-bold text-[9px] uppercase tracking-wider transition-all cursor-pointer flex items-center justify-center gap-1"
+              className={`w-full py-1.5 rounded font-bold text-[9px] uppercase tracking-wider transition-all cursor-pointer flex items-center justify-center gap-1 border ${isLight ? "bg-blue-50 border-blue-200 text-blue-600 hover:bg-blue-100" : "bg-blue-500/10 border-blue-500/30 hover:bg-blue-500/20 text-blue-400"}`}
             >
               <RefreshCw size={10} className={isScanningTrends ? "animate-spin" : ""} />
               {isScanningTrends ? "Scanning..." : "Scan Regional Trends"}
             </button>
 
             {/* Scanned trends dashboard */}
-            <div className="space-y-2 pt-2 border-t border-gray-900">
-              <span className="text-[7.5px] text-gray-555 uppercase tracking-widest block">Scanned Trend State</span>
+            <div className={`space-y-2 pt-2 border-t ${isLight ? "border-gray-200" : "border-gray-900"}`}>
+              <span className={`text-[7.5px] uppercase tracking-widest block ${isLight ? "text-gray-500" : "text-gray-555"}`}>Scanned Trend State</span>
               
-              <div className="bg-gray-950/40 border border-gray-900 rounded p-2 text-[9px] space-y-2">
+              <div className={`border rounded p-2 text-[9px] space-y-2 ${isLight ? "bg-gray-50 border-gray-150" : "bg-gray-950/40 border-gray-900"}`}>
                 <div>
-                  <span className="text-[7px] text-gray-600 block uppercase">Current Trend:</span>
-                  <span className="text-white font-bold block truncate">{scannedTrends.currentTrend}</span>
+                  <span className={`text-[7px] block uppercase ${isLight ? "text-gray-400" : "text-gray-600"}`}>Current Trend:</span>
+                  <span className={`font-bold block truncate ${isLight ? "text-gray-800" : "text-white"}`}>{scannedTrends.currentTrend}</span>
                 </div>
                 <div>
-                  <span className="text-[7px] text-orbit-success/70 block uppercase">Emerging Trend:</span>
-                  <span className="text-orbit-success font-bold block truncate">{scannedTrends.emergingTrend}</span>
+                  <span className={`text-[7px] block uppercase ${isLight ? "text-emerald-600" : "text-orbit-success/70"}`}>Emerging Trend:</span>
+                  <span className={`font-bold block truncate ${isLight ? "text-emerald-700" : "text-orbit-success"}`}>{scannedTrends.emergingTrend}</span>
                 </div>
                 <div>
-                  <span className="text-[7px] text-red-500/70 block uppercase">Declining Trend:</span>
-                  <span className="text-red-400 font-bold block truncate">{scannedTrends.decliningTrend}</span>
+                  <span className={`text-[7px] block uppercase ${isLight ? "text-red-500" : "text-red-500/70"}`}>Declining Trend:</span>
+                  <span className={`font-bold block truncate ${isLight ? "text-red-600" : "text-red-400"}`}>{scannedTrends.decliningTrend}</span>
                 </div>
                 <div>
-                  <span className="text-[7px] text-orbit-purple/70 block uppercase">Predicted Trend:</span>
-                  <span className="text-orbit-purple font-bold block truncate">{scannedTrends.predictedTrend}</span>
+                  <span className={`text-[7px] block uppercase ${isLight ? "text-purple-600" : "text-orbit-purple/70"}`}>Predicted Trend:</span>
+                  <span className={`font-bold block truncate ${isLight ? "text-purple-700" : "text-orbit-purple"}`}>{scannedTrends.predictedTrend}</span>
                 </div>
               </div>
             </div>
@@ -1376,8 +1383,8 @@ Please generate a 25-message (5 rounds) debate between the agents (Polaris, Luna
 
         {/* Live Agent Status */}
         <div className="space-y-2 flex-1">
-          <h3 className="font-space text-xs font-bold text-white uppercase tracking-wider flex items-center gap-1.5 border-b border-gray-800/60 pb-2">
-            <Users size={13} className="text-orbit-purple" />
+          <h3 className={`font-space text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 border-b pb-2 ${isLight ? "text-gray-900 border-gray-200" : "text-white border-gray-800/60"}`}>
+            <Users size={13} className={isLight ? "text-purple-600" : "text-orbit-purple"} />
             Executive Board
           </h3>
           
@@ -1399,27 +1406,27 @@ Please generate a 25-message (5 rounds) debate between the agents (Polaris, Luna
                   <div className="flex items-center justify-between mb-1">
                     <div className="flex items-center gap-1.5">
                       <span className={`w-1.5 h-1.5 rounded-full ${isSpeaker ? "animate-ping" : "animate-pulse"}`} style={{ backgroundColor: meta.color }} />
-                      <span className="font-space font-bold text-xs text-white">{agent}</span>
+                      <span className={`font-space font-bold text-xs ${isLight ? "text-gray-900" : "text-white"}`}>{agent}</span>
                     </div>
                     <span className={`font-mono text-[8px] font-bold border px-1.5 py-0.5 rounded-full transition-all ${
                       isSpeaker 
                         ? isThinking 
-                          ? "text-blue-300 border-blue-500/30 bg-blue-500/5 animate-pulse"
-                          : "text-blue-400 border-blue-500/40 bg-blue-500/10 animate-pulse" 
-                        : "text-orbit-success border-orbit-success/30 bg-orbit-success/5"
+                          ? isLight ? "text-blue-600 border-blue-300 bg-blue-50" : "text-blue-300 border-blue-500/30 bg-blue-500/5 animate-pulse"
+                          : isLight ? "text-blue-700 border-blue-400 bg-blue-100/50" : "text-blue-400 border-blue-500/40 bg-blue-500/10 animate-pulse" 
+                        : isLight ? "text-green-700 border-green-300 bg-green-50" : "text-orbit-success border-orbit-success/30 bg-orbit-success/5"
                     }`}>
                       {isSpeaker ? (isThinking ? "THINKING" : "SPEAKING") : "STANDBY"}
                     </span>
                   </div>
                   
-                  <p className="font-mono text-[8px] text-gray-555 uppercase tracking-wide">{meta.role}</p>
+                  <p className={`font-mono text-[8px] uppercase tracking-wide ${isLight ? "text-gray-500" : "text-gray-555"}`}>{meta.role}</p>
 
                   <div className="mt-2.5 space-y-1">
-                    <div className="flex justify-between text-[8px] font-mono text-gray-550">
+                    <div className={`flex justify-between text-[8px] font-mono ${isLight ? "text-gray-500" : "text-gray-550"}`}>
                       <span>Thread Activity</span>
                       <span>{loadVal}% capacity</span>
                     </div>
-                    <div className="w-full h-1 bg-gray-900 rounded-full overflow-hidden">
+                    <div className={`w-full h-1 rounded-full overflow-hidden ${isLight ? "bg-gray-200" : "bg-gray-900"}`}>
                       <div 
                         className="h-full rounded-full transition-all duration-500" 
                         style={{ width: `${loadVal}%`, backgroundColor: meta.color }}
@@ -1439,7 +1446,7 @@ Please generate a 25-message (5 rounds) debate between the agents (Polaris, Luna
       <main className="flex-1 flex flex-col min-w-0 overflow-hidden relative z-10">
         
         {/* Workspace Title Header */}
-        <div className="shrink-0 px-6 pt-4 bg-gray-950/20">
+        <div className={`shrink-0 px-6 pt-4 ${isLight ? "bg-white/40 border-b border-gray-200" : "bg-gray-950/20"}`}>
           <PageHeaderHUD
             title="Agent Boardroom"
             subtitle="LIVE AI COLLABORATION CHAMBER"
@@ -1447,7 +1454,7 @@ Please generate a 25-message (5 rounds) debate between the agents (Polaris, Luna
             actions={
               <div className="flex flex-wrap items-center gap-3">
                 {/* Speed Selector */}
-                <div className="flex items-center bg-gray-950 border border-gray-800 rounded-lg p-0.5" title="Debate speed dial">
+                <div className={`flex items-center border rounded-lg p-0.5 ${isLight ? "bg-gray-100 border-gray-200" : "bg-gray-950 border-gray-800"}`} title="Debate speed dial">
                   {(["normal", "fast", "instant"] as const).map(speed => (
                     <button
                       key={speed}
@@ -1455,7 +1462,7 @@ Please generate a 25-message (5 rounds) debate between the agents (Polaris, Luna
                       className={`px-2.5 py-1 rounded font-mono text-[9px] font-bold uppercase tracking-wider cursor-pointer transition-all ${
                         debateSpeed === speed
                           ? "bg-orbit-purple text-white shadow-[0_0_10px_rgba(139,92,246,0.4)]"
-                          : "text-gray-400 hover:text-white"
+                          : isLight ? "text-gray-500 hover:text-gray-900" : "text-gray-400 hover:text-white"
                       }`}
                     >
                       {speed === "normal" ? "5 Min" : speed === "fast" ? "1 Min" : "Instant"}
@@ -1468,7 +1475,9 @@ Please generate a 25-message (5 rounds) debate between the agents (Polaris, Luna
                     {/* Play/Pause Button */}
                     <button
                       onClick={() => setIsPaused(p => !p)}
-                      className="px-3.5 py-1.5 rounded-lg border border-gray-800 bg-gray-900/50 hover:bg-gray-900 text-xs font-mono font-bold uppercase text-white cursor-pointer transition-all flex items-center gap-1.5"
+                      className={`px-3.5 py-1.5 rounded-lg border text-xs font-mono font-bold uppercase cursor-pointer transition-all flex items-center gap-1.5 ${
+                        isLight ? "border-gray-200 bg-gray-50 hover:bg-gray-100 text-gray-700" : "border-gray-800 bg-gray-900/50 hover:bg-gray-900 text-white"
+                      }`}
                     >
                       {isPaused ? <Play size={10} /> : <Pause size={10} />}
                       {isPaused ? "Resume" : "Pause"}
@@ -1499,7 +1508,9 @@ Please generate a 25-message (5 rounds) debate between the agents (Polaris, Luna
                 ) : (
                   <button
                     onClick={triggerBoardroomDebate}
-                    className="px-5 py-2.5 rounded-xl text-xs font-mono font-bold uppercase tracking-wider flex items-center gap-2 transition-all cursor-pointer bg-gradient-to-r from-orbit-purple to-pink-500 text-white shadow-orbit-glow-purple hover:opacity-90 hover:scale-[1.02] active:scale-95 duration-200"
+                    className={`px-5 py-2.5 rounded-xl text-xs font-mono font-bold uppercase tracking-wider flex items-center gap-2 transition-all cursor-pointer bg-gradient-to-r from-orbit-purple to-pink-500 text-white hover:opacity-90 hover:scale-[1.02] active:scale-95 duration-200 ${
+                      isLight ? "" : "shadow-orbit-glow-purple"
+                    }`}
                   >
                     <Zap size={13} />
                     Initialize Executive Debate
@@ -1512,12 +1523,14 @@ Please generate a 25-message (5 rounds) debate between the agents (Polaris, Luna
 
         {/* Progress Bar under header */}
         {debateActive && debateScript.length > 0 && (
-          <div className="w-full bg-gray-950/40 px-6 py-1.5 border-b border-gray-900/40 shrink-0 animate-fade-in-up">
-            <div className="flex items-center justify-between text-[8px] font-mono text-gray-555 mb-1">
+          <div className={`w-full px-6 py-1.5 border-b shrink-0 animate-fade-in-up ${
+            isLight ? "bg-blue-50/60 border-blue-100" : "bg-gray-950/40 border-gray-900/40"
+          }`}>
+            <div className={`flex items-center justify-between text-[8px] font-mono mb-1 ${isLight ? "text-gray-500" : "text-gray-555"}`}>
               <span>DEBATE DELIBERATION PROGRESS</span>
               <span>{Math.round(((currentStepIdx) / debateScript.length) * 100)}%</span>
             </div>
-            <div className="w-full h-1 bg-gray-900 rounded-full overflow-hidden">
+            <div className={`w-full h-1 rounded-full overflow-hidden ${isLight ? "bg-gray-200" : "bg-gray-900"}`}>
               <div
                 className="h-full bg-gradient-to-r from-orbit-purple to-blue-500 rounded-full transition-all duration-300"
                 style={{ width: `${((currentStepIdx + elapsedTimeInCurrentStep / (secondsPerMessage * 1000)) / debateScript.length) * 100}%` }}
@@ -1530,33 +1543,37 @@ Please generate a 25-message (5 rounds) debate between the agents (Polaris, Luna
         <div className="flex-1 flex flex-col min-h-0">
           
           {/* Circular Holographic Roundtable Visualizer */}
-          <div className="shrink-0 h-56 bg-gray-950/25 border-b border-gray-900/60 flex items-center justify-center relative overflow-hidden">
-            <div className="absolute inset-0 radar-dots opacity-20" />
+          <div className={`shrink-0 h-56 border-b flex items-center justify-center relative overflow-hidden ${
+            isLight ? "bg-blue-50/20 border-gray-200" : "bg-gray-950/25 border-gray-900/60"
+          }`}>
+            <div className={`absolute inset-0 radar-dots opacity-20 ${isLight ? "hidden" : ""}`} />
             
             {/* Active Agenda Overlay */}
-            <div className="absolute top-3 left-4 font-mono text-[8px] text-gray-500 uppercase tracking-widest z-20">
-              AGENDA: <span className="text-white font-bold">{currentScenarioName}</span>
+            <div className={`absolute top-3 left-4 font-mono text-[8px] uppercase tracking-widest z-20 ${isLight ? "text-gray-550" : "text-gray-500"}`}>
+              AGENDA: <span className={`font-bold ${isLight ? "text-gray-900" : "text-white"}`}>{currentScenarioName}</span>
             </div>
 
             {/* Pulsing Core center glow */}
             <div className={`absolute w-32 h-32 rounded-full border flex flex-col items-center justify-center transition-all duration-500 ${
               activeSpeaker 
                 ? isThinking 
-                  ? "border-blue-500/30 bg-blue-500/5 shadow-[0_0_25px_rgba(59,130,246,0.15)] scale-105" 
-                  : "border-purple-500/30 bg-purple-500/10 shadow-[0_0_25px_rgba(139,92,246,0.15)] animate-orbit-pulse"
-                : "border-gray-850 bg-gray-900/5"
+                  ? isLight ? "border-blue-300 bg-blue-50 shadow-[0_0_20px_rgba(59,130,246,0.1)] scale-105" : "border-blue-500/30 bg-blue-500/5 shadow-[0_0_25px_rgba(59,130,246,0.15)] scale-105" 
+                  : isLight ? "border-purple-300 bg-purple-50 shadow-[0_0_20px_rgba(139,92,246,0.1)] scale-105" : "border-purple-500/30 bg-purple-500/10 shadow-[0_0_25px_rgba(139,92,246,0.15)] animate-orbit-pulse"
+                : isLight ? "border-gray-200 bg-gray-50/50" : "border-gray-850 bg-gray-900/5"
             }`}>
-              <div className="w-14 h-14 rounded-full bg-orbit-purple/15 border border-orbit-purple/30 flex items-center justify-center">
+              <div className={`w-14 h-14 rounded-full border flex items-center justify-center ${
+                isLight ? "bg-purple-100/40 border-purple-200" : "bg-orbit-purple/15 border-orbit-purple/30"
+              }`}>
                 {activeSpeaker ? (
-                  <span className="font-space text-xs font-bold text-white uppercase tracking-wider animate-pulse">
+                  <span className={`font-space text-xs font-bold uppercase tracking-wider animate-pulse ${isLight ? "text-purple-900" : "text-white"}`}>
                     {activeSpeaker.substring(0, 3)}
                   </span>
                 ) : (
-                  <Cpu size={18} className="text-white animate-pulse" />
+                  <Cpu size={18} className={`animate-pulse ${isLight ? "text-purple-500" : "text-white"}`} />
                 )}
               </div>
               {activeSpeaker && (
-                <div className="font-mono text-[7px] text-gray-400 uppercase tracking-widest mt-1.5 animate-pulse">
+                <div className={`font-mono text-[7px] uppercase tracking-widest mt-1.5 animate-pulse ${isLight ? "text-purple-500" : "text-gray-400"}`}>
                   {isThinking ? "Thinking..." : "Speaking"}
                 </div>
               )}
@@ -1677,12 +1694,14 @@ Please generate a 25-message (5 rounds) debate between the agents (Polaris, Luna
           <div className="flex-1 overflow-y-auto px-6 py-5 space-y-4 pr-3">
             {debateMsgs.length === 0 && !isThinking && (
               <div className="flex flex-col items-center justify-center h-full gap-3 text-center py-10">
-                <div className="w-14 h-14 rounded-2xl bg-gray-900 border border-gray-850 flex items-center justify-center animate-pulse">
-                  <MessageSquare size={20} className="text-gray-650" />
+                <div className={`w-14 h-14 rounded-2xl border flex items-center justify-center animate-pulse ${
+                  isLight ? "bg-gray-100 border-gray-200" : "bg-gray-900 border border-gray-850"
+                }`}>
+                  <MessageSquare size={20} className={isLight ? "text-gray-400" : "text-gray-655"} />
                 </div>
                 <div>
-                  <h3 className="font-space text-sm font-bold text-white">Roundtable Standby</h3>
-                  <p className="font-mono text-[9px] text-gray-550 max-w-xs leading-relaxed mt-1">
+                  <h3 className={`font-space text-sm font-bold ${isLight ? "text-gray-900" : "text-white"}`}>Roundtable Standby</h3>
+                  <p className={`font-mono text-[9px] max-w-xs leading-relaxed mt-1 ${isLight ? "text-gray-500" : "text-gray-550"}`}>
                     Select a directive agenda on the left and choose a speed dial, then click initialize to start the executive agent debate.
                   </p>
                 </div>
@@ -1704,7 +1723,7 @@ Please generate a 25-message (5 rounds) debate between the agents (Polaris, Luna
                       <span className={`font-mono text-[10px] font-bold uppercase tracking-wider ${meta.text}`}>
                         {msg.agent}
                       </span>
-                      <span className="font-mono text-[8px] text-gray-600">{msg.timestamp}</span>
+                      <span className="font-mono text-[8px] text-gray-500">{msg.timestamp}</span>
                     </div>
 
                     <div className="flex items-center gap-2">
@@ -1713,7 +1732,7 @@ Please generate a 25-message (5 rounds) debate between the agents (Polaris, Luna
                           {msg.stats}
                         </span>
                       )}
-                      <span className="font-mono text-[8px] text-gray-400 border border-gray-800 bg-gray-900/40 px-2 py-0.5 rounded-full">
+                      <span className={`font-mono text-[8px] border px-2 py-0.5 rounded-full ${isLight ? "text-gray-600 border-gray-200 bg-gray-50" : "text-gray-400 border-gray-800 bg-gray-900/40"}`}>
                         {msg.confidence}% confidence
                       </span>
                     </div>
@@ -1721,32 +1740,36 @@ Please generate a 25-message (5 rounds) debate between the agents (Polaris, Luna
 
                   {/* Speech Bubble */}
                   <div
-                    className={`p-4 rounded-xl border transition-all duration-300 relative bg-[#0F172A] border-[rgba(255,255,255,0.06)]`}
+                    className={`p-4 rounded-xl border transition-all duration-300 relative ${
+                      isLight ? "bg-white border-gray-200 shadow-sm" : "bg-[#0F172A] border-[rgba(255,255,255,0.06)]"
+                    }`}
                     style={{
                       borderLeft: `4px solid ${meta.color}`,
                       borderColor: activeSpeaker === msg.agent && idx === debateMsgs.length - 1 && !isThinking ? meta.color : undefined,
                       boxShadow: activeSpeaker === msg.agent && idx === debateMsgs.length - 1 && !isThinking ? `0 0 25px ${meta.color}25` : undefined
                     }}
                   >
-                    <p className={`text-xs font-inter leading-relaxed text-gray-200`}>{msg.message}</p>
+                    <p className={`text-xs font-inter leading-relaxed ${isLight ? "text-gray-700" : "text-gray-200"}`}>{msg.message}</p>
                     
                     {/* Glowing highlight point */}
                     <span className="absolute top-3 right-3 w-1.5 h-1.5 rounded-full animate-ping" style={{ backgroundColor: meta.color }} />
                   </div>
 
                   {/* Expandable Reasoning Accordion */}
-                  <div className="pl-3 border-l-2 border-gray-850 ml-1">
+                  <div className={`pl-3 border-l-2 ml-1 ${isLight ? "border-gray-200" : "border-gray-850"}`}>
                     <button
                       onClick={() => toggleReasoning(idx)}
-                      className="flex items-center gap-1 font-mono text-[8px] text-gray-555 hover:text-gray-300 uppercase tracking-wider cursor-pointer"
+                      className={`flex items-center gap-1 font-mono text-[8px] uppercase tracking-wider cursor-pointer hover:opacity-80 ${isLight ? "text-gray-500 hover:text-gray-700" : "text-gray-555 hover:text-gray-300"}`}
                     >
                       {isReasoningOpen ? <ChevronUp size={10} /> : <ChevronDown size={10} />}
                       <span>Deep Reasoning Trace</span>
                     </button>
 
                     {isReasoningOpen && (
-                      <div className="mt-1.5 p-3 rounded-lg border border-gray-900 bg-black/40 font-mono text-[9px] text-gray-450 leading-relaxed animate-fade-in-up">
-                        <div className="flex items-center gap-1.5 text-gray-500 mb-1 border-b border-gray-955 pb-1.5">
+                      <div className={`mt-1.5 p-3 rounded-lg border font-mono text-[9px] leading-relaxed animate-fade-in-up ${
+                        isLight ? "border-gray-200 bg-gray-50 text-gray-700" : "border-gray-900 bg-black/40 text-gray-450"
+                      }`}>
+                        <div className={`flex items-center gap-1.5 mb-1 border-b pb-1.5 ${isLight ? "text-gray-400 border-gray-200" : "text-gray-500 border-gray-955"}`}>
                           <Terminal size={10} className="text-purple-400" />
                           <span>ALGORITHM CRITERIA & DATA INPUTS</span>
                         </div>
@@ -1782,12 +1805,18 @@ Please generate a 25-message (5 rounds) debate between the agents (Polaris, Luna
       {/* ════════════════════════════════════════
           RIGHT PANEL — CONSENSUS & SYSTEM TELEMETRY
       ════════════════════════════════════════ */}
-      <aside className="w-64 shrink-0 flex flex-col border-l border-gray-800/60 bg-gray-950/45 backdrop-blur-md p-4 space-y-4 overflow-y-auto relative z-10">
+      <aside className={`w-64 shrink-0 flex flex-col border-l p-4 space-y-4 overflow-y-auto relative z-10 ${
+        isLight ? "border-gray-200 bg-white" : "border-gray-800/60 bg-gray-950/45 backdrop-blur-md"
+      }`}>
         
         {/* Consensus checklist */}
-        <div className="orbit-panel p-3.5 border border-gray-850 bg-gray-900/10 space-y-3">
-          <h3 className="font-space text-xs font-bold text-white uppercase tracking-wider flex items-center gap-1.5 border-b border-gray-800/60 pb-2">
-            <CheckCircle2 size={13} className="text-orbit-success" />
+        <div className={`orbit-panel p-3.5 border space-y-3 ${
+          isLight ? "border-gray-200 bg-slate-55 bg-slate-50/50" : "border-gray-850 bg-gray-900/10"
+        }`}>
+          <h3 className={`font-space text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 border-b pb-2 ${
+            isLight ? "text-gray-900 border-gray-200" : "text-white border-gray-800/60"
+          }`}>
+            <CheckCircle2 size={13} className={isLight ? "text-green-600" : "text-orbit-success"} />
             Directive Consensus
           </h3>
 
@@ -1803,12 +1832,12 @@ Please generate a 25-message (5 rounds) debate between the agents (Polaris, Luna
                 key={item.id}
                 className={`flex items-center justify-between p-2 rounded-lg border transition-all ${
                   item.ok 
-                    ? "border-green-500/20 bg-green-500/5 text-green-400" 
-                    : "border-gray-900 bg-transparent text-gray-555"
+                    ? isLight ? "border-green-200 bg-green-50 text-green-700" : "border-green-500/20 bg-green-500/5 text-green-400" 
+                    : isLight ? "border-gray-200 bg-transparent text-gray-400" : "border-gray-900 bg-transparent text-gray-555"
                 }`}
               >
                 <div className="flex items-center gap-2">
-                  <CheckCircle2 size={12} className={item.ok ? "text-green-400" : "text-gray-800"} />
+                  <CheckCircle2 size={12} className={item.ok ? (isLight ? "text-green-600" : "text-green-400") : (isLight ? "text-gray-300" : "text-gray-800")} />
                   <span className="font-semibold">{item.label}</span>
                 </div>
                 <span className="text-[8px] opacity-75">{item.agent}</span>
@@ -1818,14 +1847,20 @@ Please generate a 25-message (5 rounds) debate between the agents (Polaris, Luna
         </div>
 
         {/* AI Time Machine Simulator */}
-        <div className="orbit-panel p-3.5 border border-gray-850 bg-gray-900/10 space-y-3">
-          <h3 className="font-space text-xs font-bold text-white uppercase tracking-wider flex items-center gap-1.5 border-b border-gray-800/60 pb-2">
-            <Clock size={13} className="text-orbit-purple" />
+        <div className={`orbit-panel p-3.5 border space-y-3 ${
+          isLight ? "border-gray-200 bg-slate-50/50" : "border-gray-850 bg-gray-900/10"
+        }`}>
+          <h3 className={`font-space text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 border-b pb-2 ${
+            isLight ? "text-gray-900 border-gray-200" : "text-white border-gray-800/60"
+          }`}>
+            <Clock size={13} className={isLight ? "text-purple-500" : "text-orbit-purple"} />
             AI Time Machine
           </h3>
-          <p className="font-mono text-[8px] text-gray-555 uppercase">Future Demand Predictor</p>
+          <p className={`font-mono text-[8px] uppercase ${isLight ? "text-gray-500" : "text-gray-555"}`}>Future Demand Predictor</p>
           
-          <div className="flex items-center bg-gray-950 border border-gray-800 rounded-lg p-0.5 w-full">
+          <div className={`flex items-center border rounded-lg p-0.5 w-full ${
+            isLight ? "bg-gray-100 border-gray-200" : "bg-gray-950 border-gray-800"
+          }`}>
             {([30, 60, 90] as const).map(days => (
               <button
                 key={days}
@@ -1836,7 +1871,7 @@ Please generate a 25-message (5 rounds) debate between the agents (Polaris, Luna
                 className={`flex-1 py-1 rounded font-mono text-[9px] font-bold uppercase tracking-wider cursor-pointer transition-all ${
                   timeMachineDays === days
                     ? "bg-orbit-purple text-white shadow-[0_0_8px_rgba(139,92,246,0.3)]"
-                    : "text-gray-400 hover:text-white"
+                    : isLight ? "text-gray-500 hover:text-gray-900" : "text-gray-400 hover:text-white"
                 }`}
               >
                 T+{days}d
@@ -1847,27 +1882,29 @@ Please generate a 25-message (5 rounds) debate between the agents (Polaris, Luna
           {(() => {
             const sim = getTimeMachineSimulation(timeMachineDays, selectedRegion, selectedPersona, businessType);
             return (
-              <div className="bg-gray-950/40 border border-gray-900 rounded p-2.5 space-y-2 font-mono text-[9.5px]">
+              <div className={`border rounded p-2.5 space-y-2 font-mono text-[9.5px] ${
+                isLight ? "bg-gray-50 border-gray-150" : "bg-gray-950/40 border-gray-900"
+              }`}>
                 <div>
-                  <span className="text-[7px] text-gray-600 block uppercase">Top Target Persona:</span>
-                  <span className="text-white font-bold block">{sim.topPersona}</span>
+                  <span className={`text-[7px] block uppercase ${isLight ? "text-gray-400" : "text-gray-600"}`}>Top Target Persona:</span>
+                  <span className={`font-bold block ${isLight ? "text-gray-800" : "text-white"}`}>{sim.topPersona}</span>
                 </div>
                 <div>
-                  <span className="text-[7px] text-gray-600 block uppercase">Predicted Hero Product:</span>
-                  <span className="text-blue-400 font-bold block">{sim.topProduct}</span>
+                  <span className={`text-[7px] block uppercase ${isLight ? "text-gray-400" : "text-gray-600"}`}>Predicted Hero Product:</span>
+                  <span className={`font-bold block ${isLight ? "text-blue-600" : "text-blue-400"}`}>{sim.topProduct}</span>
                 </div>
                 <div>
-                  <span className="text-[7px] text-gray-600 block uppercase">Trend Trajectory:</span>
-                  <span className="text-gray-300 block leading-tight">{sim.trendChanges}</span>
+                  <span className={`text-[7px] block uppercase ${isLight ? "text-gray-400" : "text-gray-600"}`}>Trend Trajectory:</span>
+                  <span className={`block leading-tight ${isLight ? "text-gray-700" : "text-gray-300"}`}>{sim.trendChanges}</span>
                 </div>
-                <div className="flex justify-between items-center pt-1 border-t border-gray-900/60 font-mono">
+                <div className={`flex justify-between items-center pt-1 border-t font-mono ${isLight ? "border-gray-200" : "border-gray-900/60"}`}>
                   <div>
-                    <span className="text-[7px] text-orbit-success/70 block uppercase">Est. Revenue:</span>
-                    <span className="text-orbit-success font-bold block">{sim.revenueImpact}</span>
+                    <span className={`text-[7px] block uppercase ${isLight ? "text-emerald-600" : "text-orbit-success/70"}`}>Est. Revenue:</span>
+                    <span className={`font-bold block ${isLight ? "text-emerald-700" : "text-orbit-success"}`}>{sim.revenueImpact}</span>
                   </div>
                   <div className="text-right">
-                    <span className="text-[7px] text-red-500/70 block uppercase">Risk Exposure:</span>
-                    <span className="text-red-400 font-bold block text-[8px] max-w-[100px] truncate" title={sim.riskAreas}>{sim.riskAreas}</span>
+                    <span className={`text-[7px] block uppercase ${isLight ? "text-red-500" : "text-red-500/70"}`}>Risk Exposure:</span>
+                    <span className={`font-bold block text-[8px] max-w-[100px] truncate ${isLight ? "text-red-600" : "text-red-400"}`} title={sim.riskAreas}>{sim.riskAreas}</span>
                   </div>
                 </div>
               </div>
@@ -1877,9 +1914,13 @@ Please generate a 25-message (5 rounds) debate between the agents (Polaris, Luna
 
         {/* Latest Verdict Card */}
         {latestVerdict && (
-          <div className="orbit-panel p-3.5 border border-gray-850 bg-gray-900/10 space-y-3">
-            <h3 className="font-space text-xs font-bold text-white uppercase tracking-wider flex items-center gap-1.5 border-b border-gray-800/60 pb-2">
-              <Award size={13} className="text-orbit-success" />
+          <div className={`orbit-panel p-3.5 border space-y-3 ${
+            isLight ? "border-gray-200 bg-slate-50/50" : "border-gray-850 bg-gray-900/10"
+          }`}>
+            <h3 className={`font-space text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 border-b pb-2 ${
+              isLight ? "text-gray-900 border-gray-200" : "text-white border-gray-800/60"
+            }`}>
+              <Award size={13} className={isLight ? "text-emerald-600" : "text-orbit-success"} />
               Latest Verdict
             </h3>
             
@@ -1923,13 +1964,17 @@ Please generate a 25-message (5 rounds) debate between the agents (Polaris, Luna
 
         {/* System Activity Feed Ticker */}
         <div className="h-44 flex flex-col space-y-2">
-          <h3 className="font-space text-xs font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
-            <Activity size={13} className="text-blue-400" />
+          <h3 className={`font-space text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 ${
+            isLight ? "text-gray-900" : "text-white"
+          }`}>
+            <Activity size={13} className={isLight ? "text-blue-600" : "text-blue-400"} />
             Executive Activity Feed
           </h3>
-          <p className="font-mono text-[8px] text-gray-555 uppercase">Background operations log</p>
+          <p className={`font-mono text-[8px] uppercase ${isLight ? "text-gray-500" : "text-gray-555"}`}>Background operations log</p>
 
-          <div className="flex-1 overflow-y-auto bg-black/60 border border-gray-900 rounded-xl p-3 font-mono text-[8px] text-gray-450 space-y-2 scrollbar-thin">
+          <div className={`flex-1 overflow-y-auto border rounded-xl p-3 font-mono text-[8px] space-y-2 scrollbar-thin ${
+            isLight ? "bg-gray-50 border-gray-200 text-gray-600" : "bg-black/60 border-gray-900 text-gray-450"
+          }`}>
             {telemetry.length === 0 ? (
               <p className="text-center py-6 text-gray-650">[ CONSOLE STANDBY ]</p>
             ) : (
@@ -1950,7 +1995,9 @@ Please generate a 25-message (5 rounds) debate between the agents (Polaris, Luna
         </div>
 
         {/* Corner Diagnostic indicator */}
-        <div className="border-t border-gray-800/60 pt-3 flex items-center justify-between font-mono text-[8px] text-gray-650">
+        <div className={`border-t pt-3 flex items-center justify-between font-mono text-[8px] ${
+          isLight ? "border-gray-200 text-gray-400" : "border-gray-800/60 text-gray-650"
+        }`}>
           <span>CONSENSUS PORT: 8443</span>
           <span className="text-blue-500 animate-pulse">NOMINAL LINK</span>
         </div>

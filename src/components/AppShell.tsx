@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect, useMemo } from "react";
 import { 
   Terminal, Activity, Star, Zap, Users, Mic, BarChart2, 
-  Moon, Sun, Radio, ChevronRight, Cpu,
+  Radio, ChevronRight, Cpu,
   Compass, Sparkles, MicOff, Send, MessageSquare, X, ArrowRight, LogOut,
   Fingerprint, Calendar, MapPin, Menu
 } from "lucide-react";
@@ -306,14 +306,15 @@ Return ONLY the raw JSON object. Do not include markdown tags or extra explanati
         <div className="flex items-center gap-2">
           <button
             onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-            className={`sm:hidden p-1 rounded-lg border transition-colors cursor-pointer mr-1 ${
+            className={`sm:hidden flex items-center gap-1 px-2 py-1 rounded-lg border transition-colors cursor-pointer mr-1 text-[10px] font-mono font-medium ${
               isLight 
                 ? "border-gray-200 hover:bg-gray-100 text-gray-600" 
                 : "border-gray-800 hover:border-gray-700 text-gray-400 hover:text-white"
             }`}
             title="Toggle Menu"
           >
-            <Menu size={14} />
+            <Menu size={12} />
+            <span>Menu</span>
           </button>
           <div className="w-7 h-7 rounded-lg bg-gradient-to-tr from-orbit-blue to-orbit-purple flex items-center justify-center shadow-orbit-glow animate-glow-pulse">
             <span className="font-space font-bold text-white text-xs">O</span>
@@ -388,7 +389,7 @@ Return ONLY the raw JSON object. Do not include markdown tags or extra explanati
 
                 {/* Uploaded Workspaces section */}
                 <div className="border-t border-gray-900/40 pt-1.5">
-                  <div className="px-2.5 py-1 text-[8px] font-bold font-mono text-gray-550 uppercase tracking-widest border-b border-gray-900/40 mb-1">
+                  <div className="px-2.5 py-1 text-[8px] font-bold font-mono text-gray-500 uppercase tracking-widest border-b border-gray-900/40 mb-1">
                     Uploaded Workspaces
                   </div>
                   <div className="space-y-0.5 max-h-36 overflow-y-auto scrollbar-thin">
@@ -414,7 +415,7 @@ Return ONLY the raw JSON object. Do not include markdown tags or extra explanati
                           </button>
                           <button
                             onClick={(e) => { e.stopPropagation(); deleteWorkspace(w.id); }}
-                            className="opacity-0 group-hover/item:opacity-100 p-1 rounded hover:bg-red-900/30 hover:text-red-400 text-gray-550 transition-all cursor-pointer text-[8px]"
+                            className="opacity-0 group-hover/item:opacity-100 p-1 rounded hover:bg-red-900/30 hover:text-red-400 text-gray-500 transition-all cursor-pointer text-[8px]"
                             title="Delete workspace"
                           >
                             ✕
@@ -464,23 +465,38 @@ Return ONLY the raw JSON object. Do not include markdown tags or extra explanati
         {/* Right: System status + theme toggle */}
         <div className="flex items-center gap-3">
           <div className={`hidden sm:flex items-center gap-1.5 font-mono text-[9px] ${
-            isLight ? "text-gray-400" : "text-gray-500"
+            isLight ? "text-gray-500" : "text-gray-400"
           }`}>
             <Radio size={10} className="text-orbit-success" />
             <span>NET {networkHealth}%</span>
           </div>
           
-          <button
-            onClick={() => setTheme(isLight ? "command-center" : "executive")}
-            className={`p-1.5 rounded-lg border transition-colors ${
-              isLight 
-                ? "border-gray-200 hover:bg-gray-100 text-gray-500" 
-                : "border-gray-800 hover:bg-gray-800 text-gray-400"
-            }`}
-            title={isLight ? "Switch to Command Center Mode" : "Switch to Executive View"}
-          >
-            {isLight ? <Moon size={14} /> : <Sun size={14} />}
-          </button>
+          <div className={`flex items-center rounded-lg border text-[10px] font-mono leading-none ${
+            isLight ? "border-gray-200 bg-gray-50" : "border-gray-800 bg-gray-950/40"
+          }`}>
+            <button
+              onClick={() => setTheme("executive")}
+              className={`px-2.5 py-1.5 rounded-l-lg transition-colors cursor-pointer flex items-center gap-1 ${
+                isLight 
+                  ? "bg-white text-orbit-blue font-bold shadow-sm" 
+                  : "text-gray-400 hover:text-white"
+              }`}
+            >
+              <span>☀️</span> <span>Light Theme</span>
+            </button>
+            <button
+              onClick={() => setTheme("command-center")}
+              className={`px-2.5 py-1.5 rounded-r-lg transition-colors cursor-pointer flex items-center gap-1 border-l ${
+                isLight ? "border-gray-200 text-gray-500 hover:text-gray-900" : "border-gray-850 text-gray-400 hover:text-white"
+              } ${
+                !isLight 
+                  ? "bg-gray-900 text-orbit-blue font-bold shadow-sm" 
+                  : ""
+              }`}
+            >
+              <span>🌙</span> <span>Dark Theme</span>
+            </button>
+          </div>
 
           {onLogout && (
             <button
@@ -523,7 +539,7 @@ Return ONLY the raw JSON object. Do not include markdown tags or extra explanati
             {isSidebarOpen && (
               <button 
                 onClick={() => setIsSidebarOpen(false)}
-                className="p-1 rounded text-gray-550 hover:text-white hover:bg-gray-900 transition-colors"
+                className="p-1 rounded text-gray-500 hover:text-white hover:bg-gray-900 transition-colors cursor-pointer"
               >
                 <X size={12} />
               </button>
@@ -572,8 +588,8 @@ Return ONLY the raw JSON object. Do not include markdown tags or extra explanati
                               ? "border"
                               : "border"
                             : isLight
-                              ? "border border-transparent hover:bg-gray-550 hover:border-gray-100"
-                              : "border border-transparent hover:bg-[#0f172a]/60 hover:border-[rgba(255,255,255,0.05)]"
+                              ? "border border-transparent hover:bg-gray-100 hover:border-gray-200 text-gray-900"
+                              : "border border-transparent hover:bg-[#0f172a]/60 hover:border-[rgba(255,255,255,0.05)] text-white"
                         }`}
                         style={isActive ? {
                           background: isLight ? section.color + "10" : section.color + "15",

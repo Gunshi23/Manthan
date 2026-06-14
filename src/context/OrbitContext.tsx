@@ -843,7 +843,10 @@ const getEnrichedCustomers = (rawCustomers: Customer[], rawOrders: Order[], dna:
 
 export const OrbitProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
-  const [theme, setThemeState] = useState<ThemeMode>("command-center");
+  const [theme, setThemeState] = useState<ThemeMode>(() => {
+    const saved = localStorage.getItem("orbit_theme") as ThemeMode;
+    return saved || "command-center";
+  });
   const [workspaces, setWorkspaces] = useState<WorkspaceMetadata[]>(() => {
     const saved = localStorage.getItem("orbit_workspaces");
     return saved ? JSON.parse(saved) : [];
@@ -1914,6 +1917,7 @@ Classify this business and extract intelligence. Return ONLY a valid JSON object
 
   const setTheme = (mode: ThemeMode) => {
     setThemeState(mode);
+    localStorage.setItem("orbit_theme", mode);
   };
 
   const updateConfig = (newConfig: Partial<SystemConfig>) => {
