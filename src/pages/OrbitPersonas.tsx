@@ -111,15 +111,15 @@ export const OrbitPersonas: React.FC = () => {
       }`}>
         <div>
           <div className="flex items-center gap-2">
-            <div className="w-2 h-2 rounded-full bg-orbit-purple animate-pulse" />
-            <span className="font-mono text-[10px] tracking-widest text-orbit-purple font-bold uppercase">DNA Analysis Lab</span>
+            <div className="w-2 h-2 rounded-full bg-Manthan-purple animate-pulse" />
+            <span className="font-mono text-[10px] tracking-widest text-Manthan-purple font-bold uppercase">DNA Analysis Lab</span>
           </div>
-          <h1 className={`text-2xl font-space font-bold tracking-tight ${isLight ? "text-slate-800" : "text-white"}`}>orbit.ai Personas</h1>
+          <h1 className={`text-2xl font-space font-bold tracking-tight ${isLight ? "text-slate-800" : "text-white"}`}>Manthan.ai Personas</h1>
           <div className="flex items-center gap-2 mt-1">
             <p className={`font-mono text-xs ${isLight ? "text-slate-500" : "text-gray-400"}`}>Customer DNA Intelligence Lab & Archetype Clusters</p>
             {workspaceDna && (
               <span className={`font-mono text-[8px] border px-2 py-0.5 rounded-full uppercase font-bold ${
-                isLight ? "bg-blue-50 border-blue-200 text-blue-600" : "bg-orbit-blue/10 border-orbit-blue/30 text-orbit-blue"
+                isLight ? "bg-blue-50 border-blue-200 text-blue-600" : "bg-Manthan-blue/10 border-Manthan-blue/30 text-Manthan-blue"
               }`}>
                 {workspaceDna.industryType}
               </span>
@@ -133,7 +133,7 @@ export const OrbitPersonas: React.FC = () => {
           className={`px-4 py-2 rounded-xl font-mono text-xs font-bold uppercase tracking-wider flex items-center gap-2 border transition-all cursor-pointer ${
             isLight 
               ? "bg-blue-600 border-blue-500 text-white hover:bg-blue-700 shadow-sm" 
-              : "bg-orbit-purple/20 border-orbit-purple/40 text-orbit-purple hover:bg-orbit-purple/30 shadow-orbit-glow-purple"
+              : "bg-Manthan-purple/20 border-Manthan-purple/40 text-Manthan-purple hover:bg-Manthan-purple/30 shadow-Manthan-glow-purple"
           } disabled:opacity-50`}
         >
           <RefreshCw size={14} className={isGenerating ? "animate-spin" : ""} />
@@ -149,14 +149,14 @@ export const OrbitPersonas: React.FC = () => {
             : "bg-purple-950/15 border-purple-500/25 text-gray-200"
         }`}>
           {/* Neon side indicator */}
-          <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-orbit-purple to-orbit-pink" />
+          <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-Manthan-purple to-Manthan-pink" />
           
           <div className={`p-2.5 rounded-lg shrink-0 ${isLight ? "bg-purple-100 text-purple-600" : "bg-purple-500/10 text-purple-400 border border-purple-500/25"}`}>
             <Zap size={18} className="animate-pulse" />
           </div>
           
           <div className="flex-1 space-y-1">
-            <span className="font-space font-bold text-xs uppercase tracking-wider text-orbit-purple block">AI Persona Briefing</span>
+            <span className="font-space font-bold text-xs uppercase tracking-wider text-Manthan-purple block">AI Persona Briefing</span>
             <p className={`text-xs font-mono leading-relaxed ${isLight ? "text-slate-700" : "text-gray-400"}`}>
               {highestRevenuePersona ? (
                 <>
@@ -189,7 +189,7 @@ export const OrbitPersonas: React.FC = () => {
         <div className="lg:col-span-7 space-y-4">
           <div className="flex items-center justify-between">
             <h2 className={`font-space text-sm font-bold uppercase tracking-wider flex items-center gap-2 ${isLight ? "text-slate-600" : "text-gray-400"}`}>
-              <Award size={14} className="text-orbit-blue" />
+              <Award size={14} className="text-Manthan-blue" />
               <span>Customer Segments ({personas.length})</span>
             </h2>
             <span className="font-mono text-[10px] text-gray-500">Select card to inspect DNA details</span>
@@ -215,7 +215,7 @@ export const OrbitPersonas: React.FC = () => {
                   }}
                   className={`p-4 rounded-xl border transition-all duration-300 cursor-pointer relative ${
                     isSelected 
-                      ? `${styling.border} ${styling.glow} ${isLight ? "border-blue-400 shadow-md scale-[1.01]" : "bg-[#1E293B]/70 border-orbit-purple shadow-[0_0_20px_rgba(139,92,246,0.15)]"}` 
+                      ? `${styling.border} ${styling.glow} ${isLight ? "border-blue-400 shadow-md scale-[1.01]" : "bg-[#1E293B]/70 border-Manthan-purple shadow-[0_0_20px_rgba(139,92,246,0.15)]"}` 
                       : isLight 
                       ? "bg-white border-slate-200 hover:border-slate-350 hover:shadow-sm" 
                       : "bg-[#0F172A]/70 border-[rgba(255,255,255,0.06)] hover:border-[rgba(255,255,255,0.15)] hover:bg-[#0F172A]"
@@ -223,7 +223,7 @@ export const OrbitPersonas: React.FC = () => {
                 >
                   {/* Selection indicator border glow */}
                   {isSelected && !isLight && (
-                    <span className="absolute -inset-[1px] border border-orbit-purple rounded-xl animate-pulse pointer-events-none" />
+                    <span className="absolute -inset-[1px] border border-Manthan-purple rounded-xl animate-pulse pointer-events-none" />
                   )}
 
                   <div className="flex items-start justify-between gap-3 mb-3">
@@ -239,12 +239,12 @@ export const OrbitPersonas: React.FC = () => {
                   </div>
 
                   <div className="flex items-baseline justify-between mb-1 gap-2">
-                    <h3 className={`font-space font-bold text-sm tracking-tight group-hover:text-orbit-blue transition-colors truncate ${
+                    <h3 className={`font-space font-bold text-sm tracking-tight group-hover:text-Manthan-blue transition-colors truncate ${
                       isLight ? "text-slate-800" : "text-white"
                     }`}>
                       {persona.name}
                     </h3>
-                    <span className="font-mono text-[9px] text-orbit-purple font-bold shrink-0">Age: {persona.ageRange || "18-24"}</span>
+                    <span className="font-mono text-[9px] text-Manthan-purple font-bold shrink-0">Age: {persona.ageRange || "18-24"}</span>
                   </div>
                   <p className={`text-[10px] line-clamp-2 h-7 font-mono leading-normal mb-3 ${isLight ? "text-slate-500" : "text-gray-400"}`}>
                     {persona.description}
@@ -291,29 +291,29 @@ export const OrbitPersonas: React.FC = () => {
               <button
                 onClick={() => setActiveTab("insights")}
                 className={`pb-2 font-mono text-[11px] font-bold uppercase tracking-wider relative transition-colors cursor-pointer ${
-                  activeTab === "insights" ? "text-orbit-purple" : isLight ? "text-slate-400 hover:text-slate-600" : "text-gray-500 hover:text-gray-300"
+                  activeTab === "insights" ? "text-Manthan-purple" : isLight ? "text-slate-400 hover:text-slate-600" : "text-gray-500 hover:text-gray-300"
                 }`}
               >
                 AI Explanation Panel
                 {activeTab === "insights" && (
-                  <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-orbit-purple" />
+                  <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-Manthan-purple" />
                 )}
               </button>
               <button
                 onClick={() => setActiveTab("analytics")}
                 className={`pb-2 font-mono text-[11px] font-bold uppercase tracking-wider relative transition-colors cursor-pointer ${
-                  activeTab === "analytics" ? "text-orbit-blue" : isLight ? "text-slate-400 hover:text-slate-600" : "text-gray-500 hover:text-gray-300"
+                  activeTab === "analytics" ? "text-Manthan-blue" : isLight ? "text-slate-400 hover:text-slate-600" : "text-gray-500 hover:text-gray-300"
                 }`}
               >
                 Analytics & Heatmaps
                 {activeTab === "analytics" && (
-                  <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-orbit-blue" />
+                  <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-Manthan-blue" />
                 )}
               </button>
             </div>
             {activePersona && (
               <span className={`font-mono text-[9px] px-2 py-0.5 border rounded-full uppercase ${
-                isLight ? "bg-slate-100 border-slate-200 text-slate-600" : "bg-gray-900 border-gray-800 text-orbit-purple"
+                isLight ? "bg-slate-100 border-slate-200 text-slate-600" : "bg-gray-900 border-gray-800 text-Manthan-purple"
               }`}>
                 Active ID: {activePersona.id}
               </span>
@@ -336,7 +336,7 @@ export const OrbitPersonas: React.FC = () => {
                     <div>
                       <span className="font-mono text-[9px] text-gray-550 uppercase tracking-widest block">Customer DNA Archetype</span>
                       <h3 className={`font-space font-bold text-base ${isLight ? "text-slate-800" : "text-white"}`}>{activePersona.name}</h3>
-                      <div className="flex flex-wrap gap-2 items-center mt-1 text-[9px] font-mono text-orbit-purple font-bold">
+                      <div className="flex flex-wrap gap-2 items-center mt-1 text-[9px] font-mono text-Manthan-purple font-bold">
                         <span>Age Range: {activePersona.ageRange}</span>
                         <span className="text-gray-500 font-normal">•</span>
                         <span>Channel: {activePersona.preferredChannel}</span>
@@ -355,7 +355,7 @@ export const OrbitPersonas: React.FC = () => {
                   <div className="space-y-3.5 pt-2">
                     <div>
                       <div className={`flex items-center gap-1.5 font-space text-xs font-bold mb-1 uppercase tracking-wider ${isLight ? "text-slate-800" : "text-white"}`}>
-                        <TrendingUp size={12} className="text-orbit-purple" />
+                        <TrendingUp size={12} className="text-Manthan-purple" />
                         <span>Buying Motivation</span>
                       </div>
                       <p className={`text-[11px] font-mono pl-4 ${isLight ? "text-slate-600" : "text-gray-400"}`}>{activePersona.motivation}</p>
@@ -363,7 +363,7 @@ export const OrbitPersonas: React.FC = () => {
 
                     <div>
                       <div className={`flex items-center gap-1.5 font-space text-xs font-bold mb-1 uppercase tracking-wider ${isLight ? "text-slate-800" : "text-white"}`}>
-                        <Target size={12} className="text-orbit-pink" />
+                        <Target size={12} className="text-Manthan-pink" />
                         <span>Buying Triggers</span>
                       </div>
                       <p className={`text-[11px] font-mono pl-4 ${isLight ? "text-slate-660" : "text-gray-400"}`}>{activePersona.buyingTriggers}</p>
@@ -371,7 +371,7 @@ export const OrbitPersonas: React.FC = () => {
 
                     <div>
                       <div className={`flex items-center gap-1.5 font-space text-xs font-bold mb-1 uppercase tracking-wider ${isLight ? "text-slate-800" : "text-white"}`}>
-                        <Award size={12} className="text-orbit-blue" />
+                        <Award size={12} className="text-Manthan-blue" />
                         <span>Preferred Products</span>
                       </div>
                       <p className={`text-[11px] font-mono pl-4 ${isLight ? "text-slate-600" : "text-gray-400"}`}>{activePersona.preferredProducts} (e.g. {activePersona.whatTheyBuy})</p>
@@ -379,7 +379,7 @@ export const OrbitPersonas: React.FC = () => {
 
                     <div>
                       <div className={`flex items-center gap-1.5 font-space text-xs font-bold mb-1 uppercase tracking-wider ${isLight ? "text-slate-800" : "text-white"}`}>
-                        <Zap size={12} className="text-orbit-amber" />
+                        <Zap size={12} className="text-Manthan-amber" />
                         <span>AI Insights & Targeting Strategy</span>
                       </div>
                       <p className={`text-[11px] font-mono pl-4 leading-normal p-2 rounded border ${
@@ -398,15 +398,15 @@ export const OrbitPersonas: React.FC = () => {
                     <div className={`pt-3 border-t space-y-2 p-3 rounded-lg border ${
                       isLight ? "border-purple-200 bg-purple-50/50 text-slate-700" : "border-purple-500/10 bg-purple-950/5"
                     }`}>
-                      <div className="flex items-center gap-1.5 font-space text-xs font-bold text-orbit-purple uppercase tracking-wider">
-                        <Zap size={12} className="text-orbit-purple animate-pulse" />
+                      <div className="flex items-center gap-1.5 font-space text-xs font-bold text-Manthan-purple uppercase tracking-wider">
+                        <Zap size={12} className="text-Manthan-purple animate-pulse" />
                         <span>Recommended Campaign</span>
                       </div>
                       <p className={`text-[11px] font-mono font-bold ${isLight ? "text-slate-850" : "text-white"}`}>{activePersona.suggestedCampaign}</p>
                       <p className={`text-[10px] font-mono leading-relaxed pt-0.5 ${isLight ? "text-slate-500" : "text-gray-400"}`}>{activePersona.recommendedStrategy}</p>
                       <div className="flex justify-between items-center text-[10px] font-mono pt-2 text-gray-500">
                         <span>Revenue Opportunity:</span>
-                        <span className="text-orbit-success font-bold">₹{activePersona.revenuePotential.toLocaleString()}</span>
+                        <span className="text-Manthan-success font-bold">₹{activePersona.revenuePotential.toLocaleString()}</span>
                       </div>
                     </div>
                   </div>
@@ -420,7 +420,7 @@ export const OrbitPersonas: React.FC = () => {
                       isLight ? "text-slate-800" : "text-white"
                     }`}>
                       <span>Revenue Contribution</span>
-                      <span className="font-mono text-[10px] text-orbit-success">₹{(activePersona.predictedLtv * activePersona.customerCount).toLocaleString()} Total LTV</span>
+                      <span className="font-mono text-[10px] text-Manthan-success">₹{(activePersona.predictedLtv * activePersona.customerCount).toLocaleString()} Total LTV</span>
                     </h4>
                     <div className="space-y-2.5">
                       {personas.map(p => {
@@ -494,7 +494,7 @@ export const OrbitPersonas: React.FC = () => {
                         </div>
                         <div className="flex justify-between text-gray-400">
                           <span>Untapped headroom:</span>
-                          <span className="text-orbit-blue font-bold">₹{(activePersona.revenuePotential - activePersona.predictedLtv).toLocaleString()} (+{Math.round(((activePersona.revenuePotential - activePersona.predictedLtv)/activePersona.predictedLtv)*100)}%)</span>
+                          <span className="text-Manthan-blue font-bold">₹{(activePersona.revenuePotential - activePersona.predictedLtv).toLocaleString()} (+{Math.round(((activePersona.revenuePotential - activePersona.predictedLtv)/activePersona.predictedLtv)*100)}%)</span>
                         </div>
                       </div>
                     </div>

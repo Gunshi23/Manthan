@@ -23,7 +23,7 @@ import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { useOrbit } from './context/OrbitContext';
 
 type AppStage = 'landing' | 'auth' | 'init' | 'profile-setup' | 'setup' | 'app';
-type AppPage = 'command-center' | 'mission-control' | 'customer-galaxy' | 'growth-engine' | 'agent-boardroom' | 'analytics' | 'future-simulator' | 'opportunity-radar' | 'competitor-intel' | 'orbit-personas' | 'seasonal-intelligence' | 'regional-intelligence';
+type AppPage = 'command-center' | 'mission-control' | 'customer-galaxy' | 'growth-engine' | 'agent-boardroom' | 'analytics' | 'future-simulator' | 'opportunity-radar' | 'competitor-intel' | 'Manthan-personas' | 'seasonal-intelligence' | 'regional-intelligence';
 
 function App() {
   const [stage, setStage] = useState<AppStage>('landing');
@@ -140,7 +140,7 @@ function App() {
       {activePage === 'future-simulator' && <FutureSimulator />}
       {activePage === 'opportunity-radar' && <OpportunityRadar onNavigate={setActivePage} />}
       {activePage === 'competitor-intel' && <CompetitorIntelligence />}
-      {activePage === 'orbit-personas' && <OrbitPersonas />}
+      {activePage === 'Manthan-personas' && <OrbitPersonas />}
       {activePage === 'seasonal-intelligence' && <SeasonalIntelligence />}
       {activePage === 'regional-intelligence' && <RegionalIntelligence />}
     </AppShell>

@@ -53,7 +53,7 @@ router.post("/launch", async (req, res) => {
     if (channel === "WhatsApp") {
       result = await sendCampaignWhatsApp(campaignId, finalMissionId, recipients, template);
     } else {
-      result = await sendCampaignEmail(campaignId, finalMissionId, recipients, subject || "Special Offer from ORBIT", template);
+      result = await sendCampaignEmail(campaignId, finalMissionId, recipients, subject || "Special Offer from Manthan", template);
     }
 
     // Write to mission_updates
@@ -181,7 +181,7 @@ router.get("/templates", (req, res) => {
       name: "VIP Campaign",
       description: "Send high-ltv customers early pre-sale access details.",
       channel: "WhatsApp",
-      body: "Hi {{name}} 🌟\n\nAs one of our VIP members, you get early access to our premium launch. Click here: https://orbit.io/sale"
+      body: "Hi {{name}} 🌟\n\nAs one of our VIP members, you get early access to our premium launch. Click here: https://manthan.ai/sale"
     },
     {
       id: "tmpl_festival",

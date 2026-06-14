@@ -60,7 +60,7 @@ app.use("/api/config", configRouter);
 // Start server
 if (process.env.NODE_ENV !== "production") {
   app.listen(PORT, () => {
-    console.log(`🚀 ORBIT backend server running on http://localhost:${PORT}`);
+    console.log(`🚀 Manthan backend server running on http://localhost:${PORT}`);
   });
 }
 

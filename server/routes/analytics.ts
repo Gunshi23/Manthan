@@ -45,18 +45,18 @@ router.get("/briefing", async (req, res) => {
 - Potential Recoverable Revenue: ₹${potentialRev.toLocaleString()}
 - Opportunities Detail: ${JSON.stringify(opportunities.map(o => ({ title: o.title, revenue: o.potentialRevenue, action: o.recommendedAction })))}
 
-Based on this live ORBIT data, generate a concise, professional AI executive summary briefing for the operator node. Address:
+Based on this live Manthan data, generate a concise, professional AI executive summary briefing for the operator node. Address:
 1. Current active missions running.
 2. The total revenue achieve vs potential leaks.
 3. The highest value opportunity detected and recommended action.
 Limit the response to 3-4 bullet points or a single paragraph under 120 words.`;
 
-    const systemPrompt = "You are the ORBIT Executive AI Agent. Keep summaries concise, professional, and action-oriented.";
+    const systemPrompt = "You are the Manthan Executive AI Agent. Keep summaries concise, professional, and action-oriented.";
     const briefingText = await callGeminiAPI(prompt, systemPrompt);
     res.status(200).json({ briefing: briefingText });
   } catch (error: any) {
     console.error("AI Briefing failed, returning mock:", error);
-    res.status(200).json({ briefing: "ORBIT currently has 3 active missions.\n₹55,297 revenue forecast detected.\nHighest opportunity:\nRepeat Buyer Reactivation.\n\nRecommended action:\nLaunch WhatsApp recovery campaign.\n\nPotential gain:\n₹18,500." });
+    res.status(200).json({ briefing: "Manthan currently has 3 active missions.\n₹55,297 revenue forecast detected.\nHighest opportunity:\nRepeat Buyer Reactivation.\n\nRecommended action:\nLaunch WhatsApp recovery campaign.\n\nPotential gain:\n₹18,500." });
   }
 });
 

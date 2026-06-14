@@ -8,7 +8,7 @@ interface PageHeaderHUDProps {
   subtitle: string;
   statusLabel?: string;
   actions?: React.ReactNode;
-  onSelectAgent?: (agent: "Polaris" | "Vega" | "Nova" | "Atlas" | "Luna") => void;
+  onSelectAgent?: (agent: "Drishti" | "Khoj" | "Rachna" | "Saarthi" | "Pragya") => void;
 }
 
 export const PageHeaderHUD: React.FC<PageHeaderHUDProps> = ({
@@ -215,9 +215,9 @@ export const PageHeaderHUD: React.FC<PageHeaderHUDProps> = ({
       <div>
         <div className="flex items-center gap-3.5 mb-1">
           <div className="flex items-center gap-2">
-            <div className="w-2 h-2 rounded-full bg-orbit-success animate-pulse" />
+            <div className="w-2 h-2 rounded-full bg-Manthan-success animate-pulse" />
             <span className={`font-mono text-[9px] tracking-[0.2em] uppercase ${
-              isLight ? "text-emerald-600 font-bold" : "text-orbit-success"
+              isLight ? "text-emerald-600 font-bold" : "text-Manthan-success"
             }`}>
               {statusLabel}
             </span>
@@ -235,9 +235,9 @@ export const PageHeaderHUD: React.FC<PageHeaderHUDProps> = ({
               }`}
               title="Configure API Keys"
             >
-              <span className={`w-1.5 h-1.5 rounded-full animate-pulse ${config.geminiKey ? "bg-orbit-success" : "bg-red-500"}`} />
+              <span className={`w-1.5 h-1.5 rounded-full animate-pulse ${config.geminiKey ? "bg-Manthan-success" : "bg-red-500"}`} />
               <span className={isLight ? "text-gray-500" : "text-gray-400"}>COGNITIVE NODE:</span>
-              <span className={config.geminiKey ? "text-orbit-success font-bold" : "text-red-400 font-bold"}>
+              <span className={config.geminiKey ? "text-Manthan-success font-bold" : "text-red-400 font-bold"}>
                 {config.geminiKey ? "ONLINE" : "OFFLINE"}
               </span>
             </button>
@@ -257,9 +257,9 @@ export const PageHeaderHUD: React.FC<PageHeaderHUDProps> = ({
               }`}
               title={config.deepgramKey ? "Open Neural Voice Uplink" : "Configure Deepgram Key to Enable Voice"}
             >
-              <span className={`w-1.5 h-1.5 rounded-full ${config.deepgramKey ? "bg-orbit-success animate-pulse" : "bg-red-500"}`} />
+              <span className={`w-1.5 h-1.5 rounded-full ${config.deepgramKey ? "bg-Manthan-success animate-pulse" : "bg-red-500"}`} />
               <span className={isLight ? "text-gray-500" : "text-gray-400"}>VOICE NODE:</span>
-              <span className={config.deepgramKey ? "text-orbit-success font-bold" : "text-red-400 font-bold"}>
+              <span className={config.deepgramKey ? "text-Manthan-success font-bold" : "text-red-400 font-bold"}>
                 {config.deepgramKey ? "UPLINK READY" : "OFFLINE"}
               </span>
             </button>
@@ -289,7 +289,7 @@ export const PageHeaderHUD: React.FC<PageHeaderHUDProps> = ({
             return (
               <div
                 key={idx}
-                className="w-1 bg-orbit-blue rounded-t-sm transition-all duration-300"
+                className="w-1 bg-Manthan-blue rounded-t-sm transition-all duration-300"
                 style={{
                   height: `${pctHeight}%`,
                   opacity: 0.3 + (idx / 12) * 0.7,
@@ -312,14 +312,14 @@ export const PageHeaderHUD: React.FC<PageHeaderHUDProps> = ({
         <div className="w-px h-8 hidden sm:block" style={{ backgroundColor: isLight ? "#e5e7eb" : "#1f2937" }} />
 
         <div className="flex flex-col gap-1">
-          {["POLARIS", "VEGA", "NOVA", "ATLAS", "LUNA"].map((a, i) => (
+          {["Drishti", "Khoj", "Rachna", "Saarthi", "Pragya"].map((a, i) => (
             <div 
               key={a} 
               onClick={() => onSelectAgent?.(a.charAt(0) + a.slice(1).toLowerCase() as any)}
               className={`flex items-center gap-1.5 ${onSelectAgent ? "cursor-pointer hover:opacity-85" : ""}`}
               title={onSelectAgent ? `View ${a} premium card` : undefined}
             >
-              <span className="w-1 h-1 rounded-full bg-orbit-success animate-pulse"
+              <span className="w-1 h-1 rounded-full bg-Manthan-success animate-pulse"
                 style={{ animationDelay: `${i * 0.3}s` }} />
               <span className={`font-mono text-[8px] uppercase tracking-wider ${isLight ? "text-gray-500" : "text-gray-400"}`}>{a}</span>
             </div>
@@ -333,7 +333,7 @@ export const PageHeaderHUD: React.FC<PageHeaderHUDProps> = ({
             isLight ? "bg-white border-gray-200 text-gray-900" : "bg-[#0c0f20] border-gray-800 text-white"
           }`}>
             <div className={`flex justify-between items-center border-b pb-2.5 ${isLight ? "border-gray-200" : "border-gray-800"}`}>
-              <span className="font-space text-xs font-bold uppercase tracking-wider text-orbit-blue flex items-center gap-1.5">
+              <span className="font-space text-xs font-bold uppercase tracking-wider text-Manthan-blue flex items-center gap-1.5">
                 Configure Credentials
               </span>
               <button onClick={() => setIsKeyModalOpen(false)} className={`cursor-pointer hover:text-white ${isLight ? "text-gray-400" : "text-gray-500"}`}>
@@ -373,7 +373,7 @@ export const PageHeaderHUD: React.FC<PageHeaderHUDProps> = ({
                   updateConfig({ geminiKey: keyInput, deepgramKey: deepgramKeyInput });
                   setIsKeyModalOpen(false);
                 }}
-                className="w-full py-2 rounded-lg bg-orbit-blue hover:bg-blue-600 text-white font-bold uppercase text-[9px] tracking-wider transition-colors cursor-pointer shadow-orbit-glow"
+                className="w-full py-2 rounded-lg bg-Manthan-blue hover:bg-blue-600 text-white font-bold uppercase text-[9px] tracking-wider transition-colors cursor-pointer shadow-Manthan-glow"
               >
                 Save Configuration
               </button>
@@ -391,8 +391,8 @@ export const PageHeaderHUD: React.FC<PageHeaderHUDProps> = ({
             {/* Drawer Header */}
             <div className={`flex justify-between items-center p-4 border-b ${isLight ? "border-gray-200" : "border-gray-800"}`}>
               <div className="flex items-center gap-2">
-                <Radio className={`w-4 h-4 ${callStatus === "connected" ? "text-orbit-success animate-pulse" : "text-gray-450"}`} />
-                <span className="font-space text-xs font-bold uppercase tracking-widest text-orbit-blue">
+                <Radio className={`w-4 h-4 ${callStatus === "connected" ? "text-Manthan-success animate-pulse" : "text-gray-450"}`} />
+                <span className="font-space text-xs font-bold uppercase tracking-widest text-Manthan-blue">
                   Neural Voice Uplink
                 </span>
               </div>
@@ -418,7 +418,7 @@ export const PageHeaderHUD: React.FC<PageHeaderHUDProps> = ({
                     return (
                       <div
                         key={i}
-                        className="w-1 bg-orbit-blue rounded-full animate-bounce"
+                        className="w-1 bg-Manthan-blue rounded-full animate-bounce"
                         style={{
                           height: "100%",
                           animationDuration: `${0.6 + Math.random() * 0.8}s`,
@@ -430,7 +430,7 @@ export const PageHeaderHUD: React.FC<PageHeaderHUDProps> = ({
                 </div>
               ) : (
                 <div className="w-12 h-12 rounded-full border border-dashed border-gray-500/30 flex items-center justify-center text-gray-500">
-                  <Mic size={20} className={callStatus === "connecting" ? "animate-pulse text-orbit-blue" : ""} />
+                  <Mic size={20} className={callStatus === "connecting" ? "animate-pulse text-Manthan-blue" : ""} />
                 </div>
               )}
               
@@ -453,7 +453,7 @@ export const PageHeaderHUD: React.FC<PageHeaderHUDProps> = ({
                 <div className="h-full flex flex-col items-center justify-center text-gray-500 text-center uppercase tracking-wider p-6">
                   <span className="text-[9px] opacity-60">No speech records in buffer.</span>
                   {callStatus === "connected" && (
-                    <span className="text-[8px] text-orbit-blue mt-1">Start speaking to begin transcribing.</span>
+                    <span className="text-[8px] text-Manthan-blue mt-1">Start speaking to begin transcribing.</span>
                   )}
                 </div>
               ) : (
@@ -468,7 +468,7 @@ export const PageHeaderHUD: React.FC<PageHeaderHUDProps> = ({
                         : "bg-blue-950/20 border-blue-900/30 text-blue-200 font-medium"
                   }`}>
                     <div className="text-[7.5px] uppercase tracking-wider text-gray-500 mb-1">
-                      {log.role === "user" ? "Operator Node" : "orbit.ai Core Voice"}
+                      {log.role === "user" ? "Operator Node" : "Manthan.ai Core Voice"}
                     </div>
                     <div>{log.text}</div>
                   </div>
@@ -494,7 +494,7 @@ export const PageHeaderHUD: React.FC<PageHeaderHUDProps> = ({
               {callStatus === "idle" || callStatus === "error" ? (
                 <button
                   onClick={startCall}
-                  className="w-full py-2.5 rounded-lg bg-orbit-success hover:opacity-90 text-black font-bold uppercase text-[10px] tracking-widest transition-all cursor-pointer shadow-orbit-glow"
+                  className="w-full py-2.5 rounded-lg bg-Manthan-success hover:opacity-90 text-black font-bold uppercase text-[10px] tracking-widest transition-all cursor-pointer shadow-Manthan-glow"
                 >
                   Initiate Voice Uplink
                 </button>

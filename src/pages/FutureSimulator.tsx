@@ -33,7 +33,7 @@ interface TimelineData {
 }
 
 interface ChatMessage {
-  sender: "user" | "vega";
+  sender: "user" | "Khoj";
   text: string;
   timestamp: string;
   stats?: {
@@ -47,7 +47,7 @@ interface ChatMessage {
 export const FutureSimulator: React.FC = () => {
   const { addAgentLog, config, theme } = useOrbit();
   const isLight = theme === "executive";
-  const [selectedAgent, setSelectedAgent] = useState<"Polaris" | "Vega" | "Nova" | "Atlas" | "Luna" | null>(null);
+  const [selectedAgent, setSelectedAgent] = useState<"Drishti" | "Khoj" | "Rachna" | "Saarthi" | "Pragya" | null>(null);
   
   // Page mode: "variables" (custom inputs) vs "missions" (mission objectives)
   const [simulatorMode, setSimulatorMode] = useState<"variables" | "missions">("variables");
@@ -69,11 +69,11 @@ export const FutureSimulator: React.FC = () => {
   const [simulationStep, setSimulationStep] = useState(0);
   const [hasSimulated, setHasSimulated] = useState(false);
   const [simSteps, setSimSteps] = useState<{ label: string; agent: string; done: boolean }[]>([
-    { label: "Analyzing future outcomes...", agent: "Polaris", done: false },
-    { label: "Polaris evaluating audience...", agent: "Polaris", done: false },
-    { label: "Vega generating predictions...", agent: "Vega", done: false },
-    { label: "Nova simulating engagement...", agent: "Nova", done: false },
-    { label: "Atlas calculating execution strategy...", agent: "Atlas", done: false },
+    { label: "Analyzing future outcomes...", agent: "Drishti", done: false },
+    { label: "Drishti evaluating audience...", agent: "Drishti", done: false },
+    { label: "Khoj generating predictions...", agent: "Khoj", done: false },
+    { label: "Rachna simulating engagement...", agent: "Rachna", done: false },
+    { label: "Saarthi calculating execution strategy...", agent: "Saarthi", done: false },
   ]);
 
   // Selected timeline view detail
@@ -95,7 +95,7 @@ export const FutureSimulator: React.FC = () => {
       roi: "2.8x",
       risk: "Low",
       colorClass: "from-blue-500/15 to-blue-555/5",
-      borderClass: "border-blue-550/40 hover:border-blue-450/60 shadow-orbit-glow-blue",
+      borderClass: "border-blue-550/40 hover:border-blue-450/60 shadow-Manthan-glow-blue",
       bgGlowClass: "rgba(59, 130, 246, 0.08)",
       textAccentClass: "text-blue-400",
       recs: ["Low churn risk", "Guaranteed steady returns", "Best for budget conservation"]
@@ -103,7 +103,7 @@ export const FutureSimulator: React.FC = () => {
     B: {
       id: "B",
       name: "Timeline B",
-      badge: "Recommended (Vega Optimal)",
+      badge: "Recommended (Khoj Optimal)",
       revenue: 78000,
       openRate: 71,
       conversion: 12,
@@ -111,7 +111,7 @@ export const FutureSimulator: React.FC = () => {
       roi: "4.8x",
       risk: "Low",
       colorClass: "from-green-500/20 to-emerald-500/20 bg-green-500/5",
-      borderClass: "border-green-500/40 hover:border-green-400/70 shadow-orbit-glow-green animate-glow-pulse",
+      borderClass: "border-green-500/40 hover:border-green-400/70 shadow-Manthan-glow-green animate-glow-pulse",
       bgGlowClass: "rgba(34, 197, 94, 0.15)",
       textAccentClass: "text-green-400",
       recs: ["Highest ROI balance", "Optimized audience engagement", "Negligible churn risk bump"]
@@ -127,7 +127,7 @@ export const FutureSimulator: React.FC = () => {
       roi: "6.2x",
       risk: "High",
       colorClass: "from-purple-500/15 to-violet-500/5 bg-purple-500/5",
-      borderClass: "border-purple-500/30 hover:border-purple-400/50 shadow-orbit-glow-purple",
+      borderClass: "border-purple-500/30 hover:border-purple-400/50 shadow-Manthan-glow-purple",
       bgGlowClass: "rgba(139, 92, 246, 0.08)",
       textAccentClass: "text-purple-400",
       recs: ["Maximum revenue potential", "High fatigue risk", "Requires premium copywriting failovers"]
@@ -138,7 +138,7 @@ export const FutureSimulator: React.FC = () => {
   const [chatInput, setChatInput] = useState("");
   const [chatHistory, setChatHistory] = useState<ChatMessage[]>([
     {
-      sender: "vega",
+      sender: "Khoj",
       text: "Simulator ready. Query any timeline alteration or audience subset. What happens if we adjust parameters?",
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     }
@@ -283,7 +283,7 @@ export const FutureSimulator: React.FC = () => {
         roi: roiMultiplier(revA),
         risk: "Low",
         colorClass: "from-blue-500/15 to-blue-555/5",
-        borderClass: "border-blue-550/40 hover:border-blue-450/60 shadow-orbit-glow-blue",
+        borderClass: "border-blue-550/40 hover:border-blue-450/60 shadow-Manthan-glow-blue",
         bgGlowClass: "rgba(59, 130, 246, 0.08)",
         textAccentClass: "text-blue-400",
         recs: [
@@ -303,11 +303,11 @@ export const FutureSimulator: React.FC = () => {
         roi: roiMultiplier(revB),
         risk: selectedChannel === "WhatsApp" && timeScale > 1 ? "Medium" : "Low",
         colorClass: "from-green-500/20 to-emerald-500/20 bg-green-500/5",
-        borderClass: "border-green-500/40 hover:border-green-400/70 shadow-orbit-glow-green animate-glow-pulse",
+        borderClass: "border-green-500/40 hover:border-green-400/70 shadow-Manthan-glow-green animate-glow-pulse",
         bgGlowClass: "rgba(34, 197, 94, 0.15)",
         textAccentClass: "text-green-400",
         recs: [
-          "Vega identified: Optimal balance of conversion yields versus opt-out rates.",
+          "Khoj identified: Optimal balance of conversion yields versus opt-out rates.",
           `High performance channel allocation using ${selectedChannel} nodes.`,
           "Perfect execution window aligned with cohort session parameters."
         ]
@@ -323,7 +323,7 @@ export const FutureSimulator: React.FC = () => {
         roi: roiMultiplier(revC),
         risk: "High",
         colorClass: "from-purple-500/15 to-violet-500/5 bg-purple-500/5",
-        borderClass: "border-purple-500/30 hover:border-purple-400/50 shadow-orbit-glow-purple",
+        borderClass: "border-purple-500/30 hover:border-purple-400/50 shadow-Manthan-glow-purple",
         bgGlowClass: "rgba(139, 92, 246, 0.08)",
         textAccentClass: "text-purple-400",
         recs: [
@@ -347,13 +347,13 @@ export const FutureSimulator: React.FC = () => {
         
         // Log telemetry messages
         if (next === 1) {
-          addAgentLog("Polaris", `Evaluating database index. Mapped cohort size: ${audSize} customer profiles. Channel nodes: ${selectedChannel}.`, "action");
+          addAgentLog("Drishti", `Evaluating database index. Mapped cohort size: ${audSize} customer profiles. Channel nodes: ${selectedChannel}.`, "action");
         } else if (next === 2) {
-          addAgentLog("Vega", `Loading neural network predictive weights. Formulating ROI yield equations for ${selectedCampaignType} campaign.`, "thought");
+          addAgentLog("Khoj", `Loading neural network predictive weights. Formulating ROI yield equations for ${selectedCampaignType} campaign.`, "thought");
         } else if (next === 3) {
-          addAgentLog("Nova", `Simulating customer conversion reactions to ${selectedOffer} offer templates. Testing click probabilities.`, "action");
+          addAgentLog("Rachna", `Simulating customer conversion reactions to ${selectedOffer} offer templates. Testing click probabilities.`, "action");
         } else if (next === 4) {
-          addAgentLog("Atlas", "Compiling timeline paths. Calibrating margin drift and unsubscribes. Finalizing telemetry matrices.", "thought");
+          addAgentLog("Saarthi", "Compiling timeline paths. Calibrating margin drift and unsubscribes. Finalizing telemetry matrices.", "thought");
         }
 
         // Update step completions
@@ -368,7 +368,7 @@ export const FutureSimulator: React.FC = () => {
             setIsSimulating(false);
             setTimelines(newTimelines);
             setHasSimulated(true);
-            addAgentLog("Vega", `Simulations consolidated. Timeline B recommended (Confidence: ${confB}%, Predicted Revenue: ₹${revB.toLocaleString()}).`, "result");
+            addAgentLog("Khoj", `Simulations consolidated. Timeline B recommended (Confidence: ${confB}%, Predicted Revenue: ₹${revB.toLocaleString()}).`, "result");
           }, 600);
           return prev;
         }
@@ -398,7 +398,7 @@ export const FutureSimulator: React.FC = () => {
 
     if (config.geminiKey) {
       try {
-        const systemPrompt = `You are Vega, the AI Predictive Analytics Agent for orbit.ai. The user has set up their business (category: "${selectedAudience}").
+        const systemPrompt = `You are Khoj, the AI Predictive Analytics Agent for Manthan.ai. The user has set up their business (category: "${selectedAudience}").
 They are querying a growth timeline mutation or what-if scenario in the Future Simulator: "${queryText}".
 Formulate your response as a valid JSON object matching this schema exactly:
 {
@@ -421,20 +421,20 @@ Context Campaign Strategy: "${selectedCampaignType}"`;
         const resText = await callGeminiAPI(userPrompt, systemPrompt, config.geminiKey);
         geminiResponse = parseGeminiJson(resText, null);
       } catch (err) {
-        console.warn("Future Simulator Vega Chat query failed:", err);
+        console.warn("Future Simulator Khoj Chat query failed:", err);
       }
     }
 
     if (geminiResponse) {
       const vegaMsg: ChatMessage = {
-        sender: "vega",
-        text: geminiResponse.replyText || "Vega recalibrated simulation parameters.",
+        sender: "Khoj",
+        text: geminiResponse.replyText || "Khoj recalibrated simulation parameters.",
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
         stats: geminiResponse.stats
       };
       setChatHistory(prev => [...prev, vegaMsg]);
       setIsChatTyping(false);
-      addAgentLog("Vega", `What-if scenario query resolved: ${queryText}`, "thought");
+      addAgentLog("Khoj", `What-if scenario query resolved: ${queryText}`, "thought");
     } else {
       // Process simulation output based on text query content
       setTimeout(() => {
@@ -451,7 +451,7 @@ Context Campaign Strategy: "${selectedCampaignType}"`;
           conversion = 21;
           revenue = Math.round(audienceSize * 2500 * (conversion / 100));
           confidence = 92;
-          replyText = "Targeting only VIP customers reduces campaign volume but maximizes conversion velocity. Churn risk decreases to near zero due to high brand loyalty. Vega recommends Email or RCS cards to protect premium branding.";
+          replyText = "Targeting only VIP customers reduces campaign volume but maximizes conversion velocity. Churn risk decreases to near zero due to high brand loyalty. Khoj recommends Email or RCS cards to protect premium branding.";
         } else if (lowerQuery.includes("whatsapp") || lowerQuery.includes("whats app")) {
           audienceSize = 65;
           conversion = 16;
@@ -463,13 +463,13 @@ Context Campaign Strategy: "${selectedCampaignType}"`;
           conversion = 19;
           revenue = Math.round(audienceSize * 2200 * (conversion / 100));
           confidence = 83;
-          replyText = "Launching during a major holiday/festival boosts consumer intent by 2x. Competition in advertising nodes is high. Vega recommends a multi-channel failover plan starting 3 days early with high-incentive VIP drops.";
+          replyText = "Launching during a major holiday/festival boosts consumer intent by 2x. Competition in advertising nodes is high. Khoj recommends a multi-channel failover plan starting 3 days early with high-incentive VIP drops.";
         } else if (lowerQuery.includes("discount") || lowerQuery.includes("offer") || lowerQuery.includes("20%") || lowerQuery.includes("25%")) {
           audienceSize = 80;
           conversion = 18;
           revenue = Math.round(audienceSize * 1500 * 0.8 * (conversion / 100));
           confidence = 86;
-          replyText = "Increasing the discount from 10% to 20%+ triggers a conversion spike of 1.5x. However, product margin collapses by 22%. Vega suggests limiting high discounts to Slipping Away VIPs rather than New Signups.";
+          replyText = "Increasing the discount from 10% to 20%+ triggers a conversion spike of 1.5x. However, product margin collapses by 22%. Khoj suggests limiting high discounts to Slipping Away VIPs rather than New Signups.";
         } else if (lowerQuery.includes("inactive") || lowerQuery.includes("dormant")) {
           audienceSize = 18;
           conversion = 9;
@@ -488,11 +488,11 @@ Context Campaign Strategy: "${selectedCampaignType}"`;
           conversion = 11;
           revenue = Math.round(audienceSize * 1600 * (conversion / 100));
           confidence = 85;
-          replyText = "Vega recalculated simulation parameters. Running this custom query creates a mid-tier performance pathway. ROI yield remains stable at 3.4x with minimal channel resistance.";
+          replyText = "Khoj recalculated simulation parameters. Running this custom query creates a mid-tier performance pathway. ROI yield remains stable at 3.4x with minimal channel resistance.";
         }
 
         const vegaMsg: ChatMessage = {
-          sender: "vega",
+          sender: "Khoj",
           text: replyText,
           timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
           stats: {
@@ -505,7 +505,7 @@ Context Campaign Strategy: "${selectedCampaignType}"`;
 
         setChatHistory(prev => [...prev, vegaMsg]);
         setIsChatTyping(false);
-        addAgentLog("Vega", `What-if scenario query resolved: ${queryText}`, "thought");
+        addAgentLog("Khoj", `What-if scenario query resolved: ${queryText}`, "thought");
       }, 1800);
     }
   };
@@ -613,7 +613,7 @@ Context Campaign Strategy: "${selectedCampaignType}"`;
     <div className={`flex-1 flex overflow-hidden relative font-inter ${isLight ? "bg-[#F8FAFC] text-[#0F172A]" : "bg-[#050816] text-white"}`}>
       {/* Visual background elements */}
       <div className="pointer-events-none absolute inset-0 space-grid opacity-30 z-0" />
-      <div className="pointer-events-none absolute inset-0 bg-orbit-glow-blue opacity-10 z-0" />
+      <div className="pointer-events-none absolute inset-0 bg-Manthan-glow-blue opacity-10 z-0" />
       <div className="scanlines" />
 
       {/* ════════════════════════════════════════
@@ -623,8 +623,8 @@ Context Campaign Strategy: "${selectedCampaignType}"`;
         
         {/* Module Header */}
         <div className={`border-b pb-3 mb-2 flex items-center gap-2 ${isLight ? "border-[#E2E8F0]" : "border-gray-900"}`}>
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-orbit-blue/30 to-orbit-purple/30 border border-orbit-purple/40 flex items-center justify-center">
-            <Cpu className="text-orbit-purple animate-pulse" size={16} />
+          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-Manthan-blue/30 to-Manthan-purple/30 border border-Manthan-purple/40 flex items-center justify-center">
+            <Cpu className="text-Manthan-purple animate-pulse" size={16} />
           </div>
           <div>
             <h2 className={`font-space text-sm font-bold uppercase tracking-wider leading-none ${isLight ? "text-[#0F172A]" : "text-white"}`}>Simulation Chamber</h2>
@@ -655,7 +655,7 @@ Context Campaign Strategy: "${selectedCampaignType}"`;
         {/* Dynamic Panel Input Fields */}
         {simulatorMode === "missions" ? (
           /* Mission Selector Option List */
-          <div className="orbit-panel p-4 space-y-3">
+          <div className="Manthan-panel p-4 space-y-3">
             <label className="font-mono text-[8px] text-gray-550 uppercase tracking-wider block">Select Target Mission</label>
             <div className="space-y-2">
               {missionsList.map((m, idx) => {
@@ -666,13 +666,13 @@ Context Campaign Strategy: "${selectedCampaignType}"`;
                     onClick={() => setSelectedMission(m.name)}
                     className={`w-full p-2.5 rounded-xl border text-left cursor-pointer transition-all duration-200 ${
                       isSelected 
-                        ? "border-orbit-purple/55 bg-orbit-purple/5 text-white" 
+                        ? "border-Manthan-purple/55 bg-Manthan-purple/5 text-white" 
                         : "border-gray-900 bg-transparent text-gray-400 hover:border-gray-800 hover:text-gray-300"
                     }`}
                   >
                     <div className="flex items-center justify-between">
                       <span className="font-space font-bold text-xs">{m.name}</span>
-                      {isSelected && <div className="w-1.5 h-1.5 rounded-full bg-orbit-purple shadow-orbit-glow-purple" />}
+                      {isSelected && <div className="w-1.5 h-1.5 rounded-full bg-Manthan-purple shadow-Manthan-glow-purple" />}
                     </div>
                     <p className="font-mono text-[8px] text-gray-550 leading-relaxed mt-1">{m.desc}</p>
                   </button>
@@ -684,7 +684,7 @@ Context Campaign Strategy: "${selectedCampaignType}"`;
           /* Custom Variables Modifiers */
           <div className="space-y-3.5">
             {/* Variable: Audience */}
-            <div className="orbit-panel p-3.5 space-y-2">
+            <div className="Manthan-panel p-3.5 space-y-2">
               <label className="font-mono text-[8px] text-gray-500 uppercase tracking-wider block">Target Audience</label>
               <div className="grid grid-cols-2 gap-1.5">
                 {(["VIP Customers", "Inactive Customers", "Repeat Buyers", "New Customers"] as AudienceType[]).map(aud => (
@@ -693,7 +693,7 @@ Context Campaign Strategy: "${selectedCampaignType}"`;
                     onClick={() => setSelectedAudience(aud)}
                     className={`py-1.5 px-2 rounded-lg border font-mono text-[9px] truncate text-center cursor-pointer transition-all ${
                       selectedAudience === aud 
-                        ? "border-orbit-blue/50 bg-orbit-blue/10 text-white" 
+                        ? "border-Manthan-blue/50 bg-Manthan-blue/10 text-white" 
                         : "border-gray-900 text-gray-500 hover:border-gray-800"
                     }`}
                   >
@@ -705,7 +705,7 @@ Context Campaign Strategy: "${selectedCampaignType}"`;
                 onClick={() => setSelectedAudience("Custom Segment")}
                 className={`w-full py-1.5 px-2 rounded-lg border font-mono text-[9px] text-center cursor-pointer transition-all ${
                   selectedAudience === "Custom Segment" 
-                    ? "border-orbit-blue/50 bg-orbit-blue/10 text-white" 
+                    ? "border-Manthan-blue/50 bg-Manthan-blue/10 text-white" 
                     : "border-gray-900 text-gray-500 hover:border-gray-800"
                 }`}
               >
@@ -714,7 +714,7 @@ Context Campaign Strategy: "${selectedCampaignType}"`;
             </div>
 
             {/* Variable: Channel */}
-            <div className="orbit-panel p-3.5 space-y-2">
+            <div className="Manthan-panel p-3.5 space-y-2">
               <label className="font-mono text-[8px] text-gray-550 uppercase tracking-wider block">Communication Channel</label>
               <div className="grid grid-cols-2 gap-1.5">
                 {(["WhatsApp", "Email", "SMS", "RCS"] as ChannelType[]).map(ch => (
@@ -723,7 +723,7 @@ Context Campaign Strategy: "${selectedCampaignType}"`;
                     onClick={() => setSelectedChannel(ch)}
                     className={`py-1.5 px-2 rounded-lg border font-mono text-[9px] text-center cursor-pointer transition-all ${
                       selectedChannel === ch 
-                        ? "border-orbit-purple/50 bg-orbit-purple/10 text-white" 
+                        ? "border-Manthan-purple/50 bg-Manthan-purple/10 text-white" 
                         : "border-gray-900 text-gray-500 hover:border-gray-800"
                     }`}
                   >
@@ -735,7 +735,7 @@ Context Campaign Strategy: "${selectedCampaignType}"`;
                 onClick={() => setSelectedChannel("Multi-channel")}
                 className={`w-full py-1.5 px-2 rounded-lg border font-mono text-[9px] text-center cursor-pointer transition-all ${
                   selectedChannel === "Multi-channel" 
-                    ? "border-orbit-purple/50 bg-orbit-purple/10 text-white" 
+                    ? "border-Manthan-purple/50 bg-Manthan-purple/10 text-white" 
                     : "border-gray-900 text-gray-500 hover:border-gray-800"
                 }`}
               >
@@ -744,7 +744,7 @@ Context Campaign Strategy: "${selectedCampaignType}"`;
             </div>
 
             {/* Variable: Offer */}
-            <div className="orbit-panel p-3.5 space-y-2">
+            <div className="Manthan-panel p-3.5 space-y-2">
               <label className="font-mono text-[8px] text-gray-550 uppercase tracking-wider block">Incentive Offer Value</label>
               <div className="grid grid-cols-3 gap-1.5">
                 {(["5%", "10%", "15%", "20%", "25%"] as OfferType[]).map(off => (
@@ -753,7 +753,7 @@ Context Campaign Strategy: "${selectedCampaignType}"`;
                     onClick={() => setSelectedOffer(off)}
                     className={`py-1.5 px-1 rounded-lg border font-mono text-[9px] text-center cursor-pointer transition-all ${
                       selectedOffer === off && selectedOffer !== "Custom"
-                        ? "border-orbit-success/50 bg-orbit-success/10 text-white" 
+                        ? "border-Manthan-success/50 bg-Manthan-success/10 text-white" 
                         : "border-gray-900 text-gray-500 hover:border-gray-800"
                     }`}
                   >
@@ -764,7 +764,7 @@ Context Campaign Strategy: "${selectedCampaignType}"`;
                   onClick={() => setSelectedOffer("Custom")}
                   className={`py-1.5 px-1 rounded-lg border font-mono text-[9px] text-center cursor-pointer transition-all ${
                     selectedOffer === "Custom" 
-                      ? "border-orbit-success/50 bg-orbit-success/10 text-white" 
+                      ? "border-Manthan-success/50 bg-Manthan-success/10 text-white" 
                       : "border-gray-900 text-gray-500 hover:border-gray-800"
                   }`}
                 >
@@ -778,18 +778,18 @@ Context Campaign Strategy: "${selectedCampaignType}"`;
                   placeholder="e.g. 30% or BOGO"
                   value={customOffer}
                   onChange={e => setCustomOffer(e.target.value)}
-                  className="w-full mt-2 bg-gray-950 border border-gray-900 rounded-lg p-2 font-mono text-[9px] text-white focus:outline-none focus:border-orbit-success/40"
+                  className="w-full mt-2 bg-gray-950 border border-gray-900 rounded-lg p-2 font-mono text-[9px] text-white focus:outline-none focus:border-Manthan-success/40"
                 />
               )}
             </div>
 
             {/* Variable: Campaign Type */}
-            <div className="orbit-panel p-3.5 space-y-2">
+            <div className="Manthan-panel p-3.5 space-y-2">
               <label className="font-mono text-[8px] text-gray-550 uppercase tracking-wider block">Campaign Strategy Type</label>
               <select
                 value={selectedCampaignType}
                 onChange={e => setSelectedCampaignType(e.target.value as CampaignType)}
-                className="w-full bg-gray-950 border border-gray-900 rounded-lg p-2 font-mono text-[10px] text-white focus:outline-none focus:border-orbit-blue/40"
+                className="w-full bg-gray-950 border border-gray-900 rounded-lg p-2 font-mono text-[10px] text-white focus:outline-none focus:border-Manthan-blue/40"
               >
                 <option value="Product Launch">Product Launch</option>
                 <option value="Retention">Retention</option>
@@ -806,13 +806,13 @@ Context Campaign Strategy: "${selectedCampaignType}"`;
                   placeholder="Strategy name"
                   value={customCampaignType}
                   onChange={e => setCustomCampaignType(e.target.value)}
-                  className="w-full bg-gray-950 border border-gray-900 rounded-lg p-2 font-mono text-[9px] text-white focus:outline-none focus:border-orbit-blue/40"
+                  className="w-full bg-gray-950 border border-gray-900 rounded-lg p-2 font-mono text-[9px] text-white focus:outline-none focus:border-Manthan-blue/40"
                 />
               )}
             </div>
 
             {/* Variable: Time Period */}
-            <div className="orbit-panel p-3.5 space-y-2">
+            <div className="Manthan-panel p-3.5 space-y-2">
               <label className="font-mono text-[8px] text-gray-550 uppercase tracking-wider block">Simulation Time Frame</label>
               <div className="grid grid-cols-4 gap-1">
                 {(["1 Week", "2 Weeks", "1 Month", "3 Months"] as TimePeriodType[]).map(t => (
@@ -840,7 +840,7 @@ Context Campaign Strategy: "${selectedCampaignType}"`;
           className={`w-full py-3.5 rounded-xl font-mono text-xs font-bold uppercase tracking-widest flex items-center justify-center gap-2 transition-all cursor-pointer ${
             isSimulating 
               ? "bg-gray-900 text-gray-550 border border-gray-850 cursor-not-allowed" 
-              : "bg-gradient-to-r from-orbit-blue via-orbit-purple to-orbit-blue text-white shadow-orbit-glow hover:opacity-90 hover:scale-[1.01] active:scale-95 duration-200"
+              : "bg-gradient-to-r from-Manthan-blue via-Manthan-purple to-Manthan-blue text-white shadow-Manthan-glow hover:opacity-90 hover:scale-[1.01] active:scale-95 duration-200"
           }`}
         >
           {isSimulating ? <RefreshCw size={13} className="animate-spin" /> : <Play size={13} />}
@@ -863,11 +863,11 @@ Context Campaign Strategy: "${selectedCampaignType}"`;
         <div className="shrink-0 px-6 pt-4 bg-gray-950/20">
           <PageHeaderHUD
             title="Future Simulator"
-            subtitle="PREDICT GROWTH BEFORE YOU LAUNCH · POWERED BY VEGA ENGINE"
+            subtitle="PREDICT GROWTH BEFORE YOU LAUNCH · POWERED BY Khoj ENGINE"
             onSelectAgent={setSelectedAgent}
             actions={
               <div className="flex items-center gap-2 font-mono text-[9px] px-3 py-1.5 bg-gray-950 rounded-lg border border-gray-900 text-gray-500">
-                <Activity size={10} className="text-orbit-success animate-pulse" />
+                <Activity size={10} className="text-Manthan-success animate-pulse" />
                 <span>Telemetry Mode: Consolidated</span>
               </div>
             }
@@ -882,21 +882,21 @@ Context Campaign Strategy: "${selectedCampaignType}"`;
                 EMPTY STATE — HOLOGRAPHIC PLANET
             ════════════════════════════════════════ */
             <div className="flex-1 flex flex-col items-center justify-center py-10 relative">
-              <div className="absolute inset-0 bg-orbit-glow-blue opacity-5 pointer-events-none" />
+              <div className="absolute inset-0 bg-Manthan-glow-blue opacity-5 pointer-events-none" />
               
               {/* Rotating holographic planet visual */}
               <div className="relative w-64 h-64 mb-8 flex items-center justify-center">
                 {/* Outer concentric scanning circles */}
-                <div className="absolute inset-0 rounded-full border border-orbit-blue/10 animate-orbit-spin-slow" />
-                <div className="absolute inset-4 rounded-full border border-dashed border-orbit-purple/20 animate-orbit-spin-reverse" />
-                <div className="absolute inset-10 rounded-full border border-double border-orbit-success/15 animate-orbit-spin-slow" />
+                <div className="absolute inset-0 rounded-full border border-Manthan-blue/10 animate-Manthan-spin-slow" />
+                <div className="absolute inset-4 rounded-full border border-dashed border-Manthan-purple/20 animate-Manthan-spin-reverse" />
+                <div className="absolute inset-10 rounded-full border border-double border-Manthan-success/15 animate-Manthan-spin-slow" />
                 
                 {/* Scanning sweep radar lines */}
-                <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-transparent via-orbit-blue/5 to-transparent animate-radar-sweep pointer-events-none" />
+                <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-transparent via-Manthan-blue/5 to-transparent animate-radar-sweep pointer-events-none" />
 
                 {/* Concentric grid lines and planet structure */}
-                <div className="absolute inset-16 rounded-full border border-orbit-blue/30 bg-[#070b20]/60 flex items-center justify-center shadow-orbit-glow">
-                  <Brain size={36} className="text-orbit-blue animate-pulse" />
+                <div className="absolute inset-16 rounded-full border border-Manthan-blue/30 bg-[#070b20]/60 flex items-center justify-center shadow-Manthan-glow">
+                  <Brain size={36} className="text-Manthan-blue animate-pulse" />
                 </div>
 
                 {/* SVG Branching Timeline vectors radiating from center */}
@@ -936,7 +936,7 @@ Context Campaign Strategy: "${selectedCampaignType}"`;
                   Run AI-powered growth simulations before launching campaigns. Predict customer behaviors, LTV expansions, and ROI curves across channels.
                 </p>
                 <div className="pt-2">
-                  <span className="inline-block px-3 py-1 bg-orbit-blue/10 border border-orbit-blue/20 text-orbit-blue font-mono text-[9px] uppercase tracking-wider rounded-full">
+                  <span className="inline-block px-3 py-1 bg-Manthan-blue/10 border border-Manthan-blue/20 text-Manthan-blue font-mono text-[9px] uppercase tracking-wider rounded-full">
                     The Future Has Not Been Simulated Yet
                   </span>
                 </div>
@@ -949,15 +949,15 @@ Context Campaign Strategy: "${selectedCampaignType}"`;
             <div className="flex-1 flex flex-col items-center justify-center py-12">
               <div className="relative w-40 h-40 mb-10">
                 {/* Spinning scanner rings */}
-                <div className="absolute inset-0 rounded-full border-2 border-t-orbit-purple border-r-transparent border-b-orbit-blue border-l-transparent animate-spin" style={{ animationDuration: '2s' }} />
-                <div className="absolute inset-3 rounded-full border border-dashed border-orbit-blue/30 animate-spin-slow" />
-                <div className="absolute inset-6 rounded-full border border-dotted border-orbit-success/40 animate-orbit-spin-reverse" />
+                <div className="absolute inset-0 rounded-full border-2 border-t-Manthan-purple border-r-transparent border-b-Manthan-blue border-l-transparent animate-spin" style={{ animationDuration: '2s' }} />
+                <div className="absolute inset-3 rounded-full border border-dashed border-Manthan-blue/30 animate-spin-slow" />
+                <div className="absolute inset-6 rounded-full border border-dotted border-Manthan-success/40 animate-Manthan-spin-reverse" />
                 
                 {/* Digital reading indicators */}
                 <div className="absolute inset-0 flex flex-col items-center justify-center font-mono">
                   <span className="text-[10px] text-gray-500 uppercase">Simulating</span>
                   <span className="text-xl font-bold text-white tracking-wider animate-pulse">{Math.round((simulationStep / simSteps.length) * 100)}%</span>
-                  <span className="text-[7px] text-orbit-purple font-bold tracking-widest mt-1">VEGA ACTV</span>
+                  <span className="text-[7px] text-Manthan-purple font-bold tracking-widest mt-1">Khoj ACTV</span>
                 </div>
               </div>
 
@@ -970,26 +970,26 @@ Context Campaign Strategy: "${selectedCampaignType}"`;
                     <div 
                       key={idx} 
                       className={`flex items-center justify-between py-1 transition-all ${
-                        isActive ? "text-white opacity-100" : isDone ? "text-orbit-success opacity-85" : "text-gray-650 opacity-50"
+                        isActive ? "text-white opacity-100" : isDone ? "text-Manthan-success opacity-85" : "text-gray-650 opacity-50"
                       }`}
                     >
                       <div className="flex items-center gap-2">
                         {isDone ? (
-                          <div className="w-3.5 h-3.5 rounded-full bg-orbit-success/15 flex items-center justify-center border border-orbit-success/40">
-                            <Check size={8} className="text-orbit-success" />
+                          <div className="w-3.5 h-3.5 rounded-full bg-Manthan-success/15 flex items-center justify-center border border-Manthan-success/40">
+                            <Check size={8} className="text-Manthan-success" />
                           </div>
                         ) : isActive ? (
-                          <div className="w-3.5 h-3.5 rounded-full border border-orbit-purple/40 border-t-orbit-purple animate-spin" />
+                          <div className="w-3.5 h-3.5 rounded-full border border-Manthan-purple/40 border-t-Manthan-purple animate-spin" />
                         ) : (
                           <div className="w-3.5 h-3.5 rounded-full border border-gray-900" />
                         )}
-                        <span className={isActive ? "font-bold text-orbit-purple" : ""}>{step.label}</span>
+                        <span className={isActive ? "font-bold text-Manthan-purple" : ""}>{step.label}</span>
                       </div>
                       <span className={`text-[8px] px-1.5 py-0.5 rounded border uppercase ${
-                        step.agent === "Polaris" ? "border-orbit-blue/20 bg-orbit-blue/5 text-orbit-blue" :
-                        step.agent === "Vega" ? "border-orbit-purple/20 bg-orbit-purple/5 text-orbit-purple" :
-                        step.agent === "Nova" ? "border-pink-500/20 bg-pink-500/5 text-pink-400" :
-                        "border-orbit-success/20 bg-orbit-success/5 text-orbit-success"
+                        step.agent === "Drishti" ? "border-Manthan-blue/20 bg-Manthan-blue/5 text-Manthan-blue" :
+                        step.agent === "Khoj" ? "border-Manthan-purple/20 bg-Manthan-purple/5 text-Manthan-purple" :
+                        step.agent === "Rachna" ? "border-pink-500/20 bg-pink-500/5 text-pink-400" :
+                        "border-Manthan-success/20 bg-Manthan-success/5 text-Manthan-success"
                       }`}>
                         {step.agent}
                       </span>
@@ -1007,7 +1007,7 @@ Context Campaign Strategy: "${selectedCampaignType}"`;
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
                   <h3 className="font-space text-xs font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
-                    <Activity size={13} className="text-orbit-purple" />
+                    <Activity size={13} className="text-Manthan-purple" />
                     Simulated Timeline Matrix
                   </h3>
                   <span className="font-mono text-[8px] text-gray-550 uppercase">Select card to focus metrics</span>
@@ -1020,7 +1020,7 @@ Context Campaign Strategy: "${selectedCampaignType}"`;
                       <button
                         key={t.id}
                         onClick={() => setSelectedTimeline(t.id)}
-                        className={`orbit-panel text-left p-4 relative overflow-hidden transition-all duration-300 cursor-pointer flex flex-col justify-between min-h-[160px] ${isLight ? "border-[#E2E8F0]" : "border-gray-800"} ${
+                        className={`Manthan-panel text-left p-4 relative overflow-hidden transition-all duration-300 cursor-pointer flex flex-col justify-between min-h-[160px] ${isLight ? "border-[#E2E8F0]" : "border-gray-800"} ${
                           isSelected 
                             ? `border-opacity-100 ${t.borderClass} ring-1 ring-white/5 bg-gray-900/40` 
                             : "opacity-65 hover:opacity-95 hover:border-gray-700 bg-gray-950/20"
@@ -1079,7 +1079,7 @@ Context Campaign Strategy: "${selectedCampaignType}"`;
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 
                 {/* LEFT: Interactive Future Graph */}
-                <div className="lg:col-span-2 orbit-panel p-5 flex flex-col min-h-[300px]">
+                <div className="lg:col-span-2 Manthan-panel p-5 flex flex-col min-h-[300px]">
                   <div className="flex items-center justify-between border-b border-gray-900 pb-3 mb-4">
                     <span className={`font-space text-xs font-bold uppercase tracking-wider ${isLight ? "text-[#0F172A]" : "text-white"}`}>Scenario Projection Curves</span>
                     
@@ -1177,23 +1177,23 @@ Context Campaign Strategy: "${selectedCampaignType}"`;
                 </div>
 
                 {/* RIGHT: AI Recommendations Panel */}
-                <div className="orbit-panel p-5 flex flex-col justify-between space-y-4">
+                <div className="Manthan-panel p-5 flex flex-col justify-between space-y-4">
                   <div className="border-b border-gray-900 pb-3">
                     <div className="flex items-center gap-1.5">
-                      <Sparkles size={13} className="text-orbit-purple" />
-                      <span className={`font-space text-xs font-bold uppercase tracking-wider ${isLight ? "text-[#0F172A]" : "text-white"}`}>Vega Recommendation</span>
+                      <Sparkles size={13} className="text-Manthan-purple" />
+                      <span className={`font-space text-xs font-bold uppercase tracking-wider ${isLight ? "text-[#0F172A]" : "text-white"}`}>Khoj Recommendation</span>
                     </div>
                   </div>
 
                   <div className="flex-1 space-y-4 font-mono text-[10px]">
-                    {/* Vega Header details */}
+                    {/* Khoj Header details */}
                     <div className={`flex items-start gap-2.5 p-2 rounded-xl border ${isLight ? "bg-[#EFF6FF] border-[#BFDBFE]" : "bg-gray-950/50 border-gray-900"}`}>
-                      <div className="w-8 h-8 rounded-full bg-orbit-purple/15 flex items-center justify-center border border-orbit-purple/30 text-orbit-purple font-space font-bold text-xs shrink-0">V</div>
+                      <div className="w-8 h-8 rounded-full bg-Manthan-purple/15 flex items-center justify-center border border-Manthan-purple/30 text-Manthan-purple font-space font-bold text-xs shrink-0">V</div>
                       <div>
-                        <span className={`font-bold block uppercase text-[8px] tracking-wider ${isLight ? "text-slate-900" : "text-white"}`}>Vega analytics agent</span>
+                        <span className={`font-bold block uppercase text-[8px] tracking-wider ${isLight ? "text-slate-900" : "text-white"}`}>Khoj analytics agent</span>
                         <p className="text-[10px] text-gray-400 leading-normal mt-0.5">
                           Projected revenue opportunity: <span className="text-white font-bold">₹{focusTimeline.revenue.toLocaleString()}</span>. 
-                          Risk profile is <span className={`font-bold ${focusTimeline.risk === "High" ? "text-red-400" : "text-orbit-success"}`}>{focusTimeline.risk}</span>.
+                          Risk profile is <span className={`font-bold ${focusTimeline.risk === "High" ? "text-red-400" : "text-Manthan-success"}`}>{focusTimeline.risk}</span>.
                         </p>
                       </div>
                     </div>
@@ -1206,7 +1206,7 @@ Context Campaign Strategy: "${selectedCampaignType}"`;
                       </div>
                       <div className="flex justify-between">
                         <span className="text-gray-550">Predicted ROI factor:</span>
-                        <span className="text-orbit-success font-bold">{focusTimeline.roi}</span>
+                        <span className="text-Manthan-success font-bold">{focusTimeline.roi}</span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-gray-550">Friction risk index:</span>
@@ -1219,7 +1219,7 @@ Context Campaign Strategy: "${selectedCampaignType}"`;
                       <span className="block text-[8px] text-gray-650 uppercase tracking-widest mb-1">Tactical Strategy Checklist</span>
                       {focusTimeline.recs.map((rec, index) => (
                         <div key={index} className="flex items-start gap-1.5 text-gray-400">
-                          <span className="text-orbit-purple mt-0.5">·</span>
+                          <span className="text-Manthan-purple mt-0.5">·</span>
                           <span className="leading-relaxed">{rec}</span>
                         </div>
                       ))}
@@ -1237,10 +1237,10 @@ Context Campaign Strategy: "${selectedCampaignType}"`;
               </div>
 
               {/* BOTTOM: "What If" Chat Panel */}
-              <div className="orbit-panel p-5 flex flex-col space-y-4">
+              <div className="Manthan-panel p-5 flex flex-col space-y-4">
                 <div className={`flex items-center justify-between border-b pb-3 ${isLight ? "border-[#E2E8F0]" : "border-gray-900"}`}>
                   <div className="flex items-center gap-1.5">
-                    <Brain size={14} className="text-orbit-blue" />
+                    <Brain size={14} className="text-Manthan-blue" />
                     <span className={`font-space text-xs font-bold uppercase tracking-wider ${isLight ? "text-[#0F172A]" : "text-white"}`}>What If AI Console</span>
                   </div>
                   <span className="font-mono text-[8px] text-gray-550 uppercase">Query timeline mutations</span>
@@ -1277,26 +1277,26 @@ Context Campaign Strategy: "${selectedCampaignType}"`;
                 {/* Chat window log */}
                 <div className={`h-44 overflow-y-auto border rounded-xl p-4 font-mono text-[10px] space-y-4 scrollbar-thin ${isLight ? "bg-slate-50 border-[#E2E8F0]" : "bg-black/40 border-gray-900"}`}>
                   {chatHistory.map((msg, index) => {
-                    const isVega = msg.sender === "vega";
+                    const isVega = msg.sender === "Khoj";
                     return (
                       <div key={index} className={`flex gap-3 items-start ${isVega ? "" : "justify-end"}`}>
                         {isVega && (
-                          <div className="w-6 h-6 rounded-full bg-orbit-blue/15 border border-orbit-blue/40 text-orbit-blue font-space font-bold text-[10px] flex items-center justify-center shrink-0">
+                          <div className="w-6 h-6 rounded-full bg-Manthan-blue/15 border border-Manthan-blue/40 text-Manthan-blue font-space font-bold text-[10px] flex items-center justify-center shrink-0">
                             V
                           </div>
                         )}
                         <div className={`space-y-2 max-w-[80%] ${isVega ? "" : "text-right"}`}>
                           <div className={`p-3 rounded-2xl border text-gray-300 leading-relaxed ${
-                            isVega ? (isLight ? "bg-white border-[#E2E8F0] text-slate-800 text-left shadow-sm" : "bg-gray-950/50 border-gray-900 text-left") : (isLight ? "bg-blue-50 border-blue-200 text-blue-800 text-left" : "bg-orbit-blue/10 border-orbit-blue/30 text-left")
+                            isVega ? (isLight ? "bg-white border-[#E2E8F0] text-slate-800 text-left shadow-sm" : "bg-gray-950/50 border-gray-900 text-left") : (isLight ? "bg-blue-50 border-blue-200 text-blue-800 text-left" : "bg-Manthan-blue/10 border-Manthan-blue/30 text-left")
                           }`}>
                             <p>{msg.text}</p>
                             
-                            {/* Vega prediction telemetry card */}
+                            {/* Khoj prediction telemetry card */}
                             {msg.stats && (
                               <div className="grid grid-cols-4 gap-2.5 mt-3 pt-3 border-t border-gray-900 text-[9px] text-gray-500 font-mono">
                                 <div>
                                   <span className="block text-[7px] text-gray-650 uppercase">Expected Rev</span>
-                                  <span className="text-orbit-success font-bold">₹{msg.stats.revenue.toLocaleString()}</span>
+                                  <span className="text-Manthan-success font-bold">₹{msg.stats.revenue.toLocaleString()}</span>
                                 </div>
                                 <div>
                                   <span className="block text-[7px] text-gray-650 uppercase">Audience Size</span>
@@ -1321,13 +1321,13 @@ Context Campaign Strategy: "${selectedCampaignType}"`;
 
                   {isChatTyping && (
                     <div className="flex gap-3 items-start">
-                      <div className="w-6 h-6 rounded-full bg-orbit-blue/15 border border-orbit-blue/40 text-orbit-blue font-space font-bold text-[10px] flex items-center justify-center shrink-0">
+                      <div className="w-6 h-6 rounded-full bg-Manthan-blue/15 border border-Manthan-blue/40 text-Manthan-blue font-space font-bold text-[10px] flex items-center justify-center shrink-0">
                         V
                       </div>
                       <div className="p-3 bg-gray-950/50 border border-gray-900 rounded-2xl flex items-center gap-1">
-                        <div className="w-1.5 h-1.5 rounded-full bg-orbit-blue typing-dot" />
-                        <div className="w-1.5 h-1.5 rounded-full bg-orbit-blue typing-dot" />
-                        <div className="w-1.5 h-1.5 rounded-full bg-orbit-blue typing-dot" />
+                        <div className="w-1.5 h-1.5 rounded-full bg-Manthan-blue typing-dot" />
+                        <div className="w-1.5 h-1.5 rounded-full bg-Manthan-blue typing-dot" />
+                        <div className="w-1.5 h-1.5 rounded-full bg-Manthan-blue typing-dot" />
                       </div>
                     </div>
                   )}
@@ -1341,13 +1341,13 @@ Context Campaign Strategy: "${selectedCampaignType}"`;
                     value={chatInput}
                     onChange={e => setChatInput(e.target.value)}
                     disabled={isChatTyping}
-                    placeholder="Ask Vega, e.g. What if I increase campaign frequency to twice a week?"
-                    className={`flex-1 rounded-xl px-4 py-3 text-xs font-mono focus:outline-none border ${isLight ? "bg-white border-[#CBD5E1] text-[#0F172A] focus:border-[#2563EB] focus:ring-4 focus:ring-blue-500/15 placeholder-slate-400" : "bg-gray-950 border-gray-900 text-white focus:border-orbit-blue/40 placeholder-gray-650"} disabled:opacity-60`}
+                    placeholder="Ask Khoj, e.g. What if I increase campaign frequency to twice a week?"
+                    className={`flex-1 rounded-xl px-4 py-3 text-xs font-mono focus:outline-none border ${isLight ? "bg-white border-[#CBD5E1] text-[#0F172A] focus:border-[#2563EB] focus:ring-4 focus:ring-blue-500/15 placeholder-slate-400" : "bg-gray-950 border-gray-900 text-white focus:border-Manthan-blue/40 placeholder-gray-650"} disabled:opacity-60`}
                   />
                   <button
                     type="submit"
                     disabled={isChatTyping || !chatInput.trim()}
-                    className="px-4 bg-orbit-blue hover:bg-blue-650 text-white rounded-xl flex items-center justify-center transition-colors disabled:bg-gray-900 disabled:text-gray-600 cursor-pointer"
+                    className="px-4 bg-Manthan-blue hover:bg-blue-650 text-white rounded-xl flex items-center justify-center transition-colors disabled:bg-gray-900 disabled:text-gray-600 cursor-pointer"
                   >
                     <Send size={14} />
                   </button>

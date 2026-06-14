@@ -252,15 +252,15 @@ if (isFirebaseConfigured) {
     console.error("Failed to initialize Firebase Admin, falling back to mock database:", error);
     db = new MockFirestore();
     auth = {
-      getUser: async (uid: string) => ({ uid, email: "operator@orbit.io" }),
-      verifyIdToken: async (token: string) => ({ uid: "mock-uid", email: "operator@orbit.io" })
+      getUser: async (uid: string) => ({ uid, email: "operator@manthan.ai" }),
+      verifyIdToken: async (token: string) => ({ uid: "mock-uid", email: "operator@manthan.ai" })
     };
   }
 } else {
   console.warn("Firebase Admin credentials missing. Initializing high-fidelity mock database.");
   db = new MockFirestore();
   auth = {
-    getUser: async (uid: string) => ({ uid, email: "operator@orbit.io" }),
-    verifyIdToken: async (token: string) => ({ uid: "mock-uid", email: "operator@orbit.io" })
+    getUser: async (uid: string) => ({ uid, email: "operator@manthan.ai" }),
+    verifyIdToken: async (token: string) => ({ uid: "mock-uid", email: "operator@manthan.ai" })
   };
 }

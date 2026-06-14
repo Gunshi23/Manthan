@@ -24,13 +24,13 @@ const useMockAuth = typeof window !== "undefined" && (
 );
 
 if (useMockAuth) {
-  console.warn("Running orbit.ai in Sandbox Mode with mock authentication.");
+  console.warn("Running Manthan.ai in Sandbox Mode with mock authentication.");
   auth = {
-    currentUser: { email: "operator@orbit.io", uid: "mock-operator-uid" },
+    currentUser: { email: "operator@manthan.ai", uid: "mock-operator-uid" },
     onAuthStateChanged: (callback: any) => {
       // Immediate callback invocation to simulate signed-in user
       const timer = setTimeout(() => {
-        callback({ email: "operator@orbit.io", uid: "mock-operator-uid" });
+        callback({ email: "operator@manthan.ai", uid: "mock-operator-uid" });
       }, 50);
       return () => clearTimeout(timer);
     },

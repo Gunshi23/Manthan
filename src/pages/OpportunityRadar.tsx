@@ -29,7 +29,7 @@ interface OpportunityRadarProps {
 
 export const OpportunityRadar: React.FC<OpportunityRadarProps> = ({ onNavigate }) => {
   const { theme, lunaMetrics, updateLunaMetrics, startMission, personas, latestVerdict } = useOrbit();
-  const [selectedAgent, setSelectedAgent] = useState<"Polaris" | "Vega" | "Nova" | "Atlas" | "Luna" | null>(null);
+  const [selectedAgent, setSelectedAgent] = useState<"Drishti" | "Khoj" | "Rachna" | "Saarthi" | "Pragya" | null>(null);
 
   const isLight = theme === "executive";
 
@@ -123,7 +123,7 @@ export const OpportunityRadar: React.FC<OpportunityRadarProps> = ({ onNavigate }
           audienceSize: 17,
           priorityScore: 95,
           recommendedAction: "Recover Lost Revenue",
-          reasoning: "Luna detected a 34% increase in abandoned checkout events over the last 7 days. Customers who abandoned carts have historically converted at 28% when contacted via WhatsApp within 24 hours.",
+          reasoning: "Pragya detected a 34% increase in abandoned checkout events over the last 7 days. Customers who abandoned carts have historically converted at 28% when contacted via WhatsApp within 24 hours.",
           color: "Yellow",
           angle: 45,
           distance: 65
@@ -139,11 +139,11 @@ export const OpportunityRadar: React.FC<OpportunityRadarProps> = ({ onNavigate }
     setOpportunitiesData(null);
 
     const logs = [
-      "[Luna] Detecting revenue leaks across gateways...",
-      "[Polaris] Clustering affected target audiences...",
-      "[Vega] Computing ROI & conversion forecasts...",
-      "[Nova] Preparing copywriting templates...",
-      "[Atlas] Verifying queue status and dispatch nodes..."
+      "[Pragya] Detecting revenue leaks across gateways...",
+      "[Drishti] Clustering affected target audiences...",
+      "[Khoj] Computing ROI & conversion forecasts...",
+      "[Rachna] Preparing copywriting templates...",
+      "[Saarthi] Verifying queue status and dispatch nodes..."
     ];
 
     const fetchPromise = fetch("/api/opportunities").then(async (res) => {
@@ -235,29 +235,29 @@ export const OpportunityRadar: React.FC<OpportunityRadarProps> = ({ onNavigate }
           text: isLight ? "text-red-600" : "text-red-400",
           bg: isLight ? "bg-red-500" : "bg-red-400",
           border: isLight ? "border-red-200" : "border-red-500/35",
-          glow: isLight ? "bg-white shadow-sm border border-slate-200" : "shadow-orbit-glow-red bg-gradient-to-br from-[#0F172A] to-[#1E293B]"
+          glow: isLight ? "bg-white shadow-sm border border-slate-200" : "shadow-Manthan-glow-red bg-gradient-to-br from-[#0F172A] to-[#1E293B]"
         };
       case "Yellow":
         return {
           text: isLight ? "text-amber-600" : "text-amber-400",
           bg: isLight ? "bg-amber-500" : "bg-amber-400",
           border: isLight ? "border-amber-200" : "border-amber-500/35",
-          glow: isLight ? "bg-white shadow-sm border border-slate-200" : "shadow-orbit-glow-amber bg-gradient-to-br from-[#0F172A] to-[#1E293B]"
+          glow: isLight ? "bg-white shadow-sm border border-slate-200" : "shadow-Manthan-glow-amber bg-gradient-to-br from-[#0F172A] to-[#1E293B]"
         };
       case "Green":
         return {
-          text: isLight ? "text-emerald-600" : "text-orbit-success",
-          bg: isLight ? "bg-emerald-500" : "bg-orbit-success",
+          text: isLight ? "text-emerald-600" : "text-Manthan-success",
+          bg: isLight ? "bg-emerald-500" : "bg-Manthan-success",
           border: isLight ? "border-emerald-200" : "border-green-500/35",
-          glow: isLight ? "bg-white shadow-sm border border-slate-200" : "shadow-orbit-glow-green bg-gradient-to-br from-[#0F172A] to-[#1E293B]"
+          glow: isLight ? "bg-white shadow-sm border border-slate-200" : "shadow-Manthan-glow-green bg-gradient-to-br from-[#0F172A] to-[#1E293B]"
         };
       case "Purple":
       default:
         return {
-          text: isLight ? "text-purple-600" : "text-orbit-purple",
-          bg: isLight ? "bg-purple-500" : "bg-orbit-purple",
+          text: isLight ? "text-purple-600" : "text-Manthan-purple",
+          bg: isLight ? "bg-purple-500" : "bg-Manthan-purple",
           border: isLight ? "border-purple-200" : "border-purple-500/35",
-          glow: isLight ? "bg-white shadow-sm border border-slate-200" : "shadow-orbit-glow-purple bg-gradient-to-br from-[#0F172A] to-[#1E293B]"
+          glow: isLight ? "bg-white shadow-sm border border-slate-200" : "shadow-Manthan-glow-purple bg-gradient-to-br from-[#0F172A] to-[#1E293B]"
         };
     }
   };
@@ -266,7 +266,7 @@ export const OpportunityRadar: React.FC<OpportunityRadarProps> = ({ onNavigate }
     <div className={`flex-1 flex overflow-hidden relative font-inter ${isLight ? "bg-slate-50" : "bg-[#050816]"}`}>
       {/* Background Matrix overlays */}
       <div className={`pointer-events-none absolute inset-0 space-grid z-0 ${isLight ? "opacity-15" : "opacity-30"}`} />
-      <div className="pointer-events-none absolute inset-0 bg-orbit-glow-blue opacity-10 z-0" />
+      <div className="pointer-events-none absolute inset-0 bg-Manthan-glow-blue opacity-10 z-0" />
       {!isLight && <div className="scanlines" />}
 
       {/* ════════════════════════════════════════
@@ -279,7 +279,7 @@ export const OpportunityRadar: React.FC<OpportunityRadarProps> = ({ onNavigate }
         {/* Header */}
         <PageHeaderHUD
           title="Opportunity Radar"
-          subtitle="CONTINUOUS REVENUE LEAK DETECTION NODE · POWERED BY LUNA"
+          subtitle="CONTINUOUS REVENUE LEAK DETECTION NODE · POWERED BY Pragya"
           onSelectAgent={setSelectedAgent}
           actions={
             <button
@@ -297,16 +297,16 @@ export const OpportunityRadar: React.FC<OpportunityRadarProps> = ({ onNavigate }
 
         {/* Sleek Summary Ribbon */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6 mt-4 font-mono text-[9px]">
-          <div className={`orbit-panel p-3 border rounded-xl flex flex-col space-y-1 relative overflow-hidden text-left ${
+          <div className={`Manthan-panel p-3 border rounded-xl flex flex-col space-y-1 relative overflow-hidden text-left ${
             isLight ? "bg-white border-slate-200 shadow-sm" : "bg-gray-950/45 border-gray-900"
           }`}>
             <span className="text-gray-555 text-[7.5px] uppercase tracking-wider">Recoverable Revenue</span>
             <span className="text-emerald-600 text-sm font-bold tracking-tight">
               {opportunitiesData ? `₹${opportunitiesData.totalPotentialRevenue.toLocaleString()}` : "₹0"}
             </span>
-            <div className="absolute top-1 right-2 w-1.5 h-1.5 rounded-full bg-orbit-success/40 animate-pulse" />
+            <div className="absolute top-1 right-2 w-1.5 h-1.5 rounded-full bg-Manthan-success/40 animate-pulse" />
           </div>
-          <div className={`orbit-panel p-3 border rounded-xl flex flex-col space-y-1 relative overflow-hidden text-left ${
+          <div className={`Manthan-panel p-3 border rounded-xl flex flex-col space-y-1 relative overflow-hidden text-left ${
             isLight ? "bg-white border-slate-200 shadow-sm" : "bg-gray-950/45 border-gray-900"
           }`}>
             <span className="text-gray-555 text-[7.5px] uppercase tracking-wider">Active Nodes</span>
@@ -314,7 +314,7 @@ export const OpportunityRadar: React.FC<OpportunityRadarProps> = ({ onNavigate }
               {opportunitiesData ? `${opportunitiesData.opportunities.length} Nodes` : "0 Nodes"}
             </span>
           </div>
-          <div className={`orbit-panel p-3 border rounded-xl flex flex-col space-y-1 relative overflow-hidden text-left ${
+          <div className={`Manthan-panel p-3 border rounded-xl flex flex-col space-y-1 relative overflow-hidden text-left ${
             isLight ? "bg-white border-slate-200 shadow-sm" : "bg-gray-950/45 border-gray-900"
           }`}>
             <span className="text-gray-555 text-[7.5px] uppercase tracking-wider">Highest Priority</span>
@@ -322,11 +322,11 @@ export const OpportunityRadar: React.FC<OpportunityRadarProps> = ({ onNavigate }
               {opportunitiesData ? opportunitiesData.highestPriority : "Scanning..."}
             </span>
           </div>
-          <div className={`orbit-panel p-3 border rounded-xl flex flex-col space-y-1 relative overflow-hidden text-left ${
+          <div className={`Manthan-panel p-3 border rounded-xl flex flex-col space-y-1 relative overflow-hidden text-left ${
             isLight ? "bg-white border-slate-200 shadow-sm" : "bg-gray-950/45 border-gray-900"
           }`}>
             <span className="text-gray-555 text-[7.5px] uppercase tracking-wider">Avg AI Confidence</span>
-            <span className="text-orbit-purple text-sm font-bold tracking-tight">
+            <span className="text-Manthan-purple text-sm font-bold tracking-tight">
               {opportunitiesData && opportunitiesData.opportunities.length > 0
                 ? `${Math.round(opportunitiesData.opportunities.reduce((acc, o) => acc + o.confidence, 0) / opportunitiesData.opportunities.length)}%` 
                 : "0%"}
@@ -434,11 +434,11 @@ export const OpportunityRadar: React.FC<OpportunityRadarProps> = ({ onNavigate }
                 let colorClass = isLight ? "text-slate-600" : "text-gray-450";
                 if (log.includes("[Warning]")) colorClass = "text-red-500";
                 else if (log.includes("[System]")) colorClass = isLight ? "text-blue-600 font-bold" : "text-pink-400 font-bold";
-                else if (log.includes("[Luna]")) colorClass = "text-amber-600";
-                else if (log.includes("[Polaris]")) colorClass = "text-blue-600";
-                else if (log.includes("[Vega]")) colorClass = "text-purple-600";
-                else if (log.includes("[Nova]")) colorClass = isLight ? "text-pink-600 animate-pulse" : "text-pink-400";
-                else if (log.includes("[Atlas]")) colorClass = "text-emerald-600";
+                else if (log.includes("[Pragya]")) colorClass = "text-amber-600";
+                else if (log.includes("[Drishti]")) colorClass = "text-blue-600";
+                else if (log.includes("[Khoj]")) colorClass = "text-purple-600";
+                else if (log.includes("[Rachna]")) colorClass = isLight ? "text-pink-600 animate-pulse" : "text-pink-400";
+                else if (log.includes("[Saarthi]")) colorClass = "text-emerald-600";
                 
                 return (
                   <div key={idx} className={`${colorClass} flex gap-1.5`}>
@@ -468,7 +468,7 @@ export const OpportunityRadar: React.FC<OpportunityRadarProps> = ({ onNavigate }
       }`}>
         
         {/* Opportunity Score Indicator */}
-        <div className={`orbit-panel p-4 flex flex-col items-center justify-center text-center space-y-3 relative overflow-hidden ${
+        <div className={`Manthan-panel p-4 flex flex-col items-center justify-center text-center space-y-3 relative overflow-hidden ${
           isLight ? "bg-slate-50 border-slate-200" : "bg-gray-950/45 border-gray-900"
         }`}>
           <div className={`absolute top-0 right-0 w-16 h-16 pointer-events-none filter blur-xl ${isLight ? "bg-blue-500/5" : "bg-pink-500/10"}`} />
@@ -517,7 +517,7 @@ export const OpportunityRadar: React.FC<OpportunityRadarProps> = ({ onNavigate }
 
         {/* Selected blip node breakdown */}
         {selectedNode ? (
-          <div className={`orbit-panel p-4 space-y-3.5 transition-all duration-300 border shadow-lg rounded-xl text-left ${
+          <div className={`Manthan-panel p-4 space-y-3.5 transition-all duration-300 border shadow-lg rounded-xl text-left ${
             isLight ? "bg-white border-slate-200" : `bg-gradient-to-br from-[#0F172A] to-[#1E293B] ${getColorClasses(selectedNode.color).border}`
           }`}>
             <div className={`border-b pb-2.5 ${isLight ? "border-slate-100" : "border-gray-900/60"}`}>
@@ -551,11 +551,11 @@ export const OpportunityRadar: React.FC<OpportunityRadarProps> = ({ onNavigate }
                 {selectedNode.description}
               </p>
 
-              {/* WHY LUNA FOUND THIS */}
+              {/* WHY Pragya FOUND THIS */}
               <div className={`border-t pt-2.5 mt-2.5 ${isLight ? "border-slate-100" : "border-gray-900/60"}`}>
                 <span className={`font-bold block mb-1 uppercase text-[8px] tracking-wider ${
                   isLight ? "text-blue-600" : "text-pink-400"
-                }`}>Why Luna Found This:</span>
+                }`}>Why Pragya Found This:</span>
                 <p className={`text-[8.5px] leading-relaxed italic p-2 rounded border ${
                   isLight ? "bg-slate-50 border-slate-150 text-slate-600" : "bg-black/20 border-gray-900 text-gray-455"
                 }`}>
@@ -584,7 +584,7 @@ export const OpportunityRadar: React.FC<OpportunityRadarProps> = ({ onNavigate }
         ) : (
           <div className="space-y-3">
             {latestVerdict ? (
-              <div className={`orbit-panel p-4 space-y-3 text-left ${isLight ? "bg-slate-50 border-slate-200" : "bg-gray-900 border-gray-800"}`}>
+              <div className={`Manthan-panel p-4 space-y-3 text-left ${isLight ? "bg-slate-50 border-slate-200" : "bg-gray-900 border-gray-800"}`}>
                 <h3 className={`font-space text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 border-b pb-2 ${
                   isLight ? "border-slate-200 text-slate-800" : "border-gray-900 text-white"
                 }`}>
@@ -630,7 +630,7 @@ export const OpportunityRadar: React.FC<OpportunityRadarProps> = ({ onNavigate }
                   {/* Regional Opportunities */}
                   <div className="space-y-1">
                     <span className="text-[7.5px] text-gray-500 uppercase font-bold tracking-wider block flex items-center gap-1">
-                      <MapPin size={9} className="text-orbit-purple" />
+                      <MapPin size={9} className="text-Manthan-purple" />
                       Regional Opportunity
                     </span>
                     <div className={`p-2 rounded border flex items-center justify-between ${
@@ -647,7 +647,7 @@ export const OpportunityRadar: React.FC<OpportunityRadarProps> = ({ onNavigate }
                 </div>
               </div>
             ) : (
-              <div className="orbit-panel p-4 text-center text-gray-555 font-mono text-[9.5px]">
+              <div className="Manthan-panel p-4 text-center text-gray-555 font-mono text-[9.5px]">
                 No opportunity node focused. Run a scan to discover active nodes.
               </div>
             )}
@@ -655,14 +655,14 @@ export const OpportunityRadar: React.FC<OpportunityRadarProps> = ({ onNavigate }
         )}
 
         {/* AI Recommendations */}
-        <div className={`orbit-panel p-4 space-y-3 flex-1 flex flex-col min-h-[220px] ${
+        <div className={`Manthan-panel p-4 space-y-3 flex-1 flex flex-col min-h-[220px] ${
           isLight ? "bg-slate-50 border-slate-200" : "bg-gray-950/45 border-gray-900"
         }`}>
           <h3 className={`font-space text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 border-b pb-2 shrink-0 text-left ${
             isLight ? "border-slate-200 text-slate-800" : "border-gray-900 text-white"
           }`}>
-            <Sparkles size={12} className="text-orbit-purple" />
-            Luna Actions
+            <Sparkles size={12} className="text-Manthan-purple" />
+            Pragya Actions
           </h3>
 
           <div className="space-y-3 overflow-y-auto flex-1 pr-1 scrollbar-thin">

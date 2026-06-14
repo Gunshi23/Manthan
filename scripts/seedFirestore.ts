@@ -53,7 +53,7 @@ const CHANNELS: ("Email" | "WhatsApp" | "SMS" | "RCS")[] = ["WhatsApp", "Email",
 
 // Seed function
 async function seed() {
-  console.log("🌱 STARTING FIRESTORE SEEDING SYSTEM for orbit.ai.ai...");
+  console.log("🌱 STARTING FIRESTORE SEEDING SYSTEM for Manthan.ai.ai...");
   console.log("Business Target: Aura Threads (Women's Fashion & Kurtis)");
 
   // 1. Clear existing collections to prevent duplicates
@@ -395,7 +395,7 @@ async function seed() {
         audienceSize: 34,
         priorityScore: 95,
         recommendedAction: "Recover Lost Revenue",
-        reasoning: "Luna discovered a 34% leak rate during checkout sizes selection. Direct WhatsApp links can recover 30% of this revenue.",
+        reasoning: "Pragya discovered a 34% leak rate during checkout sizes selection. Direct WhatsApp links can recover 30% of this revenue.",
         color: "Yellow",
         angle: 45,
         distance: 65
@@ -425,7 +425,7 @@ async function seed() {
         audienceSize: 60,
         priorityScore: 92,
         recommendedAction: "Increase Customer LTV",
-        reasoning: "Kurti buyers have high affinity coordinate sets. Vega forecasts 4.2x ROI by introducing Palazzo Set bundle catalogs.",
+        reasoning: "Kurti buyers have high affinity coordinate sets. Khoj forecasts 4.2x ROI by introducing Palazzo Set bundle catalogs.",
         color: "Green",
         angle: 290,
         distance: 45
@@ -486,7 +486,7 @@ async function seed() {
         audienceSize: size,
         priorityScore: 60 + Math.floor(Math.random() * 35),
         recommendedAction: recAction as any,
-        reasoning: `Luna identified signal matching group parameters. Recommended channel matching target coordinates.`,
+        reasoning: `Pragya identified signal matching group parameters. Recommended channel matching target coordinates.`,
         color,
         angle: Math.floor(Math.random() * 360),
         distance: 20 + Math.floor(Math.random() * 75)
@@ -512,9 +512,9 @@ async function seed() {
         progress: 100,
         roi: 4.8,
         createdAt: "2026-05-01T10:00:00Z",
-        Polaris: { segment: "Loyalists", explanation: "Targeting repeat Kurti buyers." },
-        Luna: { recoverableRevenue: 122106, recoveryConfidence: 94, explanation: "Luna optimized checkouts." },
-        Vega: { predictedRoi: 4.8, predictedRevenue: 120000, explanation: "Vega forecast correct." },
+        Drishti: { segment: "Loyalists", explanation: "Targeting repeat Kurti buyers." },
+        Pragya: { recoverableRevenue: 122106, recoveryConfidence: 94, explanation: "Pragya optimized checkouts." },
+        Khoj: { predictedRoi: 4.8, predictedRevenue: 120000, explanation: "Khoj forecast correct." },
         recommendation: { summary: "Standard Whatsapp campaign.", confidenceScore: 94 }
       },
       {
@@ -524,9 +524,9 @@ async function seed() {
         progress: 65,
         roi: 3.9,
         createdAt: "2026-06-02T13:00:00Z",
-        Polaris: { segment: "Slipping Away", explanation: "Targeting cart abandoners." },
-        Luna: { recoverableRevenue: 44166, recoveryConfidence: 91, explanation: "Detected cart leaks." },
-        Vega: { predictedRoi: 3.9, predictedRevenue: 40000, explanation: "Conversion projections active." },
+        Drishti: { segment: "Slipping Away", explanation: "Targeting cart abandoners." },
+        Pragya: { recoverableRevenue: 44166, recoveryConfidence: 91, explanation: "Detected cart leaks." },
+        Khoj: { predictedRoi: 3.9, predictedRevenue: 40000, explanation: "Conversion projections active." },
         recommendation: { summary: "Cart recovery sequences.", confidenceScore: 91 }
       }
     ];
@@ -552,9 +552,9 @@ async function seed() {
         progress,
         roi: parseFloat((2.5 + Math.random() * 3).toFixed(1)),
         createdAt,
-        Polaris: { segment: "Loyalists", explanation: "Polaris mapped coordinate nodes." },
-        Luna: { recoverableRevenue: 15000 * mIndex, recoveryConfidence: 85, explanation: "Luna audited leakage nodes." },
-        Vega: { predictedRoi: 3.2, predictedRevenue: 18000 * mIndex, explanation: "Vega computed conversion loops." },
+        Drishti: { segment: "Loyalists", explanation: "Drishti mapped coordinate nodes." },
+        Pragya: { recoverableRevenue: 15000 * mIndex, recoveryConfidence: 85, explanation: "Pragya audited leakage nodes." },
+        Khoj: { predictedRoi: 3.2, predictedRevenue: 18000 * mIndex, explanation: "Khoj computed conversion loops." },
         recommendation: { summary: "Run autonomous directives via selected channel.", confidenceScore: 85 }
       });
     }
@@ -573,28 +573,28 @@ async function seed() {
     // ════════════════════════════════════════
     // 6. AGENT LOGS (30)
     // ════════════════════════════════════════
-    const agentsList: ("System" | "Polaris" | "Nova" | "Vega" | "Atlas" | "Luna")[] = [
-      "System", "Polaris", "Luna", "Vega", "Nova", "Atlas"
+    const agentsList: ("System" | "Drishti" | "Rachna" | "Khoj" | "Saarthi" | "Pragya")[] = [
+      "System", "Drishti", "Pragya", "Khoj", "Rachna", "Saarthi"
     ];
     
     const messagesPool = [
-      "[Polaris] Segmenting Indian female buyers. Group A matches Kurti preferences.",
-      "[Luna] Scanning billing gateways. Identified 12% cart leakage on checkout screen.",
-      "[Vega] Projections locked. Expected conversion yields: 24% under current WhatsApp template.",
-      "[Nova] Copy draft finished: 'Hey Priya, get 15% off Swadeshi Kurtis today!'.",
-      "[Atlas] Queuing dispatch hooks. Target: 10:30 AM Tuesday peak opens.",
+      "[Drishti] Segmenting Indian female buyers. Group A matches Kurti preferences.",
+      "[Pragya] Scanning billing gateways. Identified 12% cart leakage on checkout screen.",
+      "[Khoj] Projections locked. Expected conversion yields: 24% under current WhatsApp template.",
+      "[Rachna] Copy draft finished: 'Hey Priya, get 15% off Swadeshi Kurtis today!'.",
+      "[Saarthi] Queuing dispatch hooks. Target: 10:30 AM Tuesday peak opens.",
       "[System] Syncing cognitive registers with Firestore database.",
-      "[Polaris] 120 repeat buyers show early affinity toward Chanderi palazzo sets.",
-      "[Luna] Instagram checkout leak alert: 34 nodes left baskets active.",
-      "[Vega] ROI evaluation: 4.8x baseline yields on early VIP invite triggers.",
-      "[Nova] Drafted RCS rich template with cotton kurti catalog images.",
-      "[Atlas] Webhooks verified. Direct checkout API online and responsive.",
+      "[Drishti] 120 repeat buyers show early affinity toward Chanderi palazzo sets.",
+      "[Pragya] Instagram checkout leak alert: 34 nodes left baskets active.",
+      "[Khoj] ROI evaluation: 4.8x baseline yields on early VIP invite triggers.",
+      "[Rachna] Drafted RCS rich template with cotton kurti catalog images.",
+      "[Saarthi] Webhooks verified. Direct checkout API online and responsive.",
       "[System] Operational network metrics nominal. Latency: 5ms.",
-      "[Polaris] Alert: Slipping VIP segment churn score has climbed by 4.2%.",
-      "[Luna] Recoverable revenue potential from dormant VIPs: ₹65,000.",
-      "[Vega] Forecast: Churn reduction campaign projects ₹35,000 in saved value.",
-      "[Nova] Direct WhatsApp interactive copy armed. CTA: Shop Kurtis.",
-      "[Atlas] Webhook dispatch channels routing complete.",
+      "[Drishti] Alert: Slipping VIP segment churn score has climbed by 4.2%.",
+      "[Pragya] Recoverable revenue potential from dormant VIPs: ₹65,000.",
+      "[Khoj] Forecast: Churn reduction campaign projects ₹35,000 in saved value.",
+      "[Rachna] Direct WhatsApp interactive copy armed. CTA: Shop Kurtis.",
+      "[Saarthi] Webhook dispatch channels routing complete.",
       "[System] Calibrating boardroom consensus vectors."
     ];
 
@@ -674,12 +674,12 @@ async function seed() {
     // 9. LIVE MARKET SIGNALS (6)
     // ════════════════════════════════════════
     const marketSignals = [
-      { id: "sig_1", title: "FashionHub launched a Diwali Kurta Sale", desc: "Aggressive 40% discount blast via WhatsApp and Reels. Engagement spiked 42% in 24 hours.", impact: 91, confidence: 88, agent: "Polaris", agentColor: "#3B82F6", type: "threat" as const, trend: "up" as const },
-      { id: "sig_2", title: "Kurti reels engagement up 2.4x industry-wide", desc: "Short-form video showcasing palazzo coordinate sets outperforms static catalog posts.", impact: 84, confidence: 92, agent: "Vega", agentColor: "#8B5CF6", type: "opportunity" as const, trend: "up" as const },
-      { id: "sig_3", title: "Instagram DM shopping cart checkout leaks fell 8%", desc: "Direct payment links in Instagram chats increased checkout yields by 8%.", impact: 76, confidence: 85, agent: "Luna", agentColor: "#EC4899", type: "opportunity" as const, trend: "up" as const },
-      { id: "sig_4", title: "Aura Threads WhatsApp unsubscribe rates rose 1.2%", desc: "Dormant users reporting message fatigue due to repeated static clearances.", impact: 88, confidence: 90, agent: "Vega", agentColor: "#8B5CF6", type: "threat" as const, trend: "up" as const },
-      { id: "sig_5", title: "Limited-time Kurtis vouchers conversion rate rose 38%", desc: "Customers converted 38% faster when countdown timers were added to landing pages.", impact: 79, confidence: 87, agent: "Nova", agentColor: "#F59E0B", type: "opportunity" as const, trend: "up" as const },
-      { id: "sig_6", title: "StyleKart launched micro-influencer product drops", desc: "Tapping nano-influencers in Mumbai and Delhi for kurti style hauls, driving high web traffic.", impact: 72, confidence: 83, agent: "Atlas", agentColor: "#22C55E", type: "threat" as const, trend: "up" as const }
+      { id: "sig_1", title: "FashionHub launched a Diwali Kurta Sale", desc: "Aggressive 40% discount blast via WhatsApp and Reels. Engagement spiked 42% in 24 hours.", impact: 91, confidence: 88, agent: "Drishti", agentColor: "#3B82F6", type: "threat" as const, trend: "up" as const },
+      { id: "sig_2", title: "Kurti reels engagement up 2.4x industry-wide", desc: "Short-form video showcasing palazzo coordinate sets outperforms static catalog posts.", impact: 84, confidence: 92, agent: "Khoj", agentColor: "#8B5CF6", type: "opportunity" as const, trend: "up" as const },
+      { id: "sig_3", title: "Instagram DM shopping cart checkout leaks fell 8%", desc: "Direct payment links in Instagram chats increased checkout yields by 8%.", impact: 76, confidence: 85, agent: "Pragya", agentColor: "#EC4899", type: "opportunity" as const, trend: "up" as const },
+      { id: "sig_4", title: "Aura Threads WhatsApp unsubscribe rates rose 1.2%", desc: "Dormant users reporting message fatigue due to repeated static clearances.", impact: 88, confidence: 90, agent: "Khoj", agentColor: "#8B5CF6", type: "threat" as const, trend: "up" as const },
+      { id: "sig_5", title: "Limited-time Kurtis vouchers conversion rate rose 38%", desc: "Customers converted 38% faster when countdown timers were added to landing pages.", impact: 79, confidence: 87, agent: "Rachna", agentColor: "#F59E0B", type: "opportunity" as const, trend: "up" as const },
+      { id: "sig_6", title: "StyleKart launched micro-influencer product drops", desc: "Tapping nano-influencers in Mumbai and Delhi for kurti style hauls, driving high web traffic.", impact: 72, confidence: 83, agent: "Saarthi", agentColor: "#22C55E", type: "threat" as const, trend: "up" as const }
     ];
 
     for (const sig of marketSignals) {
@@ -781,7 +781,7 @@ async function seed() {
     console.log("✅ Seeded 30 Analytics Snapshots");
 
     console.log("🎉 FIRESTORE SEEDING COMPLETED SUCCESSFULLY!");
-    console.log("Ready for orbit.ai: 500 customers, 2500 orders, campaigns, logs, simulations, and market signals mapped.");
+    console.log("Ready for Manthan.ai: 500 customers, 2500 orders, campaigns, logs, simulations, and market signals mapped.");
   } catch (err: any) {
     console.error("❌ Firestore Seeding failed:", err.message || err);
   }

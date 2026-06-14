@@ -96,7 +96,7 @@ router.get("/signals", async (req, res) => {
     const snapshot = await db.collection("market_signals").get();
     snapshot.forEach((doc: any) => signals.push(doc.data()));
 
-    // Try to pull live news from SerpAPI and translate to ORBIT signals via Gemini
+    // Try to pull live news from SerpAPI and translate to Manthan signals via Gemini
     try {
       const activeKey = process.env.SERPAPI_KEY || "";
       const url = `https://serpapi.com/search?engine=google_news&q=kurtis+fashion+india&api_key=${activeKey}`;
@@ -108,7 +108,7 @@ router.get("/signals", async (req, res) => {
           const headlines = newsResults.map((n: any) => n.title).join(" | ");
           
           // Call Gemini to format news into 5 structured competitor alerts matching Aura Threads Kurtis brand
-          const sysInstruction = "You are ORBIT's Competitive Intelligence Analyst. Translate the news headlines into 5 highly realistic market signals and competitor alerts.";
+          const sysInstruction = "You are Manthan's Competitive Intelligence Analyst. Translate the news headlines into 5 highly realistic market signals and competitor alerts.";
           const prompt = `News Headlines: "${headlines}". 
 Create exactly 5 competitor alerts or market signals for a Women's Kurti and Ethnic wear brand called "Aura Threads".
 Format your response as a single valid JSON array matching this schema:
@@ -119,7 +119,7 @@ Format your response as a single valid JSON array matching this schema:
     "desc": "one sentence explanation of what occurred and what the metric is",
     "impact": 88,
     "confidence": 92,
-    "agent": "Polaris" | "Vega" | "Luna" | "Nova" | "Atlas",
+    "agent": "Drishti" | "Khoj" | "Pragya" | "Rachna" | "Saarthi",
     "agentColor": "#3B82F6" | "#EC4899" | "#8B5CF6" | "#F59E0B" | "#22C55E",
     "type": "opportunity" | "threat" | "neutral",
     "trend": "up" | "down" | "stable"
@@ -142,9 +142,9 @@ Only return raw JSON. No markdown backticks.`;
     if (signals.length === 0) {
       // Default fallback
       signals = [
-        { id: "sig_1", title: "FashionHub launched a Diwali Kurta Sale", desc: "Aggressive 40% discount blast via WhatsApp and Reels. Engagement spiked 42% in 24 hours.", impact: 91, confidence: 88, agent: "Polaris", agentColor: "#3B82F6", type: "threat", trend: "up" },
-        { id: "sig_2", title: "Kurti reels engagement up 2.4x industry-wide", desc: "Short-form video showcasing palazzo coordinate sets outperforms static catalog posts.", impact: 84, confidence: 92, agent: "Vega", agentColor: "#8B5CF6", type: "opportunity", trend: "up" },
-        { id: "sig_3", title: "Instagram DM shopping cart checkout leaks fell 8%", desc: "Direct payment links in Instagram chats increased checkout yields by 8%.", impact: 76, confidence: 85, agent: "Luna", agentColor: "#EC4899", type: "opportunity", trend: "up" }
+        { id: "sig_1", title: "FashionHub launched a Diwali Kurta Sale", desc: "Aggressive 40% discount blast via WhatsApp and Reels. Engagement spiked 42% in 24 hours.", impact: 91, confidence: 88, agent: "Drishti", agentColor: "#3B82F6", type: "threat", trend: "up" },
+        { id: "sig_2", title: "Kurti reels engagement up 2.4x industry-wide", desc: "Short-form video showcasing palazzo coordinate sets outperforms static catalog posts.", impact: 84, confidence: 92, agent: "Khoj", agentColor: "#8B5CF6", type: "opportunity", trend: "up" },
+        { id: "sig_3", title: "Instagram DM shopping cart checkout leaks fell 8%", desc: "Direct payment links in Instagram chats increased checkout yields by 8%.", impact: 76, confidence: 85, agent: "Pragya", agentColor: "#EC4899", type: "opportunity", trend: "up" }
       ];
     }
 
@@ -160,7 +160,7 @@ router.post("/report", async (req, res) => {
     const { businessType } = req.body;
     const type = businessType || "Women's Fashion & Kurtis";
     
-    const prompt = `You are ORBIT's Competitive Intelligence Analyst for an online ${type} brand.
+    const prompt = `You are Manthan's Competitive Intelligence Analyst for an online ${type} brand.
 Analyze the current competitor environment (e.g. FashionHub, StyleKart launching Diwali sales, reels outperforming static posts by 2.3x) and compile an executive competitor report.
 
 Format your response as a single valid JSON object matching this schema exactly:
@@ -232,7 +232,7 @@ Format your response as a single valid JSON object matching this schema exactly:
   "likelyObjective": "the main objective, e.g. conversion velocity, VIP retention",
   "strengths": ["campaign strength 1", "campaign strength 2"],
   "weaknesses": ["campaign weakness 1", "campaign weakness 2"],
-  "counterStrategy": "two-sentence actionable strategy to out-compete them using ORBIT"
+  "counterStrategy": "two-sentence actionable strategy to out-compete them using Manthan"
 }
 Only return raw JSON. No markdown.`;
 

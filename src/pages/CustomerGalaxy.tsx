@@ -52,7 +52,7 @@ export const CustomerGalaxy: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [selected, setSelected] = useState<Customer | null>(null);
   const [hovered, setHovered] = useState<Customer | null>(null);
-  const [selectedAgent, setSelectedAgent] = useState<"Polaris" | "Vega" | "Nova" | "Atlas" | "Luna" | null>(null);
+  const [selectedAgent, setSelectedAgent] = useState<"Drishti" | "Khoj" | "Rachna" | "Saarthi" | "Pragya" | null>(null);
   const [viewMode, setViewMode] = useState<"galaxy" | "list">("galaxy");
   const [showCrmFilters, setShowCrmFilters] = useState(false);
 
@@ -67,10 +67,10 @@ export const CustomerGalaxy: React.FC = () => {
   const itemsPerPage = 15;
 
   const segmentColorsMap: Record<Customer["segment"], string> = {
-    "Loyalists": isLight ? "text-blue-600 border-blue-200 bg-blue-50/50" : "text-orbit-success border-orbit-success/30 bg-orbit-success/5",
-    "Slipping Away": isLight ? "text-red-600 border-red-200 bg-red-50/50" : "text-orbit-pink border-orbit-pink/30 bg-orbit-pink/5",
-    "High-Value Inactive": isLight ? "text-amber-600 border-amber-200 bg-amber-50/50" : "text-orbit-amber border-orbit-amber/30 bg-orbit-amber/5",
-    "New Signups": isLight ? "text-purple-600 border-purple-200 bg-purple-50/50" : "text-orbit-blue border-orbit-blue/30 bg-orbit-blue/5",
+    "Loyalists": isLight ? "text-blue-600 border-blue-200 bg-blue-50/50" : "text-Manthan-success border-Manthan-success/30 bg-Manthan-success/5",
+    "Slipping Away": isLight ? "text-red-600 border-red-200 bg-red-50/50" : "text-Manthan-pink border-Manthan-pink/30 bg-Manthan-pink/5",
+    "High-Value Inactive": isLight ? "text-amber-600 border-amber-200 bg-amber-50/50" : "text-Manthan-amber border-Manthan-amber/30 bg-Manthan-amber/5",
+    "New Signups": isLight ? "text-purple-600 border-purple-200 bg-purple-50/50" : "text-Manthan-blue border-Manthan-blue/30 bg-Manthan-blue/5",
   };
 
   /* Camera State */
@@ -330,7 +330,7 @@ export const CustomerGalaxy: React.FC = () => {
       ctx.fill();
       ctx.globalAlpha = 1.0;
 
-      // Orbit lines around High Value stars (LTV > ₹2000)
+      // Manthan lines around High Value stars (LTV > ₹2000)
       if (cust.ltv > 2000) {
         ctx.strokeStyle = color + "22";
         ctx.lineWidth = 0.6;
@@ -557,7 +557,7 @@ export const CustomerGalaxy: React.FC = () => {
     <div className={`flex-1 flex overflow-hidden relative ${isLight ? "bg-gray-50 text-gray-900" : "bg-[#050816] text-white"}`}>
       {/* Background Matrix overlays */}
       <div className={`pointer-events-none absolute inset-0 space-grid opacity-35 z-0 ${isLight ? "hidden" : ""}`} />
-      <div className={`pointer-events-none absolute inset-0 bg-orbit-glow-blue opacity-15 z-0 ${isLight ? "hidden" : ""}`} />
+      <div className={`pointer-events-none absolute inset-0 bg-Manthan-glow-blue opacity-15 z-0 ${isLight ? "hidden" : ""}`} />
 
       {/* ════════════════════════════════════════
           LEFT PANEL — GALAXY CONTROLS
@@ -670,7 +670,7 @@ export const CustomerGalaxy: React.FC = () => {
         <div className={`border-t pt-4 space-y-3 ${isLight ? "border-gray-150" : "border-gray-800/60"}`}>
           <div>
             <h3 className={`font-space text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 ${isLight ? "text-gray-900" : "text-white"}`}>
-              <Compass size={13} className="text-orbit-purple" />
+              <Compass size={13} className="text-Manthan-purple" />
               Constellation Directory
             </h3>
             <p className={`font-mono text-[8px] uppercase mt-0.5 ${isLight ? "text-gray-400" : "text-gray-550"}`}>Segment profile metrics</p>
@@ -975,7 +975,7 @@ export const CustomerGalaxy: React.FC = () => {
                           </td>
                           <td className="p-3.5 font-bold text-white">₹{cust.ltv.toLocaleString()}</td>
                           <td className="p-3.5 text-gray-400 hidden sm:table-cell">
-                            {cust.predictedNextPurchase ? "Vega Projected" : "—"}
+                            {cust.predictedNextPurchase ? "Khoj Projected" : "—"}
                           </td>
                         </tr>
                       );
@@ -1085,7 +1085,7 @@ export const CustomerGalaxy: React.FC = () => {
                   <TrendingUp size={12} /> ESCALATING
                 </span>
               ) : selected.churnTrend === "down" ? (
-                <span className="text-orbit-success flex items-center gap-1">
+                <span className="text-Manthan-success flex items-center gap-1">
                   <TrendingDown size={12} /> DECLINING
                 </span>
               ) : (
@@ -1099,14 +1099,14 @@ export const CustomerGalaxy: React.FC = () => {
           {/* DNA Tags */}
           <div className="space-y-2">
             <div className="flex items-center gap-1.5">
-              <Cpu size={12} className="text-orbit-purple" />
+              <Cpu size={12} className="text-Manthan-purple" />
               <span className="font-mono text-[8px] text-gray-450 uppercase tracking-widest">Customer DNA Markers</span>
             </div>
             <div className="flex flex-wrap gap-1.5">
               {selected.dna.map((tag, i) => (
                 <span
                   key={i}
-                  className="px-2 py-0.5 rounded border border-orbit-purple/20 bg-orbit-purple/10 text-orbit-purple font-mono text-[9px] tracking-wide"
+                  className="px-2 py-0.5 rounded border border-Manthan-purple/20 bg-Manthan-purple/10 text-Manthan-purple font-mono text-[9px] tracking-wide"
                 >
                   {tag}
                 </span>
@@ -1117,7 +1117,7 @@ export const CustomerGalaxy: React.FC = () => {
           {/* Purchase History */}
           <div className="space-y-2">
             <div className="flex items-center gap-1.5">
-              <ShoppingBag size={12} className="text-orbit-blue" />
+              <ShoppingBag size={12} className="text-Manthan-blue" />
               <span className={`font-mono text-[8px] uppercase tracking-widest ${isLight ? "text-gray-500" : "text-gray-450"}`}>Order Ledger History</span>
             </div>
             <div className="space-y-1.5 max-h-[140px] overflow-y-auto pr-1">
@@ -1134,21 +1134,21 @@ export const CustomerGalaxy: React.FC = () => {
                         <p className={`font-bold truncate ${isLight ? "text-slate-800" : "text-white"}`}>{order.product}</p>
                         <span className={`text-[8.5px] ${isLight ? "text-gray-500" : "text-gray-600"}`}>{order.date} · via {order.channel}</span>
                       </div>
-                      <span className="text-orbit-success font-semibold shrink-0 ml-2">₹{order.amount.toLocaleString()}</span>
+                      <span className="text-Manthan-success font-semibold shrink-0 ml-2">₹{order.amount.toLocaleString()}</span>
                     </div>
                   ))
               )}
             </div>
           </div>
 
-          {/* Predicted Next Purchase (Vega model) */}
+          {/* Predicted Next Purchase (Khoj model) */}
           <div className={`p-3.5 rounded-xl border space-y-1.5 relative overflow-hidden ${
-            isLight ? "bg-blue-50/30 border-blue-200" : "bg-orbit-blue/5 border-orbit-blue/20"
+            isLight ? "bg-blue-50/30 border-blue-200" : "bg-Manthan-blue/5 border-Manthan-blue/20"
           }`}>
-            <div className="absolute top-0 right-0 w-16 h-16 bg-orbit-glow-blue opacity-30 pointer-events-none" />
-            <div className="flex items-center gap-1.5 font-mono text-[9px] text-orbit-blue font-bold uppercase tracking-wider relative z-10">
+            <div className="absolute top-0 right-0 w-16 h-16 bg-Manthan-glow-blue opacity-30 pointer-events-none" />
+            <div className="flex items-center gap-1.5 font-mono text-[9px] text-Manthan-blue font-bold uppercase tracking-wider relative z-10">
               <Compass size={11} className="animate-spin-slow" />
-              <span>VEGA CONVERSION PROJECTION</span>
+              <span>Khoj CONVERSION PROJECTION</span>
             </div>
             <p className={`font-mono text-xs font-semibold relative z-10 ${isLight ? "text-slate-800" : "text-white"}`}>{selected.predictedNextPurchase}</p>
             <p className="font-mono text-[9px] text-gray-500 relative z-10">Expected Product Category: <span className={isLight ? "text-slate-800 font-bold" : "text-gray-300 font-bold"}>{selected.predictedCategory}</span></p>
@@ -1156,10 +1156,10 @@ export const CustomerGalaxy: React.FC = () => {
 
           {/* AI Profile Summary (Wrapped) */}
           <div className={`p-4 rounded-xl border space-y-2 relative overflow-hidden ${
-            isLight ? "bg-purple-50/30 border-purple-200" : "bg-orbit-purple/5 border-orbit-purple/20"
+            isLight ? "bg-purple-50/30 border-purple-200" : "bg-Manthan-purple/5 border-Manthan-purple/20"
           }`}>
-            <div className="absolute top-0 right-0 w-16 h-16 bg-orbit-glow-purple opacity-30 pointer-events-none" />
-            <div className="flex items-center gap-1.5 font-mono text-[9px] text-orbit-purple font-bold uppercase tracking-wider relative z-10">
+            <div className="absolute top-0 right-0 w-16 h-16 bg-Manthan-glow-purple opacity-30 pointer-events-none" />
+            <div className="flex items-center gap-1.5 font-mono text-[9px] text-Manthan-purple font-bold uppercase tracking-wider relative z-10">
               <Cpu size={12} className="animate-pulse" />
               <span>AI Wrapped Profile Summary</span>
             </div>

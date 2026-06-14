@@ -101,39 +101,39 @@ export function parseGeminiJson<T>(text: string, fallback: T): T {
 
 export async function generateMissionPlan(goal: string, businessType: string = "Fashion & Retail") {
   try {
-    const sys = `You are the ORBIT Growth Engine, coordinating 5 AI agents to plan and generate a growth campaign for the business objective.
+    const sys = `You are the Manthan Growth Engine, coordinating 5 AI agents to plan and generate a growth campaign for the business objective.
 The agents are:
-- Polaris (Audience Intelligence): Chooses one segment from ["Loyalists", "Slipping Away", "High-Value Inactive", "New Signups"] and explains findings.
-- Luna (Recovery): Audits leakage, specifies recoverableRevenue (number), inactiveCustomers (number), abandonedLeads (number), recoveryConfidence (number), and a detailed recovery explanation.
-- Vega (Predictive ROI): Computes predictedRoi (number), predictedRevenue (number), and a detailed forecast explanation.
-- Nova (Campaign Creator): Generates copy for Email (subject, body), WhatsApp (body), SMS (body), and RCS (title, body, mediaUrl).
-- Atlas (Operations): Chooses one channel from ["Email", "WhatsApp", "SMS", "RCS"] and explains the dispatch routing.
+- Drishti (Audience Intelligence): Chooses one segment from ["Loyalists", "Slipping Away", "High-Value Inactive", "New Signups"] and explains findings.
+- Pragya (Recovery): Audits leakage, specifies recoverableRevenue (number), inactiveCustomers (number), abandonedLeads (number), recoveryConfidence (number), and a detailed recovery explanation.
+- Khoj (Predictive ROI): Computes predictedRoi (number), predictedRevenue (number), and a detailed forecast explanation.
+- Rachna (Campaign Creator): Generates copy for Email (subject, body), WhatsApp (body), SMS (body), and RCS (title, body, mediaUrl).
+- Saarthi (Operations): Chooses one channel from ["Email", "WhatsApp", "SMS", "RCS"] and explains the dispatch routing.
 
 Format your response as a single valid JSON object matching this schema exactly:
 {
-  "Polaris": {
+  "Drishti": {
     "segment": "Loyalists" | "Slipping Away" | "High-Value Inactive" | "New Signups",
     "explanation": "your explanation"
   },
-  "Luna": {
+  "Pragya": {
     "recoverableRevenue": 12000,
     "inactiveCustomers": 12,
     "abandonedLeads": 15,
     "recoveryConfidence": 92,
     "explanation": "your explanation"
   },
-  "Vega": {
+  "Khoj": {
     "predictedRoi": 4.2,
     "predictedRevenue": 35000,
     "explanation": "your explanation"
   },
-  "Nova": {
+  "Rachna": {
     "Email": { "subject": "...", "body": "..." },
     "WhatsApp": { "body": "..." },
     "SMS": { "body": "..." },
     "RCS": { "title": "...", "body": "...", "mediaUrl": "..." }
   },
-  "Atlas": {
+  "Saarthi": {
     "selectedChannel": "Email" | "WhatsApp" | "SMS" | "RCS",
     "explanation": "your explanation"
   },
@@ -156,7 +156,7 @@ Do not return any markdown code block formatting. Only return the raw JSON objec
 
 export async function runFutureSimulation(audience: string, discount: number, channel: string) {
   try {
-    const sys = `You are the ORBIT Predictive Analytics engine. You compute simulated growth marketing timelines based on discount, channel, and target audience.
+    const sys = `You are the Manthan Predictive Analytics engine. You compute simulated growth marketing timelines based on discount, channel, and target audience.
 Format your response as a single valid JSON object matching this schema exactly:
 {
   "conservative": {
@@ -194,15 +194,15 @@ Only return the raw JSON object. Do not include markdown code block styling.`;
 
 export async function generateBoardroomDiscussion(goal: string, missionPlan: any) {
   try {
-    const sys = `You are the ORBIT Boardroom facilitator. Generate a structured AI agent courtroom consensus discussion where each agent (Polaris, Luna, Vega, Nova, Atlas) aligns on the mission objective and strategy.
+    const sys = `You are the Manthan Boardroom facilitator. Generate a structured AI agent courtroom consensus discussion where each agent (Drishti, Pragya, Khoj, Rachna, Saarthi) aligns on the mission objective and strategy.
 Format your response as a single valid JSON object matching this schema exactly:
 {
   "messages": [
-    { "agent": "Polaris", "text": "speech text here" },
-    { "agent": "Luna", "text": "speech text here" },
-    { "agent": "Vega", "text": "speech text here" },
-    { "agent": "Nova", "text": "speech text here" },
-    { "agent": "Atlas", "text": "speech text here" }
+    { "agent": "Drishti", "text": "speech text here" },
+    { "agent": "Pragya", "text": "speech text here" },
+    { "agent": "Khoj", "text": "speech text here" },
+    { "agent": "Rachna", "text": "speech text here" },
+    { "agent": "Saarthi", "text": "speech text here" }
   ]
 }
 Only return the raw JSON object.`;
@@ -218,8 +218,8 @@ Only return the raw JSON object.`;
 
 export async function generateCopilotResponse(message: string, context: { brandDna?: any, campaigns?: any[], opportunities?: any[] }) {
   try {
-    const sys = `You are orbit.ai Copilot, a co-founder AI assistant for orbit.ai. Respond to the user's query about their business or campaigns in a concise, professional, growth-focused tone, speaking as their AI co-founder partner.
-Suggest a next action step if appropriate, which we can map to a dashboard page in orbit.ai.
+    const sys = `You are Manthan.ai Copilot, a co-founder AI assistant for Manthan.ai. Respond to the user's query about their business or campaigns in a concise, professional, growth-focused tone, speaking as their AI co-founder partner.
+Suggest a next action step if appropriate, which we can map to a dashboard page in Manthan.ai.
 Format your response as a valid JSON object matching this schema:
 {
   "replyText": "your response speech here...",
@@ -246,19 +246,19 @@ function getMockCopilotResponse(message: string) {
   let action: any = { label: "Open CommandCenter", page: "command-center" };
 
   if (lowerQuery.includes("sales") || lowerQuery.includes("increase")) {
-    replyText = "Vega: Your primary growth opportunity is to target Slipping VIPs. Our data shows 12 inactive customer accounts with high untapped buying capacity. Standard recovery campaign yields an expected ₹12,000 (91% confidence).";
+    replyText = "Khoj: Your primary growth opportunity is to target Slipping VIPs. Our data shows 12 inactive customer accounts with high untapped buying capacity. Standard recovery campaign yields an expected ₹12,000 (91% confidence).";
     action = { label: "Launch Reactivation Campaign", page: "opportunity-radar" };
   } else if (lowerQuery.includes("fail") || lowerQuery.includes("why")) {
-    replyText = "Vega: The recent win-back initiatives suffered high cart abandonment on messaging checkout screens. Competitor benchmarks show fashion brands see 23% higher conversions by moving form steps directly inside WhatsApp replies.";
+    replyText = "Khoj: The recent win-back initiatives suffered high cart abandonment on messaging checkout screens. Competitor benchmarks show fashion brands see 23% higher conversions by moving form steps directly inside WhatsApp replies.";
     action = { label: "View Competitor Benchmarks", page: "competitor-intel" };
   } else if (lowerQuery.includes("opportunity") || lowerQuery.includes("biggest")) {
-    replyText = "Luna: Growth Radar has detected ₹24,500 in hidden revenue. This includes 17 abandoned checkouts on Instagram DMs and 12 inactive VIP customers. Let's deploy Luna recovery nodes.";
+    replyText = "Pragya: Growth Radar has detected ₹24,500 in hidden revenue. This includes 17 abandoned checkouts on Instagram DMs and 12 inactive VIP customers. Let's deploy Pragya recovery nodes.";
     action = { label: "Open Opportunity Radar", page: "opportunity-radar" };
   } else if (lowerQuery.includes("whatsapp") || lowerQuery.includes("create")) {
-    replyText = "Nova: I have pre-drafted an automated WhatsApp creative drop targeting repeat buyers based on your Fashion DNA profile. Let's customize it in the Growth Engine.";
+    replyText = "Rachna: I have pre-drafted an automated WhatsApp creative drop targeting repeat buyers based on your Fashion DNA profile. Let's customize it in the Growth Engine.";
     action = { label: "Go to Growth Engine", page: "growth-engine" };
   } else if (lowerQuery.includes("revenue") || lowerQuery.includes("predict")) {
-    replyText = "Vega: Next month's predicted baseline is ₹78,000 (87% confidence). Launching a Diwali collections promotion (14 days away) is projected to add an extra ₹45,000 in revenue.";
+    replyText = "Khoj: Next month's predicted baseline is ₹78,000 (87% confidence). Launching a Diwali collections promotion (14 days away) is projected to add an extra ₹45,000 in revenue.";
     action = { label: "Open Future Simulator", page: "future-simulator" };
   }
   
@@ -267,7 +267,7 @@ function getMockCopilotResponse(message: string) {
 
 export async function generateBrandDNA(businessType: string, growthStyle: string) {
   try {
-    const sys = `You are the ORBIT Brand Intelligence Engine. You evaluate brand definitions and output critical metrics.
+    const sys = `You are the Manthan Brand Intelligence Engine. You evaluate brand definitions and output critical metrics.
 Format your response as a single valid JSON object matching this schema exactly:
 {
   "businessType": "string",
@@ -290,7 +290,7 @@ Only return the raw JSON.`;
 
 export async function generateOpportunityRadar(context: any) {
   try {
-    const sys = `You are the ORBIT Opportunity Detection Engine. Analyze the customer segments, campaign performance, and analytics metrics to identify high-yield growth opportunities.
+    const sys = `You are the Manthan Opportunity Detection Engine. Analyze the customer segments, campaign performance, and analytics metrics to identify high-yield growth opportunities.
 Format your response as a single valid JSON object matching this schema exactly:
 {
   "totalPotentialRevenue": 45600,
@@ -330,42 +330,42 @@ Only return the raw JSON object. Do not include markdown code block formatting.`
 
 function getMockMissionPlan(goal: string) {
   let segment = "Loyalists";
-  let explPolaris = "Polaris identified 24 repeat customers in your loyal buyer category.";
+  let explPolaris = "Drishti identified 24 repeat customers in your loyal buyer category.";
   if (goal.toLowerCase().includes("churn") || goal.toLowerCase().includes("risk")) {
     segment = "Slipping Away";
-    explPolaris = "Polaris detected 18 high-risk accounts showing severe retention drop-offs.";
+    explPolaris = "Drishti detected 18 high-risk accounts showing severe retention drop-offs.";
   } else if (goal.toLowerCase().includes("recover") || goal.toLowerCase().includes("inactive")) {
     segment = "High-Value Inactive";
-    explPolaris = "Polaris isolated 14 top-spending accounts who have not ordered in the past 60 days.";
+    explPolaris = "Drishti isolated 14 top-spending accounts who have not ordered in the past 60 days.";
   }
 
   return {
-    Polaris: {
+    Drishti: {
       segment,
       explanation: explPolaris
     },
-    Luna: {
+    Pragya: {
       recoverableRevenue: 12500,
       inactiveCustomers: 12,
       abandonedLeads: 8,
       recoveryConfidence: 94,
-      explanation: "Luna scanned checkout logs and found slippage in high-ltv billing loops."
+      explanation: "Pragya scanned checkout logs and found slippage in high-ltv billing loops."
     },
-    Vega: {
+    Khoj: {
       predictedRoi: 4.8,
       predictedRevenue: 38500,
-      explanation: "Vega calculated target reactivation coefficients. Expecting 4.8x ROI yield."
+      explanation: "Khoj calculated target reactivation coefficients. Expecting 4.8x ROI yield."
     },
-    Nova: {
+    Rachna: {
       Email: {
         subject: `Early Access Pre-sale Launch: Custom Upgrades`,
-        body: `Hi {{name}},\n\nGet exclusive priority access to the latest collections at ORBIT.\n\nWarm regards,\nORBIT Operations`
+        body: `Hi {{name}},\n\nGet exclusive priority access to the latest collections at Manthan.\n\nWarm regards,\nORBIT Operations`
       },
       WhatsApp: {
         body: `👋 Hi *{{name}}*! Get pre-sale access to our top updates. Free shipping today. Reply *YES* to claim.`
       },
       SMS: {
-        body: `ORBIT: Hi {{name}}, early access pre-sale is live! Shop now at https://orbit.io`
+        body: `Manthan: Hi {{name}}, early access pre-sale is live! Shop now at https://manthan.ai`
       },
       RCS: {
         title: "Priority Offer Access",
@@ -373,9 +373,9 @@ function getMockMissionPlan(goal: string) {
         mediaUrl: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=400&q=80"
       }
     },
-    Atlas: {
+    Saarthi: {
       selectedChannel: "WhatsApp",
-      explanation: "Atlas selected WhatsApp as the channel with highest target engagement preference."
+      explanation: "Saarthi selected WhatsApp as the channel with highest target engagement preference."
     },
     recommendation: {
       summary: "Deploy a high-frequency WhatsApp win-back loop targeting VIP spenders.",
@@ -416,11 +416,11 @@ function getMockBoardroomDiscussion(goal: string, plan: any) {
   const p = plan || getMockMissionPlan(goal);
   return {
     messages: [
-      { agent: "Polaris", text: `I have segmented ${p.Polaris?.segment || "Loyalists"} cohort as the ideal targets. ${p.Polaris?.explanation || ""}` },
-      { agent: "Luna", text: `I support this focus. ${p.Luna?.explanation || "Detected slippage of recovery nodes."} Est Revenue: ₹${(p.Luna?.recoverableRevenue || 12000).toLocaleString()}` },
-      { agent: "Vega", text: `Target ROI looks highly viable. Reactivation forecasts indicate ${p.Vega?.predictedRoi || 4.2}x returns yield. Expected Revenue: ₹${(p.Vega?.predictedRevenue || 35000).toLocaleString()}.` },
-      { agent: "Nova", text: `I have compiled responsive marketing assets for ${p.Atlas?.selectedChannel || "WhatsApp"} templates. Personalization handles are armed.` },
-      { agent: "Atlas", text: `Gateways verified. Selected channel: ${p.Atlas?.selectedChannel || "WhatsApp"}. Dispatch buffers are ready for deployment.` }
+      { agent: "Drishti", text: `I have segmented ${p.Drishti?.segment || "Loyalists"} cohort as the ideal targets. ${p.Drishti?.explanation || ""}` },
+      { agent: "Pragya", text: `I support this focus. ${p.Pragya?.explanation || "Detected slippage of recovery nodes."} Est Revenue: ₹${(p.Pragya?.recoverableRevenue || 12000).toLocaleString()}` },
+      { agent: "Khoj", text: `Target ROI looks highly viable. Reactivation forecasts indicate ${p.Khoj?.predictedRoi || 4.2}x returns yield. Expected Revenue: ₹${(p.Khoj?.predictedRevenue || 35000).toLocaleString()}.` },
+      { agent: "Rachna", text: `I have compiled responsive marketing assets for ${p.Saarthi?.selectedChannel || "WhatsApp"} templates. Personalization handles are armed.` },
+      { agent: "Saarthi", text: `Gateways verified. Selected channel: ${p.Saarthi?.selectedChannel || "WhatsApp"}. Dispatch buffers are ready for deployment.` }
     ]
   };
 }
@@ -455,7 +455,7 @@ function getMockOpportunitiesPayload() {
         audienceSize: 17,
         priorityScore: 95,
         recommendedAction: "Recover Lost Revenue",
-        reasoning: "Luna detected a 34% increase in abandoned checkout events over the last 7 days. Customers who abandoned carts have historically converted at 28% when contacted via WhatsApp within 24 hours.",
+        reasoning: "Pragya detected a 34% increase in abandoned checkout events over the last 7 days. Customers who abandoned carts have historically converted at 28% when contacted via WhatsApp within 24 hours.",
         color: "Yellow",
         angle: 45,
         distance: 65

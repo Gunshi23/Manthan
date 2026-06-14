@@ -260,11 +260,11 @@ export const BusinessProfileSetup: React.FC<BusinessProfileSetupProps> = ({ onSe
 
     const steps = [
       "Analyzing Brand DNA parameters...",
-      "Polaris studying customer cohort signals...",
-      "Luna scanning database growth opportunities...",
-      "Vega forecasting retention & conversion potential...",
-      "Nova identifying personalization engagement patterns...",
-      "Atlas building custom execution & campaign profiles...",
+      "Drishti studying customer cohort signals...",
+      "Pragya scanning database growth opportunities...",
+      "Khoj forecasting retention & conversion potential...",
+      "Rachna identifying personalization engagement patterns...",
+      "Saarthi building custom execution & campaign profiles...",
       "Calibrating system boardroom models to business node...",
       "Brand DNA successfully decoded. Report generated."
     ];
@@ -283,7 +283,7 @@ export const BusinessProfileSetup: React.FC<BusinessProfileSetupProps> = ({ onSe
     let geminiReport: any = null;
     if (config.geminiKey) {
       try {
-        const systemPrompt = `You are the orbit.ai AI Organization Decoded Node. Analyze the user's business onboarding profile and generate a custom Brand DNA report.
+        const systemPrompt = `You are the Manthan.ai AI Organization Decoded Node. Analyze the user's business onboarding profile and generate a custom Brand DNA report.
 Format your response as a valid JSON object matching this schema exactly:
 {
   "potRevenue": "₹X,XX,XXX" (Estimated recoverable revenue from leakages, e.g. "₹34,500"),
@@ -297,7 +297,7 @@ Format your response as a valid JSON object matching this schema exactly:
   "healthScore": number (overall database/brand health rating from 1 to 100, e.g. 88),
   "opportunityScore": number (opportunity score from 1 to 100, e.g. 91),
   "recommendedMissionName": "string" (Recommended next campaign mission goal, e.g. "Recover Lost Revenue"),
-  "recommendedMissionDescription": "string" (Brief summary explaining the mission goal and channel, e.g. "Luna has detected high-affinity checkout leaks...")
+  "recommendedMissionDescription": "string" (Brief summary explaining the mission goal and channel, e.g. "Pragya has detected high-affinity checkout leaks...")
 }
 Return ONLY the raw JSON. Do not write markdown tags or extra explanations.`;
 
@@ -400,13 +400,13 @@ Style: "${growthPersonality}"`;
         healthScore: apiReportData.healthScore || 85,
         opportunityScore: apiReportData.opportunityScore || 88,
         recommendedMissionName: apiReportData.recommendedMissionName || "Recover Lost Revenue",
-        recommendedMissionDescription: apiReportData.recommendedMissionDescription || `Luna has detected high-affinity checkout leaks. Launching this mission dispatches automated templates to recover up to ${apiReportData.potRevenue || "₹24,500"} in dormant cart assets.`
+        recommendedMissionDescription: apiReportData.recommendedMissionDescription || `Pragya has detected high-affinity checkout leaks. Launching this mission dispatches automated templates to recover up to ${apiReportData.potRevenue || "₹24,500"} in dormant cart assets.`
       };
     }
     return {
       ...reportData,
       recommendedMissionName: "Recover Lost Revenue",
-      recommendedMissionDescription: `Luna has detected high-affinity checkout leaks. Launching this mission dispatches automated ${businessType === "Fashion & Apparel" ? "RCS Cards" : "WhatsApp"} templates to recover up to ${reportData.potRevenue} in dormant cart assets.`
+      recommendedMissionDescription: `Pragya has detected high-affinity checkout leaks. Launching this mission dispatches automated ${businessType === "Fashion & Apparel" ? "RCS Cards" : "WhatsApp"} templates to recover up to ${reportData.potRevenue} in dormant cart assets.`
     };
   }, [apiReportData, reportData, businessType]);
 
@@ -434,13 +434,13 @@ Style: "${growthPersonality}"`;
       <div className={`relative min-h-screen space-grid flex flex-col items-center justify-center p-4 md:p-6 overflow-y-auto transition-colors duration-300 ${isLight ? "bg-gray-50 text-gray-900" : "bg-[#050816] text-white"}`}>
         <Background />
         
-        <div className="relative z-10 w-full max-w-xl orbit-panel p-6 sm:p-8 space-y-6 animate-fade-in-up">
+        <div className="relative z-10 w-full max-w-xl Manthan-panel p-6 sm:p-8 space-y-6 animate-fade-in-up">
           <div className="flex items-center justify-between border-b border-gray-950/60 pb-4">
             <div className="flex items-center gap-2">
-              <Loader2 size={16} className="text-orbit-purple animate-spin" />
-              <span className="font-space text-xs font-bold uppercase tracking-wider text-white">orbit.ai Analyzer Pipeline</span>
+              <Loader2 size={16} className="text-Manthan-purple animate-spin" />
+              <span className="font-space text-xs font-bold uppercase tracking-wider text-white">Manthan.ai Analyzer Pipeline</span>
             </div>
-            <span className="font-mono text-xs text-orbit-purple font-bold">{progressPct}% Complete</span>
+            <span className="font-mono text-xs text-Manthan-purple font-bold">{progressPct}% Complete</span>
           </div>
 
           {/* Stepper items */}
@@ -452,15 +452,15 @@ Style: "${growthPersonality}"`;
                 <div key={idx} className={`flex items-start gap-3.5 transition-all duration-300 ${isCompleted ? "opacity-50" : isActive ? "opacity-100 scale-[1.01]" : "opacity-25"}`}>
                   <div className={`w-5 h-5 rounded-md flex items-center justify-center border text-[9px] shrink-0 ${
                     isCompleted 
-                      ? "bg-orbit-success/15 border-orbit-success/40 text-orbit-success" 
+                      ? "bg-Manthan-success/15 border-Manthan-success/40 text-Manthan-success" 
                       : isActive 
-                      ? "bg-orbit-purple/20 border-orbit-purple/60 text-orbit-purple font-bold animate-pulse" 
+                      ? "bg-Manthan-purple/20 border-Manthan-purple/60 text-Manthan-purple font-bold animate-pulse" 
                       : "bg-gray-900 border-gray-800 text-transparent"
                   }`}>
                     {isCompleted ? <Check size={11} strokeWidth={3} /> : idx + 1}
                   </div>
                   <div>
-                    <span className={`block font-bold ${isActive ? "text-orbit-purple" : "text-white"}`}>{step.label}</span>
+                    <span className={`block font-bold ${isActive ? "text-Manthan-purple" : "text-white"}`}>{step.label}</span>
                     <span className="text-[10px] text-gray-550 leading-tight block mt-0.5">{step.desc}</span>
                   </div>
                 </div>
@@ -471,7 +471,7 @@ Style: "${growthPersonality}"`;
           {/* Progress bar */}
           <div className="w-full bg-gray-950 rounded-full h-1.5 border border-gray-900 overflow-hidden">
             <div 
-              className="h-full bg-gradient-to-r from-orbit-blue to-orbit-purple transition-all duration-300 ease-out" 
+              className="h-full bg-gradient-to-r from-Manthan-blue to-Manthan-purple transition-all duration-300 ease-out" 
               style={{ width: `${progressPct}%` }}
             />
           </div>
@@ -489,11 +489,11 @@ Style: "${growthPersonality}"`;
           
           {/* Title and Header */}
           <div className="text-center space-y-3">
-            <span className={`font-mono text-[9px] tracking-[0.25em] uppercase border px-3.5 py-1 rounded-full ${isLight ? "border-blue-500/30 bg-blue-500/5 text-blue-600 font-bold" : "border-orbit-blue/30 bg-orbit-blue/5 text-orbit-blue"}`}>
+            <span className={`font-mono text-[9px] tracking-[0.25em] uppercase border px-3.5 py-1 rounded-full ${isLight ? "border-blue-500/30 bg-blue-500/5 text-blue-600 font-bold" : "border-Manthan-blue/30 bg-Manthan-blue/5 text-Manthan-blue"}`}>
               Smart Onboarding System
             </span>
             <h1 className="text-3xl md:text-5xl font-bold font-space tracking-tight">
-              Welcome to orbit.ai
+              Welcome to Manthan.ai
             </h1>
             <p className="text-xs md:text-sm text-gray-400 max-w-lg mx-auto leading-relaxed font-mono">
               Choose how you would like to start your AI Business Operating System.
@@ -504,10 +504,10 @@ Style: "${growthPersonality}"`;
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full mt-2">
             
             {/* Option 1: Explore Demo Workspace */}
-            <div className="orbit-panel p-6 flex flex-col hover:border-orbit-blue/40 transition-colors duration-300">
+            <div className="Manthan-panel p-6 flex flex-col hover:border-Manthan-blue/40 transition-colors duration-300">
               <div className="flex items-center gap-3 mb-2">
-                <div className="w-10 h-10 rounded-xl bg-orbit-blue/15 border border-orbit-blue/30 flex items-center justify-center shrink-0">
-                  <Play size={18} className="text-orbit-blue" />
+                <div className="w-10 h-10 rounded-xl bg-Manthan-blue/15 border border-Manthan-blue/30 flex items-center justify-center shrink-0">
+                  <Play size={18} className="text-Manthan-blue" />
                 </div>
                 <div>
                   <span className="font-space text-sm font-bold text-white block">Explore Demo Workspace</span>
@@ -515,7 +515,7 @@ Style: "${growthPersonality}"`;
                 </div>
               </div>
               <p className="font-mono text-[10.5px] text-gray-400 leading-relaxed mb-6">
-                Experience ORBIT using realistic business datasets. Instantly calibrate dashboards, personas, boardroom debates, and growth engines.
+                Experience Manthan using realistic business datasets. Instantly calibrate dashboards, personas, boardroom debates, and growth engines.
               </p>
 
               {/* Quick Demo Workspace Selection Grid */}
@@ -550,10 +550,10 @@ Style: "${growthPersonality}"`;
             </div>
 
             {/* Option 2: Upload Business Data */}
-            <div className="orbit-panel p-6 flex flex-col hover:border-orbit-purple/40 transition-colors duration-300">
+            <div className="Manthan-panel p-6 flex flex-col hover:border-Manthan-purple/40 transition-colors duration-300">
               <div className="flex items-center gap-3 mb-2">
-                <div className="w-10 h-10 rounded-xl bg-orbit-purple/15 border border-orbit-purple/30 flex items-center justify-center shrink-0">
-                  <Upload size={18} className="text-orbit-purple" />
+                <div className="w-10 h-10 rounded-xl bg-Manthan-purple/15 border border-Manthan-purple/30 flex items-center justify-center shrink-0">
+                  <Upload size={18} className="text-Manthan-purple" />
                 </div>
                 <div>
                   <span className="font-space text-sm font-bold text-white block">Upload Business Data</span>
@@ -561,14 +561,14 @@ Style: "${growthPersonality}"`;
                 </div>
               </div>
               <p className="font-mono text-[10.5px] text-gray-400 leading-relaxed mb-6">
-                Upload your own CSV, XLSX or JSON files. ORBIT will dynamically parse your database, detect your industry, and spin up an active operating instance.
+                Upload your own CSV, XLSX or JSON files. Manthan will dynamically parse your database, detect your industry, and spin up an active operating instance.
               </p>
 
               {/* File Dropzone */}
               <div
                 className={`border-2 border-dashed rounded-xl p-5 flex flex-col items-center justify-center gap-3 text-center transition-all cursor-pointer flex-1 min-h-[140px] relative ${
                   dragOver 
-                    ? "border-orbit-purple bg-orbit-purple/10 shadow-orbit-glow-purple" 
+                    ? "border-Manthan-purple bg-Manthan-purple/10 shadow-Manthan-glow-purple" 
                     : "border-gray-900 bg-gray-950/10 hover:border-gray-800 hover:bg-gray-900/10"
                 }`}
                 onDragOver={handleDragOver}
@@ -583,7 +583,7 @@ Style: "${growthPersonality}"`;
                   className="hidden"
                   onChange={e => { const f = e.target.files?.[0]; if (f) handleFileSelect(f); }}
                 />
-                <Upload size={18} className="text-orbit-purple animate-pulse" />
+                <Upload size={18} className="text-Manthan-purple animate-pulse" />
                 <div>
                   <span className="font-mono text-[10px] text-white block font-bold">Drop files here or click to browse</span>
                   <span className="font-mono text-[8px] text-gray-550 block mt-1">Supports CSV, XLSX, JSON · Max 10 MB</span>
@@ -648,7 +648,7 @@ Style: "${growthPersonality}"`;
               <span className={`font-mono text-[9px] tracking-[0.25em] uppercase border px-3.5 py-1 rounded-full ${
                 isLight 
                   ? "border-blue-500/30 bg-blue-500/5 text-blue-600 font-bold" 
-                  : "border-orbit-blue/30 bg-orbit-blue/5 text-orbit-blue"
+                  : "border-Manthan-blue/30 bg-Manthan-blue/5 text-Manthan-blue"
               }`}>
                 Brand DNA Initializer
               </span>
@@ -675,9 +675,9 @@ Style: "${growthPersonality}"`;
 
             {/* Step 1: Business Identity */}
             {step === 1 && (
-              <div className="w-full orbit-panel p-5 md:p-6 space-y-6 animate-fade-in-up">
+              <div className="w-full Manthan-panel p-5 md:p-6 space-y-6 animate-fade-in-up">
                 <div className="border-b border-gray-900 pb-3 flex items-center gap-2">
-                  <Cpu size={14} className="text-orbit-purple" />
+                  <Cpu size={14} className="text-Manthan-purple" />
                   <h3 className="font-space text-sm font-bold uppercase tracking-wider">Business profile credentials</h3>
                 </div>
 
@@ -689,7 +689,7 @@ Style: "${growthPersonality}"`;
                       value={brandName}
                       onChange={e => setBrandName(e.target.value)}
                       placeholder="e.g. Moonlight Kurtis"
-                      className="w-full bg-gray-950 border border-gray-900 rounded-xl px-4 py-3 text-xs font-mono text-white focus:outline-none focus:border-orbit-blue/40"
+                      className="w-full bg-gray-950 border border-gray-900 rounded-xl px-4 py-3 text-xs font-mono text-white focus:outline-none focus:border-Manthan-blue/40"
                     />
                   </div>
 
@@ -700,7 +700,7 @@ Style: "${growthPersonality}"`;
                       <select
                         value={businessType}
                         onChange={e => setBusinessType(e.target.value as BusinessType)}
-                        className="w-full bg-gray-950 border border-gray-900 rounded-xl p-3 font-mono text-[10px] text-white focus:outline-none focus:border-orbit-blue/40"
+                        className="w-full bg-gray-950 border border-gray-900 rounded-xl p-3 font-mono text-[10px] text-white focus:outline-none focus:border-Manthan-blue/40"
                       >
                         <option value="Fashion & Apparel">Fashion & Apparel</option>
                         <option value="Beauty & Skincare">Beauty & Skincare</option>
@@ -718,7 +718,7 @@ Style: "${growthPersonality}"`;
                       <select
                         value={salesChannel}
                         onChange={e => setSalesChannel(e.target.value as SalesChannel)}
-                        className="w-full bg-gray-950 border border-gray-900 rounded-xl p-3 font-mono text-[10px] text-white focus:outline-none focus:border-orbit-purple/40"
+                        className="w-full bg-gray-950 border border-gray-900 rounded-xl p-3 font-mono text-[10px] text-white focus:outline-none focus:border-Manthan-purple/40"
                       >
                         <option value="Instagram">Instagram</option>
                         <option value="WhatsApp">WhatsApp</option>
@@ -737,9 +737,9 @@ Style: "${growthPersonality}"`;
             {step === 2 && (
               <div className="w-full grid grid-cols-1 md:grid-cols-12 gap-6 animate-fade-in-up items-center">
                 {/* Left controls selectors */}
-                <div className="md:col-span-6 orbit-panel p-5 md:p-6 space-y-4">
+                <div className="md:col-span-6 Manthan-panel p-5 md:p-6 space-y-4">
                   <div className="border-b border-gray-900 pb-3 flex items-center gap-2">
-                    <Users size={14} className="text-orbit-blue" />
+                    <Users size={14} className="text-Manthan-blue" />
                     <h3 className="font-space text-sm font-bold uppercase tracking-wider">Customer Universe Scale</h3>
                   </div>
                   
@@ -753,13 +753,13 @@ Style: "${growthPersonality}"`;
                           onClick={() => setCustomerUniverse(univ)}
                           className={`w-full p-3 rounded-xl border text-left cursor-pointer transition-all ${
                             isSelected 
-                              ? "border-orbit-blue bg-orbit-blue/10 text-white font-bold" 
+                              ? "border-Manthan-blue bg-Manthan-blue/10 text-white font-bold" 
                               : "border-gray-900 bg-transparent text-gray-400 hover:border-gray-800"
                           }`}
                         >
                           <div className="flex items-center justify-between font-mono text-xs">
                             <span>{univ} customers</span>
-                            {isSelected && <div className="w-1.5 h-1.5 rounded-full bg-orbit-blue shadow-orbit-glow" />}
+                            {isSelected && <div className="w-1.5 h-1.5 rounded-full bg-Manthan-blue shadow-Manthan-glow" />}
                           </div>
                         </button>
                       );
@@ -768,12 +768,12 @@ Style: "${growthPersonality}"`;
                 </div>
 
                 {/* Right concentric galaxy visualization */}
-                <div className="md:col-span-6 flex flex-col items-center justify-center py-6 orbit-panel relative overflow-hidden min-h-[300px]">
-                  <div className="absolute inset-0 bg-orbit-glow-blue opacity-5 pointer-events-none" />
+                <div className="md:col-span-6 flex flex-col items-center justify-center py-6 Manthan-panel relative overflow-hidden min-h-[300px]">
+                  <div className="absolute inset-0 bg-Manthan-glow-blue opacity-5 pointer-events-none" />
                   
                   <div className="relative w-64 h-64 flex items-center justify-center">
-                    <div className="absolute inset-0 rounded-full border border-orbit-blue/5 animate-orbit-spin-slow" />
-                    <div className="absolute inset-6 rounded-full border border-dashed border-orbit-purple/10 animate-orbit-spin-reverse" />
+                    <div className="absolute inset-0 rounded-full border border-Manthan-blue/5 animate-Manthan-spin-slow" />
+                    <div className="absolute inset-6 rounded-full border border-dashed border-Manthan-purple/10 animate-Manthan-spin-reverse" />
                     
                     <svg 
                       className="absolute inset-0 w-full h-full pointer-events-none" 
@@ -794,7 +794,7 @@ Style: "${growthPersonality}"`;
                       </g>
                     </svg>
 
-                    <div className="absolute inset-20 rounded-full bg-[#070b20]/45 border border-orbit-blue/35 flex flex-col items-center justify-center shadow-orbit-glow font-mono">
+                    <div className="absolute inset-20 rounded-full bg-[#070b20]/45 border border-Manthan-blue/35 flex flex-col items-center justify-center shadow-Manthan-glow font-mono">
                       <span className="text-[7px] text-gray-500 uppercase tracking-widest block">Universe size</span>
                       <span className="text-sm font-bold text-white block mt-0.5">{customerUniverse}</span>
                     </div>
@@ -805,9 +805,9 @@ Style: "${growthPersonality}"`;
 
             {/* Step 3: Growth Objective */}
             {step === 3 && (
-              <div className="w-full orbit-panel p-5 md:p-6 space-y-4 animate-fade-in-up">
+              <div className="w-full Manthan-panel p-5 md:p-6 space-y-4 animate-fade-in-up">
                 <div className="border-b border-gray-900 pb-3 flex items-center gap-2">
-                  <Target size={14} className="text-orbit-success" />
+                  <Target size={14} className="text-Manthan-success" />
                   <h3 className="font-space text-sm font-bold uppercase tracking-wider">Primary growth target</h3>
                 </div>
 
@@ -828,7 +828,7 @@ Style: "${growthPersonality}"`;
                         onClick={() => setGrowthObjective(obj)}
                         className={`p-3.5 rounded-xl border text-left cursor-pointer transition-all ${
                           isSelected 
-                            ? "border-orbit-success bg-orbit-success/10 text-white font-bold" 
+                            ? "border-Manthan-success bg-Manthan-success/10 text-white font-bold" 
                             : "border-gray-900 bg-transparent text-gray-400 hover:border-gray-800"
                         }`}
                       >
@@ -852,8 +852,8 @@ Style: "${growthPersonality}"`;
                     { name: "Conservative", desc: "Focuses on budget management, maximum confidence thresholds, zero fatigue risk.", color: "border-blue-500/30" },
                     { name: "Balanced", desc: "Maintains optimal dispatch frequency, mid-tier ROI yields, structured campaigns.", color: "border-cyan-500/30" },
                     { name: "Aggressive", desc: "High frequency push notifications, massive conversions focus, higher churn risks.", color: "border-red-500/30" },
-                    { name: "Customer First", desc: "Maintains high personalization values, filters opt-outs, shields loyal buyers.", color: "border-orbit-purple/40 shadow-orbit-glow-purple" },
-                    { name: "Autopilot", desc: "Fully autonomous dispatch triggers. Agents execute win-backs and promotions automatically.", color: "border-orbit-success/30" }
+                    { name: "Customer First", desc: "Maintains high personalization values, filters opt-outs, shields loyal buyers.", color: "border-Manthan-purple/40 shadow-Manthan-glow-purple" },
+                    { name: "Autopilot", desc: "Fully autonomous dispatch triggers. Agents execute win-backs and promotions automatically.", color: "border-Manthan-success/30" }
                   ] as { name: GrowthPersonality; desc: string; color: string }[]).map((card) => {
                     const isSelected = growthPersonality === card.name;
                     return (
@@ -868,7 +868,7 @@ Style: "${growthPersonality}"`;
                       >
                         <div className="flex items-center justify-between w-full">
                           <span className="font-space text-xs font-bold text-white">{card.name}</span>
-                          {isSelected && <CheckCircle2 size={10} className="text-orbit-purple" />}
+                          {isSelected && <CheckCircle2 size={10} className="text-Manthan-purple" />}
                         </div>
                         <p className="font-mono text-[8.5px] leading-relaxed text-gray-550 mt-2">{card.desc}</p>
                       </button>
@@ -889,7 +889,7 @@ Style: "${growthPersonality}"`;
               
               <button
                 onClick={nextStep}
-                className="px-6 py-3.5 rounded-xl bg-gradient-to-r from-orbit-blue to-orbit-purple text-white font-mono text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5 hover:opacity-95 active:scale-95 duration-200 cursor-pointer shadow-orbit-glow"
+                className="px-6 py-3.5 rounded-xl bg-gradient-to-r from-Manthan-blue to-Manthan-purple text-white font-mono text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5 hover:opacity-95 active:scale-95 duration-200 cursor-pointer shadow-Manthan-glow"
               >
                 <span>Continue</span>
                 <ArrowRight size={12} />
@@ -906,19 +906,19 @@ Style: "${growthPersonality}"`;
               /* ════════════════════════════════════════
                   AI ANALYSIS TELEMETRY LOADER
               ════════════════════════════════════════ */
-              <div className="relative w-full max-w-lg bg-gray-900/85 backdrop-blur-md border border-gray-850 rounded-2xl p-6 sm:p-8 shadow-orbit-glow flex flex-col space-y-6 animate-pulse-slow">
+              <div className="relative w-full max-w-lg bg-gray-900/85 backdrop-blur-md border border-gray-850 rounded-2xl p-6 sm:p-8 shadow-Manthan-glow flex flex-col space-y-6 animate-pulse-slow">
                 <div className="flex items-center justify-between border-b border-gray-800 pb-4">
                   <div className="flex items-center gap-3">
-                    <Loader2 size={16} className="text-orbit-purple animate-spin" />
+                    <Loader2 size={16} className="text-Manthan-purple animate-spin" />
                     <span className="font-mono text-xs text-gray-400 uppercase tracking-widest">Decoding Brand DNA Sockets</span>
                   </div>
-                  <span className="font-mono text-xs text-orbit-purple font-bold tabular-nums">{analysisProgress}%</span>
+                  <span className="font-mono text-xs text-Manthan-purple font-bold tabular-nums">{analysisProgress}%</span>
                 </div>
 
                 <div className="font-mono text-[10px] space-y-2.5 h-52 overflow-y-auto text-green-400 pr-2 scrollbar-thin">
                   {calibLogs.map((log, idx) => (
                     <div key={idx} className="flex gap-2 animate-fade-in-up">
-                      <span className="text-orbit-purple font-bold">&gt;</span>
+                      <span className="text-Manthan-purple font-bold">&gt;</span>
                       <span>{log}</span>
                     </div>
                   ))}
@@ -926,7 +926,7 @@ Style: "${growthPersonality}"`;
 
                 <div className="w-full h-1 bg-gray-950 rounded-full overflow-hidden">
                   <div 
-                    className="h-full bg-gradient-to-r from-orbit-blue to-orbit-purple rounded-full transition-all duration-300"
+                    className="h-full bg-gradient-to-r from-Manthan-blue to-Manthan-purple rounded-full transition-all duration-300"
                     style={{ width: `${analysisProgress}%` }}
                   />
                 </div>
@@ -944,14 +944,14 @@ Style: "${growthPersonality}"`;
                 
                 {/* Header status bar */}
                 <div className="text-center space-y-2 mb-2">
-                  <span className="font-mono text-[9px] text-orbit-success border border-orbit-success/30 px-3.5 py-1 rounded-full bg-orbit-success/5 uppercase font-bold tracking-widest">
+                  <span className="font-mono text-[9px] text-Manthan-success border border-Manthan-success/30 px-3.5 py-1 rounded-full bg-Manthan-success/5 uppercase font-bold tracking-widest">
                     Your Brand DNA Has Been Decoded
                   </span>
                   <h1 className="text-2xl md:text-3xl font-bold font-space tracking-tight">
                     Intelligence Briefing Profile
                   </h1>
                   <p className="text-[11px] text-gray-400 max-w-md mx-auto">
-                    ORBIT is now calibrated and personalized to your business. Let's inspect your growth assets.
+                    Manthan is now calibrated and personalized to your business. Let's inspect your growth assets.
                   </p>
                 </div>
 
@@ -959,7 +959,7 @@ Style: "${growthPersonality}"`;
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                   
                   {/* COLUMN 1: Brand DNA Report */}
-                  <div className="orbit-panel p-5 flex flex-col justify-between min-h-[300px]">
+                  <div className="Manthan-panel p-5 flex flex-col justify-between min-h-[300px]">
                     <div className="border-b border-gray-900 pb-3">
                       <span className="font-space text-xs font-bold uppercase tracking-wider text-white">Brand DNA Details</span>
                     </div>
@@ -992,18 +992,18 @@ Style: "${growthPersonality}"`;
                       
                       <div className="border-t border-gray-900/60 pt-3 flex items-center justify-between">
                         <div>
-                          <span className="text-gray-550 block uppercase text-[8px]">Orbit health rating</span>
-                          <span className="text-xs font-bold text-orbit-success">{activeReport.healthScore}/100</span>
+                          <span className="text-gray-550 block uppercase text-[8px]">Manthan health rating</span>
+                          <span className="text-xs font-bold text-Manthan-success">{activeReport.healthScore}/100</span>
                         </div>
                         <div className="w-16 h-1 bg-gray-950 rounded-full overflow-hidden shrink-0">
-                          <div className="h-full bg-orbit-success" style={{ width: `${activeReport.healthScore}%` }} />
+                          <div className="h-full bg-Manthan-success" style={{ width: `${activeReport.healthScore}%` }} />
                         </div>
                       </div>
                     </div>
                   </div>
 
                   {/* COLUMN 2: AI Insights checklist */}
-                  <div className="orbit-panel p-5 flex flex-col min-h-[300px]">
+                  <div className="Manthan-panel p-5 flex flex-col min-h-[300px]">
                     <div className="border-b border-gray-900 pb-3 mb-4">
                       <span className="font-space text-xs font-bold uppercase tracking-wider text-white">Targeted AI Insights</span>
                     </div>
@@ -1023,11 +1023,11 @@ Style: "${growthPersonality}"`;
                       </div>
                       <div className="flex justify-between border-b border-gray-900/40 pb-1.5">
                         <span>Recommended Channel:</span>
-                        <span className="text-orbit-purple font-bold uppercase">{activeReport.recommendedChannel}</span>
+                        <span className="text-Manthan-purple font-bold uppercase">{activeReport.recommendedChannel}</span>
                       </div>
                       <div className="flex justify-between border-b border-gray-900/40 pb-1.5">
                         <span>Predicted Growth Potential:</span>
-                        <span className="text-orbit-success font-bold uppercase">High</span>
+                        <span className="text-Manthan-success font-bold uppercase">High</span>
                       </div>
                       <div className="flex justify-between">
                         <span>Campaign Risk Level:</span>
@@ -1036,8 +1036,8 @@ Style: "${growthPersonality}"`;
                     </div>
                   </div>
 
-                  {/* COLUMN 3: Growth Opportunity Radar (Luna) */}
-                  <div className="orbit-panel p-5 flex flex-col justify-between min-h-[300px]">
+                  {/* COLUMN 3: Growth Opportunity Radar (Pragya) */}
+                  <div className="Manthan-panel p-5 flex flex-col justify-between min-h-[300px]">
                     <div className="border-b border-gray-900 pb-3 flex items-center gap-1">
                       <Activity size={12} className="text-pink-400" />
                       <span className="font-space text-xs font-bold uppercase tracking-wider text-white">Growth Opportunity Radar</span>
@@ -1066,15 +1066,15 @@ Style: "${growthPersonality}"`;
                         <span className="font-space text-sm font-bold text-pink-400">{activeReport.opportunityScore}/100</span>
                       </div>
                     </div>
-                    <span className="font-mono text-[7px] text-gray-655 uppercase tracking-widest text-center mt-2 block">Powered by Luna Agent</span>
+                    <span className="font-mono text-[7px] text-gray-655 uppercase tracking-widest text-center mt-2 block">Powered by Pragya Agent</span>
                   </div>
 
                 </div>
 
                 {/* BOTTOM: AI Recommended Launch Mission */}
-                <div className="orbit-panel p-5 grid grid-cols-1 md:grid-cols-3 gap-6 items-center border border-orbit-purple/20 bg-orbit-purple/5">
+                <div className="Manthan-panel p-5 grid grid-cols-1 md:grid-cols-3 gap-6 items-center border border-Manthan-purple/20 bg-Manthan-purple/5">
                   <div className="md:col-span-2 space-y-2">
-                    <span className="font-mono text-[8px] text-orbit-purple border border-orbit-purple/30 bg-orbit-purple/5 px-2 py-0.5 rounded-full uppercase font-bold tracking-wider">
+                    <span className="font-mono text-[8px] text-Manthan-purple border border-Manthan-purple/30 bg-Manthan-purple/5 px-2 py-0.5 rounded-full uppercase font-bold tracking-wider">
                       Recommended Next Mission
                     </span>
                     <h3 className="font-space text-lg font-bold text-white uppercase tracking-tight">{activeReport.recommendedMissionName}</h3>
@@ -1087,7 +1087,7 @@ Style: "${growthPersonality}"`;
                     <div className="font-mono text-[10px] space-y-1">
                       <div className="flex justify-between md:justify-end gap-4">
                         <span className="text-gray-555">Expected Yield:</span>
-                        <span className="text-orbit-success font-bold">{activeReport.expectedMissionRevenue}</span>
+                        <span className="text-Manthan-success font-bold">{activeReport.expectedMissionRevenue}</span>
                       </div>
                       <div className="flex justify-between md:justify-end gap-4">
                         <span className="text-gray-555">Confidence Score:</span>
@@ -1104,7 +1104,7 @@ Style: "${growthPersonality}"`;
                       </button>
                       <button
                         onClick={() => handleLaunch(activeReport.recommendedMissionName)}
-                        className="px-5 py-3 bg-gradient-to-r from-orbit-blue to-orbit-purple text-white font-mono text-[9px] uppercase tracking-widest font-bold rounded-xl cursor-pointer shadow-orbit-glow hover:opacity-95 duration-150 transition-opacity"
+                        className="px-5 py-3 bg-gradient-to-r from-Manthan-blue to-Manthan-purple text-white font-mono text-[9px] uppercase tracking-widest font-bold rounded-xl cursor-pointer shadow-Manthan-glow hover:opacity-95 duration-150 transition-opacity"
                       >
                         Start Mission
                       </button>

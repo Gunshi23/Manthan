@@ -3,86 +3,86 @@
 @import "tailwindcss";
 
 :root {
-  --orbit-bg: #050816;
-  --orbit-card: #0F172A;
-  --orbit-elevated: #1E293B;
-  --orbit-border: rgba(255, 255, 255, 0.08);
-  --orbit-text-primary: #FFFFFF;
-  --orbit-text-secondary: #94a3b8;
-  --orbit-text-muted: #64748b;
+  --Manthan-bg: #050816;
+  --Manthan-card: #0F172A;
+  --Manthan-elevated: #1E293B;
+  --Manthan-border: rgba(255, 255, 255, 0.08);
+  --Manthan-text-primary: #FFFFFF;
+  --Manthan-text-secondary: #94a3b8;
+  --Manthan-text-muted: #64748b;
   
-  --orbit-gray-950: #050816;
-  --orbit-gray-900: #0F172A;
-  --orbit-gray-850: #162032;
-  --orbit-gray-800: #1E293B;
+  --Manthan-gray-950: #050816;
+  --Manthan-gray-900: #0F172A;
+  --Manthan-gray-850: #162032;
+  --Manthan-gray-800: #1E293B;
 }
 
 .light {
-  --orbit-bg: #F8FAFC;
-  --orbit-card: #FFFFFF;
-  --orbit-elevated: #FFFFFF;
-  --orbit-border: #E2E8F0;
-  --orbit-text-primary: #0F172A;
-  --orbit-text-secondary: #475569;
-  --orbit-text-muted: #64748B;
+  --Manthan-bg: #F8FAFC;
+  --Manthan-card: #FFFFFF;
+  --Manthan-elevated: #FFFFFF;
+  --Manthan-border: #E2E8F0;
+  --Manthan-text-primary: #0F172A;
+  --Manthan-text-secondary: #475569;
+  --Manthan-text-muted: #64748B;
   
-  --orbit-gray-950: #F8FAFC;
-  --orbit-gray-900: #FFFFFF;
-  --orbit-gray-850: #EFF6FF;
-  --orbit-gray-800: #E2E8F0;
+  --Manthan-gray-950: #F8FAFC;
+  --Manthan-gray-900: #FFFFFF;
+  --Manthan-gray-850: #EFF6FF;
+  --Manthan-gray-800: #E2E8F0;
 }
 
 @theme {
-  --color-orbit-bg: var(--orbit-bg);
-  --color-orbit-card: var(--orbit-card);
-  --color-orbit-elevated: var(--orbit-elevated);
-  --color-orbit-darkBorder: var(--orbit-border);
+  --color-Manthan-bg: var(--Manthan-bg);
+  --color-Manthan-card: var(--Manthan-card);
+  --color-Manthan-elevated: var(--Manthan-elevated);
+  --color-Manthan-darkBorder: var(--Manthan-border);
   
-  --color-gray-950: var(--orbit-gray-950);
-  --color-gray-900: var(--orbit-gray-900);
-  --color-gray-850: var(--orbit-gray-850);
-  --color-gray-800: var(--orbit-gray-800);
+  --color-gray-950: var(--Manthan-gray-950);
+  --color-gray-900: var(--Manthan-gray-900);
+  --color-gray-850: var(--Manthan-gray-850);
+  --color-gray-800: var(--Manthan-gray-800);
   
   /* Agent brand colors */
-  --color-orbit-blue: #3B82F6;
-  --color-orbit-purple: #8B5CF6;
-  --color-orbit-success: #22C55E;
-  --color-orbit-amber: #F59E0B;
-  --color-orbit-pink: #EC4899;
+  --color-Manthan-blue: #3B82F6;
+  --color-Manthan-purple: #8B5CF6;
+  --color-Manthan-success: #22C55E;
+  --color-Manthan-amber: #F59E0B;
+  --color-Manthan-pink: #EC4899;
 
   /* Agent aliases */
-  --color-agent-polaris: #3B82F6;
-  --color-agent-luna: #F59E0B;
-  --color-agent-vega: #8B5CF6;
-  --color-agent-nova: #EC4899;
-  --color-agent-atlas: #22C55E;
+  --color-agent-Drishti: #3B82F6;
+  --color-agent-Pragya: #F59E0B;
+  --color-agent-Khoj: #8B5CF6;
+  --color-agent-Rachna: #EC4899;
+  --color-agent-Saarthi: #22C55E;
   
-  --color-orbit-lightBg: #F9FAFB;
-  --color-orbit-lightCard: #FFFFFF;
-  --color-orbit-lightBorder: #E5E7EB;
-  --color-orbit-lightText: #111827;
+  --color-Manthan-lightBg: #F9FAFB;
+  --color-Manthan-lightCard: #FFFFFF;
+  --color-Manthan-lightBorder: #E5E7EB;
+  --color-Manthan-lightText: #111827;
   
   --font-family-space: 'Space Grotesk', sans-serif;
   --font-family-inter: Inter, sans-serif;
   --font-family-mono: 'JetBrains Mono', 'Courier New', monospace;
 
-  --animate-orbit-pulse: orbitPulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-  --animate-orbit-spin-slow: spin 30s linear infinite;
-  --animate-orbit-spin-reverse: spinReverse 20s linear infinite;
+  --animate-Manthan-pulse: orbitPulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  --animate-Manthan-spin-slow: spin 30s linear infinite;
+  --animate-Manthan-spin-reverse: spinReverse 20s linear infinite;
   --animate-fade-in-up: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   --animate-shimmer: shimmer 3s ease-in-out infinite;
 
   /* Stronger glow shadows */
-  --shadow-orbit-glow: 0 0 30px rgba(59, 130, 246, 0.35);
-  --shadow-orbit-glow-blue: 0 0 30px rgba(59, 130, 246, 0.35);
-  --shadow-orbit-glow-purple: 0 0 30px rgba(139, 92, 246, 0.35);
-  --shadow-orbit-glow-green: 0 0 30px rgba(34, 197, 94, 0.35);
-  --shadow-orbit-glow-pink: 0 0 30px rgba(236, 72, 153, 0.35);
-  --shadow-orbit-glow-amber: 0 0 30px rgba(245, 158, 11, 0.35);
-  --shadow-orbit-glow-inset: inset 0 0 20px rgba(59, 130, 246, 0.12);
+  --shadow-Manthan-glow: 0 0 30px rgba(59, 130, 246, 0.35);
+  --shadow-Manthan-glow-blue: 0 0 30px rgba(59, 130, 246, 0.35);
+  --shadow-Manthan-glow-purple: 0 0 30px rgba(139, 92, 246, 0.35);
+  --shadow-Manthan-glow-green: 0 0 30px rgba(34, 197, 94, 0.35);
+  --shadow-Manthan-glow-pink: 0 0 30px rgba(236, 72, 153, 0.35);
+  --shadow-Manthan-glow-amber: 0 0 30px rgba(245, 158, 11, 0.35);
+  --shadow-Manthan-glow-inset: inset 0 0 20px rgba(59, 130, 246, 0.12);
 
   /* Hero glow for dominant cards */
-  --shadow-orbit-glow-hero: 0 0 60px rgba(59, 130, 246, 0.4), 0 0 120px rgba(59, 130, 246, 0.15);
+  --shadow-Manthan-glow-hero: 0 0 60px rgba(59, 130, 246, 0.4), 0 0 120px rgba(59, 130, 246, 0.15);
 }
 
 @keyframes orbitPulse {
@@ -117,8 +117,8 @@
 
 @layer base {
   body {
-    background-color: var(--orbit-bg);
-    color: var(--orbit-text-primary);
+    background-color: var(--Manthan-bg);
+    color: var(--Manthan-text-primary);
     font-family: 'Inter', sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -167,18 +167,18 @@
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
 /* Standard panel — secondary surfaces */
-.orbit-panel {
+.Manthan-panel {
   @apply bg-[#0F172A]/90 backdrop-blur-md border border-[rgba(255,255,255,0.08)] rounded-xl transition-all duration-300;
 }
 
 /* Elevated panel — tertiary/primary cards */
-.orbit-panel-elevated {
+.Manthan-panel-elevated {
   @apply bg-[#1E293B]/95 backdrop-blur-md border border-[rgba(255,255,255,0.18)] rounded-xl transition-all duration-300;
   box-shadow: 0 4px 32px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.06);
 }
 
 /* Hero panel — dominant focal cards */
-.orbit-panel-hero {
+.Manthan-panel-hero {
   @apply backdrop-blur-md rounded-xl transition-all duration-300 border;
   background: linear-gradient(135deg, #0F172A 0%, #1E293B 100%);
   border-color: rgba(255,255,255,0.18);
@@ -186,18 +186,18 @@
 }
 
 /* Light theme overrides */
-.light .orbit-panel {
+.light .Manthan-panel {
   @apply bg-white border border-[#E2E8F0] rounded-2xl transition-all duration-300;
   box-shadow: 0 4px 12px rgba(15, 23, 42, 0.06);
 }
-.light .orbit-panel:hover {
+.light .Manthan-panel:hover {
   box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
 }
-.light .orbit-panel-elevated {
+.light .Manthan-panel-elevated {
   @apply bg-white border border-[#E2E8F0] rounded-2xl transition-all duration-300;
   box-shadow: 0 6px 16px rgba(15, 23, 42, 0.07);
 }
-.light .orbit-panel-hero {
+.light .Manthan-panel-hero {
   @apply bg-white border border-[#E2E8F0] rounded-2xl transition-all duration-300;
   box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
 }
@@ -253,36 +253,36 @@
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
 /* Ambient glow backgrounds — increased intensity */
-.bg-orbit-glow-blue {
+.bg-Manthan-glow-blue {
   background: radial-gradient(circle at center, rgba(59, 130, 246, 0.24) 0%, transparent 70%);
 }
-.bg-orbit-glow-purple {
+.bg-Manthan-glow-purple {
   background: radial-gradient(circle at center, rgba(139, 92, 246, 0.24) 0%, transparent 70%);
 }
-.bg-orbit-glow-green {
+.bg-Manthan-glow-green {
   background: radial-gradient(circle at center, rgba(34, 197, 94, 0.18) 0%, transparent 70%);
 }
-.bg-orbit-glow-amber {
+.bg-Manthan-glow-amber {
   background: radial-gradient(circle at center, rgba(245, 158, 11, 0.18) 0%, transparent 70%);
 }
-.bg-orbit-glow-pink {
+.bg-Manthan-glow-pink {
   background: radial-gradient(circle at center, rgba(236, 72, 153, 0.18) 0%, transparent 70%);
 }
 
 /* Strong glow overlays for hero elements */
-.bg-orbit-glow-blue-strong {
+.bg-Manthan-glow-blue-strong {
   background: radial-gradient(circle at center, rgba(59, 130, 246, 0.35) 0%, transparent 65%);
 }
-.bg-orbit-glow-purple-strong {
+.bg-Manthan-glow-purple-strong {
   background: radial-gradient(circle at center, rgba(139, 92, 246, 0.35) 0%, transparent 65%);
 }
-.bg-orbit-glow-green-strong {
+.bg-Manthan-glow-green-strong {
   background: radial-gradient(circle at center, rgba(34, 197, 94, 0.30) 0%, transparent 65%);
 }
-.bg-orbit-glow-amber-strong {
+.bg-Manthan-glow-amber-strong {
   background: radial-gradient(circle at center, rgba(245, 158, 11, 0.30) 0%, transparent 65%);
 }
-.bg-orbit-glow-pink-strong {
+.bg-Manthan-glow-pink-strong {
   background: radial-gradient(circle at center, rgba(236, 72, 153, 0.30) 0%, transparent 65%);
 }
 
@@ -347,16 +347,16 @@
 .light .scanlines {
   display: none !important;
 }
-.light .bg-orbit-glow-blue, 
-.light .bg-orbit-glow-purple, 
-.light .bg-orbit-glow-green, 
-.light .bg-orbit-glow-amber, 
-.light .bg-orbit-glow-pink,
-.light .bg-orbit-glow-blue-strong, 
-.light .bg-orbit-glow-purple-strong, 
-.light .bg-orbit-glow-green-strong, 
-.light .bg-orbit-glow-amber-strong, 
-.light .bg-orbit-glow-pink-strong {
+.light .bg-Manthan-glow-blue, 
+.light .bg-Manthan-glow-purple, 
+.light .bg-Manthan-glow-green, 
+.light .bg-Manthan-glow-amber, 
+.light .bg-Manthan-glow-pink,
+.light .bg-Manthan-glow-blue-strong, 
+.light .bg-Manthan-glow-purple-strong, 
+.light .bg-Manthan-glow-green-strong, 
+.light .bg-Manthan-glow-amber-strong, 
+.light .bg-Manthan-glow-pink-strong {
   background: transparent !important;
   box-shadow: none !important;
 }
@@ -483,13 +483,13 @@
 .animate-spin-slow {
   animation: spin 20s linear infinite;
 }
-.animate-orbit-spin-slow {
+.animate-Manthan-spin-slow {
   animation: spin 30s linear infinite;
 }
-.animate-orbit-spin-reverse {
+.animate-Manthan-spin-reverse {
   animation: spinReverse 20s linear infinite;
 }
-.animate-orbit-pulse {
+.animate-Manthan-pulse {
   animation: orbitPulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 .animate-shimmer {

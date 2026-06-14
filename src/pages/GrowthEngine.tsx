@@ -26,11 +26,11 @@ interface CampaignVariant {
 }
 
 interface MissionPlan {
-  Polaris: { segment: string; explanation: string; audienceSize: number };
-  Luna: { recoverableRevenue: number; inactiveCustomers: number; abandonedLeads: number; recoveryConfidence: number; explanation: string };
-  Vega: { predictedRoi: number; predictedRevenue: number; confidenceScore: number; explanation: string };
-  Nova: { Email: { subject: string; body: string }; WhatsApp: { body: string }; SMS: { body: string }; RCS: { title: string; body: string; mediaUrl: string } };
-  Atlas: { selectedChannel: string; explanation: string };
+  Drishti: { segment: string; explanation: string; audienceSize: number };
+  Pragya: { recoverableRevenue: number; inactiveCustomers: number; abandonedLeads: number; recoveryConfidence: number; explanation: string };
+  Khoj: { predictedRoi: number; predictedRevenue: number; confidenceScore: number; explanation: string };
+  Rachna: { Email: { subject: string; body: string }; WhatsApp: { body: string }; SMS: { body: string }; RCS: { title: string; body: string; mediaUrl: string } };
+  Saarthi: { selectedChannel: string; explanation: string };
   recommendation: { summary: string; confidenceScore: number; estimatedTimeframe: string };
 }
 
@@ -45,7 +45,7 @@ interface WorkflowStep {
 }
 
 const AGENT_COLORS: Record<string, string> = {
-  Polaris: "#3B82F6", Luna: "#EC4899", Vega: "#8B5CF6", Nova: "#F59E0B", Atlas: "#22C55E"
+  Drishti: "#3B82F6", Pragya: "#EC4899", Khoj: "#8B5CF6", Rachna: "#F59E0B", Saarthi: "#22C55E"
 };
 
 const CHANNEL_CONFIG: Record<ChannelType, { icon: React.FC<any>; color: string; borderColor: string; bg: string; label: string; openRate: string; ctr: string; conv: string; reach: string }> = {
@@ -91,43 +91,43 @@ function buildFallbackPlan(goal: string, businessType: string, personas?: Person
   const roiText = `${roi}x`;
 
   return {
-    Polaris: { 
+    Drishti: { 
       segment: seg, 
       explanation: targetPersona 
-        ? `Polaris scanned customer nodes and targeted ${targetPersona.name} representing ${targetPersona.customerCount} customers with ${targetPersona.revenueContributionPct}% revenue share.`
-        : `Polaris scanned the full customer universe for ${businessType} and isolated the ${seg} cohort as the highest-impact target for this mission.`, 
+        ? `Drishti scanned customer nodes and targeted ${targetPersona.name} representing ${targetPersona.customerCount} customers with ${targetPersona.revenueContributionPct}% revenue share.`
+        : `Drishti scanned the full customer universe for ${businessType} and isolated the ${seg} cohort as the highest-impact target for this mission.`, 
       audienceSize: audience 
     },
-    Luna: { 
+    Pragya: { 
       recoverableRevenue: Math.round(rev * 0.42), 
       inactiveCustomers: Math.max(1, Math.round(audience * 0.3)), 
       abandonedLeads: Math.max(1, Math.round(audience * 0.15)), 
       recoveryConfidence: targetPersona ? targetPersona.loyaltyScore : 91, 
       explanation: targetPersona
-        ? `Luna analyzed ${targetPersona.name} accounts and identified ₹${Math.round(rev * 0.42).toLocaleString()} in untapped headroom. Recommended strategy: ${targetPersona.recommendedStrategy}`
-        : `Luna audited transaction logs and found ₹${Math.round(rev * 0.42).toLocaleString()} in recoverable revenue across inactive customer nodes.` 
+        ? `Pragya analyzed ${targetPersona.name} accounts and identified ₹${Math.round(rev * 0.42).toLocaleString()} in untapped headroom. Recommended strategy: ${targetPersona.recommendedStrategy}`
+        : `Pragya audited transaction logs and found ₹${Math.round(rev * 0.42).toLocaleString()} in recoverable revenue across inactive customer nodes.` 
     },
-    Vega: { 
+    Khoj: { 
       predictedRoi: roi, 
       predictedRevenue: rev, 
       confidenceScore: targetPersona ? targetPersona.loyaltyScore : 89, 
-      explanation: `Vega forecasted ROI at ${roiText} based on historical performance models for ${seg}.` 
+      explanation: `Khoj forecasted ROI at ${roiText} based on historical performance models for ${seg}.` 
     },
-    Nova: {
+    Rachna: {
       Email: { 
         subject: targetPersona ? `Special Drop for our ${targetPersona.name}` : `Exclusive Offer: ${goal.slice(0, 40)}`, 
         body: targetPersona 
-          ? `Hi {{name}},\n\nWe've crafted a special recommendation just for you. Based on your preferences, we suggest trying our latest collections.\n\nRecommended: ${targetPersona.suggestedCampaign}\n\nUse code ORBIT20 for exclusive perks.\n\nWarm regards,\norbit.ai Intelligence`
+          ? `Hi {{name}},\n\nWe've crafted a special recommendation just for you. Based on your preferences, we suggest trying our latest collections.\n\nRecommended: ${targetPersona.suggestedCampaign}\n\nUse code ORBIT20 for exclusive perks.\n\nWarm regards,\nManthan.ai Intelligence`
           : `Hi {{name}},\n\nWe noticed you haven't shopped with us recently. As one of our valued customers, we've curated a special offer just for you.\n\nUse code ORBIT20 for 20% off your next purchase.\n\nShop now before it expires!\n\nWarm regards,\nAura Threads` 
       },
       WhatsApp: { 
         body: targetPersona
-          ? `✨ Hey *{{name}}*! \n\nWe've designed a special campaign for our *${targetPersona.name}* community.\n\n🎁 Recommended Action: *${targetPersona.suggestedCampaign}*\n🚚 Strategy: ${targetPersona.recommendedStrategy}\n\nTap to explore: https://orbit.ai/dna\n\n_(Reply STOP to opt out)_`
+          ? `✨ Hey *{{name}}*! \n\nWe've designed a special campaign for our *${targetPersona.name}* community.\n\n🎁 Recommended Action: *${targetPersona.suggestedCampaign}*\n🚚 Strategy: ${targetPersona.recommendedStrategy}\n\nTap to explore: https://Manthan.ai/dna\n\n_(Reply STOP to opt out)_`
           : `✨ Hey *{{name}}*! \n\nWe miss you! Here's an exclusive offer crafted by our AI just for you.\n\n🎁 20% OFF your next order\n🚚 Free shipping today\n\nTap to claim: https://aurathreads.in/special\n\n_(Reply STOP to opt out)_` 
       },
       SMS: { 
         body: targetPersona
-          ? `Orbit: Hi {{name}}, exclusive campaign for ${targetPersona.name}: ${targetPersona.suggestedCampaign}. Explore: https://orbit.ai/dna`
+          ? `Manthan: Hi {{name}}, exclusive campaign for ${targetPersona.name}: ${targetPersona.suggestedCampaign}. Explore: https://Manthan.ai/dna`
           : `Aura Threads: Hi {{name}}, 20% OFF exclusive offer for you. Valid 48hrs. Claim: https://aurathreads.in/off` 
       },
       RCS: { 
@@ -138,9 +138,9 @@ function buildFallbackPlan(goal: string, businessType: string, personas?: Person
         mediaUrl: "https://images.unsplash.com/photo-1441984904996-e0b6ba687e04?auto=format&fit=crop&w=600&q=80" 
       }
     },
-    Atlas: { 
+    Saarthi: { 
       selectedChannel: channel, 
-      explanation: `Atlas verified ${channel} as the highest-performing delivery channel for the ${seg} cohort.` 
+      explanation: `Saarthi verified ${channel} as the highest-performing delivery channel for the ${seg} cohort.` 
     },
     recommendation: { 
       summary: targetPersona
@@ -165,18 +165,18 @@ export const GrowthEngine: React.FC = () => {
   const [activeChannel, setActiveChannel] = useState<ChannelType>("WhatsApp");
   const [activeVariant, setActiveVariant] = useState<VariantKey>("A");
   const [isPreview, setIsPreview] = useState(false);
-  const [selectedAgent, setSelectedAgent] = useState<"Polaris" | "Vega" | "Nova" | "Atlas" | "Luna" | null>(null);
+  const [selectedAgent, setSelectedAgent] = useState<"Drishti" | "Khoj" | "Rachna" | "Saarthi" | "Pragya" | null>(null);
   const [selectedSegmentIdx, setSelectedSegmentIdx] = useState(0);
 
   /* ── AI Workflow State ── */
   const [workflowRunning, setWorkflowRunning] = useState(false);
   const [workflowDone, setWorkflowDone] = useState(false);
   const [workflowSteps, setWorkflowSteps] = useState<WorkflowStep[]>([
-    { agent: "Polaris", label: "Analyzing customer audience...", status: "idle", color: "#3B82F6", icon: "👁" },
-    { agent: "Luna",    label: "Identifying opportunities...",  status: "idle", color: "#EC4899", icon: "🌙" },
-    { agent: "Vega",    label: "Forecasting outcomes...",       status: "idle", color: "#8B5CF6", icon: "⭐" },
-    { agent: "Nova",    label: "Generating campaigns...",       status: "idle", color: "#F59E0B", icon: "✨" },
-    { agent: "Atlas",   label: "Preparing deployment...",       status: "idle", color: "#22C55E", icon: "🚀" },
+    { agent: "Drishti", label: "Analyzing customer audience...", status: "idle", color: "#3B82F6", icon: "👁" },
+    { agent: "Pragya",    label: "Identifying opportunities...",  status: "idle", color: "#EC4899", icon: "🌙" },
+    { agent: "Khoj",    label: "Forecasting outcomes...",       status: "idle", color: "#8B5CF6", icon: "⭐" },
+    { agent: "Rachna",    label: "Generating campaigns...",       status: "idle", color: "#F59E0B", icon: "✨" },
+    { agent: "Saarthi",   label: "Preparing deployment...",       status: "idle", color: "#22C55E", icon: "🚀" },
   ]);
 
   /* ── Mission Data ── */
@@ -291,7 +291,7 @@ export const GrowthEngine: React.FC = () => {
   };
 
   const applyRecencyPreset = (presetType: "review" | "missing15" | "inactiveMonth") => {
-    addAgentLog("Nova", `Applying Recency Campaign Preset: ${presetType === "review" ? "Within 7 Days (Review)" : presetType === "missing15" ? "15 Days Inactive" : "Last 1 Month Inactive"}`, "action");
+    addAgentLog("Rachna", `Applying Recency Campaign Preset: ${presetType === "review" ? "Within 7 Days (Review)" : presetType === "missing15" ? "15 Days Inactive" : "Last 1 Month Inactive"}`, "action");
     
     let targetCohort = reviewCohort;
     let goalText = "Ask for product review (Purchase within last 7 days)";
@@ -306,10 +306,10 @@ export const GrowthEngine: React.FC = () => {
     
     let subject = "How is your recent purchase?";
     let bodyA = "Hi {{name}},\n\nThank you for your recent purchase! We hope you are loving your order.\n\nCould you please take 30 seconds to leave us a quick review? We would love to hear your feedback!\n\nBest,\nOrbit Team";
-    let bodyB = "Hi *{{name}}*! \n\nThank you for your recent purchase. We hope you are loving your order!\n\nCould you please take a moment to leave a review?\n\nRate us: https://orbit.ai/review";
-    let bodyC = "Hi {{name}},\n\nWe hope you love your order! Share your feedback with us by writing a quick review.\n\nRate here: https://orbit.ai/review";
-    let bodyD = "Hi {{name}}, thank you for your recent purchase! We hope you love it. Please leave a quick review here: https://orbit.ai/review";
-    let bodyE = "Hi {{name}}, we value your opinion. How was your recent shopping experience with us? Tell us here: https://orbit.ai/review";
+    let bodyB = "Hi *{{name}}*! \n\nThank you for your recent purchase. We hope you are loving your order!\n\nCould you please take a moment to leave a review?\n\nRate us: https://Manthan.ai/review";
+    let bodyC = "Hi {{name}},\n\nWe hope you love your order! Share your feedback with us by writing a quick review.\n\nRate here: https://Manthan.ai/review";
+    let bodyD = "Hi {{name}}, thank you for your recent purchase! We hope you love it. Please leave a quick review here: https://Manthan.ai/review";
+    let bodyE = "Hi {{name}}, we value your opinion. How was your recent shopping experience with us? Tell us here: https://Manthan.ai/review";
 
     if (presetType === "missing15") {
       targetCohort = fifteenDaysCohort;
@@ -325,10 +325,10 @@ export const GrowthEngine: React.FC = () => {
 
       subject = "We miss you, {{name}}! 💙";
       bodyA = "Hi {{name}},\n\nWe are missing you! It has been 15 days since you last visited or bought anything from us.\n\nWe would love to see you again. Check out our latest collection designed just for you!\n\nWarmly,\nOrbit Team";
-      bodyB = "Hey *{{name}}*! \n\nWe miss you! 💙 It has been 15 days since your last purchase. We've dropped some exciting new styles we think you'd love.\n\nCheck them out: https://orbit.ai/styles";
-      bodyC = "Dear {{name}},\n\nIt has been 15 days since we last had the pleasure of serving you. We've introduced new arrivals curated for your taste.\n\nExplore: https://orbit.ai/styles";
-      bodyD = "Hey {{name}} 👋\n\nIt's been 15 days! Just wanted to check in and see how you're doing. A new trend drop just hit our store.\n\nSee it here: https://orbit.ai/styles";
-      bodyE = "Hi {{name}}, we miss you! It's been 15 days since your last checkout. Check out new drops: https://orbit.ai/styles";
+      bodyB = "Hey *{{name}}*! \n\nWe miss you! 💙 It has been 15 days since your last purchase. We've dropped some exciting new styles we think you'd love.\n\nCheck them out: https://Manthan.ai/styles";
+      bodyC = "Dear {{name}},\n\nIt has been 15 days since we last had the pleasure of serving you. We've introduced new arrivals curated for your taste.\n\nExplore: https://Manthan.ai/styles";
+      bodyD = "Hey {{name}} 👋\n\nIt's been 15 days! Just wanted to check in and see how you're doing. A new trend drop just hit our store.\n\nSee it here: https://Manthan.ai/styles";
+      bodyE = "Hi {{name}}, we miss you! It's been 15 days since your last checkout. Check out new drops: https://Manthan.ai/styles";
     } else if (presetType === "inactiveMonth") {
       targetCohort = oneMonthCohort;
       goalText = "Win-back customer (No purchase in last 1 month)";
@@ -342,10 +342,10 @@ export const GrowthEngine: React.FC = () => {
       recTime = "14 Days";
 
       subject = "An exclusive offer to welcome you back 🎁";
-      bodyA = "Hi {{name}},\n\nYou have not bought anything from us in the last 1 month. We really miss you!\n\nTo help you get back, here is an exclusive 20% discount code for your next checkout: WELCOME20.\n\nShop now: https://orbit.ai";
-      bodyB = "Hey *{{name}}*! \n\nYou haven't shopped with us in over a month. We miss you! 🎁\n\nHere's 20% OFF your next order: WELCOME20\n\nClaim now: https://orbit.ai/welcome";
+      bodyA = "Hi {{name}},\n\nYou have not bought anything from us in the last 1 month. We really miss you!\n\nTo help you get back, here is an exclusive 20% discount code for your next checkout: WELCOME20.\n\nShop now: https://Manthan.ai";
+      bodyB = "Hey *{{name}}*! \n\nYou haven't shopped with us in over a month. We miss you! 🎁\n\nHere's 20% OFF your next order: WELCOME20\n\nClaim now: https://Manthan.ai/welcome";
       bodyC = "Dear {{name}},\n\nIt has been over a month. As a token of our appreciation, please enjoy an exclusive 20% welcome-back privilege. Code: WELCOME20.";
-      bodyD = "Hey {{name}} 👋\n\nYou haven't shopped with us in over a month. Use WELCOME20 for 20% OFF: https://orbit.ai/welcome";
+      bodyD = "Hey {{name}} 👋\n\nYou haven't shopped with us in over a month. Use WELCOME20 for 20% OFF: https://Manthan.ai/welcome";
       bodyE = "Hi {{name}},\n\nWe haven't seen you in 30 days! We want you back. Here is an exclusive 20% offer code WELCOME20 for your next purchase.";
     }
 
@@ -353,31 +353,31 @@ export const GrowthEngine: React.FC = () => {
     setActiveChannel(channel);
 
     const basePlan: MissionPlan = {
-      Polaris: {
+      Drishti: {
         segment: segmentName,
         explanation: explanationText,
         audienceSize: targetCohort.length
       },
-      Luna: {
+      Pragya: {
         recoverableRevenue: Math.round(targetCohort.length * 0.42 * 1000),
         inactiveCustomers: targetCohort.length,
         abandonedLeads: 0,
         recoveryConfidence: 85,
         explanation: explanationText
       },
-      Vega: {
+      Khoj: {
         predictedRoi,
         predictedRevenue,
         confidenceScore: 85,
-        explanation: `Vega forecasted ROI at ${predictedRoi}x based on historical models for this recency cohort.`
+        explanation: `Khoj forecasted ROI at ${predictedRoi}x based on historical models for this recency cohort.`
       },
-      Nova: {
+      Rachna: {
         Email: { subject, body: bodyA },
         WhatsApp: { body: bodyB },
         SMS: { body: bodyD },
         RCS: { title: subject, body: bodyC, mediaUrl: "https://images.unsplash.com/photo-1441984904996-e0b6ba687e04?auto=format&fit=crop&w=600&q=80" }
       },
-      Atlas: {
+      Saarthi: {
         selectedChannel: channel,
         explanation: channelExpl
       },
@@ -409,7 +409,7 @@ export const GrowthEngine: React.FC = () => {
 
   const handleOptimizeCampaign = async () => {
     setAiOptimizing(true);
-    addAgentLog("Nova", `Initializing AI copywriting optimization for ${activeAutomationCategory} campaign...`, "action");
+    addAgentLog("Rachna", `Initializing AI copywriting optimization for ${activeAutomationCategory} campaign...`, "action");
     
     const targetCohort = getActiveCohort();
     const segmentName = activeAutomationCategory === "review" ? "Recent Buyers" 
@@ -419,7 +419,7 @@ export const GrowthEngine: React.FC = () => {
       : "Dormant Customer";
 
     const defaultMsg = automationTemplates[activeAutomationCategory].body;
-    const systemPrompt = `You are the orbit.ai Growth Campaign Copywriter.
+    const systemPrompt = `You are the Manthan.ai Growth Campaign Copywriter.
 Optimize the following automated lifecycle campaign template body:
 "${defaultMsg}"
 
@@ -439,7 +439,7 @@ Do not return any markdown code block formatting. Return only the raw text of th
         const hasProfessionals = targetCohort.some(c => (c.persona || "").includes("Professional") || (c.persona || "").includes("Working"));
         
         if (activeAutomationCategory === "review") {
-          optimizedBody = `Hi {{name}},\n\nThank you for choosing ${businessType.toLowerCase().includes("fashion") ? "Aura Threads" : "orbit.ai"}. We hope you are loving your new purchase.\n\nYour review helps our community. Could you leave a quick rating?\n\nBest,\nTeam Orbit`;
+          optimizedBody = `Hi {{name}},\n\nThank you for choosing ${businessType.toLowerCase().includes("fashion") ? "Aura Threads" : "Manthan.ai"}. We hope you are loving your new purchase.\n\nYour review helps our community. Could you leave a quick rating?\n\nBest,\nTeam Manthan`;
         } else if (activeAutomationCategory === "checkin") {
           if (hasProfessionals) {
             optimizedBody = `Hi {{name}},\n\nJust checking in on your office wear and smart-casual selections. How is the fit and comfort?\n\nLet us know if you need sizing adjustments.\n\nWarmly,\nAura Threads Support`;
@@ -450,12 +450,12 @@ Do not return any markdown code block formatting. Return only the raw text of th
           if (hasStudents) {
             optimizedBody = `Hi {{name}},\n\nWe miss you! 💙 A new trend drop just hit Aura Threads and we know you'll love it.\n\nHere's a 15% discount for your next style swap: SWAP15.\n\nCheck it out!`;
           } else {
-            optimizedBody = `Hi {{name}},\n\nWe miss you. It's been a while since your last purchase. We've added new collections that match your profile.\n\nUse code RETURN15 for 15% off.\n\nShop now: https://orbit.ai/shop`;
+            optimizedBody = `Hi {{name}},\n\nWe miss you. It's been a while since your last purchase. We've added new collections that match your profile.\n\nUse code RETURN15 for 15% off.\n\nShop now: https://Manthan.ai/shop`;
           }
         } else if (activeAutomationCategory === "winback") {
-          optimizedBody = `Hi {{name}},\n\nIt has been over a month! We'd love to welcome you back.\n\nGet 20% off your next purchase using code WINBACK20.\n\nClaim now: https://orbit.ai/winback`;
+          optimizedBody = `Hi {{name}},\n\nIt has been over a month! We'd love to welcome you back.\n\nGet 20% off your next purchase using code WINBACK20.\n\nClaim now: https://Manthan.ai/winback`;
         } else {
-          optimizedBody = `Hi {{name}},\n\nWe noticed you haven't visited Aura Threads in a while. Here is a high-priority recovery reward just for you:\n\n🎁 ₹500 off your next order over ₹1,550!\nCode: RECOVER500\n\nShop: https://orbit.ai/reward`;
+          optimizedBody = `Hi {{name}},\n\nWe noticed you haven't visited Aura Threads in a while. Here is a high-priority recovery reward just for you:\n\n🎁 ₹500 off your next order over ₹1,550!\nCode: RECOVER500\n\nShop: https://Manthan.ai/reward`;
         }
       }
       
@@ -466,10 +466,10 @@ Do not return any markdown code block formatting. Return only the raw text of th
           body: optimizedBody
         }
       }));
-      addAgentLog("Nova", `AI Campaign message optimized successfully for ${activeAutomationCategory} cohort.`, "action");
+      addAgentLog("Rachna", `AI Campaign message optimized successfully for ${activeAutomationCategory} cohort.`, "action");
     } catch (err: any) {
       console.error("Gemini optimization failed:", err);
-      addAgentLog("Nova", `Failed to optimize copy via Gemini: ${err.message || err}`, "thought");
+      addAgentLog("Rachna", `Failed to optimize copy via Gemini: ${err.message || err}`, "thought");
     } finally {
       setAiOptimizing(false);
     }
@@ -480,7 +480,7 @@ Do not return any markdown code block formatting. Return only the raw text of th
     setAutomationSendDone(false);
     
     const cohort = getActiveCohort();
-    addAgentLog("Atlas", `Initiating ${automationChannel} automated dispatch to ${cohort.length} targets...`, "action");
+    addAgentLog("Saarthi", `Initiating ${automationChannel} automated dispatch to ${cohort.length} targets...`, "action");
     
     const queuedStatuses: Record<string, "Ready" | "Queued" | "Dispatched"> = {};
     cohort.forEach(c => {
@@ -498,7 +498,7 @@ Do not return any markdown code block formatting. Return only the raw text of th
     setAutomationSending(false);
     setAutomationSendDone(true);
     
-    addAgentLog("Atlas", `Campaign successfully dispatched via Twilio/Resend. Verified 100% gateway handshake.`, "action");
+    addAgentLog("Saarthi", `Campaign successfully dispatched via Twilio/Resend. Verified 100% gateway handshake.`, "action");
 
     const finalCampaign = {
       id: "camp_" + Date.now(),
@@ -551,7 +551,7 @@ Do not return any markdown code block formatting. Return only the raw text of th
   /* ── Initialize variants from mission plan ── */
   useEffect(() => {
     if (!missionPlan) return;
-    const base = missionPlan.Nova;
+    const base = missionPlan.Rachna;
     const ch = activeChannel;
     const getBase = () => ch === "Email" ? base.Email.body : ch === "WhatsApp" ? base.WhatsApp.body : ch === "SMS" ? base.SMS.body : base.RCS.body;
     setVariants(prev => ({
@@ -580,13 +580,13 @@ Do not return any markdown code block formatting. Return only the raw text of th
     };
 
     try {
-      // Step 1 - Polaris
+      // Step 1 - Drishti
       setStep(0, "running"); await sleep(900);
 
-      // Step 2 - Luna  
+      // Step 2 - Pragya  
       setStep(1, "running"); await sleep(800);
 
-      // Step 3 - Vega
+      // Step 3 - Khoj
       setStep(2, "running"); await sleep(700);
 
       // Actual API call while steps animate
@@ -598,7 +598,7 @@ Do not return any markdown code block formatting. Return only the raw text of th
           body: JSON.stringify({ goal, businessType }),
         });
         const data = res.ok ? await res.json() : null;
-        plan = data && data.Polaris ? data : buildFallbackPlan(goal, businessType, personas);
+        plan = data && data.Drishti ? data : buildFallbackPlan(goal, businessType, personas);
       } catch {
         plan = buildFallbackPlan(goal, businessType, personas);
       }
@@ -607,22 +607,22 @@ Do not return any markdown code block formatting. Return only the raw text of th
       setStep(1, "done");
       setStep(2, "done");
 
-      // Step 4 - Nova
+      // Step 4 - Rachna
       setStep(3, "running"); await sleep(900);
       setStep(3, "done");
 
-      // Step 5 - Atlas
+      // Step 5 - Saarthi
       setStep(4, "running"); await sleep(700);
       setStep(4, "done");
 
       setMissionPlan(plan);
 
       // Log to agent logs
-      addAgentLog("Polaris", `Audience scan complete for mission: "${goal}". Target: ${plan.Polaris.segment}.`, "action");
-      addAgentLog("Luna", plan.Luna.explanation, "thought");
-      addAgentLog("Vega", `ROI forecast: ${plan.Vega.predictedRoi}x. Revenue: ₹${plan.Vega.predictedRevenue.toLocaleString()}.`, "thought");
-      addAgentLog("Nova", `Campaign copy generated for ${Object.keys(plan.Nova).join(", ")}.`, "action");
-      addAgentLog("Atlas", `Deployment ready via ${plan.Atlas.selectedChannel}. ${plan.Atlas.explanation}`, "action");
+      addAgentLog("Drishti", `Audience scan complete for mission: "${goal}". Target: ${plan.Drishti.segment}.`, "action");
+      addAgentLog("Pragya", plan.Pragya.explanation, "thought");
+      addAgentLog("Khoj", `ROI forecast: ${plan.Khoj.predictedRoi}x. Revenue: ₹${plan.Khoj.predictedRevenue.toLocaleString()}.`, "thought");
+      addAgentLog("Rachna", `Campaign copy generated for ${Object.keys(plan.Rachna).join(", ")}.`, "action");
+      addAgentLog("Saarthi", `Deployment ready via ${plan.Saarthi.selectedChannel}. ${plan.Saarthi.explanation}`, "action");
 
       // Trigger simulation
       await runSimulation(plan);
@@ -646,9 +646,9 @@ Do not return any markdown code block formatting. Return only the raw text of th
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          audience: p.Polaris.segment,
+          audience: p.Drishti.segment,
           discount: 20,
-          channel: p.Atlas.selectedChannel,
+          channel: p.Saarthi.selectedChannel,
         }),
       });
       const data = res.ok ? await res.json() : null;
@@ -657,17 +657,17 @@ Do not return any markdown code block formatting. Return only the raw text of th
       } else {
 
         setSimData({
-          conservative: { conversionRate: 2.1, revenue: Math.round(p.Vega.predictedRevenue * 0.6), roi: parseFloat((p.Vega.predictedRoi * 0.65).toFixed(1)), customerFatigue: "Low", optOutRate: 0.4 },
-          recommended:  { conversionRate: 4.8, revenue: p.Vega.predictedRevenue, roi: p.Vega.predictedRoi, customerFatigue: "Medium", optOutRate: 0.9 },
-          aggressive:   { conversionRate: 7.2, revenue: Math.round(p.Vega.predictedRevenue * 1.35), roi: parseFloat((p.Vega.predictedRoi * 1.2).toFixed(1)), customerFatigue: "High", optOutRate: 2.1 },
+          conservative: { conversionRate: 2.1, revenue: Math.round(p.Khoj.predictedRevenue * 0.6), roi: parseFloat((p.Khoj.predictedRoi * 0.65).toFixed(1)), customerFatigue: "Low", optOutRate: 0.4 },
+          recommended:  { conversionRate: 4.8, revenue: p.Khoj.predictedRevenue, roi: p.Khoj.predictedRoi, customerFatigue: "Medium", optOutRate: 0.9 },
+          aggressive:   { conversionRate: 7.2, revenue: Math.round(p.Khoj.predictedRevenue * 1.35), roi: parseFloat((p.Khoj.predictedRoi * 1.2).toFixed(1)), customerFatigue: "High", optOutRate: 2.1 },
         });
       }
     } catch {
       if (p) {
         setSimData({
-          conservative: { conversionRate: 2.1, revenue: Math.round(p.Vega.predictedRevenue * 0.6), roi: parseFloat((p.Vega.predictedRoi * 0.65).toFixed(1)), customerFatigue: "Low", optOutRate: 0.4 },
-          recommended:  { conversionRate: 4.8, revenue: p.Vega.predictedRevenue, roi: p.Vega.predictedRoi, customerFatigue: "Medium", optOutRate: 0.9 },
-          aggressive:   { conversionRate: 7.2, revenue: Math.round(p.Vega.predictedRevenue * 1.35), roi: parseFloat((p.Vega.predictedRoi * 1.2).toFixed(1)), customerFatigue: "High", optOutRate: 2.1 },
+          conservative: { conversionRate: 2.1, revenue: Math.round(p.Khoj.predictedRevenue * 0.6), roi: parseFloat((p.Khoj.predictedRoi * 0.65).toFixed(1)), customerFatigue: "Low", optOutRate: 0.4 },
+          recommended:  { conversionRate: 4.8, revenue: p.Khoj.predictedRevenue, roi: p.Khoj.predictedRoi, customerFatigue: "Medium", optOutRate: 0.9 },
+          aggressive:   { conversionRate: 7.2, revenue: Math.round(p.Khoj.predictedRevenue * 1.35), roi: parseFloat((p.Khoj.predictedRoi * 1.2).toFixed(1)), customerFatigue: "High", optOutRate: 2.1 },
         });
       }
     } finally {
@@ -688,14 +688,14 @@ Do not return any markdown code block formatting. Return only the raw text of th
       urgent: "Rewrite this with urgency and scarcity signals — limited time, act now.",
       instagram: "Rewrite this as an Instagram DM — short, casual, emoji-rich, conversational.",
       dna: `Rewrite this and inject brand DNA signals for ${businessType}. Make it feel uniquely on-brand.`,
-      regenerate: `Rewrite this campaign copy for a ${businessType} store targeting ${missionPlan.Polaris.segment}. Goal: ${goal}. Make it fresh and compelling.`,
+      regenerate: `Rewrite this campaign copy for a ${businessType} store targeting ${missionPlan.Drishti.segment}. Goal: ${goal}. Make it fresh and compelling.`,
     };
 
     const prompt = `${toneMap[action]}\n\nOriginal message:\n${currentBody}`;
     try {
       let newBody = currentBody;
       if (config.geminiKey) {
-        const res = await callGeminiAPI(prompt, "You are Nova, orbit.ai's expert campaign copywriter. Return only the rewritten copy, no explanations.", config.geminiKey);
+        const res = await callGeminiAPI(prompt, "You are Rachna, Manthan.ai's expert campaign copywriter. Return only the rewritten copy, no explanations.", config.geminiKey);
         newBody = res.trim();
       } else {
         // Fallback transforms
@@ -719,15 +719,15 @@ Do not return any markdown code block formatting. Return only the raw text of th
     setShowExplain(true);
     setExplainLoading(true);
     setExplainData(null);
-    const prompt = `Explain in detail why ORBIT created this campaign for the goal: "${goal}".
+    const prompt = `Explain in detail why Manthan created this campaign for the goal: "${goal}".
 Use agent perspectives:
-- Polaris (Audience): ${missionPlan.Polaris.explanation}
-- Luna (Opportunities): ${missionPlan.Luna.explanation}
-- Vega (Predictions): ${missionPlan.Vega.explanation}
-- Nova (Campaign): Generated ${activeChannel} campaign for ${missionPlan.Polaris.segment}
-- Atlas (Execution): ${missionPlan.Atlas.explanation}
+- Drishti (Audience): ${missionPlan.Drishti.explanation}
+- Pragya (Opportunities): ${missionPlan.Pragya.explanation}
+- Khoj (Predictions): ${missionPlan.Khoj.explanation}
+- Rachna (Campaign): Generated ${activeChannel} campaign for ${missionPlan.Drishti.segment}
+- Saarthi (Execution): ${missionPlan.Saarthi.explanation}
 
-Format as JSON: { "Polaris": "...", "Luna": "...", "Vega": "...", "Nova": "...", "Atlas": "...", "overall": "..." }`;
+Format as JSON: { "Drishti": "...", "Pragya": "...", "Khoj": "...", "Rachna": "...", "Saarthi": "...", "overall": "..." }`;
     try {
       if (config.geminiKey) {
         const res = await callGeminiAPI(prompt, "You are an explainability engine. Return only a JSON object.", config.geminiKey);
@@ -745,12 +745,12 @@ Format as JSON: { "Polaris": "...", "Luna": "...", "Vega": "...", "Nova": "...",
   };
 
   const buildFallbackExplain = () => ({
-    Polaris: `I scanned all ${totalCustomers} customers and identified the ${missionPlan?.Polaris.segment} cohort as the ideal target. This group has the highest probability of conversion based on historical purchase frequency, LTV data, and channel engagement patterns.`,
-    Luna: `I detected ₹${missionPlan?.Luna.recoverableRevenue.toLocaleString() || 0} in recoverable revenue. There are ${missionPlan?.Luna.inactiveCustomers || 0} dormant high-value accounts and ${missionPlan?.Luna.abandonedLeads || 0} abandoned intent signals that can be reactivated with a targeted outreach.`,
-    Vega: `My predictive models calculate a ${missionPlan?.Vega.predictedRoi || 0}x ROI at ${missionPlan?.Vega.confidenceScore || 89}% confidence. The conversion curve for this segment peaks within a 14-day window, so time-sensitive messaging maximizes yield.`,
-    Nova: `I generated 5 campaign variants tailored to different emotional registers — professional, urgent, luxury, friendly, and emotional. The WhatsApp format was prioritized due to its 92% open rate for this segment. All copy uses {{name}} personalization for higher CTR.`,
-    Atlas: `Deployment pathways verified. ${missionPlan?.Atlas.selectedChannel} selected as primary channel. I've pre-validated recipient consent, routing endpoints, and webhook callbacks for delivery tracking. Zero configuration needed.`,
-    overall: `orbit.ai recommends this campaign because it represents the highest-confidence, highest-ROI action available given your current customer data and business objective. Every element — audience, copy, channel, and timing — has been optimized by the collective intelligence of all 5 AI agents.`,
+    Drishti: `I scanned all ${totalCustomers} customers and identified the ${missionPlan?.Drishti.segment} cohort as the ideal target. This group has the highest probability of conversion based on historical purchase frequency, LTV data, and channel engagement patterns.`,
+    Pragya: `I detected ₹${missionPlan?.Pragya.recoverableRevenue.toLocaleString() || 0} in recoverable revenue. There are ${missionPlan?.Pragya.inactiveCustomers || 0} dormant high-value accounts and ${missionPlan?.Pragya.abandonedLeads || 0} abandoned intent signals that can be reactivated with a targeted outreach.`,
+    Khoj: `My predictive models calculate a ${missionPlan?.Khoj.predictedRoi || 0}x ROI at ${missionPlan?.Khoj.confidenceScore || 89}% confidence. The conversion curve for this segment peaks within a 14-day window, so time-sensitive messaging maximizes yield.`,
+    Rachna: `I generated 5 campaign variants tailored to different emotional registers — professional, urgent, luxury, friendly, and emotional. The WhatsApp format was prioritized due to its 92% open rate for this segment. All copy uses {{name}} personalization for higher CTR.`,
+    Saarthi: `Deployment pathways verified. ${missionPlan?.Saarthi.selectedChannel} selected as primary channel. I've pre-validated recipient consent, routing endpoints, and webhook callbacks for delivery tracking. Zero configuration needed.`,
+    overall: `Manthan.ai recommends this campaign because it represents the highest-confidence, highest-ROI action available given your current customer data and business objective. Every element — audience, copy, channel, and timing — has been optimized by the collective intelligence of all 5 AI agents.`,
   });
 
   /* ── Launch Campaign ── */
@@ -770,18 +770,18 @@ Format as JSON: { "Polaris": "...", "Luna": "...", "Vega": "...", "Nova": "...",
         body: JSON.stringify({
           name: goal.slice(0, 50),
           goal,
-          channel: missionPlan.Atlas.selectedChannel,
-          targetSegment: missionPlan.Polaris.segment,
-          audienceSize: missionPlan.Polaris.audienceSize || 100,
-          predictedRevenue: missionPlan.Vega.predictedRevenue,
-          predictedRoi: missionPlan.Vega.predictedRoi,
+          channel: missionPlan.Saarthi.selectedChannel,
+          targetSegment: missionPlan.Drishti.segment,
+          audienceSize: missionPlan.Drishti.audienceSize || 100,
+          predictedRevenue: missionPlan.Khoj.predictedRevenue,
+          predictedRoi: missionPlan.Khoj.predictedRoi,
           copy: variants[activeVariant].body,
           subject: variants[activeVariant].subject,
           status: "Running",
         }),
       }).catch(() => {});
 
-      addAgentLog("Atlas", `Campaign launched via ${missionPlan.Atlas.selectedChannel}. Mission "${goal}" is now active.`, "result");
+      addAgentLog("Saarthi", `Campaign launched via ${missionPlan.Saarthi.selectedChannel}. Mission "${goal}" is now active.`, "result");
       setLaunchDone(true);
     } catch (err) {
       console.error("Launch error:", err);
@@ -796,7 +796,7 @@ Format as JSON: { "Polaris": "...", "Luna": "...", "Vega": "...", "Nova": "...",
     <div className={`flex-1 flex flex-col overflow-hidden relative ${isLight ? "bg-[#F8FAFC] text-[#0F172A]" : "bg-[#050816] text-white"}`}>
       {/* Background */}
       <div className="pointer-events-none absolute inset-0 space-grid opacity-25 z-0" />
-      <div className="pointer-events-none absolute inset-0 bg-orbit-glow-blue opacity-10 z-0" />
+      <div className="pointer-events-none absolute inset-0 bg-Manthan-glow-blue opacity-10 z-0" />
 
       {/* Page Header */}
       <div className={`shrink-0 px-6 pt-4 border-b relative z-10 ${isLight ? "bg-white border-[#E2E8F0]" : "bg-gray-950/30 border-gray-800/50"}`}>
@@ -851,7 +851,7 @@ Format as JSON: { "Polaris": "...", "Luna": "...", "Vega": "...", "Nova": "...",
           ══════════════════════════════════════════════════════ */}
           {activeTab === "manual" && (
             <>
-              <div className={`orbit-panel p-6 rounded-2xl relative overflow-hidden ${isLight ? "" : "border border-gray-800/60 bg-gray-900/20"}`}>
+              <div className={`Manthan-panel p-6 rounded-2xl relative overflow-hidden ${isLight ? "" : "border border-gray-800/60 bg-gray-900/20"}`}>
             <div className="absolute top-0 right-0 w-64 h-24 bg-gradient-to-bl from-blue-600/10 to-transparent pointer-events-none" />
             <div className="flex items-center gap-2 mb-4">
               <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
@@ -859,7 +859,7 @@ Format as JSON: { "Polaris": "...", "Luna": "...", "Vega": "...", "Nova": "...",
               </div>
               <div>
                 <h2 className="font-space text-sm font-bold text-white uppercase tracking-wider">Mission Command</h2>
-                <p className="font-mono text-[9px] text-gray-500">Define your growth objective — orbit.ai will do the rest</p>
+                <p className="font-mono text-[9px] text-gray-500">Define your growth objective — Manthan.ai will do the rest</p>
               </div>
             </div>
 
@@ -898,7 +898,7 @@ Format as JSON: { "Polaris": "...", "Luna": "...", "Vega": "...", "Nova": "...",
                       setSelectedPersonaId("");
                     }}
                     onKeyDown={e => e.key === "Enter" && handleGenerateStrategy()}
-                    placeholder="What growth objective should ORBIT achieve?"
+                    placeholder="What growth objective should Manthan achieve?"
                     className="w-full bg-gray-950 border border-gray-800 rounded-xl px-4 py-3 font-mono text-sm text-white focus:outline-none focus:border-blue-500/60 placeholder-gray-600 pr-32"
                   />
                   <div className="absolute right-3 top-1/2 -translate-y-1/2 font-mono text-[8px] text-gray-600">PRESS ENTER</div>
@@ -930,7 +930,7 @@ Format as JSON: { "Polaris": "...", "Luna": "...", "Vega": "...", "Nova": "...",
           {/* ══════════════════════════════════════════════════════
               SECTION 2 — AUTONOMOUS AI WORKFLOW
           ══════════════════════════════════════════════════════ */}
-          <div className="orbit-panel border border-gray-800/60 bg-gray-900/20 p-6 rounded-2xl">
+          <div className="Manthan-panel border border-gray-800/60 bg-gray-900/20 p-6 rounded-2xl">
             <div className="flex items-center gap-2 mb-5">
               <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center">
                 <Cpu size={14} className="text-white" />
@@ -988,7 +988,7 @@ Format as JSON: { "Polaris": "...", "Luna": "...", "Vega": "...", "Nova": "...",
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
               {/* SECTION 3 — Mission Intelligence */}
-              <div className={`orbit-panel p-5 rounded-2xl ${isLight ? "" : "border border-gray-800/60 bg-gray-900/20"}`}>
+              <div className={`Manthan-panel p-5 rounded-2xl ${isLight ? "" : "border border-gray-800/60 bg-gray-900/20"}`}>
                 <div className="flex items-center gap-2 mb-4">
                   <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center">
                     <BarChart3 size={12} className="text-white" />
@@ -998,13 +998,13 @@ Format as JSON: { "Polaris": "...", "Luna": "...", "Vega": "...", "Nova": "...",
 
                 <div className="grid grid-cols-2 gap-3">
                   {[
-                    { label: "Target Segment",   value: missionPlan.Polaris.segment,                           color: "text-blue-400" },
-                    { label: "Audience Size",     value: `${missionPlan.Polaris.audienceSize || customers.filter(c => c.segment === missionPlan.Polaris.segment).length} customers`, color: "text-white" },
-                    { label: "Potential Revenue", value: `₹${missionPlan.Luna.recoverableRevenue.toLocaleString()}`, color: "text-yellow-400" },
-                    { label: "Predicted Revenue", value: `₹${missionPlan.Vega.predictedRevenue.toLocaleString()}`, color: "text-green-400" },
-                    { label: "Expected ROI",      value: `${missionPlan.Vega.predictedRoi}x`,                   color: "text-purple-400" },
+                    { label: "Target Segment",   value: missionPlan.Drishti.segment,                           color: "text-blue-400" },
+                    { label: "Audience Size",     value: `${missionPlan.Drishti.audienceSize || customers.filter(c => c.segment === missionPlan.Drishti.segment).length} customers`, color: "text-white" },
+                    { label: "Potential Revenue", value: `₹${missionPlan.Pragya.recoverableRevenue.toLocaleString()}`, color: "text-yellow-400" },
+                    { label: "Predicted Revenue", value: `₹${missionPlan.Khoj.predictedRevenue.toLocaleString()}`, color: "text-green-400" },
+                    { label: "Expected ROI",      value: `${missionPlan.Khoj.predictedRoi}x`,                   color: "text-purple-400" },
                     { label: "Confidence Score",  value: `${missionPlan.recommendation.confidenceScore}%`,      color: "text-white" },
-                    { label: "Best Channel",      value: missionPlan.Atlas.selectedChannel,                     color: "text-green-400" },
+                    { label: "Best Channel",      value: missionPlan.Saarthi.selectedChannel,                     color: "text-green-400" },
                     { label: "Timeframe",         value: missionPlan.recommendation.estimatedTimeframe,         color: "text-gray-300" },
                   ].map(item => (
                     <div key={item.label} className="bg-gray-950/50 p-3 rounded-xl border border-gray-800/50">
@@ -1028,21 +1028,21 @@ Format as JSON: { "Polaris": "...", "Luna": "...", "Vega": "...", "Nova": "...",
               </div>
 
               {/* SECTION 4 — AI Reasoning */}
-              <div className={`orbit-panel p-5 rounded-2xl ${isLight ? "" : "border border-gray-800/60 bg-gray-900/20"}`}>
+              <div className={`Manthan-panel p-5 rounded-2xl ${isLight ? "" : "border border-gray-800/60 bg-gray-900/20"}`}>
                 <div className="flex items-center gap-2 mb-4">
                   <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-purple-500 to-blue-600 flex items-center justify-center">
                     <Brain size={12} className="text-white" />
                   </div>
-                  <h2 className={`font-space text-xs font-bold uppercase tracking-wider ${isLight ? "text-[#0F172A]" : "text-white"}`}>Why orbit.ai Recommends This</h2>
+                  <h2 className={`font-space text-xs font-bold uppercase tracking-wider ${isLight ? "text-[#0F172A]" : "text-white"}`}>Why Manthan.ai Recommends This</h2>
                 </div>
 
                 <div className="space-y-3">
                   {[
-                    { agent: "Polaris", color: AGENT_COLORS.Polaris, icon: "👁", text: missionPlan.Polaris.explanation },
-                    { agent: "Luna",    color: AGENT_COLORS.Luna,    icon: "🌙", text: `${missionPlan.Luna.explanation} Recoverable revenue: ₹${missionPlan.Luna.recoverableRevenue.toLocaleString()}.` },
-                    { agent: "Vega",    color: AGENT_COLORS.Vega,    icon: "⭐", text: missionPlan.Vega.explanation },
-                    { agent: "Nova",    color: AGENT_COLORS.Nova,    icon: "✨", text: `Nova selected ${missionPlan.Atlas.selectedChannel} due to its open rate advantage. Generated 5 campaign variants.` },
-                    { agent: "Atlas",   color: AGENT_COLORS.Atlas,   icon: "🚀", text: missionPlan.Atlas.explanation },
+                    { agent: "Drishti", color: AGENT_COLORS.Drishti, icon: "👁", text: missionPlan.Drishti.explanation },
+                    { agent: "Pragya",    color: AGENT_COLORS.Pragya,    icon: "🌙", text: `${missionPlan.Pragya.explanation} Recoverable revenue: ₹${missionPlan.Pragya.recoverableRevenue.toLocaleString()}.` },
+                    { agent: "Khoj",    color: AGENT_COLORS.Khoj,    icon: "⭐", text: missionPlan.Khoj.explanation },
+                    { agent: "Rachna",    color: AGENT_COLORS.Rachna,    icon: "✨", text: `Rachna selected ${missionPlan.Saarthi.selectedChannel} due to its open rate advantage. Generated 5 campaign variants.` },
+                    { agent: "Saarthi",   color: AGENT_COLORS.Saarthi,   icon: "🚀", text: missionPlan.Saarthi.explanation },
                   ].map(r => (
                     <div key={r.agent} className="flex gap-3 p-3 rounded-xl border border-gray-800/30 bg-gray-950/30">
                       <div className="w-6 h-6 rounded-lg flex items-center justify-center shrink-0 text-xs" style={{ backgroundColor: r.color + "20", border: `1px solid ${r.color}40` }}>
@@ -1062,7 +1062,7 @@ Format as JSON: { "Polaris": "...", "Luna": "...", "Vega": "...", "Nova": "...",
           {/* ══════════════════════════════════════════════════════
               SECTION 5 — AUDIENCE EXPLORER
           ══════════════════════════════════════════════════════ */}
-          <div className={`orbit-panel p-5 rounded-2xl ${isLight ? "" : "border border-gray-800/60 bg-gray-900/20"}`}>
+          <div className={`Manthan-panel p-5 rounded-2xl ${isLight ? "" : "border border-gray-800/60 bg-gray-900/20"}`}>
             <div className="flex items-center gap-2 mb-4">
               <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-yellow-500 to-orange-600 flex items-center justify-center">
                 <Users size={12} className="text-white" />
@@ -1110,7 +1110,7 @@ Format as JSON: { "Polaris": "...", "Luna": "...", "Vega": "...", "Nova": "...",
           {/* ══════════════════════════════════════════════════════
               SECTIONS 6+9 — CAMPAIGN GENERATOR + COPYWRITING ASSIST
           ══════════════════════════════════════════════════════ */}
-          <div className="orbit-panel border border-gray-800/60 bg-gray-900/20 rounded-2xl overflow-hidden">
+          <div className="Manthan-panel border border-gray-800/60 bg-gray-900/20 rounded-2xl overflow-hidden">
             {/* Channel selector */}
             <div className="grid grid-cols-4 border-b border-gray-800/60">
               {(Object.entries(CHANNEL_CONFIG) as [ChannelType, typeof CHANNEL_CONFIG[ChannelType]][]).map(([ch, cfg]) => {
@@ -1233,7 +1233,7 @@ Format as JSON: { "Polaris": "...", "Luna": "...", "Vega": "...", "Nova": "...",
                         placeholder={missionPlan ? "Campaign copy generated..." : "Generate a strategy first to populate campaign copy..."}
                         className="w-full bg-gray-950/50 border border-gray-900 rounded-xl p-4 text-xs font-mono text-gray-200 focus:outline-none focus:border-blue-500/50 resize-none leading-relaxed" />
                     </div>
-                    <p className="font-mono text-[8px] text-gray-600">Use {"{{name}}"} for personalization. Nova automatically injects customer data at dispatch.</p>
+                    <p className="font-mono text-[8px] text-gray-600">Use {"{{name}}"} for personalization. Rachna automatically injects customer data at dispatch.</p>
                   </div>
 
                   {/* AI Copywriting Assist panel */}
@@ -1326,7 +1326,7 @@ Format as JSON: { "Polaris": "...", "Luna": "...", "Vega": "...", "Nova": "...",
           {/* ══════════════════════════════════════════════════════
               SECTION 7 — CHANNEL STRATEGY
           ══════════════════════════════════════════════════════ */}
-          <div className={`orbit-panel p-5 rounded-2xl ${isLight ? "" : "border border-gray-800/60 bg-gray-900/20"}`}>
+          <div className={`Manthan-panel p-5 rounded-2xl ${isLight ? "" : "border border-gray-800/60 bg-gray-900/20"}`}>
             <div className="flex items-center gap-2 mb-4">
               <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-blue-500 to-cyan-600 flex items-center justify-center">
                 <Activity size={12} className="text-white" />
@@ -1335,7 +1335,7 @@ Format as JSON: { "Polaris": "...", "Luna": "...", "Vega": "...", "Nova": "...",
               {missionPlan && (
                 <div className="ml-auto flex items-center gap-1.5 px-2 py-1 rounded-lg bg-green-500/10 border border-green-500/30 font-mono text-[8px] text-green-400">
                   <Star size={9} className="fill-green-400" />
-                  Best: {missionPlan.Atlas.selectedChannel}
+                  Best: {missionPlan.Saarthi.selectedChannel}
                 </div>
               )}
             </div>
@@ -1343,8 +1343,8 @@ Format as JSON: { "Polaris": "...", "Luna": "...", "Vega": "...", "Nova": "...",
             <div className="grid grid-cols-4 gap-3">
               {(Object.entries(CHANNEL_CONFIG) as [ChannelType, typeof CHANNEL_CONFIG[ChannelType]][]).map(([ch, cfg]) => {
                 const Icon = cfg.icon;
-                const isBest = missionPlan?.Atlas.selectedChannel === ch;
-                const rev = missionPlan ? Math.round(missionPlan.Vega.predictedRevenue * parseFloat(cfg.conv) / 4.2) : 0;
+                const isBest = missionPlan?.Saarthi.selectedChannel === ch;
+                const rev = missionPlan ? Math.round(missionPlan.Khoj.predictedRevenue * parseFloat(cfg.conv) / 4.2) : 0;
                 return (
                   <div key={ch} className={`relative p-4 rounded-xl border transition-all ${isBest ? `${cfg.bg} ${cfg.borderColor} shadow-lg` : "border-gray-800/40 bg-gray-900/10"}`}>
                     {isBest && <div className="absolute top-2 right-2 px-1.5 py-0.5 rounded-md bg-green-500/20 border border-green-500/30 font-mono text-[7px] text-green-400 font-bold">RECOMMENDED</div>}
@@ -1375,7 +1375,7 @@ Format as JSON: { "Polaris": "...", "Luna": "...", "Vega": "...", "Nova": "...",
           {/* ══════════════════════════════════════════════════════
               SECTION 8 — FUTURE SIMULATOR
           ══════════════════════════════════════════════════════ */}
-          <div className={`orbit-panel p-5 rounded-2xl ${isLight ? "" : "border border-gray-800/60 bg-gray-900/20"}`}>
+          <div className={`Manthan-panel p-5 rounded-2xl ${isLight ? "" : "border border-gray-800/60 bg-gray-900/20"}`}>
             <div className="flex items-center gap-2 mb-4">
               <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center">
                 <FlaskConical size={12} className="text-white" />
@@ -1446,14 +1446,14 @@ Format as JSON: { "Polaris": "...", "Luna": "...", "Vega": "...", "Nova": "...",
           </div>
 
           {/* ══════════════════════════════════════════════════════
-              SECTION 11 — ATLAS EXECUTION CENTER
+              SECTION 11 — Saarthi EXECUTION CENTER
           ══════════════════════════════════════════════════════ */}
-          <div className={`orbit-panel p-5 rounded-2xl ${isLight ? "" : "border border-gray-800/60 bg-gray-900/20"}`}>
+          <div className={`Manthan-panel p-5 rounded-2xl ${isLight ? "" : "border border-gray-800/60 bg-gray-900/20"}`}>
             <div className="flex items-center gap-2 mb-5">
               <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center">
                 <Rocket size={12} className="text-white" />
               </div>
-              <h2 className={`font-space text-xs font-bold uppercase tracking-wider ${isLight ? "text-[#0F172A]" : "text-white"}`}>Atlas Execution Center</h2>
+              <h2 className={`font-space text-xs font-bold uppercase tracking-wider ${isLight ? "text-[#0F172A]" : "text-white"}`}>Saarthi Execution Center</h2>
               {missionPlan && (
                 <div className="ml-auto flex items-center gap-2">
                   <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg border font-mono text-[8px] font-bold ${
@@ -1472,11 +1472,11 @@ Format as JSON: { "Polaris": "...", "Luna": "...", "Vega": "...", "Nova": "...",
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                   {[
                     { label: "Campaign Status",  value: launchDone ? "Running" : missionPlan ? "Ready" : "Idle",  color: launchDone ? "text-green-400" : missionPlan ? "text-blue-400" : "text-gray-500" },
-                    { label: "Primary Channel",  value: missionPlan?.Atlas.selectedChannel || "—",                 color: "text-white" },
-                    { label: "Target Cohort",    value: missionPlan?.Polaris.segment || "—",                       color: "text-white" },
+                    { label: "Primary Channel",  value: missionPlan?.Saarthi.selectedChannel || "—",                 color: "text-white" },
+                    { label: "Target Cohort",    value: missionPlan?.Drishti.segment || "—",                       color: "text-white" },
                     { label: "Consent Check",    value: "VERIFIED",                                                color: "text-green-400" },
                     { label: "Queue Status",     value: "CLEARED",                                                 color: "text-blue-400" },
-                    { label: "Delivery Engine",  value: "ATLAS-99",                                                color: "text-purple-400" },
+                    { label: "Delivery Engine",  value: "Saarthi-99",                                                color: "text-purple-400" },
                     { label: "Twilio Gateway",   value: "ACTIVE",                                                  color: "text-green-400" },
                     { label: "Resend Gateway",   value: "ACTIVE",                                                  color: "text-green-400" },
                   ].map(item => (
@@ -1493,7 +1493,7 @@ Format as JSON: { "Polaris": "...", "Luna": "...", "Vega": "...", "Nova": "...",
                       <CheckCircle2 size={14} className="text-green-400" />
                       <span className="font-space text-xs font-bold text-green-400">Campaign Successfully Launched!</span>
                     </div>
-                    <p className="font-mono text-[9px] text-gray-400">Atlas has dispatched the campaign via {missionPlan?.Atlas.selectedChannel}. Mission Control is tracking engagement in real-time. Check Mission Control for live analytics.</p>
+                    <p className="font-mono text-[9px] text-gray-400">Saarthi has dispatched the campaign via {missionPlan?.Saarthi.selectedChannel}. Mission Control is tracking engagement in real-time. Check Mission Control for live analytics.</p>
                   </div>
                 )}
               </div>
@@ -1517,7 +1517,7 @@ Format as JSON: { "Polaris": "...", "Luna": "...", "Vega": "...", "Nova": "...",
                    <><Rocket size={16} /> Launch Autonomous Mission</>}
                 </button>
                 <p className="font-mono text-[8px] text-gray-600 text-center leading-relaxed">
-                  Dispatches via {missionPlan?.Atlas.selectedChannel || "channel"} · Updates Mission Control · Logs to Firestore
+                  Dispatches via {missionPlan?.Saarthi.selectedChannel || "channel"} · Updates Mission Control · Logs to Firestore
                 </p>
               </div>
             </div>
@@ -1594,7 +1594,7 @@ Format as JSON: { "Polaris": "...", "Luna": "...", "Vega": "...", "Nova": "...",
               </div>
 
               {/* Template Editor & API Sender (Right Column) */}
-              <div className="orbit-panel border border-gray-800/60 bg-gray-900/20 p-6 rounded-2xl relative overflow-hidden space-y-5">
+              <div className="Manthan-panel border border-gray-800/60 bg-gray-900/20 p-6 rounded-2xl relative overflow-hidden space-y-5">
                 <div className="flex justify-between items-start">
                   <div className="flex items-center gap-2">
                     <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
@@ -1746,7 +1746,7 @@ Format as JSON: { "Polaris": "...", "Luna": "...", "Vega": "...", "Nova": "...",
             </div>
 
             {/* Customer Preview Table */}
-            <div className="orbit-panel border border-gray-800/60 bg-gray-900/20 p-6 rounded-2xl relative overflow-hidden space-y-4">
+            <div className="Manthan-panel border border-gray-800/60 bg-gray-900/20 p-6 rounded-2xl relative overflow-hidden space-y-4">
               <div>
                 <h3 className="font-space text-xs font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
                   <Users size={13} className="text-blue-400" />
@@ -1842,11 +1842,11 @@ Format as JSON: { "Polaris": "...", "Luna": "...", "Vega": "...", "Nova": "...",
               ) : explainData ? (
                 <>
                   {[
-                    { agent: "Polaris", color: AGENT_COLORS.Polaris, icon: "👁", title: "Audience Intelligence Analysis",  key: "Polaris" },
-                    { agent: "Luna",    color: AGENT_COLORS.Luna,    icon: "🌙", title: "Opportunity Discovery Findings",  key: "Luna" },
-                    { agent: "Vega",    color: AGENT_COLORS.Vega,    icon: "⭐", title: "Predictive Analytics Report",     key: "Vega" },
-                    { agent: "Nova",    color: AGENT_COLORS.Nova,    icon: "✨", title: "Campaign Creation Strategy",      key: "Nova" },
-                    { agent: "Atlas",   color: AGENT_COLORS.Atlas,   icon: "🚀", title: "Execution Plan",                  key: "Atlas" },
+                    { agent: "Drishti", color: AGENT_COLORS.Drishti, icon: "👁", title: "Audience Intelligence Analysis",  key: "Drishti" },
+                    { agent: "Pragya",    color: AGENT_COLORS.Pragya,    icon: "🌙", title: "Opportunity Discovery Findings",  key: "Pragya" },
+                    { agent: "Khoj",    color: AGENT_COLORS.Khoj,    icon: "⭐", title: "Predictive Analytics Report",     key: "Khoj" },
+                    { agent: "Rachna",    color: AGENT_COLORS.Rachna,    icon: "✨", title: "Campaign Creation Strategy",      key: "Rachna" },
+                    { agent: "Saarthi",   color: AGENT_COLORS.Saarthi,   icon: "🚀", title: "Execution Plan",                  key: "Saarthi" },
                   ].map(r => (
                     <div key={r.agent} className="p-4 rounded-xl border border-gray-800/40 bg-gray-900/20 space-y-2">
                       <div className="flex items-center gap-2">
@@ -1862,7 +1862,7 @@ Format as JSON: { "Polaris": "...", "Luna": "...", "Vega": "...", "Nova": "...",
 
                   {explainData.overall && (
                     <div className="p-4 rounded-xl border border-blue-500/20 bg-blue-500/5">
-                      <p className="font-space text-[10px] font-bold text-blue-400 mb-1">orbit.ai's Overall Recommendation</p>
+                      <p className="font-space text-[10px] font-bold text-blue-400 mb-1">Manthan.ai's Overall Recommendation</p>
                       <p className="font-mono text-[9px] text-gray-400 leading-relaxed">{explainData.overall}</p>
                     </div>
                   )}

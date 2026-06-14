@@ -101,7 +101,7 @@ const analytics = [
 ];
 
 async function seed() {
-  console.log("🌱 Seeding database with pre-populated ORBIT data...");
+  console.log("🌱 Seeding database with pre-populated Manthan data...");
 
   try {
     // 1. Seed brand DNA

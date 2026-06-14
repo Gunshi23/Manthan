@@ -47,7 +47,7 @@ interface RegionalPersona {
 }
 
 interface BoardroomInsight {
-  agent: "Polaris" | "Luna" | "Vega" | "Nova" | "Atlas";
+  agent: "Drishti" | "Pragya" | "Khoj" | "Rachna" | "Saarthi";
   role: string;
   color: string;
   question: string;
@@ -111,11 +111,11 @@ const growthColor = (g: CityStats["growth"]) =>
   g === "high" ? "#22c55e" : g === "medium" ? "#eab308" : "#ef4444";
 
 const agentColor: Record<string, string> = {
-  Polaris: "#3b82f6",
-  Luna:    "#f59e0b",
-  Vega:    "#8b5cf6",
-  Nova:    "#ec4899",
-  Atlas:   "#22c55e",
+  Drishti: "#3b82f6",
+  Pragya:    "#f59e0b",
+  Khoj:    "#8b5cf6",
+  Rachna:    "#ec4899",
+  Saarthi:   "#22c55e",
 };
 
 // ─── COMPONENT ───────────────────────────────────────────────────────────────
@@ -130,11 +130,11 @@ export const RegionalIntelligence: React.FC = () => {
   const [filterRegion, setFilterRegion] = useState("all");
   const [launchedKeys, setLaunchedKeys] = useState<Set<string>>(new Set());
   const [boardroomInsights, setBoardroomInsights] = useState<BoardroomInsight[]>([
-    { agent: "Polaris", role: "Customer Intelligence",   color: agentColor.Polaris, question: "Who is buying and where?",                        insight: "", loading: false },
-    { agent: "Luna",    role: "Revenue Recovery",        color: agentColor.Luna,    question: "What opportunity exists in which region?",         insight: "", loading: false },
-    { agent: "Vega",    role: "Growth Strategy",         color: agentColor.Vega,    question: "Which region has highest growth potential?",        insight: "", loading: false },
-    { agent: "Nova",    role: "Campaign Architecture",   color: agentColor.Nova,    question: "What campaign should run in each region?",          insight: "", loading: false },
-    { agent: "Atlas",   role: "Execution Engine",        color: agentColor.Atlas,   question: "Can we execute region-specific campaigns now?",     insight: "", loading: false },
+    { agent: "Drishti", role: "Customer Intelligence",   color: agentColor.Drishti, question: "Who is buying and where?",                        insight: "", loading: false },
+    { agent: "Pragya",    role: "Revenue Recovery",        color: agentColor.Pragya,    question: "What opportunity exists in which region?",         insight: "", loading: false },
+    { agent: "Khoj",    role: "Growth Strategy",         color: agentColor.Khoj,    question: "Which region has highest growth potential?",        insight: "", loading: false },
+    { agent: "Rachna",    role: "Campaign Architecture",   color: agentColor.Rachna,    question: "What campaign should run in each region?",          insight: "", loading: false },
+    { agent: "Saarthi",   role: "Execution Engine",        color: agentColor.Saarthi,   question: "Can we execute region-specific campaigns now?",     insight: "", loading: false },
   ]);
   const [boardroomGenerated, setBoardroomGenerated] = useState(false);
 
@@ -274,24 +274,24 @@ export const RegionalIntelligence: React.FC = () => {
 
     const agentPrompts: { agent: BoardroomInsight["agent"]; systemPrompt: string }[] = [
       {
-        agent: "Polaris",
-        systemPrompt: `You are Polaris, the Customer Intelligence agent for orbit.ai. Regional data: Top cities by revenue: ${topCities}. Top regional personas: ${topPersonas}. Answer in 2-3 short sentences: Who is buying and from where? Mention specific cities and persona types. Be data-driven and specific.`
+        agent: "Drishti",
+        systemPrompt: `You are Drishti, the Customer Intelligence agent for Manthan.ai. Regional data: Top cities by revenue: ${topCities}. Top regional personas: ${topPersonas}. Answer in 2-3 short sentences: Who is buying and from where? Mention specific cities and persona types. Be data-driven and specific.`
       },
       {
-        agent: "Luna",
-        systemPrompt: `You are Luna, the Revenue Recovery agent for orbit.ai. Regional data: City breakdown: ${topCities}. Question: What revenue opportunities exist in under-performing regions? Mention specific cities. 2-3 sentences max. Focus on recovery tactics.`
+        agent: "Pragya",
+        systemPrompt: `You are Pragya, the Revenue Recovery agent for Manthan.ai. Regional data: City breakdown: ${topCities}. Question: What revenue opportunities exist in under-performing regions? Mention specific cities. 2-3 sentences max. Focus on recovery tactics.`
       },
       {
-        agent: "Vega",
-        systemPrompt: `You are Vega, the Growth Strategy agent for orbit.ai. Regional data: ${topCities}. Question: Which region has the highest growth potential and why? Name specific cities. Quantify with percentages or revenue estimates. 2-3 sentences.`
+        agent: "Khoj",
+        systemPrompt: `You are Khoj, the Growth Strategy agent for Manthan.ai. Regional data: ${topCities}. Question: Which region has the highest growth potential and why? Name specific cities. Quantify with percentages or revenue estimates. 2-3 sentences.`
       },
       {
-        agent: "Nova",
-        systemPrompt: `You are Nova, the Campaign Architecture agent for orbit.ai. Regional personas: ${topPersonas}. Question: What specific campaigns should run in each region? Name city-persona combinations and campaign types. 2-3 sentences.`
+        agent: "Rachna",
+        systemPrompt: `You are Rachna, the Campaign Architecture agent for Manthan.ai. Regional personas: ${topPersonas}. Question: What specific campaigns should run in each region? Name city-persona combinations and campaign types. 2-3 sentences.`
       },
       {
-        agent: "Atlas",
-        systemPrompt: `You are Atlas, the Execution Engine agent for orbit.ai. Regional data: ${topCities}. Question: Can we execute region-specific campaigns now? What channels work best per city? Mention WhatsApp/Email/RCS preferences by region. 2-3 sentences.`
+        agent: "Saarthi",
+        systemPrompt: `You are Saarthi, the Execution Engine agent for Manthan.ai. Regional data: ${topCities}. Question: Can we execute region-specific campaigns now? What channels work best per city? Mention WhatsApp/Email/RCS preferences by region. 2-3 sentences.`
       },
     ];
 
@@ -333,16 +333,16 @@ export const RegionalIntelligence: React.FC = () => {
     const second = stats[1];
     const topRp = rps[0];
     switch (agent) {
-      case "Polaris":
+      case "Drishti":
         return `Primary buying activity is concentrated in ${top?.city} and ${second?.city}, contributing ${Math.round(((top?.totalRevenue || 0) + (second?.totalRevenue || 0)) / (stats.reduce((s, c) => s + c.totalRevenue, 0) || 1) * 100)}% of total revenue. The ${topRp?.persona} persona in ${topRp?.city} is the single highest-value cohort with ₹${Math.round((topRp?.totalRevenue || 0) / 1000)}K in lifetime value. North India cities show strongest purchase frequency signals.`;
-      case "Luna":
-        return `${stats.find(c => c.growth === "low")?.city || "Lucknow"} has significant untapped recovery potential — churn risk is elevated but LTV per customer remains high. Deploying a 48-hour WhatsApp win-back campaign with a geo-specific 20% discount code could recover ₹${Math.round((stats.find(c => c.growth === "low")?.totalRevenue || 5000) * 0.3 / 1000)}K. Luna recommends prioritising these dormant high-value customers first.`;
-      case "Vega":
-        return `${stats.find(c => c.growth === "high")?.city || "Bangalore"} shows the highest growth momentum at +${stats.find(c => c.growth === "high")?.growthPct || 28}% MoM, driven by Young Working Professional and Premium segments. ${second?.city} represents a strong secondary growth pocket with lower saturation and expanding digital adoption. Vega recommends doubling campaign budget allocation to these two markets.`;
-      case "Nova":
+      case "Pragya":
+        return `${stats.find(c => c.growth === "low")?.city || "Lucknow"} has significant untapped recovery potential — churn risk is elevated but LTV per customer remains high. Deploying a 48-hour WhatsApp win-back campaign with a geo-specific 20% discount code could recover ₹${Math.round((stats.find(c => c.growth === "low")?.totalRevenue || 5000) * 0.3 / 1000)}K. Pragya recommends prioritising these dormant high-value customers first.`;
+      case "Khoj":
+        return `${stats.find(c => c.growth === "high")?.city || "Bangalore"} shows the highest growth momentum at +${stats.find(c => c.growth === "high")?.growthPct || 28}% MoM, driven by Young Working Professional and Premium segments. ${second?.city} represents a strong secondary growth pocket with lower saturation and expanding digital adoption. Khoj recommends doubling campaign budget allocation to these two markets.`;
+      case "Rachna":
         return `For ${top?.city}: launch a VIP Early Access campaign targeting ${top?.topPersona} personas via ${Object.entries(top?.channels || {}).sort((a,b) => b[1]-a[1])[0]?.[0] || "WhatsApp"}. For ${second?.city}: deploy a festival lookbook campaign with region-specific imagery. Each geo-campaign should use city-name personalisation in the subject line for +34% open rate lift.`;
-      case "Atlas":
-        return `All 10 city segments are ready for campaign dispatch. WhatsApp achieves highest open rates in Tier-2 cities (Lucknow, Noida, Ahmedabad). Email performs best for Mumbai and Bangalore professionals. RCS is ideal for Delhi premium customers. Atlas can begin parallel geo-campaign execution across all regions within 2 minutes upon approval.`;
+      case "Saarthi":
+        return `All 10 city segments are ready for campaign dispatch. WhatsApp achieves highest open rates in Tier-2 cities (Lucknow, Noida, Ahmedabad). Email performs best for Mumbai and Bangalore professionals. RCS is ideal for Delhi premium customers. Saarthi can begin parallel geo-campaign execution across all regions within 2 minutes upon approval.`;
       default:
         return "Regional intelligence analysis complete.";
     }

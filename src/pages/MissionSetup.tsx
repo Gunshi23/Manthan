@@ -17,21 +17,21 @@ export const MissionSetup: React.FC<MissionSetupProps> = ({ onSetupComplete }) =
     {
       id: "repeat",
       title: "Increase Repeat Purchases",
-      desc: "Activate Polaris behavioral filters to find regular buyers and schedule Nova incentive triggers.",
+      desc: "Activate Drishti behavioral filters to find regular buyers and schedule Rachna incentive triggers.",
       icon: TrendingUp,
       color: "from-blue-500/20 to-cyan-500/20 border-blue-500/30 text-blue-400"
     },
     {
       id: "churn",
       title: "Reduce Customer Churn",
-      desc: "Initialize Vega churn risk predictors. Isolate accounts showing slipping activity and alert Atlas operations.",
+      desc: "Initialize Khoj churn risk predictors. Isolate accounts showing slipping activity and alert Saarthi operations.",
       icon: UserMinus,
       color: "from-red-500/20 to-orange-500/20 border-red-500/30 text-red-400"
     },
     {
       id: "product",
       title: "Launch Product Campaign",
-      desc: "Draft multi-channel layouts with Nova creator and broadcast across optimal customer interest streams.",
+      desc: "Draft multi-channel layouts with Rachna creator and broadcast across optimal customer interest streams.",
       icon: Rocket,
       color: "from-purple-500/20 to-pink-500/20 border-purple-500/30 text-purple-400"
     },
@@ -54,11 +54,11 @@ export const MissionSetup: React.FC<MissionSetupProps> = ({ onSetupComplete }) =
 
     const onboardingLogs = [
       `Initializing neural framework for goal: "${selectedGoal}"...`,
-      "Polaris: Syncing customer segment clusters...",
-      "Vega: Calibrating conversion threshold models...",
-      "Nova: Spinning copy drafting networks...",
-      "Atlas: Mapping active dispatch channels...",
-      "Configuration locked. Target orbit stabilized."
+      "Drishti: Syncing customer segment clusters...",
+      "Khoj: Calibrating conversion threshold models...",
+      "Rachna: Spinning copy drafting networks...",
+      "Saarthi: Mapping active dispatch channels...",
+      "Configuration locked. Target Manthan stabilized."
     ];
 
     onboardingLogs.forEach((log, index) => {
@@ -74,23 +74,23 @@ export const MissionSetup: React.FC<MissionSetupProps> = ({ onSetupComplete }) =
   };
 
   return (
-    <div className={`relative min-h-screen space-grid flex flex-col items-center justify-center p-6 overflow-hidden ${isLight ? "bg-[#F8FAFC] text-[#0F172A]" : "bg-orbit-bg text-white"}`}>
+    <div className={`relative min-h-screen space-grid flex flex-col items-center justify-center p-6 overflow-hidden ${isLight ? "bg-[#F8FAFC] text-[#0F172A]" : "bg-Manthan-bg text-white"}`}>
       <div className="scanlines" />
 
       {/* Glow */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-orbit-glow-blue pointer-events-none" />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-Manthan-glow-blue pointer-events-none" />
 
       {!isGenerating ? (
         <div className="relative w-full max-w-4xl flex flex-col items-center">
           <div className="text-center mb-12">
-            <span className="font-mono text-[10px] tracking-widest text-orbit-blue uppercase border border-orbit-blue/30 px-3 py-1 rounded-full bg-orbit-blue/5">
+            <span className="font-mono text-[10px] tracking-widest text-Manthan-blue uppercase border border-Manthan-blue/30 px-3 py-1 rounded-full bg-Manthan-blue/5">
               MISSION SETUP SEQUENCE
             </span>
             <h1 className="text-3xl md:text-5xl font-bold font-space mt-4 mb-3">
               Establish Core Objective
             </h1>
             <p className="text-sm text-gray-400 max-w-xl mx-auto">
-              Select an objective node. orbit.ai will calibrate its AI agent boardroom weights to optimize segmentation, copy, and channel execution for this priority.
+              Select an objective node. Manthan.ai will calibrate its AI agent boardroom weights to optimize segmentation, copy, and channel execution for this priority.
             </p>
           </div>
 
@@ -105,7 +105,7 @@ export const MissionSetup: React.FC<MissionSetupProps> = ({ onSetupComplete }) =
                   onClick={() => handleSelect(item.title)}
                   className={`p-6 rounded-xl text-left border transition-all duration-300 flex gap-5 group ${isLight ? "bg-white border-[#E2E8F0] hover:bg-[#EFF6FF] hover:border-blue-400" : "bg-gray-900/40 border-gray-800 hover:border-white/20 hover:bg-gray-900/70"} ${
                     isSelected 
-                      ? "border-orbit-blue bg-gray-900/90 shadow-orbit-glow" 
+                      ? "border-Manthan-blue bg-gray-900/90 shadow-Manthan-glow" 
                       : "border-gray-800"
                   }`}
                 >
@@ -127,7 +127,7 @@ export const MissionSetup: React.FC<MissionSetupProps> = ({ onSetupComplete }) =
             disabled={!selectedGoal}
             className={`px-8 py-3.5 rounded-lg text-xs font-mono font-bold tracking-widest uppercase flex items-center gap-2 transition-all ${
               selectedGoal 
-                ? "bg-gradient-to-r from-orbit-blue to-orbit-purple text-white shadow-orbit-glow active:scale-95"
+                ? "bg-gradient-to-r from-Manthan-blue to-Manthan-purple text-white shadow-Manthan-glow active:scale-95"
                 : "bg-gray-800 border border-gray-700 text-gray-500 cursor-not-allowed"
             }`}
           >
@@ -137,9 +137,9 @@ export const MissionSetup: React.FC<MissionSetupProps> = ({ onSetupComplete }) =
         </div>
       ) : (
         /* Generation Log Overlay */
-        <div className="relative w-full max-w-lg bg-gray-900/80 backdrop-blur-md border border-gray-800 rounded-xl p-6 sm:p-8 shadow-orbit-glow flex flex-col">
+        <div className="relative w-full max-w-lg bg-gray-900/80 backdrop-blur-md border border-gray-800 rounded-xl p-6 sm:p-8 shadow-Manthan-glow flex flex-col">
           <div className="flex items-center gap-3 border-b border-gray-800 pb-4 mb-4">
-            <Loader2 size={16} className="text-orbit-blue animate-spin" />
+            <Loader2 size={16} className="text-Manthan-blue animate-spin" />
             <span className="font-mono text-xs text-gray-400">CALIBRATING AGENT BOARDS...</span>
           </div>
 

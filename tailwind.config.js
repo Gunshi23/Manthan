@@ -8,7 +8,7 @@ export default {
   theme: {
     extend: {
       colors: {
-        orbit: {
+        Manthan: {
           bg: "#050816",
           card: "#0F172A",
           elevated: "#1E293B",
@@ -24,11 +24,11 @@ export default {
           darkBorder: "rgba(255, 255, 255, 0.08)",
         },
         agent: {
-          polaris: "#3B82F6",
-          luna:    "#F59E0B",
-          vega:    "#8B5CF6",
-          nova:    "#EC4899",
-          atlas:   "#22C55E",
+          drishti: "#3B82F6",
+          pragya:  "#F59E0B",
+          khoj:    "#8B5CF6",
+          rachna:  "#EC4899",
+          saarthi: "#22C55E",
         },
         gray: {
           950: "#050816",

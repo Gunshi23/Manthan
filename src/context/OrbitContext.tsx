@@ -119,13 +119,13 @@ export interface Order {
 // Agent Log Interface
 export interface AgentLog {
   id: string;
-  agent: "System" | "Polaris" | "Nova" | "Vega" | "Atlas" | "Luna";
+  agent: "System" | "Drishti" | "Rachna" | "Khoj" | "Saarthi" | "Pragya";
   timestamp: string;
   message: string;
   type: "thought" | "action" | "chat" | "result";
 }
 
-// Luna Metrics Interface
+// Pragya Metrics Interface
 export interface LunaMetrics {
   recoverableRevenue: number;
   opportunityScore: number;
@@ -162,7 +162,7 @@ export interface MissionState {
     RCS?: { title: string; body: string; mediaUrl: string };
   };
   selectedChannel: "Email" | "WhatsApp" | "SMS" | "RCS";
-  boardroomDialogue?: { agent: "Polaris" | "Luna" | "Vega" | "Nova" | "Atlas"; message: string }[];
+  boardroomDialogue?: { agent: "Drishti" | "Pragya" | "Khoj" | "Rachna" | "Saarthi"; message: string }[];
 }
 
 export interface BoardroomVerdict {
@@ -313,7 +313,7 @@ const generateMockCustomers = (businessType: string = "Fashion & Apparel"): Cust
     preferredChannelPool = ["WhatsApp", "WhatsApp", "SMS", "Email"];
   }
 
-  let categories = ["Cyberwear", "Neural Implants", "Quantum Deck", "Orbit Thrusters", "Space Capsule Access", "Hologram Display"];
+  let categories = ["Cyberwear", "Neural Implants", "Quantum Deck", "Manthan Thrusters", "Space Capsule Access", "Hologram Display"];
   if (businessType === "Fashion & Apparel") {
     categories = ["Streetwear Hoodies", "Retro Shades", "Cargo Pants", "Denim Jackets", "Cyber Boots", "Premium Tees"];
   } else if (businessType === "Beauty & Skincare") {
@@ -325,7 +325,7 @@ const generateMockCustomers = (businessType: string = "Fashion & Apparel"): Cust
   } else if (businessType === "D2C Brand") {
     categories = ["Cyber Water Bottles", "Acoustic Pods", "Eco-Fiber Totes", "Grid Packs", "Smart Cap Nodes", "Travel Organizers"];
   } else if (businessType === "Enterprise") {
-    categories = ["Server Cluster Licenses", "Dedicated API Gateways", "Cognitive Nodes SaaS", "Master DB Integrations", "Orbit Cloud Access", "SLA Support Nodes"];
+    categories = ["Server Cluster Licenses", "Dedicated API Gateways", "Cognitive Nodes SaaS", "Master DB Integrations", "Manthan Cloud Access", "SLA Support Nodes"];
   }
 
   // Geo data pool — 10 Indian cities
@@ -435,7 +435,7 @@ const generateMockOrders = (customers: Customer[], businessType: string = "Fashi
   } else if (businessType === "D2C Brand") {
     products = ["Cyber Water Bottle", "Acoustic Pods", "Eco-Fiber Tote", "Grid Pack v2", "Smart Cap Node"];
   } else if (businessType === "Enterprise") {
-    products = ["Server Cluster License", "Dedicated API Gateway", "Cognitive Nodes SaaS", "Master DB Integrations", "Orbit Cloud Access"];
+    products = ["Server Cluster License", "Dedicated API Gateway", "Cognitive Nodes SaaS", "Master DB Integrations", "Manthan Cloud Access"];
   }
   
   const channels = ["Email", "WhatsApp", "SMS", "RCS"];
@@ -1000,19 +1000,19 @@ export const OrbitProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         id: "log_1",
         agent: "System" as const,
         timestamp: new Date(Date.now() - 3600000).toLocaleTimeString(),
-        message: "orbit.ai Core System online. Version 4.8.1-Vanguard.",
+        message: "Manthan.ai Core System online. Version 4.8.1-Vanguard.",
         type: "thought" as const
       },
       {
         id: "log_2",
-        agent: "Polaris" as const,
+        agent: "Drishti" as const,
         timestamp: new Date(Date.now() - 3500000).toLocaleTimeString(),
         message: "Scanning customer cohorts. Detected 18 Slipping Away VIPs.",
         type: "action" as const
       },
       {
         id: "log_3",
-        agent: "Vega" as const,
+        agent: "Khoj" as const,
         timestamp: new Date(Date.now() - 3400000).toLocaleTimeString(),
         message: "Predictive ROI evaluation complete for slipping cohort. High impact channel identified: WhatsApp.",
         type: "thought" as const
@@ -1133,11 +1133,11 @@ export const OrbitProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         const textToSpeak = `${agent} says: ${message}`;
         const utterance = new SpeechSynthesisUtterance(textToSpeak);
         // Change pitch slightly based on agent to differentiate them
-        if (agent === "Polaris") { utterance.pitch = 1.2; utterance.rate = 1.05; }
-        else if (agent === "Vega") { utterance.pitch = 0.9; utterance.rate = 0.95; }
-        else if (agent === "Nova") { utterance.pitch = 1.3; utterance.rate = 1.1; }
-        else if (agent === "Atlas") { utterance.pitch = 0.85; utterance.rate = 1.0; }
-        else if (agent === "Luna") { utterance.pitch = 1.1; utterance.rate = 1.15; }
+        if (agent === "Drishti") { utterance.pitch = 1.2; utterance.rate = 1.05; }
+        else if (agent === "Khoj") { utterance.pitch = 0.9; utterance.rate = 0.95; }
+        else if (agent === "Rachna") { utterance.pitch = 1.3; utterance.rate = 1.1; }
+        else if (agent === "Saarthi") { utterance.pitch = 0.85; utterance.rate = 1.0; }
+        else if (agent === "Pragya") { utterance.pitch = 1.1; utterance.rate = 1.15; }
         
         window.speechSynthesis.speak(utterance);
       }
@@ -1198,7 +1198,7 @@ export const OrbitProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         const health = await healthRes.json();
         if (health.status !== "online") throw new Error("Backend status invalid");
 
-        console.log("Connected to ORBIT Backend. Fetching state...");
+        console.log("Connected to Manthan Backend. Fetching state...");
 
         // Sync API keys on startup if loaded from localStorage or env
         const startupPayload: any = {};
@@ -1311,7 +1311,7 @@ export const OrbitProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     addAgentLog("System", "Initializing AI Customer DNA Persona analysis...", "thought");
     
     if (config.geminiKey) {
-      addAgentLog("Polaris", "Analyzing customer buying profiles, LTV, preferred channels, and transaction registers...", "action");
+      addAgentLog("Drishti", "Analyzing customer buying profiles, LTV, preferred channels, and transaction registers...", "action");
       
       const loyalists = customers.filter(c => c.segment === "Loyalists");
       const slipping = customers.filter(c => c.segment === "Slipping Away");
@@ -1378,7 +1378,7 @@ For each persona, generate:
 23. lifestyle (Lifestyle Description)
 24. buyingTriggers (Buying triggers/prompts)
 25. preferredProducts (Preferred products/categories)
-26. aiInsightsTargeting (AI insights explaining why they matter and how ORBIT should target them)
+26. aiInsightsTargeting (AI insights explaining why they matter and how Manthan should target them)
 
 Return a single valid JSON object with a "personas" array containing these 6 personas. Do not return any markdown code block formatting. Only return the raw JSON object matching this schema:
 {
@@ -1416,7 +1416,7 @@ Return a single valid JSON object with a "personas" array containing these 6 per
 `;
 
       try {
-        const sys = "You are the ORBIT Customer DNA Engine. Group the customer base into 6 demographic archetypes and return a structured JSON response.";
+        const sys = "You are the Manthan Customer DNA Engine. Group the customer base into 6 demographic archetypes and return a structured JSON response.";
         const res = await callGeminiAPI(prompt, sys, config.geminiKey);
         const parsed = parseGeminiJson<any>(res, null);
         if (parsed && Array.isArray(parsed.personas) && parsed.personas.length > 0) {
@@ -1427,7 +1427,7 @@ Return a single valid JSON object with a "personas" array containing these 6 per
             avatar: avatars[idx % avatars.length]
           }));
           setPersonas(finalPersonas);
-          addAgentLog("Polaris", `Successfully mapped ${finalPersonas.length} Customer DNA profiles dynamically using Gemini.`, "result");
+          addAgentLog("Drishti", `Successfully mapped ${finalPersonas.length} Customer DNA profiles dynamically using Gemini.`, "result");
           return;
         }
       } catch (err: any) {
@@ -1437,7 +1437,7 @@ Return a single valid JSON object with a "personas" array containing these 6 per
 
     const localPersonas = mapCustomersToPersonas(customers, businessType);
     setPersonas(localPersonas);
-    addAgentLog("Polaris", `Clustered ${localPersonas.length} Customer DNA profiles dynamically using local mapping.`, "result");
+    addAgentLog("Drishti", `Clustered ${localPersonas.length} Customer DNA profiles dynamically using local mapping.`, "result");
   }, [customers, businessType, workspaceDna, config.geminiKey, addAgentLog]);
 
   // ─── UNIVERSAL BUSINESS INTELLIGENCE ENGINE ─────────────────────────────────
@@ -1547,7 +1547,7 @@ Return a single valid JSON object with a "personas" array containing these 6 per
 
       const currency = detectCurrency(rows);
       const sampleRows = rows.length;
-      addAgentLog("Polaris", `Parsed ${sampleRows} records with ${headers.length} columns. Detected currency: ${currency}.`, "action");
+      addAgentLog("Drishti", `Parsed ${sampleRows} records with ${headers.length} columns. Detected currency: ${currency}.`, "action");
 
       // Extract numeric revenue and customer count heuristically
       const revenueKeys = headers.filter(h => /revenue|amount|total|sales|price|value|earnings/i.test(h));
@@ -1571,8 +1571,8 @@ Return a single valid JSON object with a "personas" array containing these 6 per
       let dna: BusinessDNA;
 
       if (config.geminiKey) {
-        addAgentLog("Polaris", "Sending dataset schema to Gemini for industry classification and DNA extraction...", "action");
-        const geminiPrompt = `You are the ORBIT Universal Business DNA Engine.
+        addAgentLog("Drishti", "Sending dataset schema to Gemini for industry classification and DNA extraction...", "action");
+        const geminiPrompt = `You are the Manthan Universal Business DNA Engine.
 
 Analyze this dataset schema and sample data, then return a complete Business DNA profile.
 
@@ -1612,11 +1612,11 @@ Classify this business and extract intelligence. Return ONLY a valid JSON object
 }`;
 
         try {
-          const res = await callGeminiAPI(geminiPrompt, "You are the ORBIT Business DNA Engine. Return only valid JSON.", config.geminiKey);
+          const res = await callGeminiAPI(geminiPrompt, "You are the Manthan Business DNA Engine. Return only valid JSON.", config.geminiKey);
           const parsed = parseGeminiJson<any>(res, null);
           if (parsed && parsed.industryType) {
             dna = { ...parsed, dataSource: "csv", columns: headers, sampleRows, uploadedAt: new Date().toISOString() };
-            addAgentLog("Polaris", `Business DNA decoded: ${dna.industryType} — ${dna.businessModel}. Primary metric: ${dna.primaryMetric}.`, "result");
+            addAgentLog("Drishti", `Business DNA decoded: ${dna.industryType} — ${dna.businessModel}. Primary metric: ${dna.primaryMetric}.`, "result");
           } else {
             throw new Error("Invalid Gemini DNA response");
           }
@@ -1647,7 +1647,7 @@ Classify this business and extract intelligence. Return ONLY a valid JSON object
           : hint.includes("coaching") || hint.includes("student") ? "Coaching Institute"
           : "Fashion Brand";
         dna = buildFallbackDna(industryGuess, totalRevenue, totalCustomers, headers, sampleRows);
-        addAgentLog("Polaris", `Gemini not available. Heuristic classification: ${dna.industryType}.`, "result");
+        addAgentLog("Drishti", `Gemini not available. Heuristic classification: ${dna.industryType}.`, "result");
       }
 
       const newCustomers = generateMockCustomers(dna.industryType);
@@ -1665,7 +1665,7 @@ Classify this business and extract intelligence. Return ONLY a valid JSON object
           id: `log_${Date.now()}`,
           agent: "System" as const,
           timestamp: new Date().toLocaleTimeString(),
-          message: `Calibrated ORBIT modules for uploaded business: ${file.name}.`,
+          message: `Calibrated Manthan modules for uploaded business: ${file.name}.`,
           type: "thought" as const
         }
       ];
@@ -1729,7 +1729,7 @@ Classify this business and extract intelligence. Return ONLY a valid JSON object
         body: JSON.stringify({ businessType: dna.industryType, growthStyle: "High Growth", dna })
       }).catch(() => {});
 
-      addAgentLog("System", `ORBIT reconfigured for ${dna.industryType}. All modules updated to industry DNA profile.`, "thought");
+      addAgentLog("System", `Manthan reconfigured for ${dna.industryType}. All modules updated to industry DNA profile.`, "thought");
 
     } catch (err) {
       console.error("Dataset upload failed:", err);
@@ -1753,7 +1753,7 @@ Classify this business and extract intelligence. Return ONLY a valid JSON object
     setTimeout(() => {
       setPersonas(mapCustomersToPersonas(newCustomers, dna.industryType));
     }, 100);
-    addAgentLog("System", `Applied ${industryKey} DNA preset. ORBIT modules reconfigured.`, "thought");
+    addAgentLog("System", `Applied ${industryKey} DNA preset. Manthan modules reconfigured.`, "thought");
     fetch("/api/brand-dna", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -1850,7 +1850,7 @@ Classify this business and extract intelligence. Return ONLY a valid JSON object
       ];
     }
 
-    // Custom Luna Metrics
+    // Custom Pragya Metrics
     let recoverableRevenue = 20550;
     let opportunityScore = 88;
     let inactiveCustomers = 12;
@@ -1900,7 +1900,7 @@ Classify this business and extract intelligence. Return ONLY a valid JSON object
       recoveryConfidence
     });
 
-    addAgentLog("System", `Calibrated orbit.ai Core parameters for ${type} node schema. Mapped ${newCustomers.length} profiles, regenerated transaction registers.`, "thought");
+    addAgentLog("System", `Calibrated Manthan.ai Core parameters for ${type} node schema. Mapped ${newCustomers.length} profiles, regenerated transaction registers.`, "thought");
   }, [addAgentLog]);
 
   // Set initial theme on HTML class
@@ -2090,39 +2090,39 @@ Classify this business and extract intelligence. Return ONLY a valid JSON object
       
       if (config.geminiKey) {
         try {
-          const sys = `You are the ORBIT Growth Engine, coordinating 5 AI agents to plan and generate a growth campaign for the business objective.
+          const sys = `You are the Manthan Growth Engine, coordinating 5 AI agents to plan and generate a growth campaign for the business objective.
 The agents are:
-- Polaris (Audience Intelligence): Chooses one segment from ["Loyalists", "Slipping Away", "High-Value Inactive", "New Signups"] and explains findings.
-- Luna (Recovery): Audits leakage, specifies recoverableRevenue (number), inactiveCustomers (number), abandonedLeads (number), recoveryConfidence (number), and a detailed recovery explanation.
-- Vega (Predictive ROI): Computes predictedRoi (number), predictedRevenue (number), and a detailed forecast explanation.
-- Nova (Campaign Creator): Generates copy for Email (subject, body), WhatsApp (body), SMS (body), and RCS (title, body, mediaUrl).
-- Atlas (Operations): Chooses one channel from ["Email", "WhatsApp", "SMS", "RCS"] and explains the dispatch routing.
+- Drishti (Audience Intelligence): Chooses one segment from ["Loyalists", "Slipping Away", "High-Value Inactive", "New Signups"] and explains findings.
+- Pragya (Recovery): Audits leakage, specifies recoverableRevenue (number), inactiveCustomers (number), abandonedLeads (number), recoveryConfidence (number), and a detailed recovery explanation.
+- Khoj (Predictive ROI): Computes predictedRoi (number), predictedRevenue (number), and a detailed forecast explanation.
+- Rachna (Campaign Creator): Generates copy for Email (subject, body), WhatsApp (body), SMS (body), and RCS (title, body, mediaUrl).
+- Saarthi (Operations): Chooses one channel from ["Email", "WhatsApp", "SMS", "RCS"] and explains the dispatch routing.
 
 Format your response as a single valid JSON object matching this schema exactly:
 {
-  "Polaris": {
+  "Drishti": {
     "segment": "Loyalists" | "Slipping Away" | "High-Value Inactive" | "New Signups",
     "explanation": "your explanation"
   },
-  "Luna": {
+  "Pragya": {
     "recoverableRevenue": 12000,
     "inactiveCustomers": 12,
     "abandonedLeads": 15,
     "recoveryConfidence": 92,
     "explanation": "your explanation"
   },
-  "Vega": {
+  "Khoj": {
     "predictedRoi": 4.2,
     "predictedRevenue": 35000,
     "explanation": "your explanation"
   },
-  "Nova": {
+  "Rachna": {
     "Email": { "subject": "...", "body": "..." },
     "WhatsApp": { "body": "..." },
     "SMS": { "body": "..." },
     "RCS": { "title": "...", "body": "...", "mediaUrl": "..." }
   },
-  "Atlas": {
+  "Saarthi": {
     "selectedChannel": "Email" | "WhatsApp" | "SMS" | "RCS",
     "explanation": "your explanation"
   }
@@ -2144,13 +2144,13 @@ Do not return any markdown code block formatting. Only return the raw JSON objec
       addAgentLog("System", `Direct Gemini API Call Failed: ${geminiError}`, "result");
     }
 
-    // Step 2: Polaris finds audience
+    // Step 2: Drishti finds audience
     setMission(prev => ({ ...prev, step: "analyzing" }));
-    addAgentLog("Polaris", "Analyzing customer database graph. Searching for matching demographic signals.", "action");
+    addAgentLog("Drishti", "Analyzing customer database graph. Searching for matching demographic signals.", "action");
     await wait(1500);
 
-    if (consolidatedResult?.Polaris) {
-      const pData = consolidatedResult.Polaris;
+    if (consolidatedResult?.Drishti) {
+      const pData = consolidatedResult.Drishti;
       if (pData.segment && ["Loyalists", "Slipping Away", "High-Value Inactive", "New Signups"].includes(pData.segment)) {
         targetSegment = pData.segment as Customer["segment"];
       }
@@ -2178,16 +2178,16 @@ Do not return any markdown code block formatting. Only return the raw JSON objec
       audienceCount: cohort.length
     }));
     
-    addAgentLog("Polaris", `Demographic segmentation complete. Target segment: ${targetSegment}. ${filterMsg}`, "chat");
-    bRoomDialogue.push({ agent: "Polaris", text: `I have mapped ${cohort.length} targets in the ${targetSegment} segment. ${filterMsg}` });
+    addAgentLog("Drishti", `Demographic segmentation complete. Target segment: ${targetSegment}. ${filterMsg}`, "chat");
+    bRoomDialogue.push({ agent: "Drishti", text: `I have mapped ${cohort.length} targets in the ${targetSegment} segment. ${filterMsg}` });
     await wait(1500);
 
-    // Step 2.5: Luna searches for leaks
-    addAgentLog("Luna", "Initiating leakage and dormancy audits on targets...", "action");
+    // Step 2.5: Pragya searches for leaks
+    addAgentLog("Pragya", "Initiating leakage and dormancy audits on targets...", "action");
     await wait(1500);
 
-    if (consolidatedResult?.Luna) {
-      const lData = consolidatedResult.Luna;
+    if (consolidatedResult?.Pragya) {
+      const lData = consolidatedResult.Pragya;
       recoveredCount = lData.inactiveCustomers || lData.abandonedLeads || 10;
       recoveredValue = lData.recoverableRevenue || 12000;
       confidence = lData.recoveryConfidence || 90;
@@ -2225,20 +2225,20 @@ Do not return any markdown code block formatting. Only return the raw JSON objec
         }));
       }
     }
-    addAgentLog("Luna", lunaMsg, "chat");
-    bRoomDialogue.push({ agent: "Luna", text: lunaMsg });
+    addAgentLog("Pragya", lunaMsg, "chat");
+    bRoomDialogue.push({ agent: "Pragya", text: lunaMsg });
     await wait(1500);
 
-    // Step 3: Vega predicts ROI
+    // Step 3: Khoj predicts ROI
     setMission(prev => ({
       ...prev,
       step: "predicting"
     }));
-    addAgentLog("Vega", `Starting conversion forecast for ${cohort.length} targets. Simulating ROI curves.`, "action");
+    addAgentLog("Khoj", `Starting conversion forecast for ${cohort.length} targets. Simulating ROI curves.`, "action");
     await wait(1500);
 
-    if (consolidatedResult?.Vega) {
-      const vData = consolidatedResult.Vega;
+    if (consolidatedResult?.Khoj) {
+      const vData = consolidatedResult.Khoj;
       predictedRoi = vData.predictedRoi || 4.2;
       predictedRevenue = vData.predictedRevenue || 35000;
       vegaMsg = vData.explanation || `Forecast: Channel yield optimal. Expected revenue: ₹${predictedRevenue.toLocaleString()}. Predicted ROI: ${predictedRoi.toFixed(1)}x.`;
@@ -2254,20 +2254,20 @@ Do not return any markdown code block formatting. Only return the raw JSON objec
       predictedRoi: parseFloat(predictedRoi.toFixed(2)),
       predictedRevenue
     }));
-    addAgentLog("Vega", vegaMsg, "chat");
-    bRoomDialogue.push({ agent: "Vega", text: vegaMsg });
+    addAgentLog("Khoj", vegaMsg, "chat");
+    bRoomDialogue.push({ agent: "Khoj", text: vegaMsg });
     await wait(1500);
 
-    // Step 4: Nova generates content
+    // Step 4: Rachna generates content
     setMission(prev => ({
       ...prev,
       step: "generating"
     }));
-    addAgentLog("Nova", "Spinning content generation engine. Assembling custom copywriting nodes.", "action");
+    addAgentLog("Rachna", "Spinning content generation engine. Assembling custom copywriting nodes.", "action");
     await wait(1500);
 
-    if (consolidatedResult?.Nova) {
-      const nData = consolidatedResult.Nova;
+    if (consolidatedResult?.Rachna) {
+      const nData = consolidatedResult.Rachna;
       if (nData.Email) copy.Email = nData.Email;
       if (nData.WhatsApp) copy.WhatsApp = nData.WhatsApp;
       if (nData.SMS) copy.SMS = nData.SMS;
@@ -2275,7 +2275,7 @@ Do not return any markdown code block formatting. Only return the raw JSON objec
     }
 
     if (!copy.Email.body) {
-      let whatsAppBody = `⚡ *ORBIT ALERT* ⚡\nHey {{name}}, ready to upgrade your setup? Get exclusive pre-launch access to the Quantum Deck. Reply *YES* to claim. Free priority shipping included.`;
+      let whatsAppBody = `⚡ *Manthan ALERT* ⚡\nHey {{name}}, ready to upgrade your setup? Get exclusive pre-launch access to the Quantum Deck. Reply *YES* to claim. Free priority shipping included.`;
       const gLower = goal.toLowerCase();
       if (gLower.includes("recovery") || gLower.includes("churn") || gLower.includes("slipping") || gLower.includes("inactive") || gLower.includes("win-back")) {
         whatsAppBody = `Hi {{name}} 👋\n\nWe noticed you haven't visited recently.\n\nHere's an exclusive offer for you.`;
@@ -2287,35 +2287,35 @@ Do not return any markdown code block formatting. Only return the raw JSON objec
 
       copy = {
         Email: {
-          subject: `Exclusive Access: Elevate Your Setup with orbit.ai Core`,
-          body: `Hello {{name}},\n\nYour journey with ORBIT is just beginning. As one of our select targets, we are opening up access to the all-new Cyberwear Implant upgrades. \n\nGet yours today with priority shipping.\n\nBest regards,\norbit.ai Intelligence Network`
+          subject: `Exclusive Access: Elevate Your Setup with Manthan.ai Core`,
+          body: `Hello {{name}},\n\nYour journey with Manthan is just beginning. As one of our select targets, we are opening up access to the all-new Cyberwear Implant upgrades. \n\nGet yours today with priority shipping.\n\nBest regards,\nManthan.ai Intelligence Network`
         },
         WhatsApp: {
           body: whatsAppBody
         },
         SMS: {
-          body: `ORBIT: Hi {{name}}, get exclusive pre-sale access to the new Quantum Implants. Order now at: https://orbit.io/q-deck`
+          body: `Manthan: Hi {{name}}, get exclusive pre-sale access to the new Quantum Implants. Order now at: https://manthan.ai/q-deck`
         },
         RCS: {
           title: "Exclusive Launch Access",
-          body: "Hey {{name}}, Vega predicted you would love this. Elevate your setup today with the Cyberwear Implant v4. Interactive booking inside.",
+          body: "Hey {{name}}, Khoj predicted you would love this. Elevate your setup today with the Cyberwear Implant v4. Interactive booking inside.",
           mediaUrl: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=400&q=80"
         }
       };
     }
 
-    addAgentLog("Nova", "Marketing copies generated across channels (WhatsApp, Email, SMS, RCS). Content hyper-personalized using DNA tags.", "chat");
-    bRoomDialogue.push({ agent: "Nova", text: `I have generated dynamic copies across Email, WhatsApp, SMS, and RCS channels, personalized using DNA tags.` });
+    addAgentLog("Rachna", "Marketing copies generated across channels (WhatsApp, Email, SMS, RCS). Content hyper-personalized using DNA tags.", "chat");
+    bRoomDialogue.push({ agent: "Rachna", text: `I have generated dynamic copies across Email, WhatsApp, SMS, and RCS channels, personalized using DNA tags.` });
     await wait(1500);
 
-    // Step 5: Atlas verifies delivery routes and optimal channel
-    addAgentLog("Atlas", "Analyzing delivery nodes and selecting optimal dispatch channels...", "action");
+    // Step 5: Saarthi verifies delivery routes and optimal channel
+    addAgentLog("Saarthi", "Analyzing delivery nodes and selecting optimal dispatch channels...", "action");
     await wait(1500);
 
     let atlasMsg = "";
 
-    if (consolidatedResult?.Atlas) {
-      const aData = consolidatedResult.Atlas;
+    if (consolidatedResult?.Saarthi) {
+      const aData = consolidatedResult.Saarthi;
       if (aData.selectedChannel && ["Email", "WhatsApp", "SMS", "RCS"].includes(aData.selectedChannel)) {
         selectedChannel = aData.selectedChannel as Campaign["channel"];
       }
@@ -2327,8 +2327,8 @@ Do not return any markdown code block formatting. Only return the raw JSON objec
       atlasMsg = `Optimal delivery channel verified: ${selectedChannel}. Dispatch buffers armed.`;
     }
 
-    addAgentLog("Atlas", atlasMsg, "chat");
-    bRoomDialogue.push({ agent: "Atlas", text: atlasMsg });
+    addAgentLog("Saarthi", atlasMsg, "chat");
+    bRoomDialogue.push({ agent: "Saarthi", text: atlasMsg });
 
     // Retrieve boardroom dialogue sequence from Express backend with a 3-second timeout
     const brController = new AbortController();
@@ -2367,7 +2367,7 @@ Do not return any markdown code block formatting. Only return the raw JSON objec
     // In autonomous mode, auto-dispatch immediately
     if (config.autonomousMode) {
       await wait(1500);
-      addAgentLog("Atlas", "[Autonomous Mode Activated] Dispatching campaign automatically.", "action");
+      addAgentLog("Saarthi", "[Autonomous Mode Activated] Dispatching campaign automatically.", "action");
       launchMissionCampaignRef.current?.(selectedChannel);
     }
   }, [customers, config, addAgentLog, businessType, cancelMission]);
@@ -2406,7 +2406,7 @@ Do not return any markdown code block formatting. Only return the raw JSON objec
       step: "dispatched"
     }));
 
-    addAgentLog("Atlas", `Campaign dispatched via ${channel}. Initializing routing gateways...`, "action");
+    addAgentLog("Saarthi", `Campaign dispatched via ${channel}. Initializing routing gateways...`, "action");
 
     const speedMultiplier = config.simulationSpeed;
     const wait = (ms: number) => new Promise(res => setTimeout(res, ms / speedMultiplier));
@@ -2428,7 +2428,7 @@ Do not return any markdown code block formatting. Only return the raw JSON objec
         audience: matchingCohort.map(c => ({ phone: c.phone, email: c.email, name: c.name })),
         template: channel === "WhatsApp" ? (mission.generatedContent.WhatsApp?.body || "") : (mission.generatedContent.Email?.body || ""),
         missionId: campaignId,
-        subject: mission.generatedContent.Email?.subject || "Special Offer from ORBIT"
+        subject: mission.generatedContent.Email?.subject || "Special Offer from Manthan"
       })
     }).catch(err => {
       console.warn("Backend campaign dispatch failed to run:", err);
@@ -2436,7 +2436,7 @@ Do not return any markdown code block formatting. Only return the raw JSON objec
 
     if (channel === "WhatsApp") {
       // Live WhatsApp Campaign Run
-      const templateBody = mission.generatedContent.WhatsApp?.body || "Hello from ORBIT";
+      const templateBody = mission.generatedContent.WhatsApp?.body || "Hello from Manthan";
       const firebaseConfig = {
         firebaseKey: config.firebaseKey,
         firebaseProjectId: config.firebaseProjectId
@@ -2449,7 +2449,7 @@ Do not return any markdown code block formatting. Only return the raw JSON objec
       setMission(prev => ({ ...prev, isActive: false, step: "idle" }));
       setActiveMissionsCount(0);
 
-      addAgentLog("Atlas", `Atlas routing campaign to Twilio WhatsApp Sandbox for ${recipients.length} numbers.`, "action");
+      addAgentLog("Saarthi", `Saarthi routing campaign to Twilio WhatsApp Sandbox for ${recipients.length} numbers.`, "action");
 
       // Execute twilio send campaign
       const result = await sendCampaign(
@@ -2478,7 +2478,7 @@ Do not return any markdown code block formatting. Only return the raw JSON objec
           }));
 
           if (status === "Failed") {
-            addAgentLog("Atlas", `Message fail [${recipients[index].name}]: ${info}`, "thought");
+            addAgentLog("Saarthi", `Message fail [${recipients[index].name}]: ${info}`, "thought");
           } else if (status === "Delivered") {
             addAgentLog("System", `Delivered to ${recipients[index].name} [SID: ${info}]`, "thought");
           }
@@ -2488,7 +2488,7 @@ Do not return any markdown code block formatting. Only return the raw JSON objec
       const delCount = result.dispatchedCount;
       const failCount = result.failedCount;
 
-      addAgentLog("Atlas", `Twilio dispatch completed. Sent: ${delCount}, Failed: ${failCount}`, "chat");
+      addAgentLog("Saarthi", `Twilio dispatch completed. Sent: ${delCount}, Failed: ${failCount}`, "chat");
 
       // Trigger Simulated Conversions for Delivered Messages
       if (delCount > 0) {
@@ -2548,12 +2548,12 @@ Do not return any markdown code block formatting. Only return the raw JSON objec
 
         setOrders(prev => [...newOrdersList, ...prev]);
         setGrowthScore(prev => parseFloat((prev + 1.0 + Math.random() * 0.5).toFixed(1)));
-        addAgentLog("Atlas", `Campaign ${mission.goal} conversions tracked. Converted: ${purCount} VIPs. Yield: ₹${revenue.toLocaleString()}`, "chat");
-        addAgentLog("Vega", `Customer Churn Risk re-computed. Churn trend is DOWN.`, "chat");
+        addAgentLog("Saarthi", `Campaign ${mission.goal} conversions tracked. Converted: ${purCount} VIPs. Yield: ₹${revenue.toLocaleString()}`, "chat");
+        addAgentLog("Khoj", `Customer Churn Risk re-computed. Churn trend is DOWN.`, "chat");
       }
     } else if (channel === "Email") {
       // Live Resend Email Campaign Run
-      const templateBody = mission.generatedContent.Email?.body || "Hello from ORBIT";
+      const templateBody = mission.generatedContent.Email?.body || "Hello from Manthan";
       const subject = mission.generatedContent.Email?.subject || "Hello World";
       const firebaseConfig = {
         firebaseKey: config.firebaseKey,
@@ -2567,7 +2567,7 @@ Do not return any markdown code block formatting. Only return the raw JSON objec
       setMission(prev => ({ ...prev, isActive: false, step: "idle" }));
       setActiveMissionsCount(0);
 
-      addAgentLog("Atlas", `Atlas routing campaign to Resend Email service for ${recipients.length} emails.`, "action");
+      addAgentLog("Saarthi", `Saarthi routing campaign to Resend Email service for ${recipients.length} emails.`, "action");
 
       // Execute resend send campaign
       const result = await sendEmailCampaign(
@@ -2598,7 +2598,7 @@ Do not return any markdown code block formatting. Only return the raw JSON objec
           }));
 
           if (status === "Failed") {
-            addAgentLog("Atlas", `Email fail [${recipients[index].name}]: ${info}`, "thought");
+            addAgentLog("Saarthi", `Email fail [${recipients[index].name}]: ${info}`, "thought");
           } else if (status === "Delivered") {
             addAgentLog("System", `Delivered to ${recipients[index].name} [ID: ${info}]`, "thought");
           }
@@ -2608,7 +2608,7 @@ Do not return any markdown code block formatting. Only return the raw JSON objec
       const delCount = result.dispatchedCount;
       const failCount = result.failedCount;
 
-      addAgentLog("Atlas", `Resend dispatch completed. Sent: ${delCount}, Failed: ${failCount}`, "chat");
+      addAgentLog("Saarthi", `Resend dispatch completed. Sent: ${delCount}, Failed: ${failCount}`, "chat");
 
       // Trigger Simulated Conversions for Delivered Messages
       if (delCount > 0) {
@@ -2668,8 +2668,8 @@ Do not return any markdown code block formatting. Only return the raw JSON objec
 
         setOrders(prev => [...newOrdersList, ...prev]);
         setGrowthScore(prev => parseFloat((prev + 0.8 + Math.random() * 0.4).toFixed(1)));
-        addAgentLog("Atlas", `Campaign ${mission.goal} conversions tracked. Converted: ${purCount} VIPs. Yield: ₹${revenue.toLocaleString()}`, "chat");
-        addAgentLog("Vega", `Customer Churn Risk re-computed. Churn trend is DOWN.`, "chat");
+        addAgentLog("Saarthi", `Campaign ${mission.goal} conversions tracked. Converted: ${purCount} VIPs. Yield: ₹${revenue.toLocaleString()}`, "chat");
+        addAgentLog("Khoj", `Customer Churn Risk re-computed. Churn trend is DOWN.`, "chat");
       }
     } else {
       // Simulated Run for Other Channels (SMS, RCS)
@@ -2743,8 +2743,8 @@ Do not return any markdown code block formatting. Only return the raw JSON objec
 
       setOrders(prev => [...newOrdersList, ...prev]);
       setGrowthScore(prev => parseFloat((prev + 0.8 + Math.random() * 0.6).toFixed(1)));
-      addAgentLog("Atlas", `Campaign execution complete. Converted purchases: ${purCount}. Total Yield: ₹${revenue.toLocaleString()}.`, "chat");
-      addAgentLog("Vega", `Re-evaluating client portfolios. Overall customer Churn Probability has dropped by 3.8% across segments.`, "chat");
+      addAgentLog("Saarthi", `Campaign execution complete. Converted purchases: ${purCount}. Total Yield: ₹${revenue.toLocaleString()}.`, "chat");
+      addAgentLog("Khoj", `Re-evaluating client portfolios. Overall customer Churn Probability has dropped by 3.8% across segments.`, "chat");
     }
   }, [mission, customers, config, addAgentLog]);
 
@@ -2814,7 +2814,7 @@ Do not return any markdown code block formatting. Only return the raw JSON objec
         id: "log_init",
         agent: "System",
         timestamp: new Date().toLocaleTimeString(),
-        message: "orbit.ai Core cleared and reinitialized.",
+        message: "Manthan.ai Core cleared and reinitialized.",
         type: "thought"
       }
     ]);
@@ -2915,7 +2915,7 @@ Do not return any markdown code block formatting. Only return the raw JSON objec
           id: `log_${Date.now()}`,
           agent: "System",
           timestamp: new Date().toLocaleTimeString(),
-          message: `Calibrated ORBIT boardroom registers for ${presetKey} Demo workspace.`,
+          message: `Calibrated Manthan boardroom registers for ${presetKey} Demo workspace.`,
           type: "thought"
         }
       ]);

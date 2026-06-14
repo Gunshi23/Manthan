@@ -76,7 +76,7 @@ interface WorkflowStep {
 }
 
 const AGENT_COLORS: Record<string, string> = {
-  Polaris: "#3B82F6", Luna: "#EC4899", Vega: "#8B5CF6", Nova: "#F59E0B", Atlas: "#22C55E"
+  Drishti: "#3B82F6", Pragya: "#EC4899", Khoj: "#8B5CF6", Rachna: "#F59E0B", Saarthi: "#22C55E"
 };
 
 const CHANNEL_ICONS: Record<string, React.FC<any>> = {
@@ -114,12 +114,12 @@ function buildCompetitors(businessType: string): Competitor[] {
 function buildSignals(businessType: string): MarketSignal[] {
   const isFashion = /fashion|apparel|kurtis/i.test(businessType);
   return [
-    { id: "s1", title: `${isFashion ? "FashionHub" : "Top Competitor"} launched a Diwali Sale campaign`, desc: "Aggressive 30% discount with WhatsApp blast to 5,000+ subscribers. Engagement up 42% in 24 hours.", impact: 91, confidence: 88, agent: "Polaris", agentColor: AGENT_COLORS.Polaris, type: "threat",      trend: "up" },
-    { id: "s2", title: "WhatsApp campaign engagement up 24% industry-wide",                               desc: "Brands using personalized WhatsApp messages with product images see 2.4x higher CTR vs plain text.", impact: 84, confidence: 92, agent: "Vega",    agentColor: AGENT_COLORS.Vega,    type: "opportunity", trend: "up" },
-    { id: "s3", title: "Fashion Reels outperform static posts by 2.3x",                                   desc: "Short-form video content driving 2.3x higher reach in fashion vertical. Avg view duration: 18s.", impact: 76, confidence: 85, agent: "Polaris", agentColor: AGENT_COLORS.Polaris, type: "opportunity", trend: "up" },
-    { id: "s4", title: "Average checkout conversion dropped 12% this month",                               desc: "Cart abandonment rate increased across mid-market fashion brands. Recover with urgency messaging.", impact: 88, confidence: 90, agent: "Luna",    agentColor: AGENT_COLORS.Luna,    type: "threat",      trend: "down" },
-    { id: "s5", title: "Limited-time offers driving 38% higher conversion rates",                         desc: "Customers respond 38% better to countdown-based urgency offers vs static discount codes.", impact: 79, confidence: 87, agent: "Nova",    agentColor: AGENT_COLORS.Nova,    type: "opportunity", trend: "up" },
-    { id: "s6", title: "Influencer micro-campaigns showing ROI of 5.2x in fashion",                       desc: "Nano and micro-influencers (10K–100K followers) generating highest ROI in fashion category.", impact: 71, confidence: 82, agent: "Vega",    agentColor: AGENT_COLORS.Vega,    type: "opportunity", trend: "up" },
+    { id: "s1", title: `${isFashion ? "FashionHub" : "Top Competitor"} launched a Diwali Sale campaign`, desc: "Aggressive 30% discount with WhatsApp blast to 5,000+ subscribers. Engagement up 42% in 24 hours.", impact: 91, confidence: 88, agent: "Drishti", agentColor: AGENT_COLORS.Drishti, type: "threat",      trend: "up" },
+    { id: "s2", title: "WhatsApp campaign engagement up 24% industry-wide",                               desc: "Brands using personalized WhatsApp messages with product images see 2.4x higher CTR vs plain text.", impact: 84, confidence: 92, agent: "Khoj",    agentColor: AGENT_COLORS.Khoj,    type: "opportunity", trend: "up" },
+    { id: "s3", title: "Fashion Reels outperform static posts by 2.3x",                                   desc: "Short-form video content driving 2.3x higher reach in fashion vertical. Avg view duration: 18s.", impact: 76, confidence: 85, agent: "Drishti", agentColor: AGENT_COLORS.Drishti, type: "opportunity", trend: "up" },
+    { id: "s4", title: "Average checkout conversion dropped 12% this month",                               desc: "Cart abandonment rate increased across mid-market fashion brands. Recover with urgency messaging.", impact: 88, confidence: 90, agent: "Pragya",    agentColor: AGENT_COLORS.Pragya,    type: "threat",      trend: "down" },
+    { id: "s5", title: "Limited-time offers driving 38% higher conversion rates",                         desc: "Customers respond 38% better to countdown-based urgency offers vs static discount codes.", impact: 79, confidence: 87, agent: "Rachna",    agentColor: AGENT_COLORS.Rachna,    type: "opportunity", trend: "up" },
+    { id: "s6", title: "Influencer micro-campaigns showing ROI of 5.2x in fashion",                       desc: "Nano and micro-influencers (10K–100K followers) generating highest ROI in fashion category.", impact: 71, confidence: 82, agent: "Khoj",    agentColor: AGENT_COLORS.Khoj,    type: "opportunity", trend: "up" },
   ];
 }
 
@@ -162,7 +162,7 @@ const sleep = (ms: number) => new Promise(r => setTimeout(r, ms));
 export const CompetitorIntelligence: React.FC = () => {
   const { businessType, startMission, customers, campaigns, orders, theme } = useOrbit();
   const isLight = theme === "executive";
-  const [selectedAgent, setSelectedAgent] = useState<"Polaris" | "Vega" | "Nova" | "Atlas" | "Luna" | null>(null);
+  const [selectedAgent, setSelectedAgent] = useState<"Drishti" | "Khoj" | "Rachna" | "Saarthi" | "Pragya" | null>(null);
 
   /* ── Data ── */
   const [competitors, setCompetitors] = useState<Competitor[]>(() => buildCompetitors(businessType));
@@ -316,11 +316,11 @@ export const CompetitorIntelligence: React.FC = () => {
   /* ── Autonomous Response ── */
   const [responseTarget, setResponseTarget] = useState<MarketOpportunity | null>(null);
   const [workflowSteps, setWorkflowSteps] = useState<WorkflowStep[]>([
-    { agent: "Polaris", icon: "👁", label: "Analyzing audience...",        color: AGENT_COLORS.Polaris, status: "idle" },
-    { agent: "Luna",    icon: "🌙", label: "Mapping opportunities...",     color: AGENT_COLORS.Luna,    status: "idle" },
-    { agent: "Vega",    icon: "⭐", label: "Forecasting revenue...",       color: AGENT_COLORS.Vega,    status: "idle" },
-    { agent: "Nova",    icon: "✨", label: "Generating campaign...",       color: AGENT_COLORS.Nova,    status: "idle" },
-    { agent: "Atlas",   icon: "🚀", label: "Planning deployment...",       color: AGENT_COLORS.Atlas,   status: "idle" },
+    { agent: "Drishti", icon: "👁", label: "Analyzing audience...",        color: AGENT_COLORS.Drishti, status: "idle" },
+    { agent: "Pragya",    icon: "🌙", label: "Mapping opportunities...",     color: AGENT_COLORS.Pragya,    status: "idle" },
+    { agent: "Khoj",    icon: "⭐", label: "Forecasting revenue...",       color: AGENT_COLORS.Khoj,    status: "idle" },
+    { agent: "Rachna",    icon: "✨", label: "Generating campaign...",       color: AGENT_COLORS.Rachna,    status: "idle" },
+    { agent: "Saarthi",   icon: "🚀", label: "Planning deployment...",       color: AGENT_COLORS.Saarthi,   status: "idle" },
   ]);
   const [workflowRunning, setWorkflowRunning] = useState(false);
   const [workflowDone, setWorkflowDone]       = useState(false);
@@ -478,7 +478,7 @@ export const CompetitorIntelligence: React.FC = () => {
     likelyObjective: c.type === "Festival" ? "Drive volume through urgency + FOMO during high-intent buying window" : "Boost conversion rate with direct discount incentive and social proof",
     strengths: ["High discount creates immediate FOMO", "Multi-channel reach maximizes visibility", "Festival timing aligns with peak buying intent"],
     weaknesses: ["Trains customers to wait for discounts", "Low margin impact from heavy discounting", "No personalization — same offer to all segments"],
-    counterStrategy: `Launch a personalized WhatsApp campaign targeting your ${businessType} loyalists with an exclusive early-access offer (no heavy discount). Use Vega's prediction model to identify the top 20% of buyers and send curated product drops 48 hours before competitor sale ends.`,
+    counterStrategy: `Launch a personalized WhatsApp campaign targeting your ${businessType} loyalists with an exclusive early-access offer (no heavy discount). Use Khoj's prediction model to identify the top 20% of buyers and send curated product drops 48 hours before competitor sale ends.`,
   });
 
   /* ── Autonomous Response Workflow ── */
@@ -509,7 +509,7 @@ export const CompetitorIntelligence: React.FC = () => {
   return (
     <div className={`flex-1 flex flex-col overflow-hidden relative ${isLight ? "bg-[#F8FAFC] text-[#0F172A]" : "bg-[#050816] text-white"}`}>
       <div className={`pointer-events-none absolute inset-0 space-grid z-0 ${isLight ? "opacity-5" : "opacity-25"}`} />
-      <div className={`pointer-events-none absolute inset-0 bg-orbit-glow-blue z-0 ${isLight ? "opacity-5" : "opacity-10"}`} />
+      <div className={`pointer-events-none absolute inset-0 bg-Manthan-glow-blue z-0 ${isLight ? "opacity-5" : "opacity-10"}`} />
 
       {/* Header */}
       <div className={`shrink-0 px-6 pt-4 border-b relative z-10 ${isLight ? "bg-white border-[#E2E8F0]" : "bg-gray-950/30 border-gray-800/50"}`}>
@@ -553,7 +553,7 @@ export const CompetitorIntelligence: React.FC = () => {
               <div className="flex items-center gap-2 mb-3">
                 <Brain size={14} className={isLight ? "text-purple-600" : "text-purple-400"} />
                 <span className={`font-space text-xs font-bold uppercase tracking-wider ${isLight ? "text-[#0F172A]" : "text-white"}`}>What Should I Do Next?</span>
-                <span className="ml-auto font-mono text-[8px] text-gray-500">orbit.ai Executive Intelligence</span>
+                <span className="ml-auto font-mono text-[8px] text-gray-500">Manthan.ai Executive Intelligence</span>
               </div>
               <div className="grid grid-cols-4 gap-3">
                 {[
@@ -584,7 +584,7 @@ export const CompetitorIntelligence: React.FC = () => {
           </div>
 
           {/* ══ SECTION 1 — COMPETITOR WATCHLIST ══ */}
-          <div className={`orbit-panel p-5 rounded-2xl ${isLight ? "border border-slate-200 bg-white shadow-sm" : "border border-gray-800/60 bg-gray-900/20"}`}>
+          <div className={`Manthan-panel p-5 rounded-2xl ${isLight ? "border border-slate-200 bg-white shadow-sm" : "border border-gray-800/60 bg-gray-900/20"}`}>
             <div className="flex items-center gap-2 mb-4">
               <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-red-500 to-orange-600 flex items-center justify-center">
                 <Eye size={12} className="text-white" />
@@ -645,7 +645,7 @@ export const CompetitorIntelligence: React.FC = () => {
           </div>
 
           {/* ══ SECTION 2 — LIVE MARKET SIGNALS ══ */}
-          <div className={`orbit-panel p-5 rounded-2xl ${isLight ? "border border-slate-200 bg-white shadow-sm" : "border border-gray-800/60 bg-gray-900/20"}`}>
+          <div className={`Manthan-panel p-5 rounded-2xl ${isLight ? "border border-slate-200 bg-white shadow-sm" : "border border-gray-800/60 bg-gray-900/20"}`}>
             <div className="flex items-center gap-2 mb-4">
               <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-green-500 to-cyan-600 flex items-center justify-center">
                 <Activity size={12} className="text-white" />
@@ -689,9 +689,9 @@ export const CompetitorIntelligence: React.FC = () => {
                     <div className="ml-auto flex items-center gap-1">
                       <div className="w-4 h-4 rounded-md flex items-center justify-center text-[8px]"
                         style={{ backgroundColor: sig.agentColor + "25", border: `1px solid ${sig.agentColor}40` }}>
-                        {sig.agent === "Polaris" ? "👁" : sig.agent === "Luna" ? "🌙" : sig.agent === "Vega" ? "⭐" : sig.agent === "Nova" ? "✨" : "🚀"}
+                        {sig.agent === "Drishti" ? "👁" : sig.agent === "Pragya" ? "🌙" : sig.agent === "Khoj" ? "⭐" : sig.agent === "Rachna" ? "✨" : "🚀"}
                       </div>
-                      <span className="font-mono text-[7px]" style={{ color: isLight ? (sig.agent === "Nova" ? "#D97706" : sig.agentColor) : sig.agentColor }}>{sig.agent}</span>
+                      <span className="font-mono text-[7px]" style={{ color: isLight ? (sig.agent === "Rachna" ? "#D97706" : sig.agentColor) : sig.agentColor }}>{sig.agent}</span>
                     </div>
                   </div>
                 </div>
@@ -700,7 +700,7 @@ export const CompetitorIntelligence: React.FC = () => {
           </div>
 
           {/* ══ SECTION 3 — COMPETITIVE GAP ANALYSIS ══ */}
-          <div className={`orbit-panel p-5 rounded-2xl ${isLight ? "border border-slate-200 bg-white shadow-sm" : "border border-gray-800/60 bg-gray-900/20"}`}>
+          <div className={`Manthan-panel p-5 rounded-2xl ${isLight ? "border border-slate-200 bg-white shadow-sm" : "border border-gray-800/60 bg-gray-900/20"}`}>
             <div className="flex items-center gap-2 mb-4">
               <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
                 <BarChart3 size={12} className="text-white" />
@@ -754,7 +754,7 @@ export const CompetitorIntelligence: React.FC = () => {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
             {/* SECTION 4 — Trend Radar */}
-            <div className={`orbit-panel p-5 rounded-2xl ${isLight ? "" : "border border-gray-800/60 bg-gray-900/20"}`}>
+            <div className={`Manthan-panel p-5 rounded-2xl ${isLight ? "" : "border border-gray-800/60 bg-gray-900/20"}`}>
               <div className="flex items-center gap-2 mb-4">
                 <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center">
                   <Compass size={12} className="text-white" />
@@ -780,7 +780,7 @@ export const CompetitorIntelligence: React.FC = () => {
             </div>
 
             {/* SECTION 6 — Campaign Reverse Engineering */}
-            <div className={`orbit-panel p-5 rounded-2xl ${isLight ? "" : "border border-gray-800/60 bg-gray-900/20"}`}>
+            <div className={`Manthan-panel p-5 rounded-2xl ${isLight ? "" : "border border-gray-800/60 bg-gray-900/20"}`}>
               <div className="flex items-center gap-2 mb-4">
                 <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-pink-500 to-purple-600 flex items-center justify-center">
                   <Target size={12} className="text-white" />
@@ -853,7 +853,7 @@ export const CompetitorIntelligence: React.FC = () => {
           </div>
 
           {/* ══ SECTION 5 — AI COMPETITOR REPORT ══ */}
-          <div className={`orbit-panel p-5 rounded-2xl ${isLight ? "" : "border border-gray-800/60 bg-gray-900/20"}`}>
+          <div className={`Manthan-panel p-5 rounded-2xl ${isLight ? "" : "border border-gray-800/60 bg-gray-900/20"}`}>
             <div className="flex items-center gap-2 mb-4">
               <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-orange-500 to-red-600 flex items-center justify-center">
                 <Globe size={12} className="text-white" />
@@ -932,7 +932,7 @@ export const CompetitorIntelligence: React.FC = () => {
           <div className="grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-6">
 
             {/* SECTION 7 — Market Opportunities */}
-            <div className={`orbit-panel p-5 rounded-2xl ${isLight ? "" : "border border-gray-800/60 bg-gray-900/20"}`}>
+            <div className={`Manthan-panel p-5 rounded-2xl ${isLight ? "" : "border border-gray-800/60 bg-gray-900/20"}`}>
               <div className="flex items-center gap-2 mb-4">
                 <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-yellow-500 to-orange-600 flex items-center justify-center">
                   <TrendingUp size={12} className="text-white" />
@@ -986,7 +986,7 @@ export const CompetitorIntelligence: React.FC = () => {
             </div>
 
             {/* SECTION 8 — Autonomous Response */}
-            <div className={`orbit-panel p-5 rounded-2xl ${isLight ? "" : "border border-gray-800/60 bg-gray-900/20"}`}>
+            <div className={`Manthan-panel p-5 rounded-2xl ${isLight ? "" : "border border-gray-800/60 bg-gray-900/20"}`}>
               <div className="flex items-center gap-2 mb-4">
                 <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-purple-500 to-blue-600 flex items-center justify-center">
                   <Cpu size={12} className="text-white" />

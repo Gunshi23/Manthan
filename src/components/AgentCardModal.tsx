@@ -3,7 +3,7 @@ import { X, Activity, Sparkles, BarChart2, Radio, Users, Terminal } from "lucide
 import { useOrbit } from "../context/OrbitContext";
 
 interface AgentCardModalProps {
-  agent: "Polaris" | "Vega" | "Nova" | "Atlas" | "Luna" | null;
+  agent: "Drishti" | "Khoj" | "Rachna" | "Saarthi" | "Pragya" | null;
   onClose: () => void;
 }
 
@@ -31,14 +31,14 @@ export const AgentCardModal: React.FC<AgentCardModalProps> = ({ agent, onClose }
   if (!agent) return null;
 
   const AGENT_PROFILES = {
-    Luna: {
+    Pragya: {
       title: "Growth Recovery Agent",
       themeColor: "from-amber-500 to-purple-600",
       accentText: "text-amber-400",
       accentBg: "bg-amber-500/10",
       glowColor: "rgba(245, 158, 11, 0.25)",
       icon: Activity,
-      purpose: "Luna specializes in identifying and recovering lost revenue opportunities by auditing abandoned checkouts, inactive customer behaviors, and slipping churn risks.",
+      purpose: "Pragya specializes in identifying and recovering lost revenue opportunities by auditing abandoned checkouts, inactive customer behaviors, and slipping churn risks.",
       personality: ["Observant", "Persistent", "Proactive", "Revenue-focused", "Helpful"],
       statuses: [
         "Scanning customer universe...",
@@ -80,14 +80,14 @@ export const AgentCardModal: React.FC<AgentCardModalProps> = ({ agent, onClose }
         thread: "Recovery Pipeline Node 7"
       }
     },
-    Polaris: {
+    Drishti: {
       title: "Audience Discovery Agent",
       themeColor: "from-blue-500 to-cyan-500",
       accentText: "text-blue-400",
       accentBg: "bg-blue-500/10",
       glowColor: "rgba(59, 130, 246, 0.25)",
       icon: Users,
-      purpose: "Polaris maps customer cohorts, filters demographic DNA properties, and discovers high-affinity buyers to fuel campaigns.",
+      purpose: "Drishti maps customer cohorts, filters demographic DNA properties, and discovers high-affinity buyers to fuel campaigns.",
       personality: ["Analytical", "Systematic", "Logical", "Meticulous", "Precise"],
       statuses: [
         "Clustering customer database...",
@@ -126,14 +126,14 @@ export const AgentCardModal: React.FC<AgentCardModalProps> = ({ agent, onClose }
         thread: "Audience discovery Node 1"
       }
     },
-    Vega: {
+    Khoj: {
       title: "Predictive ROI Forecaster",
       themeColor: "from-violet-500 to-pink-500",
       accentText: "text-violet-400",
       accentBg: "bg-violet-500/10",
       glowColor: "rgba(139, 92, 246, 0.25)",
       icon: BarChart2,
-      purpose: "Vega computes projected conversion yields, forecasts campaign revenue outputs, and evaluates promotional ROI scales.",
+      purpose: "Khoj computes projected conversion yields, forecasts campaign revenue outputs, and evaluates promotional ROI scales.",
       personality: ["Mathematical", "Quantitative", "Foresighted", "Pragmatic", "Risk-averse"],
       statuses: [
         "Running ROI regression models...",
@@ -172,14 +172,14 @@ export const AgentCardModal: React.FC<AgentCardModalProps> = ({ agent, onClose }
         thread: "Predictive Analytics Node 3"
       }
     },
-    Nova: {
+    Rachna: {
       title: "Campaign Creator & Copywriter",
       themeColor: "from-pink-500 to-rose-500",
       accentText: "text-pink-400",
       accentBg: "bg-pink-500/10",
       glowColor: "rgba(236, 72, 153, 0.25)",
       icon: Sparkles,
-      purpose: "Nova writes hyper-personalized content copies, formats rich messaging templates, and builds A/B creative variants.",
+      purpose: "Rachna writes hyper-personalized content copies, formats rich messaging templates, and builds A/B creative variants.",
       personality: ["Creative", "Engaging", "Empathetic", "Adaptive", "Witty"],
       statuses: [
         "Engaging creative generation...",
@@ -198,7 +198,7 @@ export const AgentCardModal: React.FC<AgentCardModalProps> = ({ agent, onClose }
       outputs: [
         {
           title: "WhatsApp Personalization Template A",
-          content: "⚡ *ORBIT* ⚡\nHey {{name}}, ready to upgrade your setup? Get priority pre-sale access to the Quantum Deck. Link expires tonight: https://orbit.io/up"
+          content: "⚡ *Manthan* ⚡\nHey {{name}}, ready to upgrade your setup? Get priority pre-sale access to the Quantum Deck. Link expires tonight: https://manthan.ai/up"
         },
         {
           title: "Urgent Email Copy Template B",
@@ -218,14 +218,14 @@ export const AgentCardModal: React.FC<AgentCardModalProps> = ({ agent, onClose }
         thread: "Content Generation Node 4"
       }
     },
-    Atlas: {
+    Saarthi: {
       title: "Operations Dispatch Node",
       themeColor: "from-green-500 to-emerald-500",
       accentText: "text-green-400",
       accentBg: "bg-green-500/10",
       glowColor: "rgba(34, 197, 94, 0.25)",
       icon: Radio,
-      purpose: "Atlas controls dispatcher nodes, throttles gateway message queues, checks API latencies, and tracks event logs.",
+      purpose: "Saarthi controls dispatcher nodes, throttles gateway message queues, checks API latencies, and tracks event logs.",
       personality: ["Rapid", "Vigilant", "Methodical", "Logical", "Robust"],
       statuses: [
         "Connecting dispatcher server sockets...",

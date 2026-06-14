@@ -14,7 +14,7 @@ import { PageHeaderHUD } from "../components/PageHeaderHUD";
    TYPES
  ───────────────────────────────────────────────────────────── */
 interface BoardroomMessage {
-  agent: "Polaris" | "Nova" | "Vega" | "Atlas" | "Luna";
+  agent: "Drishti" | "Rachna" | "Khoj" | "Saarthi" | "Pragya";
   message: string;
   confidence: number;
   reasoning: string;
@@ -32,35 +32,35 @@ const SCENARIOS = [
     script: [
       // ROUND 1: DISCOVERY & SCANS
       { 
-        agent: "Polaris" as const, 
+        agent: "Drishti" as const, 
         message: "Sector scan complete. I've discovered 432 high-ltv customers showing zero activity for 90 days. Churn risk clusters at 78% in group B.", 
         confidence: 94, 
         reasoning: "Dormancy pattern triggers match historical slippage thresholds. Customer DNA marks: 'VIP', 'Organic Preferred'.",
         stats: "432 targets flagged"
       },
       {
-        agent: "Luna" as const,
+        agent: "Pragya" as const,
         message: "Transaction history audited. Out of these 432 profiles, 150 VIPs have substantial unused loyalty points. This is prime win-back leverage.",
         confidence: 93,
         reasoning: "Queried transaction ledger. Filtered active balances > ₹200. Cross-checked with last transaction timestamp.",
         stats: "150 credit VIPs mapped"
       },
       { 
-        agent: "Vega" as const, 
+        agent: "Khoj" as const, 
         message: "Revenue opportunity is evaluated at ₹1.2L. Calculating ROI projections gives 3.8x baseline return under current parameters.", 
         confidence: 87, 
         reasoning: "60-feature regression model runs. Estimated conversion threshold is 28% model yields. Risk delta: -4.5%.",
         stats: "₹1.2L opp · 3.8x ROI"
       },
       { 
-        agent: "Nova" as const, 
+        agent: "Rachna" as const, 
         message: "Personalized win-back layout generated. Selecting urgency-framed copy variants optimized for WhatsApp delivery.", 
         confidence: 91, 
         reasoning: "A/B test archives show urgency copy yields 23% higher CTR on mobile channel segments over classic email formats.",
         stats: "WhatsApp template ready"
       },
       { 
-        agent: "Atlas" as const, 
+        agent: "Saarthi" as const, 
         message: "Optimal delivery window computed. Dispatch nodes responsive. Ready to route campaign. Awaiting authorization.", 
         confidence: 96, 
         reasoning: "Channel capacity analysis reports 0ms queue latency. Dispatch time locked to Tuesday 10:30 AM timezone peaks.",
@@ -68,35 +68,35 @@ const SCENARIOS = [
       },
       // ROUND 2: ANALYSIS & REFINEMENT
       {
-        agent: "Polaris" as const,
+        agent: "Drishti" as const,
         message: "Refining segment filters. If we exclude users who had high support-ticket frequencies before going cold, we reduce churn feedback loops.",
         confidence: 92,
         reasoning: "Cohort adjustment: removed 32 users who registered complaints in their last 30 active days.",
         stats: "Segment set to 400"
       },
       {
-        agent: "Luna" as const,
+        agent: "Pragya" as const,
         message: "Agreed. Excluding those 32 users reduces coupon abuse risk by 14% and shifts our focus to purely satisfied-but-idle accounts.",
         confidence: 91,
         reasoning: "Compared support tickets with promotional redemption behavior. Coupon sensitivity index is lower for frustrated accounts.",
         stats: "Risk delta: -14%"
       },
       {
-        agent: "Vega" as const,
+        agent: "Khoj" as const,
         message: "Recalculating conversion curve. The refined segment of 400 VIPs pushes expected conversion rate up to 34%, yielding ₹1.35L.",
         confidence: 90,
         reasoning: "Run adjusted regression model on 400 cohort size. Confidence interval narrows from 72-88% to 78-91%.",
         stats: "₹1.35L opp · 4.2x ROI"
       },
       {
-        agent: "Nova" as const,
+        agent: "Rachna" as const,
         message: "Adjusting copy layout. I will add a dynamic list of their top three past purchased items to trigger high-context recall.",
         confidence: 93,
         reasoning: "Personalized purchase histories embedded in WhatsApp cards show 45% higher engagement compared to generic copy.",
         stats: "Dynamic copy updated"
       },
       {
-        agent: "Atlas" as const,
+        agent: "Saarthi" as const,
         message: "Throttling parameters configured. I will schedule a fallback SMS route for profiles with invalid WhatsApp numbers.",
         confidence: 95,
         reasoning: "SMS fallback API latency check completed. Gateway rate-limits set to 50 TPS to avoid carrier spam blocks.",
@@ -104,36 +104,36 @@ const SCENARIOS = [
       },
       // ROUND 3: FINAL CONSENSUS
       {
-        agent: "Polaris" as const,
-        message: "Final target list compiled and verified. All 400 profiles have clean segment attributes. Polaris consensus reached.",
+        agent: "Drishti" as const,
+        message: "Final target list compiled and verified. All 400 profiles have clean segment attributes. Drishti consensus reached.",
         confidence: 97,
         reasoning: "Finalized database view export. Schema validation returned 100% success rate on segment criteria.",
         stats: "400 VIPs finalized"
       },
       {
-        agent: "Luna" as const,
-        message: "Loyalty point balance query verified. Token balances mapped directly to checkout gateways. Luna consensus reached.",
+        agent: "Pragya" as const,
+        message: "Loyalty point balance query verified. Token balances mapped directly to checkout gateways. Pragya consensus reached.",
         confidence: 96,
         reasoning: "Executed endpoint handshake. Token validator responded with zero errors across the active cohort.",
         stats: "Token mapping complete"
       },
       {
-        agent: "Vega" as const,
-        message: "Revenue models finalized. Net value recovery is optimized. Vega consensus reached.",
+        agent: "Khoj" as const,
+        message: "Revenue models finalized. Net value recovery is optimized. Khoj consensus reached.",
         confidence: 92,
         reasoning: "Final simulation run. Expected revenue: ₹1.35L, expected margin: 82%. P-value: < 0.01.",
         stats: "ROI: 4.2x locked"
       },
       {
-        agent: "Nova" as const,
-        message: "Creative templates and assets generated and locked in storage CDN. Nova consensus reached.",
+        agent: "Rachna" as const,
+        message: "Creative templates and assets generated and locked in storage CDN. Rachna consensus reached.",
         confidence: 94,
         reasoning: "Compiled layouts, compressed image assets, verified link redirection parameters.",
         stats: "Creatives locked"
       },
       {
-        agent: "Atlas" as const,
-        message: "Campaign queue armed. Automated dispatch nodes are active and await manual launch approval. Atlas consensus reached.",
+        agent: "Saarthi" as const,
+        message: "Campaign queue armed. Automated dispatch nodes are active and await manual launch approval. Saarthi consensus reached.",
         confidence: 98,
         reasoning: "Webhook handlers tested, queue listener initialized, campaign status set to standby-ready.",
         stats: "Campaign fully armed"
@@ -146,35 +146,35 @@ const SCENARIOS = [
     script: [
       // ROUND 1: DISCOVERY & SCANS
       { 
-        agent: "Polaris" as const, 
+        agent: "Drishti" as const, 
         message: "Scanning active Loyalist graphs. Identified 120 tech cohort profiles matching 'Early Adopter' and 'Quantum Deck' affinity tags.", 
         confidence: 93, 
         reasoning: "Cross-cohort behavior models match upgrade velocity indexes. Average LTV baseline: ₹3,500.",
         stats: "120 early adopters flagged"
       },
       {
-        agent: "Luna" as const,
+        agent: "Pragya" as const,
         message: "Cross-referenced active cohorts. Mapped 45 early adopters who recently purchased accessory bundles but haven't upgraded their core deck.",
         confidence: 94,
         reasoning: "Analyzed peripheral catalog purchase timestamps and correlated with active hardware IDs.",
         stats: "45 accessory owners found"
       },
       { 
-        agent: "Vega" as const, 
+        agent: "Khoj" as const, 
         message: "Opportunity projection sets conversion yields at 42%. Predicted revenue generated is ₹2.4L. Churn correlation risk is negligible.", 
         confidence: 90, 
         reasoning: "Likelihood score computed via random forest. Customer buying capacity shows 1.5x scale multiplier.",
         stats: "₹2.4L forecast · 42% yield"
       },
       { 
-        agent: "Nova" as const, 
+        agent: "Rachna" as const, 
         message: "Generated high-fidelity RCS card copy with embedded upgrade pathways and rich interactive visuals.", 
         confidence: 89, 
         reasoning: "RCS rich templates return 3.4x higher conversion metrics compared to plain SMS text nodes on tech segments.",
         stats: "RCS Rich Cards generated"
       },
       { 
-        agent: "Atlas" as const, 
+        agent: "Saarthi" as const, 
         message: "Routing channels confirmed. Pre-sales dispatch cadence scheduled. Delivery buffers cleared for launch.", 
         confidence: 95, 
         reasoning: "Scheduling is configured with pre-sale notification +48h follow-up cadences. Webhooks armed.",
@@ -182,35 +182,35 @@ const SCENARIOS = [
       },
       // ROUND 2: REFINEMENT
       {
-        agent: "Polaris" as const,
+        agent: "Drishti" as const,
         message: "Filtering target group to isolate users with a session count of >5 in the past 14 days, maximizing immediate purchase intent.",
         confidence: 92,
         reasoning: "Cohort adjustment: focused on high-engagement user profiles to avoid fatigue warnings.",
         stats: "Segment set to 95"
       },
       {
-        agent: "Luna" as const,
+        agent: "Pragya" as const,
         message: "For the remaining 25 low-session profiles, I suggest sending a customized loyalty discount code to re-engage them through the purchase path.",
         confidence: 91,
         reasoning: "Promotion triggers for cold segments yield 18% higher activation rates based on Loyalist records.",
         stats: "25 discount targets"
       },
       {
-        agent: "Vega" as const,
+        agent: "Khoj" as const,
         message: "Running profit simulations. A 10% discount for the 25 low-session profiles boosts overall campaign conversion to 48%, increasing revenue to ₹2.65L.",
         confidence: 90,
         reasoning: "Run pricing elasticity models. Conversion gains outweigh margin compression.",
         stats: "₹2.65L forecast · 48% yield"
       },
       {
-        agent: "Nova" as const,
+        agent: "Rachna" as const,
         message: "Created a secondary, high-urgency A/B copy variant for the discount cohort emphasizing the 48-hour discount window.",
         confidence: 92,
         reasoning: "Fears-of-missing-out copy templates yield 31% higher CTR on tech segments.",
         stats: "Variant B generated"
       },
       {
-        agent: "Atlas" as const,
+        agent: "Saarthi" as const,
         message: "Adjusted dispatch paths. Profiles will be split automatically into two queues to prevent discount code leakage.",
         confidence: 94,
         reasoning: "Database dispatch routing mapped to dynamic coupon API nodes.",
@@ -218,36 +218,36 @@ const SCENARIOS = [
       },
       // ROUND 3: FINAL CONSENSUS
       {
-        agent: "Polaris" as const,
-        message: "Finalized both target groups. Segments synced and schemas validated. Polaris consensus reached.",
+        agent: "Drishti" as const,
+        message: "Finalized both target groups. Segments synced and schemas validated. Drishti consensus reached.",
         confidence: 97,
         reasoning: "Final schema check returned no null values for customer parameters.",
         stats: "Segments finalized"
       },
       {
-        agent: "Luna" as const,
-        message: "Checked active coupons in database. Promotion codes are registered and active. Luna consensus reached.",
+        agent: "Pragya" as const,
+        message: "Checked active coupons in database. Promotion codes are registered and active. Pragya consensus reached.",
         confidence: 95,
         reasoning: "Handshake completed with promotion code service, code validated successfully.",
         stats: "Coupon codes verified"
       },
       {
-        agent: "Vega" as const,
-        message: "Final yield curve locked. ROI index is optimized at 4.6x. Vega consensus reached.",
+        agent: "Khoj" as const,
+        message: "Final yield curve locked. ROI index is optimized at 4.6x. Khoj consensus reached.",
         confidence: 91,
         reasoning: "Simulation model finalized, p-value verified at < 0.01.",
         stats: "ROI: 4.6x locked"
       },
       {
-        agent: "Nova" as const,
-        message: "RCS layouts and fallback templates packaged and uploaded to CDN. Nova consensus reached.",
+        agent: "Rachna" as const,
+        message: "RCS layouts and fallback templates packaged and uploaded to CDN. Rachna consensus reached.",
         confidence: 93,
         reasoning: "Layout validation checked against Android and iOS display parameters.",
         stats: "Creatives finalized"
       },
       {
-        agent: "Atlas" as const,
-        message: "Webhook listeners active, delivery pipelines ready, and queues armed for Tuesday. Atlas consensus reached.",
+        agent: "Saarthi" as const,
+        message: "Webhook listeners active, delivery pipelines ready, and queues armed for Tuesday. Saarthi consensus reached.",
         confidence: 97,
         reasoning: "Queue listeners initialized, message template IDs registered.",
         stats: "Dispatch armed"
@@ -260,35 +260,35 @@ const SCENARIOS = [
     script: [
       // ROUND 1: DISCOVERY & SCANS
       { 
-        agent: "Polaris" as const, 
+        agent: "Drishti" as const, 
         message: "Critical Warning: Slipping Away VIP cohort segment displays a 78% attrition hazard rating. 18 accounts are marked active danger.", 
         confidence: 95, 
         reasoning: "Risk spikes match critical indicators: 30-day session decline + repeated cart abandonments on core items.",
         stats: "18 critical VIP nodes"
       },
       {
-        agent: "Luna" as const,
+        agent: "Pragya" as const,
         message: "Support logs audited. 6 of these slipping VIPs have unresolved customer service tickets regarding recent transaction delays.",
         confidence: 94,
         reasoning: "Scanned support ticket DB, matched customer emails with open tickets and categorized as high-severity.",
         stats: "6 open ticket VIPs"
       },
       { 
-        agent: "Vega" as const, 
+        agent: "Khoj" as const, 
         message: "Averted churn value calculated at ₹85,000. Suggested campaign ROI threshold: 4.2x. WhatsApp has highest recovery rate.", 
         confidence: 88, 
         reasoning: "Customer recovery probability is 64% when reached within a 24h window. SMS acts as fallback channel node.",
         stats: "₹85K value saved · 4.2x ROI"
       },
       { 
-        agent: "Nova" as const, 
+        agent: "Rachna" as const, 
         message: "Generated personalized re-engagement layouts, injecting past purchases and dedicated loyalty recovery values.", 
         confidence: 92, 
         reasoning: "Loyalty compensation structures decrease VIP exit rates by 40% based on historical mitigation loops.",
         stats: "Dynamic copy personalized"
       },
       { 
-        agent: "Atlas" as const, 
+        agent: "Saarthi" as const, 
         message: "Operations dispatch pipeline verified. Trigger buffers loaded. Channels ready for automatic activation.", 
         confidence: 97, 
         reasoning: "Webhook handlers mapped. Automatic dispatcher active. Real-time delivery monitors online.",
@@ -296,35 +296,35 @@ const SCENARIOS = [
       },
       // ROUND 2: REFINEMENT
       {
-        agent: "Polaris" as const,
+        agent: "Drishti" as const,
         message: "Cross-referencing notifications settings. 4 of the critical VIPs have disabled marketing push alerts.",
         confidence: 91,
         reasoning: "Checked notification token status in segment database.",
         stats: "4 push-disabled VIPs"
       },
       {
-        agent: "Luna" as const,
+        agent: "Pragya" as const,
         message: "We should bypass push alerts and route them via transactional support emails, citing their open support tickets directly.",
         confidence: 93,
         reasoning: "Support emails have 95% open rate on active accounts compared to standard push notifications.",
         stats: "Email fallback mapped"
       },
       {
-        agent: "Vega" as const,
+        agent: "Khoj" as const,
         message: "Modeling email fallback yields. Reaching these 4 users via transactional support paths preserves a 72% overall cohort recovery probability.",
         confidence: 90,
         reasoning: "Adjusted recovery tree. Transactional emails yield 1.8x higher response than promotional nodes.",
         stats: "72% recovery rate"
       },
       {
-        agent: "Nova" as const,
+        agent: "Rachna" as const,
         message: "Created custom, high-priority email templates that integrate recent support ticket IDs and agent notes.",
         confidence: 91,
         reasoning: "Support ticket references in subjects boost open rate by 34%.",
         stats: "Support email template ready"
       },
       {
-        agent: "Atlas" as const,
+        agent: "Saarthi" as const,
         message: "Mapped high-priority transactional SMTP endpoints to bypass standard promotional queue throttling.",
         confidence: 96,
         reasoning: "Configured specific SMTP headers to classify as high priority transactional emails.",
@@ -332,36 +332,36 @@ const SCENARIOS = [
       },
       // ROUND 3: FINAL CONSENSUS
       {
-        agent: "Polaris" as const,
-        message: "Target profiles verified, push-disabled indicators updated in database. Polaris consensus reached.",
+        agent: "Drishti" as const,
+        message: "Target profiles verified, push-disabled indicators updated in database. Drishti consensus reached.",
         confidence: 96,
         reasoning: "Final segment definitions updated in core DB.",
         stats: "VIP list compiled"
       },
       {
-        agent: "Luna" as const,
-        message: "Support ticket link webhooks tested and listening for resolution triggers. Luna consensus reached.",
+        agent: "Pragya" as const,
+        message: "Support ticket link webhooks tested and listening for resolution triggers. Pragya consensus reached.",
         confidence: 95,
         reasoning: "Validated target endpoints, webhook listening status active.",
         stats: "Ticket hooks verified"
       },
       {
-        agent: "Vega" as const,
-        message: "Revised value recovery projection finalized at ₹61,200. Vega consensus reached.",
+        agent: "Khoj" as const,
+        message: "Revised value recovery projection finalized at ₹61,200. Khoj consensus reached.",
         confidence: 92,
         reasoning: "Final regression simulation finished.",
         stats: "Recovery: ₹61.2K locked"
       },
       {
-        agent: "Nova" as const,
-        message: "All personalized copies and support templates checked and signed off. Nova consensus reached.",
+        agent: "Rachna" as const,
+        message: "All personalized copies and support templates checked and signed off. Rachna consensus reached.",
         confidence: 94,
         reasoning: "Draft copy signed with dynamic parameter keys.",
         stats: "Copy templates approved"
       },
       {
-        agent: "Atlas" as const,
-        message: "VIP mitigation dispatch pipeline armed and ready for trigger events. Atlas consensus reached.",
+        agent: "Saarthi" as const,
+        message: "VIP mitigation dispatch pipeline armed and ready for trigger events. Saarthi consensus reached.",
         confidence: 98,
         reasoning: "SMTP configurations validated and queue pipeline running.",
         stats: "Mitigation pipeline live"
@@ -370,39 +370,39 @@ const SCENARIOS = [
   },
   {
     name: "Growth Recovery & Reactivation",
-    description: "Luna recovers dormant revenue and leakage through automated re-engagement.",
+    description: "Pragya recovers dormant revenue and leakage through automated re-engagement.",
     script: [
       // ROUND 1: DISCOVERY & SCANS
       { 
-        agent: "Polaris" as const, 
+        agent: "Drishti" as const, 
         message: "Dormant user scan finished. I have mapped 712 churn-risk accounts with no login events in 120 days. Historical average basket value: ₹4,200.", 
         confidence: 95, 
         reasoning: "Dormancy behavior triggers are confirmed across customer segments with active historical purchases but flatline 120-day web session logs.",
         stats: "712 idle profiles mapped"
       },
       { 
-        agent: "Luna" as const, 
+        agent: "Pragya" as const, 
         message: "I've cross-referenced those 712 accounts. 284 profiles are high-affinity recovery candidates with abandoned checkouts. Leakage recovery protocols initialized.", 
         confidence: 96, 
         reasoning: "Analyzing abandonment pathways. High recovery probability detected due to previous checkout tokens remaining in local basket cache.",
         stats: "284 recovery targets found"
       },
       { 
-        agent: "Vega" as const, 
+        agent: "Khoj" as const, 
         message: "Evaluating recoverable revenue delta. Estimated recovery pipeline stands at ₹1.8L. Calculating a 4.1x ROI projection on targeted incentives.", 
         confidence: 89, 
         reasoning: "Calculated with a 35% expected reactivation rate based on localized conversion coefficients and custom incentive weightings.",
         stats: "₹1.8L opp · 4.1x ROI"
       },
       { 
-        agent: "Nova" as const, 
+        agent: "Rachna" as const, 
         message: "Re-engagement creatives compiled. Injecting dynamic discount codes and cart restoring links into personalized SMS and email variants.", 
         confidence: 92, 
         reasoning: "Dynamic recovery links coupled with custom urgency discounts drive 34% higher reactivation margins over standard generic email alerts.",
         stats: "Multi-channel templates"
       },
       { 
-        agent: "Atlas" as const, 
+        agent: "Saarthi" as const, 
         message: "Distribution paths cleared. Automated reactivation campaign queues armed. Initiating dispatch buffers upon manager approval.", 
         confidence: 97, 
         reasoning: "Gateway handshake verified. Throttling active to avoid carrier rate limits.",
@@ -410,35 +410,35 @@ const SCENARIOS = [
       },
       // ROUND 2: REFINEMENT
       {
-        agent: "Polaris" as const,
+        agent: "Drishti" as const,
         message: "Inventory check completed. 90 of these abandoned carts contain items that are currently out of stock.",
         confidence: 92,
         reasoning: "Cross-checked product IDs against inventory management database.",
         stats: "90 stock alerts"
       },
       {
-        agent: "Luna" as const,
+        agent: "Pragya" as const,
         message: "I will query the recommendation API to find active alternatives for out-of-stock items and inject them dynamically.",
         confidence: 94,
         reasoning: "Mapping alternative SKU IDs using product category and buyer history.",
         stats: "Alternative mapping active"
       },
       {
-        agent: "Vega" as const,
+        agent: "Khoj" as const,
         message: "Recalculating revenue curve. Replacing items leads to a minor 4% conversion drop, but keeps 100% of target profiles active.",
         confidence: 91,
         reasoning: "Estimated substitution factor sets conversion stability at 96% of control.",
         stats: "₹1.72L revised opp"
       },
       {
-        agent: "Nova" as const,
+        agent: "Rachna" as const,
         message: "Re-generating template blocks to display dynamically mapped replacement items with a 'Recommended for You' tag.",
         confidence: 92,
         reasoning: "Recommendation tags increase click-through metrics by 22% in A/B archives.",
         stats: "Copy block updated"
       },
       {
-        agent: "Atlas" as const,
+        agent: "Saarthi" as const,
         message: "Stock verification hooks integrated. Dispatcher will double check inventory cache before sending messages.",
         confidence: 95,
         reasoning: "Connected real-time stock lookup service hook into the sending middleware.",
@@ -446,36 +446,36 @@ const SCENARIOS = [
       },
       // ROUND 3: FINAL CONSENSUS
       {
-        agent: "Polaris" as const,
-        message: "Target list of 284 profiles finalized, stock fallback profiles flagged. Polaris consensus reached.",
+        agent: "Drishti" as const,
+        message: "Target list of 284 profiles finalized, stock fallback profiles flagged. Drishti consensus reached.",
         confidence: 96,
         reasoning: "Final segment view built, attributes exported to CSV and loaded to cache.",
         stats: "284 profiles ready"
       },
       {
-        agent: "Luna" as const,
-        message: "Dynamic recommendation parameters verified and connected to checkout flow. Luna consensus reached.",
+        agent: "Pragya" as const,
+        message: "Dynamic recommendation parameters verified and connected to checkout flow. Pragya consensus reached.",
         confidence: 95,
         reasoning: "Handshake verified with recomendation API, return value mapped.",
         stats: "Checkout hooks verified"
       },
       {
-        agent: "Vega" as const,
-        message: "Yield model locked at ₹1.72L with 3.9x ROI projection. Vega consensus reached.",
+        agent: "Khoj" as const,
+        message: "Yield model locked at ₹1.72L with 3.9x ROI projection. Khoj consensus reached.",
         confidence: 92,
         reasoning: "Finalized revenue models under refined inventory inputs.",
         stats: "ROI: 3.9x locked"
       },
       {
-        agent: "Nova" as const,
-        message: "All dynamic blocks and checkout link variables validated. Nova consensus reached.",
+        agent: "Rachna" as const,
+        message: "All dynamic blocks and checkout link variables validated. Rachna consensus reached.",
         confidence: 94,
         reasoning: "Double checked link shortener webhooks, dynamic variables are functional.",
         stats: "Templates approved"
       },
       {
-        agent: "Atlas" as const,
-        message: "Reactivation campaign dispatch schedule confirmed. Queues armed for launch. Atlas consensus reached.",
+        agent: "Saarthi" as const,
+        message: "Reactivation campaign dispatch schedule confirmed. Queues armed for launch. Saarthi consensus reached.",
         confidence: 98,
         reasoning: "Scheduled queues created, dispatch nodes are active in standby.",
         stats: "Launch armed"
@@ -485,7 +485,7 @@ const SCENARIOS = [
 ];
 
 const AGENT_META = {
-  Polaris: { 
+  Drishti: { 
     role: "Audience Intelligence", 
     color: "#3B82F6", 
     border: "border-blue-500/20", 
@@ -494,7 +494,7 @@ const AGENT_META = {
     icon: Users,
     x: 120, y: 35
   },
-  Vega: { 
+  Khoj: { 
     role: "Predictive Analytics", 
     color: "#8B5CF6", 
     border: "border-violet-500/20", 
@@ -503,7 +503,7 @@ const AGENT_META = {
     icon: BarChart2,
     x: 201, y: 94
   },
-  Nova: { 
+  Rachna: { 
     role: "Campaign Creator", 
     color: "#EC4899", 
     border: "border-pink-500/20", 
@@ -512,7 +512,7 @@ const AGENT_META = {
     icon: Sparkles,
     x: 170, y: 189
   },
-  Atlas: { 
+  Saarthi: { 
     role: "Operations Dispatch", 
     color: "#22C55E", 
     border: "border-green-500/20", 
@@ -521,7 +521,7 @@ const AGENT_META = {
     icon: Radio,
     x: 70, y: 189
   },
-  Luna: { 
+  Pragya: { 
     role: "Growth Recovery Agent", 
     color: "#F59E0B", 
     border: "border-amber-500/20", 
@@ -747,35 +747,35 @@ const generateDynamicFallbackScript = (region: string, persona: string, business
   const script: BoardroomMessage[] = [
     // ROUND 1: DISCOVERY & SCANS
     {
-      agent: "Polaris",
+      agent: "Drishti",
       message: `Sector scan complete for ${region}. Identified active profiles matching the '${pName}' archetype. Segment demand index stands at 92%. Mapped ${stats.cohortSize} customers within this region.`,
       confidence: 94,
       reasoning: `Matched segment parameters against active customer DB. Found high cluster density in ${region} region.`,
       stats: `${stats.cohortSize} profiles mapped`
     },
     {
-      agent: "Luna",
+      agent: "Pragya",
       message: `Audit of regional sales logs complete. The primary sentiment of this cohort is ${stats.primarySentiment}. Key customer review: "${stats.recentReview}".`,
       confidence: 93,
       reasoning: `Queried product order logs and compared last 30 days vs previous 30 days. Primary sentiment detected is ${stats.primarySentiment}.`,
       stats: `${stats.primarySentiment} sentiment`
     },
     {
-      agent: "Vega",
+      agent: "Khoj",
       message: `Modeling 30-Day Demand forecast. Average risk is ${stats.avgRisk}%. Total cohort LTV stands at ₹${stats.totalLTV.toLocaleString()}. Transitioning to ${trends.emergingTrend} yields a projected ₹45K revenue spike.`,
       confidence: 88,
       reasoning: `Regression model based on regional conversion rate (4.2%) and average basket value (₹3,200).`,
       stats: `LTV: ₹${stats.totalLTV.toLocaleString()}`
     },
     {
-      agent: "Nova",
-      message: `Creative positioning prepared. Proposing campaign: '${isFashion ? "NEXT DROP" : "ORBIT COGNITIVE CORE"}'. We will focus styling around ${trends.emergingTrend} via preferred channel: ${stats.preferredChannel}.`,
+      agent: "Rachna",
+      message: `Creative positioning prepared. Proposing campaign: '${isFashion ? "NEXT DROP" : "Manthan COGNITIVE CORE"}'. We will focus styling around ${trends.emergingTrend} via preferred channel: ${stats.preferredChannel}.`,
       confidence: 91,
       reasoning: `A/B testing shows visual grids containing minimalist aesthetics drive 25% higher CTR. Preferred channel is ${stats.preferredChannel}.`,
       stats: `Preferred: ${stats.preferredChannel}`
     },
     {
-      agent: "Atlas",
+      agent: "Saarthi",
       message: `Operations check. Preferred channel ${stats.preferredChannel} dispatch queue is responsive. We recommend scheduling dispatch on Tuesday 10:30 AM for maximum visual impact.`,
       confidence: 95,
       reasoning: `Checked API gateway queues, zero latency detected. SMS backup routes configured for push-disabled profiles.`,
@@ -783,35 +783,35 @@ const generateDynamicFallbackScript = (region: string, persona: string, business
     },
     // ROUND 2: DEEPER DEMOGRAPHICS & TRENDS
     {
-      agent: "Polaris",
+      agent: "Drishti",
       message: `Auditing audience demographics. This segment in ${region} is mostly aged ${pName.includes("Gen Z") ? "18-24" : "25-45"}, with high mobile engagement. They represent a high-value growth opportunity.`,
       confidence: 92,
       reasoning: `Aggregated age brackets and preferred channels for target customers. Mobile session count averages 6.2 per week.`,
       stats: "Demographics mapped"
     },
     {
-      agent: "Luna",
+      agent: "Pragya",
       message: `Analyzing buying triggers. The audience is motivated by exclusivity and aesthetic drops. We see a declining trend in ${trends.decliningTrend}, indicating we must shift stock immediately.`,
       confidence: 91,
       reasoning: `Isolating abandonment reasons. Coupon code sensitivities are high, but brand design matches the primary trigger index.`,
       stats: `Declining: ${trends.decliningTrend}`
     },
     {
-      agent: "Vega",
+      agent: "Khoj",
       message: `60-Day demand simulation complete. If we pivot stock, we forecast a cumulative revenue impact of ₹85K. If we delay, we risk losing 18% of this cohort's LTV of ₹${stats.totalLTV.toLocaleString()}.`,
       confidence: 90,
       reasoning: `Calculated churn hazard rates against delay times. Every week of delay increases cohort exit rate by 2.4%.`,
       stats: `LTV at risk: ₹${Math.round(stats.totalLTV * 0.18).toLocaleString()}`
     },
     {
-      agent: "Nova",
+      agent: "Rachna",
       message: `Refining copywriting direction. I will generate copy variants that emphasize clean aesthetics, quick delivery, and limited stock to leverage FOMO triggers.`,
       confidence: 92,
       reasoning: `FOMO-framed subject lines boost email open rates by 34% and WhatsApp link CTR by 19% in active test cells.`,
       stats: "Copy triggers set"
     },
     {
-      agent: "Atlas",
+      agent: "Saarthi",
       message: `Inventory logistics check. Recommended action: reduce ${trends.currentTrend} inventory by 20% and allocate 35% more budget to ${trends.emergingTrend} to prevent stockouts.`,
       confidence: 96,
       reasoning: `Compared inventory turnover rate with estimated demand scale. Optimal safety stock level is 3.5 weeks.`,
@@ -819,35 +819,35 @@ const generateDynamicFallbackScript = (region: string, persona: string, business
     },
     // ROUND 3: REGIONAL INTELLIGENCE & FORECAST
     {
-      agent: "Polaris",
+      agent: "Drishti",
       message: `Analyzing regional density. ${region} accounts for 38% of total purchases in this category. Location affinity for ${trends.emergingTrend} is higher here than in other regions.`,
       confidence: 93,
       reasoning: `Computed regional purchase metrics and normalized by population density index.`,
       stats: `${region} affinity: High`
     },
     {
-      agent: "Luna",
-      message: `Trend momentum is accelerating. Luna metrics indicate that ${trends.emergingTrend} is gaining traction rapidly in high-engagement circles, driven by social discovery.`,
+      agent: "Pragya",
+      message: `Trend momentum is accelerating. Pragya metrics indicate that ${trends.emergingTrend} is gaining traction rapidly in high-engagement circles, driven by social discovery.`,
       confidence: 94,
       reasoning: `Scanned social referral webhooks and external search velocity logs for ${region}.`,
       stats: "Trend Momentum: 85%"
     },
     {
-      agent: "Vega",
+      agent: "Khoj",
       message: `90-Day forecast shows peak adoption. We predict ${trends.predictedTrend} will become the dominant category. The total revenue opportunity stands at ₹1.45L.`,
       confidence: 89,
       reasoning: `Multi-variable regression models indicate full trend flip will occur in weeks 8 to 11.`,
       stats: `90d: Peak / +₹145K`
     },
     {
-      agent: "Nova",
-      message: `Visual layout finalized. The campaign will utilize a high-fidelity dark-mode cyberpunk theme matching ORBIT's signature brand design.`,
+      agent: "Rachna",
+      message: `Visual layout finalized. The campaign will utilize a high-fidelity dark-mode cyberpunk theme matching Manthan's signature brand design.`,
       confidence: 93,
       reasoning: `Brand compliance check returned 100% match. Theme elements aligned with premium aesthetics.`,
       stats: "Aesthetics locked"
     },
     {
-      agent: "Atlas",
+      agent: "Saarthi",
       message: `Campaign deployment staging is complete. We can configure automated trigger nodes to launch the campaign within 14 days.`,
       confidence: 95,
       reasoning: `Staged webhook templates, verified routing table configs. Ready for queue injection.`,
@@ -855,35 +855,35 @@ const generateDynamicFallbackScript = (region: string, persona: string, business
     },
     // ROUND 4: CONSOLIDATION & OPTIMIZATION
     {
-      agent: "Polaris",
+      agent: "Drishti",
       message: `Refining target segments. We will exclude accounts with open support tickets or active refund requests to preserve segment health.`,
       confidence: 91,
       reasoning: `Excluding frustrated nodes prevents adverse marketing reviews and increases net conversion value.`,
       stats: "Support filter applied"
     },
     {
-      agent: "Luna",
+      agent: "Pragya",
       message: `Verified coupon parameters. Allocating a 10% early access discount code for the loyalist sub-cohort to maximize immediate pre-order checkouts.`,
       confidence: 92,
       reasoning: `Pre-order coupon code redemption velocity is historically 2.8x higher than standard launch discounts.`,
       stats: "Pre-order coupon active"
     },
     {
-      agent: "Vega",
+      agent: "Khoj",
       message: `Discount simulation yields: 10% coupon compression is offset by a 15% increase in conversion volume. Net revenue forecast adjusted to ₹1.5L, expected ROI 4.5x.`,
       confidence: 90,
       reasoning: `Price elasticity models show inelastic response on luxury streetwear, but high elastic volume on Gen Z/Students.`,
       stats: "ROI: 4.5x projected"
     },
     {
-      agent: "Nova",
+      agent: "Rachna",
       message: `Secondary email creative variants ready for transactional fallbacks. Injects personalized list of past purchased categories.`,
       confidence: 91,
       reasoning: `Correlating past category names boosts user click affinity indexes by 42%.`,
       stats: "Fallback templates ready"
     },
     {
-      agent: "Atlas",
+      agent: "Saarthi",
       message: `Channel throttling parameters configured. Dispatch rate capped to 45 transactions per second to avoid carrier spam triggers.`,
       confidence: 94,
       reasoning: `Optimized SMTP and SMS carrier gateway queue parameters to fit standard service level agreements.`,
@@ -891,39 +891,39 @@ const generateDynamicFallbackScript = (region: string, persona: string, business
     },
     // ROUND 5: CONSENSUS REACHED
     {
-      agent: "Polaris",
-      message: `Target segment synced. Polaris consensus reached. Audience confidence stands at 95%. Ready for strategic execution.`,
+      agent: "Drishti",
+      message: `Target segment synced. Drishti consensus reached. Audience confidence stands at 95%. Ready for strategic execution.`,
       confidence: 97,
       reasoning: `Verified target lists, synchronized segment attributes across databases.`,
-      stats: "Polaris consensus"
+      stats: "Drishti consensus"
     },
     {
-      agent: "Luna",
-      message: `Product affinities and leakage prevention webhooks are online. Luna consensus reached. Ready to track conversions.`,
+      agent: "Pragya",
+      message: `Product affinities and leakage prevention webhooks are online. Pragya consensus reached. Ready to track conversions.`,
       confidence: 96,
       reasoning: `Handshake tests completed successfully on conversion tracker webhooks.`,
-      stats: "Luna consensus"
+      stats: "Pragya consensus"
     },
     {
-      agent: "Vega",
-      message: `Yield projections, ROI curves, and Time Machine demand simulators locked. Vega consensus reached. Expected ROI is 4.5x.`,
+      agent: "Khoj",
+      message: `Yield projections, ROI curves, and Time Machine demand simulators locked. Khoj consensus reached. Expected ROI is 4.5x.`,
       confidence: 92,
       reasoning: `Approved final regression model, verified statistical p-value at < 0.01.`,
-      stats: "Vega consensus"
+      stats: "Khoj consensus"
     },
     {
-      agent: "Nova",
-      message: `All styling guides, copy templates, and visual assets uploaded to primary CDNs. Nova consensus reached.`,
+      agent: "Rachna",
+      message: `All styling guides, copy templates, and visual assets uploaded to primary CDNs. Rachna consensus reached.`,
       confidence: 95,
       reasoning: `Static layout checks and responsiveness tests passed across standard client templates.`,
-      stats: "Nova consensus"
+      stats: "Rachna consensus"
     },
     {
-      agent: "Atlas",
-      message: `Deployment queue armed. Execution pipeline in standby. Awaiting launch authorization. Atlas consensus reached.`,
+      agent: "Saarthi",
+      message: `Deployment queue armed. Execution pipeline in standby. Awaiting launch authorization. Saarthi consensus reached.`,
       confidence: 98,
       reasoning: `SMTP endpoints validated, SMS channels armed, webhook listener status is green.`,
-      stats: "Atlas consensus"
+      stats: "Saarthi consensus"
     }
   ];
 
@@ -939,7 +939,7 @@ export const AgentBoardroom: React.FC = () => {
   const [selectedScenario, setSelectedScenario] = useState(0);
   const [debateActive, setDebateActive] = useState(false);
   const [debateMsgs, setDebateMsgs] = useState<BoardroomMessage[]>([]);
-  const [activeSpeaker, setActiveSpeaker] = useState<"Polaris" | "Nova" | "Vega" | "Atlas" | "Luna" | null>(null);
+  const [activeSpeaker, setActiveSpeaker] = useState<"Drishti" | "Rachna" | "Khoj" | "Saarthi" | "Pragya" | null>(null);
 
   // Selected Region and Persona states (Trend Intelligence)
   const [selectedRegion, setSelectedRegion] = useState<string>("North Delhi");
@@ -978,7 +978,7 @@ export const AgentBoardroom: React.FC = () => {
   const [timeMachineDays, setTimeMachineDays] = useState<30 | 60 | 90>(30);
 
   /* selected agent profile card state */
-  const [selectedAgent, setSelectedAgent] = useState<"Polaris" | "Vega" | "Nova" | "Atlas" | "Luna" | null>(null);
+  const [selectedAgent, setSelectedAgent] = useState<"Drishti" | "Khoj" | "Rachna" | "Saarthi" | "Pragya" | null>(null);
 
   /* Accordion state for deep reasoning */
   const [openReasoning, setOpenReasoning] = useState<Record<number, boolean>>({});
@@ -1065,11 +1065,11 @@ export const AgentBoardroom: React.FC = () => {
                 // Update consensus
                 setConsensus(c => {
                   const newC = { ...c };
-                  if (msg.agent === "Polaris") newC.segmentFound = true;
-                  else if (msg.agent === "Luna") newC.leaksRecovered = true;
-                  else if (msg.agent === "Vega") newC.roiForecasted = true;
-                  else if (msg.agent === "Nova") newC.copyGenerated = true;
-                  else if (msg.agent === "Atlas") newC.dispatchArmed = true;
+                  if (msg.agent === "Drishti") newC.segmentFound = true;
+                  else if (msg.agent === "Pragya") newC.leaksRecovered = true;
+                  else if (msg.agent === "Khoj") newC.roiForecasted = true;
+                  else if (msg.agent === "Rachna") newC.copyGenerated = true;
+                  else if (msg.agent === "Saarthi") newC.dispatchArmed = true;
                   return newC;
                 });
 
@@ -1190,17 +1190,17 @@ export const AgentBoardroom: React.FC = () => {
       if (config.geminiKey) {
         addTelemetry(`Querying Gemini to generate debate for ${selectedRegion} and ${selectedPersona}...`);
         try {
-          const sys = `You are the ORBIT Neural Boardroom coordinator.
+          const sys = `You are the Manthan Neural Boardroom coordinator.
 1. Formulate a marketing strategy debate for target region: "${selectedRegion}", target persona: "${selectedPersona}", current trend: "${scannedTrends.currentTrend}", and emerging trend: "${scannedTrends.emergingTrend}".
 2. Simulate a detailed, multi-round debate among 5 AI agents for this scenario.
-The debate MUST consist of exactly 25 messages (5 rounds where the 5 agents: Polaris, Luna, Vega, Nova, and Atlas speak in sequence: Round 1, Round 2, Round 3, Round 4, Round 5) discussing, analyzing, challenging, and aligning on a strategy.
+The debate MUST consist of exactly 25 messages (5 rounds where the 5 agents: Drishti, Pragya, Khoj, Rachna, and Saarthi speak in sequence: Round 1, Round 2, Round 3, Round 4, Round 5) discussing, analyzing, challenging, and aligning on a strategy.
 
 The agents are:
-- Polaris (Audience Intelligence): Analyzes cohorts and identifies target groups.
-- Luna (Recovery): Audits transaction logs, customer records, and identifies leakages.
-- Vega (Predictive Analytics): Forecasts yields, ROI, and models conversion curves.
-- Nova (Campaign Creator): Designs creative drops, copy variations, and messaging layouts.
-- Atlas (Operations Dispatch): Verifies API channels, routes delivery pathways, and arms dispatch.
+- Drishti (Audience Intelligence): Analyzes cohorts and identifies target groups.
+- Pragya (Recovery): Audits transaction logs, customer records, and identifies leakages.
+- Khoj (Predictive Analytics): Forecasts yields, ROI, and models conversion curves.
+- Rachna (Campaign Creator): Designs creative drops, copy variations, and messaging layouts.
+- Saarthi (Operations Dispatch): Verifies API channels, routes delivery pathways, and arms dispatch.
 
 Format your response as a single valid JSON object matching this schema:
 {
@@ -1208,7 +1208,7 @@ Format your response as a single valid JSON object matching this schema:
   "scenarioDescription": "Description of the scenario (1-2 sentences)",
   "messages": [
     {
-      "agent": "Polaris" | "Luna" | "Vega" | "Nova" | "Atlas",
+      "agent": "Drishti" | "Pragya" | "Khoj" | "Rachna" | "Saarthi",
       "message": "speech in character (1-2 sentences)",
       "confidence": number,
       "reasoning": "thought process and algorithmic reasoning details",
@@ -1229,7 +1229,7 @@ Cohort Statistics for "${selectedPersona}" in "${selectedRegion}":
 - Primary customer sentiment: ${stats.primarySentiment}
 - Sample customer review: "${stats.recentReview}"
 
-Please generate a 25-message (5 rounds) debate between the agents (Polaris, Luna, Vega, Nova, Atlas in sequence for 5 rounds). Ensure the agents explicitly discuss these specific statistics, sentiments, and quotes in their arguments.`;
+Please generate a 25-message (5 rounds) debate between the agents (Drishti, Pragya, Khoj, Rachna, Saarthi in sequence for 5 rounds). Ensure the agents explicitly discuss these specific statistics, sentiments, and quotes in their arguments.`;
           const res = await callGeminiAPI(prompt, sys, config.geminiKey);
           const parsed = parseGeminiJson<any>(res, null);
           
@@ -1280,7 +1280,7 @@ Please generate a 25-message (5 rounds) debate between the agents (Polaris, Luna
     <div className={`flex-1 flex overflow-hidden relative ${isLight ? "bg-gray-50 text-gray-900" : "bg-[#050816] text-white"}`}>
       {/* Background Matrix overlays */}
       <div className={`pointer-events-none absolute inset-0 space-grid opacity-35 z-0 ${isLight ? "hidden" : ""}`} />
-      <div className={`pointer-events-none absolute inset-0 bg-orbit-glow-blue opacity-15 z-0 ${isLight ? "hidden" : ""}`} />
+      <div className={`pointer-events-none absolute inset-0 bg-Manthan-glow-blue opacity-15 z-0 ${isLight ? "hidden" : ""}`} />
 
       {/* ════════════════════════════════════════
           LEFT PANEL — MISSION CONTEXT & AGENT STATS
@@ -1289,10 +1289,10 @@ Please generate a 25-message (5 rounds) debate between the agents (Polaris, Luna
         isLight ? "border-gray-200 bg-white" : "border-gray-800/60 bg-gray-950/45 backdrop-blur-md"
       }`}>
         {/* Trend Intelligence Context */}
-        <div className={`orbit-panel p-3.5 border space-y-3 relative overflow-hidden ${
+        <div className={`Manthan-panel p-3.5 border space-y-3 relative overflow-hidden ${
           isLight ? "border-gray-200 bg-slate-50/50" : "border-gray-850 bg-gray-900/10"
         }`}>
-          <div className="absolute top-0 right-0 w-16 h-16 bg-orbit-glow-blue opacity-25 pointer-events-none" />
+          <div className="absolute top-0 right-0 w-16 h-16 bg-Manthan-glow-blue opacity-25 pointer-events-none" />
           <h2 className={`font-space text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 border-b pb-2 ${
             isLight ? "text-gray-900 border-gray-200" : "text-white border-gray-800/60"
           }`}>
@@ -1364,16 +1364,16 @@ Please generate a 25-message (5 rounds) debate between the agents (Polaris, Luna
                   <span className={`font-bold block truncate ${isLight ? "text-gray-800" : "text-white"}`}>{scannedTrends.currentTrend}</span>
                 </div>
                 <div>
-                  <span className={`text-[7px] block uppercase ${isLight ? "text-emerald-600" : "text-orbit-success/70"}`}>Emerging Trend:</span>
-                  <span className={`font-bold block truncate ${isLight ? "text-emerald-700" : "text-orbit-success"}`}>{scannedTrends.emergingTrend}</span>
+                  <span className={`text-[7px] block uppercase ${isLight ? "text-emerald-600" : "text-Manthan-success/70"}`}>Emerging Trend:</span>
+                  <span className={`font-bold block truncate ${isLight ? "text-emerald-700" : "text-Manthan-success"}`}>{scannedTrends.emergingTrend}</span>
                 </div>
                 <div>
                   <span className={`text-[7px] block uppercase ${isLight ? "text-red-500" : "text-red-500/70"}`}>Declining Trend:</span>
                   <span className={`font-bold block truncate ${isLight ? "text-red-600" : "text-red-400"}`}>{scannedTrends.decliningTrend}</span>
                 </div>
                 <div>
-                  <span className={`text-[7px] block uppercase ${isLight ? "text-purple-600" : "text-orbit-purple/70"}`}>Predicted Trend:</span>
-                  <span className={`font-bold block truncate ${isLight ? "text-purple-700" : "text-orbit-purple"}`}>{scannedTrends.predictedTrend}</span>
+                  <span className={`text-[7px] block uppercase ${isLight ? "text-purple-600" : "text-Manthan-purple/70"}`}>Predicted Trend:</span>
+                  <span className={`font-bold block truncate ${isLight ? "text-purple-700" : "text-Manthan-purple"}`}>{scannedTrends.predictedTrend}</span>
                 </div>
               </div>
             </div>
@@ -1384,12 +1384,12 @@ Please generate a 25-message (5 rounds) debate between the agents (Polaris, Luna
         {/* Live Agent Status */}
         <div className="space-y-2 flex-1">
           <h3 className={`font-space text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 border-b pb-2 ${isLight ? "text-gray-900 border-gray-200" : "text-white border-gray-800/60"}`}>
-            <Users size={13} className={isLight ? "text-purple-600" : "text-orbit-purple"} />
+            <Users size={13} className={isLight ? "text-purple-600" : "text-Manthan-purple"} />
             Executive Board
           </h3>
           
           <div className="flex flex-col gap-2">
-            {(["Polaris", "Vega", "Nova", "Atlas", "Luna"] as const).map(agent => {
+            {(["Drishti", "Khoj", "Rachna", "Saarthi", "Pragya"] as const).map(agent => {
               const meta = AGENT_META[agent];
               const isSpeaker = activeSpeaker === agent;
               // dynamic load metric
@@ -1413,7 +1413,7 @@ Please generate a 25-message (5 rounds) debate between the agents (Polaris, Luna
                         ? isThinking 
                           ? isLight ? "text-blue-600 border-blue-300 bg-blue-50" : "text-blue-300 border-blue-500/30 bg-blue-500/5 animate-pulse"
                           : isLight ? "text-blue-700 border-blue-400 bg-blue-100/50" : "text-blue-400 border-blue-500/40 bg-blue-500/10 animate-pulse" 
-                        : isLight ? "text-green-700 border-green-300 bg-green-50" : "text-orbit-success border-orbit-success/30 bg-orbit-success/5"
+                        : isLight ? "text-green-700 border-green-300 bg-green-50" : "text-Manthan-success border-Manthan-success/30 bg-Manthan-success/5"
                     }`}>
                       {isSpeaker ? (isThinking ? "THINKING" : "SPEAKING") : "STANDBY"}
                     </span>
@@ -1461,7 +1461,7 @@ Please generate a 25-message (5 rounds) debate between the agents (Polaris, Luna
                       onClick={() => setDebateSpeed(speed)}
                       className={`px-2.5 py-1 rounded font-mono text-[9px] font-bold uppercase tracking-wider cursor-pointer transition-all ${
                         debateSpeed === speed
-                          ? "bg-orbit-purple text-white shadow-[0_0_10px_rgba(139,92,246,0.4)]"
+                          ? "bg-Manthan-purple text-white shadow-[0_0_10px_rgba(139,92,246,0.4)]"
                           : isLight ? "text-gray-500 hover:text-gray-900" : "text-gray-400 hover:text-white"
                       }`}
                     >
@@ -1508,8 +1508,8 @@ Please generate a 25-message (5 rounds) debate between the agents (Polaris, Luna
                 ) : (
                   <button
                     onClick={triggerBoardroomDebate}
-                    className={`px-5 py-2.5 rounded-xl text-xs font-mono font-bold uppercase tracking-wider flex items-center gap-2 transition-all cursor-pointer bg-gradient-to-r from-orbit-purple to-pink-500 text-white hover:opacity-90 hover:scale-[1.02] active:scale-95 duration-200 ${
-                      isLight ? "" : "shadow-orbit-glow-purple"
+                    className={`px-5 py-2.5 rounded-xl text-xs font-mono font-bold uppercase tracking-wider flex items-center gap-2 transition-all cursor-pointer bg-gradient-to-r from-Manthan-purple to-pink-500 text-white hover:opacity-90 hover:scale-[1.02] active:scale-95 duration-200 ${
+                      isLight ? "" : "shadow-Manthan-glow-purple"
                     }`}
                   >
                     <Zap size={13} />
@@ -1532,7 +1532,7 @@ Please generate a 25-message (5 rounds) debate between the agents (Polaris, Luna
             </div>
             <div className={`w-full h-1 rounded-full overflow-hidden ${isLight ? "bg-gray-200" : "bg-gray-900"}`}>
               <div
-                className="h-full bg-gradient-to-r from-orbit-purple to-blue-500 rounded-full transition-all duration-300"
+                className="h-full bg-gradient-to-r from-Manthan-purple to-blue-500 rounded-full transition-all duration-300"
                 style={{ width: `${((currentStepIdx + elapsedTimeInCurrentStep / (secondsPerMessage * 1000)) / debateScript.length) * 100}%` }}
               />
             </div>
@@ -1558,11 +1558,11 @@ Please generate a 25-message (5 rounds) debate between the agents (Polaris, Luna
               activeSpeaker 
                 ? isThinking 
                   ? isLight ? "border-blue-300 bg-blue-50 shadow-[0_0_20px_rgba(59,130,246,0.1)] scale-105" : "border-blue-500/30 bg-blue-500/5 shadow-[0_0_25px_rgba(59,130,246,0.15)] scale-105" 
-                  : isLight ? "border-purple-300 bg-purple-50 shadow-[0_0_20px_rgba(139,92,246,0.1)] scale-105" : "border-purple-500/30 bg-purple-500/10 shadow-[0_0_25px_rgba(139,92,246,0.15)] animate-orbit-pulse"
+                  : isLight ? "border-purple-300 bg-purple-50 shadow-[0_0_20px_rgba(139,92,246,0.1)] scale-105" : "border-purple-500/30 bg-purple-500/10 shadow-[0_0_25px_rgba(139,92,246,0.15)] animate-Manthan-pulse"
                 : isLight ? "border-gray-200 bg-gray-50/50" : "border-gray-850 bg-gray-900/5"
             }`}>
               <div className={`w-14 h-14 rounded-full border flex items-center justify-center ${
-                isLight ? "bg-purple-100/40 border-purple-200" : "bg-orbit-purple/15 border-orbit-purple/30"
+                isLight ? "bg-purple-100/40 border-purple-200" : "bg-Manthan-purple/15 border-Manthan-purple/30"
               }`}>
                 {activeSpeaker ? (
                   <span className={`font-space text-xs font-bold uppercase tracking-wider animate-pulse ${isLight ? "text-purple-900" : "text-white"}`}>
@@ -1612,7 +1612,7 @@ Please generate a 25-message (5 rounds) debate between the agents (Polaris, Luna
               )}
 
               {/* Render Roundtable nodes for each executive agent */}
-              {(["Polaris", "Vega", "Nova", "Atlas", "Luna"] as const).map(agent => {
+              {(["Drishti", "Khoj", "Rachna", "Saarthi", "Pragya"] as const).map(agent => {
                 const meta = AGENT_META[agent];
                 const isSpeaking = activeSpeaker === agent;
                 const Icon = meta.icon;
@@ -1785,9 +1785,9 @@ Please generate a 25-message (5 rounds) debate between the agents (Polaris, Luna
             {debateActive && activeSpeaker && (
               <div className="flex items-center gap-3 text-gray-500 py-2">
                 <div className="flex gap-1.5 items-center">
-                  <span className="w-1.5 h-1.5 rounded-full bg-orbit-purple animate-bounce" />
-                  <span className="w-1.5 h-1.5 rounded-full bg-orbit-purple animate-bounce [animation-delay:0.2s]" />
-                  <span className="w-1.5 h-1.5 rounded-full bg-orbit-purple animate-bounce [animation-delay:0.4s]" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-Manthan-purple animate-bounce" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-Manthan-purple animate-bounce [animation-delay:0.2s]" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-Manthan-purple animate-bounce [animation-delay:0.4s]" />
                 </div>
                 <span className="font-mono text-[9px] uppercase tracking-wider animate-pulse text-gray-455">
                   {isThinking 
@@ -1810,23 +1810,23 @@ Please generate a 25-message (5 rounds) debate between the agents (Polaris, Luna
       }`}>
         
         {/* Consensus checklist */}
-        <div className={`orbit-panel p-3.5 border space-y-3 ${
+        <div className={`Manthan-panel p-3.5 border space-y-3 ${
           isLight ? "border-gray-200 bg-slate-55 bg-slate-50/50" : "border-gray-850 bg-gray-900/10"
         }`}>
           <h3 className={`font-space text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 border-b pb-2 ${
             isLight ? "text-gray-900 border-gray-200" : "text-white border-gray-800/60"
           }`}>
-            <CheckCircle2 size={13} className={isLight ? "text-green-600" : "text-orbit-success"} />
+            <CheckCircle2 size={13} className={isLight ? "text-green-600" : "text-Manthan-success"} />
             Directive Consensus
           </h3>
 
           <div className="flex flex-col gap-2 font-mono text-[10px]">
             {[
-              { id: "segmentFound", label: "Cohort Mapped", ok: consensus.segmentFound, agent: "Polaris" },
-              { id: "leaksRecovered", label: "Leaks Audited", ok: consensus.leaksRecovered, agent: "Luna" },
-              { id: "roiForecasted", label: "Yield ROI Predicted", ok: consensus.roiForecasted, agent: "Vega" },
-              { id: "copyGenerated", label: "Campaign Assembled", ok: consensus.copyGenerated, agent: "Nova" },
-              { id: "dispatchArmed", label: "Dispatch Channels Locked", ok: consensus.dispatchArmed, agent: "Atlas" },
+              { id: "segmentFound", label: "Cohort Mapped", ok: consensus.segmentFound, agent: "Drishti" },
+              { id: "leaksRecovered", label: "Leaks Audited", ok: consensus.leaksRecovered, agent: "Pragya" },
+              { id: "roiForecasted", label: "Yield ROI Predicted", ok: consensus.roiForecasted, agent: "Khoj" },
+              { id: "copyGenerated", label: "Campaign Assembled", ok: consensus.copyGenerated, agent: "Rachna" },
+              { id: "dispatchArmed", label: "Dispatch Channels Locked", ok: consensus.dispatchArmed, agent: "Saarthi" },
             ].map(item => (
               <div 
                 key={item.id}
@@ -1847,13 +1847,13 @@ Please generate a 25-message (5 rounds) debate between the agents (Polaris, Luna
         </div>
 
         {/* AI Time Machine Simulator */}
-        <div className={`orbit-panel p-3.5 border space-y-3 ${
+        <div className={`Manthan-panel p-3.5 border space-y-3 ${
           isLight ? "border-gray-200 bg-slate-50/50" : "border-gray-850 bg-gray-900/10"
         }`}>
           <h3 className={`font-space text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 border-b pb-2 ${
             isLight ? "text-gray-900 border-gray-200" : "text-white border-gray-800/60"
           }`}>
-            <Clock size={13} className={isLight ? "text-purple-500" : "text-orbit-purple"} />
+            <Clock size={13} className={isLight ? "text-purple-500" : "text-Manthan-purple"} />
             AI Time Machine
           </h3>
           <p className={`font-mono text-[8px] uppercase ${isLight ? "text-gray-500" : "text-gray-555"}`}>Future Demand Predictor</p>
@@ -1870,7 +1870,7 @@ Please generate a 25-message (5 rounds) debate between the agents (Polaris, Luna
                 }}
                 className={`flex-1 py-1 rounded font-mono text-[9px] font-bold uppercase tracking-wider cursor-pointer transition-all ${
                   timeMachineDays === days
-                    ? "bg-orbit-purple text-white shadow-[0_0_8px_rgba(139,92,246,0.3)]"
+                    ? "bg-Manthan-purple text-white shadow-[0_0_8px_rgba(139,92,246,0.3)]"
                     : isLight ? "text-gray-500 hover:text-gray-900" : "text-gray-400 hover:text-white"
                 }`}
               >
@@ -1899,8 +1899,8 @@ Please generate a 25-message (5 rounds) debate between the agents (Polaris, Luna
                 </div>
                 <div className={`flex justify-between items-center pt-1 border-t font-mono ${isLight ? "border-gray-200" : "border-gray-900/60"}`}>
                   <div>
-                    <span className={`text-[7px] block uppercase ${isLight ? "text-emerald-600" : "text-orbit-success/70"}`}>Est. Revenue:</span>
-                    <span className={`font-bold block ${isLight ? "text-emerald-700" : "text-orbit-success"}`}>{sim.revenueImpact}</span>
+                    <span className={`text-[7px] block uppercase ${isLight ? "text-emerald-600" : "text-Manthan-success/70"}`}>Est. Revenue:</span>
+                    <span className={`font-bold block ${isLight ? "text-emerald-700" : "text-Manthan-success"}`}>{sim.revenueImpact}</span>
                   </div>
                   <div className="text-right">
                     <span className={`text-[7px] block uppercase ${isLight ? "text-red-500" : "text-red-500/70"}`}>Risk Exposure:</span>
@@ -1914,13 +1914,13 @@ Please generate a 25-message (5 rounds) debate between the agents (Polaris, Luna
 
         {/* Latest Verdict Card */}
         {latestVerdict && (
-          <div className={`orbit-panel p-3.5 border space-y-3 ${
+          <div className={`Manthan-panel p-3.5 border space-y-3 ${
             isLight ? "border-gray-200 bg-slate-50/50" : "border-gray-850 bg-gray-900/10"
           }`}>
             <h3 className={`font-space text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 border-b pb-2 ${
               isLight ? "text-gray-900 border-gray-200" : "text-white border-gray-800/60"
             }`}>
-              <Award size={13} className={isLight ? "text-emerald-600" : "text-orbit-success"} />
+              <Award size={13} className={isLight ? "text-emerald-600" : "text-Manthan-success"} />
               Latest Verdict
             </h3>
             
@@ -1941,7 +1941,7 @@ Please generate a 25-message (5 rounds) debate between the agents (Polaris, Luna
                 <div className={`leading-tight ${isLight ? "text-slate-700" : "text-gray-300"}`}>
                   <span className="text-red-500 font-bold">{latestVerdict.currentTrend}</span>
                   <ArrowRight size={10} className="inline mx-1 text-gray-500" />
-                  <span className="text-orbit-success font-bold">{latestVerdict.futureTrend}</span>
+                  <span className="text-Manthan-success font-bold">{latestVerdict.futureTrend}</span>
                 </div>
               </div>
 
@@ -1952,7 +1952,7 @@ Please generate a 25-message (5 rounds) debate between the agents (Polaris, Luna
                 </div>
                 <div>
                   <span className={`text-[7px] block uppercase ${isLight ? "text-slate-400" : "text-gray-600"}`}>Est. Opportunity</span>
-                  <span className="text-orbit-success font-bold block">₹{latestVerdict.revenueOpportunity.toLocaleString()}</span>
+                  <span className="text-Manthan-success font-bold block">₹{latestVerdict.revenueOpportunity.toLocaleString()}</span>
                 </div>
               </div>
 
@@ -1960,7 +1960,7 @@ Please generate a 25-message (5 rounds) debate between the agents (Polaris, Luna
                 isLight ? "bg-emerald-50/20 border-emerald-300/40 text-emerald-700" : "bg-[#050816] border-green-500/20 text-green-400"
               }`}>
                 <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-ping" />
-                <span className="text-[7.5px] font-bold uppercase tracking-widest">Synced with orbit.ai Core</span>
+                <span className="text-[7.5px] font-bold uppercase tracking-widest">Synced with Manthan.ai Core</span>
               </div>
             </div>
           </div>
@@ -1986,7 +1986,7 @@ Please generate a 25-message (5 rounds) debate between the agents (Polaris, Luna
                 <div 
                   key={i} 
                   className={`leading-relaxed border-b border-gray-950 pb-1 transition-all ${
-                    log.includes("BOARDROOM") ? "text-orbit-purple font-bold" :
+                    log.includes("BOARDROOM") ? "text-Manthan-purple font-bold" :
                     log.includes("complete") || log.includes("consensus") || log.includes("armed") ? "text-green-400" : ""
                   }`}
                   style={{ animation: "fadeInUp 0.3s ease" }}

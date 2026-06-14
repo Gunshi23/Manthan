@@ -11,10 +11,10 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnterOS }) => {
   const [isDemoOpen, setIsDemoOpen] = useState(false);
 
   return (
-    <div className="relative min-h-screen bg-orbit-bg overflow-hidden space-grid flex flex-col justify-between">
+    <div className="relative min-h-screen bg-Manthan-bg overflow-hidden space-grid flex flex-col justify-between">
       {/* Background glowing blobs */}
-      <div className="absolute top-1/4 left-1/4 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full bg-orbit-glow-blue pointer-events-none" />
-      <div className="absolute bottom-1/4 right-1/4 translate-x-1/2 translate-y-1/2 w-[500px] h-[500px] rounded-full bg-orbit-glow-purple pointer-events-none" />
+      <div className="absolute top-1/4 left-1/4 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full bg-Manthan-glow-blue pointer-events-none" />
+      <div className="absolute bottom-1/4 right-1/4 translate-x-1/2 translate-y-1/2 w-[500px] h-[500px] rounded-full bg-Manthan-glow-purple pointer-events-none" />
 
       {/* Decorative scanline overlay */}
       <div className="scanlines" />
@@ -22,17 +22,17 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnterOS }) => {
       {/* Header */}
       <header className="relative z-10 px-8 py-6 flex items-center justify-between border-b border-gray-800/40 backdrop-blur-sm">
         <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-orbit-blue to-orbit-purple flex items-center justify-center shadow-orbit-glow animate-orbit-pulse">
+          <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-Manthan-blue to-Manthan-purple flex items-center justify-center shadow-Manthan-glow animate-Manthan-pulse">
             <span className="font-space font-bold text-white text-lg">O</span>
           </div>
-          <span className="font-space font-bold text-xl tracking-wider uppercase text-white bg-clip-text text-transparent bg-gradient-to-r from-white via-gray-200 to-gray-400">orbit.ai</span>
+          <span className="font-space font-bold text-xl tracking-wider uppercase text-white bg-clip-text text-transparent bg-gradient-to-r from-white via-gray-200 to-gray-400">Manthan.ai</span>
         </div>
         
         <div className="flex items-center gap-6">
           <span className="text-xs font-mono text-gray-500 hidden sm:inline-block">SYSTEM STATUS: OPTIMAL</span>
           <button
             onClick={onEnterOS}
-            className="px-4 py-2 rounded-lg border border-orbit-blue/30 bg-orbit-blue/10 text-xs text-orbit-blue font-mono hover:bg-orbit-blue/20 hover:border-orbit-blue/50 transition-all flex items-center gap-1.5 shadow-orbit-glow-inset"
+            className="px-4 py-2 rounded-lg border border-Manthan-blue/30 bg-Manthan-blue/10 text-xs text-Manthan-blue font-mono hover:bg-Manthan-blue/20 hover:border-Manthan-blue/50 transition-all flex items-center gap-1.5 shadow-Manthan-glow-inset"
           >
             <Terminal size={14} />
             Boot OS
@@ -48,7 +48,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnterOS }) => {
           transition={{ duration: 0.8 }}
           className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-gray-800 bg-gray-900/40 backdrop-blur-md mb-8"
         >
-          <Sparkles size={13} className="text-orbit-blue animate-pulse" />
+          <Sparkles size={13} className="text-Manthan-blue animate-pulse" />
           <span className="text-xs font-mono text-gray-400 tracking-wider">AUTONOMOUS MARKETING OS</span>
         </motion.div>
 
@@ -59,7 +59,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnterOS }) => {
           className="text-4xl sm:text-6xl md:text-7xl font-bold font-space text-white leading-tight tracking-tight mb-6"
         >
           Increase Customer Revenue <br />
-          <span className="text-transparent bg-clip-text bg-gradient-to-r from-orbit-blue via-orbit-purple to-pink-500">
+          <span className="text-transparent bg-clip-text bg-gradient-to-r from-Manthan-blue via-Manthan-purple to-pink-500">
             On Autopilot.
           </span>
         </motion.h1>
@@ -70,7 +70,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnterOS }) => {
           transition={{ duration: 0.8, delay: 0.2 }}
           className="text-gray-400 text-lg md:text-xl max-w-2xl mb-12 font-inter leading-relaxed"
         >
-          Keep Every Customer In Your Orbit. orbit.ai orchestrates autonomous AI agents to segment users, model conversion ROI, generate copy, and launch campaigns.
+          Keep Every Customer In Your Manthan. Manthan.ai orchestrates autonomous AI agents to segment users, model conversion ROI, generate copy, and launch campaigns.
         </motion.p>
 
         <motion.div
@@ -81,7 +81,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnterOS }) => {
         >
           <button
             onClick={onEnterOS}
-            className="group px-8 py-4 rounded-xl bg-gradient-to-r from-orbit-blue to-orbit-purple text-sm font-semibold text-white shadow-orbit-glow hover:shadow-orbit-glow-purple transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer"
+            className="group px-8 py-4 rounded-xl bg-gradient-to-r from-Manthan-blue to-Manthan-purple text-sm font-semibold text-white shadow-Manthan-glow hover:shadow-Manthan-glow-purple transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer"
           >
             Initialize Command Center
             <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
@@ -89,10 +89,10 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnterOS }) => {
           
           <button
             onClick={() => setIsDemoOpen(true)}
-            className="group px-8 py-4 rounded-xl border border-orbit-blue/30 bg-[#0F172A]/85 hover:bg-[#1E293B] text-sm font-semibold text-white transition-all duration-300 flex items-center justify-center gap-2 shadow-orbit-glow-inset hover:border-orbit-blue/60 cursor-pointer"
+            className="group px-8 py-4 rounded-xl border border-Manthan-blue/30 bg-[#0F172A]/85 hover:bg-[#1E293B] text-sm font-semibold text-white transition-all duration-300 flex items-center justify-center gap-2 shadow-Manthan-glow-inset hover:border-Manthan-blue/60 cursor-pointer"
           >
-            <Play size={14} className="fill-current text-orbit-blue group-hover:scale-110 transition-transform" />
-            Watch orbit.ai In Action
+            <Play size={14} className="fill-current text-Manthan-blue group-hover:scale-110 transition-transform" />
+            Watch Manthan.ai In Action
           </button>
         </motion.div>
 
@@ -103,33 +103,33 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnterOS }) => {
           transition={{ duration: 0.8, delay: 0.35 }}
           className="w-full bg-[#0F172A]/60 border border-white/10 rounded-2xl p-8 backdrop-blur-md mb-20 relative overflow-hidden shadow-2xl flex flex-col md:flex-row items-center justify-between gap-8 group"
         >
-          <div className="absolute top-0 right-0 w-80 h-80 bg-orbit-glow-blue opacity-[0.06] filter blur-3xl pointer-events-none" />
-          <div className="absolute bottom-0 left-0 w-80 h-80 bg-orbit-glow-purple opacity-[0.06] filter blur-3xl pointer-events-none" />
+          <div className="absolute top-0 right-0 w-80 h-80 bg-Manthan-glow-blue opacity-[0.06] filter blur-3xl pointer-events-none" />
+          <div className="absolute bottom-0 left-0 w-80 h-80 bg-Manthan-glow-purple opacity-[0.06] filter blur-3xl pointer-events-none" />
 
           {/* Left panel text */}
           <div className="text-left max-w-md space-y-4">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-orbit-blue/30 bg-orbit-blue/5 text-[10px] font-mono text-orbit-blue uppercase tracking-wider">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-Manthan-blue/30 bg-Manthan-blue/5 text-[10px] font-mono text-Manthan-blue uppercase tracking-wider">
               <Activity size={10} className="animate-pulse" />
               Autonomous Preview
             </div>
             
             <h2 className="text-2xl md:text-3xl font-bold font-space text-white leading-tight">
               A Complete Agent Organization. <br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-orbit-blue to-orbit-purple">
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-Manthan-blue to-Manthan-purple">
                 Running in Unison.
               </span>
             </h2>
             
             <p className="text-xs text-gray-400 font-mono leading-relaxed">
-              Witness how orbit.ai links audience mapping, copywriting, ROI simulations, and final campaign dispatching. See our agents align live in the boardroom in under 60 seconds.
+              Witness how Manthan.ai links audience mapping, copywriting, ROI simulations, and final campaign dispatching. See our agents align live in the boardroom in under 60 seconds.
             </p>
 
             <button
               onClick={() => setIsDemoOpen(true)}
-              className="mt-2 group px-5 py-2.5 rounded-lg bg-orbit-blue/15 border border-orbit-blue/40 text-xs font-mono text-orbit-blue hover:bg-orbit-blue hover:text-white transition-all flex items-center gap-2 shadow-orbit-glow-inset cursor-pointer"
+              className="mt-2 group px-5 py-2.5 rounded-lg bg-Manthan-blue/15 border border-Manthan-blue/40 text-xs font-mono text-Manthan-blue hover:bg-Manthan-blue hover:text-white transition-all flex items-center gap-2 shadow-Manthan-glow-inset cursor-pointer"
             >
-              <Play size={12} className="fill-current text-orbit-blue" />
-              Watch orbit.ai In Action
+              <Play size={12} className="fill-current text-Manthan-blue" />
+              Watch Manthan.ai In Action
             </button>
           </div>
 
@@ -184,32 +184,32 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnterOS }) => {
         <div className="w-full grid grid-cols-1 md:grid-cols-4 gap-6 text-left">
           {[
             {
-              name: "Polaris",
+              name: "Drishti",
               desc: "Audience Intelligence",
               task: "Natural language segmentation, customer cohort clustering, and behavioral graphing.",
-              color: "text-orbit-blue border-orbit-blue/20",
-              glow: "hover:shadow-orbit-glow"
+              color: "text-Manthan-blue border-Manthan-blue/20",
+              glow: "hover:shadow-Manthan-glow"
             },
             {
-              name: "Vega",
+              name: "Khoj",
               desc: "Predictive Analytics",
               task: "Conversion forecasting, churn risk calculations, and real-time revenue ROI modeling.",
-              color: "text-orbit-purple border-orbit-purple/20",
-              glow: "hover:shadow-orbit-glow-purple"
+              color: "text-Manthan-purple border-Manthan-purple/20",
+              glow: "hover:shadow-Manthan-glow-purple"
             },
             {
-              name: "Nova",
+              name: "Rachna",
               desc: "Campaign Creator",
               task: "Generative message copywriter tailoring layouts for Email, WhatsApp, SMS, and RCS.",
               color: "text-pink-500 border-pink-500/20",
               glow: "hover:shadow-0"
             },
             {
-              name: "Atlas",
+              name: "Saarthi",
               desc: "Operations Dispatch",
               task: "Execution router, automated delivery validation, and real-time conversion loop monitors.",
-              color: "text-orbit-success border-orbit-success/20",
-              glow: "hover:shadow-orbit-glow-green"
+              color: "text-Manthan-success border-Manthan-success/20",
+              glow: "hover:shadow-Manthan-glow-green"
             }
           ].map((agent, i) => (
             <motion.div
@@ -232,10 +232,10 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnterOS }) => {
 
       {/* Footer */}
       <footer className="relative z-10 px-8 py-6 border-t border-gray-800/40 text-center flex flex-col sm:flex-row items-center justify-between gap-4">
-        <span className="text-xs font-mono text-gray-500">© 2026 orbit.ai · All Rights Reserved</span>
+        <span className="text-xs font-mono text-gray-500">© 2026 Manthan.ai · All Rights Reserved</span>
         <div className="flex gap-6 text-xs font-mono text-gray-500">
-          <a href="#" className="hover:text-white transition-colors">POLARIS NODE</a>
-          <a href="#" className="hover:text-white transition-colors">VEGA ENGINE</a>
+          <a href="#" className="hover:text-white transition-colors">Drishti NODE</a>
+          <a href="#" className="hover:text-white transition-colors">Khoj ENGINE</a>
           <a href="#" className="hover:text-white transition-colors">SECURE LINK</a>
         </div>
       </footer>

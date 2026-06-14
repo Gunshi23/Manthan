@@ -20,7 +20,7 @@ export const AuthFlow: React.FC<AuthFlowProps> = ({ onLoginSuccess, onBack }) =>
 
   const initialLogs = [
     "LOG: SECURE CONNECTION SOCKET CREATED AT PROTOCOL IP:192.112.5.44",
-    "LOG: RETRIEVING orbit.ai ENCRYPTED KEYS...",
+    "LOG: RETRIEVING Manthan.ai ENCRYPTED KEYS...",
     "LOG: HANDSHAKE COMPLETED WITH VANGUARD SERVER CORES.",
     "LOG: DECRYPTING BIO-SIGNATURE MODULES...",
     "LOG: WAITING FOR OPERATOR IDENTIFICATION CREDENTIALS..."
@@ -135,20 +135,20 @@ export const AuthFlow: React.FC<AuthFlowProps> = ({ onLoginSuccess, onBack }) =>
   };
 
   return (
-    <div className="relative min-h-screen bg-orbit-bg space-grid flex flex-col items-center justify-center p-4">
+    <div className="relative min-h-screen bg-Manthan-bg space-grid flex flex-col items-center justify-center p-4">
       {/* Laser grids / scans */}
-      <div className="absolute top-0 left-0 w-full h-1 bg-orbit-blue/30 animate-scan-line" />
+      <div className="absolute top-0 left-0 w-full h-1 bg-Manthan-blue/30 animate-scan-line" />
       <div className="scanlines" />
 
       {/* Box containing authentication core */}
-      <div className="relative w-full max-w-lg bg-gray-900/80 backdrop-blur-xl border border-gray-800 rounded-2xl overflow-hidden shadow-orbit-glow flex flex-col p-6 sm:p-8">
+      <div className="relative w-full max-w-lg bg-gray-900/80 backdrop-blur-xl border border-gray-800 rounded-2xl overflow-hidden shadow-Manthan-glow flex flex-col p-6 sm:p-8">
         
         {/* Top bar */}
         <div className="flex items-center justify-between border-b border-gray-800 pb-4 mb-6">
           <div className="flex items-center gap-2">
-            <Cpu size={16} className="text-orbit-blue animate-spin-slow" />
+            <Cpu size={16} className="text-Manthan-blue animate-spin-slow" />
             <span className="font-mono text-xs text-gray-400">
-              ORBIT SECURE SHELL {mode === "login" ? "v4.81-LOGIN" : "v4.81-REGISTER"}
+              Manthan SECURE SHELL {mode === "login" ? "v4.81-LOGIN" : "v4.81-REGISTER"}
             </span>
           </div>
           <button 
@@ -190,8 +190,8 @@ export const AuthFlow: React.FC<AuthFlowProps> = ({ onLoginSuccess, onBack }) =>
                 disabled={isLoggingIn}
                 value={username}
                 onChange={e => setUsername(e.target.value)}
-                className="w-full pl-10 pr-4 py-2.5 rounded-lg bg-gray-950 border border-gray-850 text-xs font-mono text-white focus:outline-none focus:border-orbit-blue transition-colors focus:shadow-orbit-glow-inset"
-                placeholder="operator@orbit.io"
+                className="w-full pl-10 pr-4 py-2.5 rounded-lg bg-gray-950 border border-gray-850 text-xs font-mono text-white focus:outline-none focus:border-Manthan-blue transition-colors focus:shadow-Manthan-glow-inset"
+                placeholder="operator@manthan.ai"
               />
             </div>
           </div>
@@ -206,7 +206,7 @@ export const AuthFlow: React.FC<AuthFlowProps> = ({ onLoginSuccess, onBack }) =>
                 disabled={isLoggingIn}
                 value={password}
                 onChange={e => setPassword(e.target.value)}
-                className="w-full pl-10 pr-12 py-2.5 rounded-lg bg-gray-950 border border-gray-855 text-xs font-mono text-white focus:outline-none focus:border-orbit-blue transition-colors focus:shadow-orbit-glow-inset"
+                className="w-full pl-10 pr-12 py-2.5 rounded-lg bg-gray-950 border border-gray-855 text-xs font-mono text-white focus:outline-none focus:border-Manthan-blue transition-colors focus:shadow-Manthan-glow-inset"
                 placeholder="••••••••"
               />
               <button
@@ -230,7 +230,7 @@ export const AuthFlow: React.FC<AuthFlowProps> = ({ onLoginSuccess, onBack }) =>
                   disabled={isLoggingIn}
                   value={confirmPassword}
                   onChange={e => setConfirmPassword(e.target.value)}
-                  className="w-full pl-10 pr-12 py-2.5 rounded-lg bg-gray-950 border border-gray-855 text-xs font-mono text-white focus:outline-none focus:border-orbit-blue transition-colors focus:shadow-orbit-glow-inset"
+                  className="w-full pl-10 pr-12 py-2.5 rounded-lg bg-gray-950 border border-gray-855 text-xs font-mono text-white focus:outline-none focus:border-Manthan-blue transition-colors focus:shadow-Manthan-glow-inset"
                   placeholder="••••••••"
                 />
               </div>
@@ -239,7 +239,7 @@ export const AuthFlow: React.FC<AuthFlowProps> = ({ onLoginSuccess, onBack }) =>
 
           {/* Verification check panel */}
           <div className="flex items-center gap-2 border border-gray-805 bg-gray-950/40 rounded-lg p-3 my-2">
-            <Shield size={16} className="text-orbit-blue animate-pulse" />
+            <Shield size={16} className="text-Manthan-blue animate-pulse" />
             <span className="font-mono text-[9px] text-gray-550 uppercase leading-snug">
               Encrypted under military-grade SHA-512 nodes. Biometric mapping activated.
             </span>
@@ -251,7 +251,7 @@ export const AuthFlow: React.FC<AuthFlowProps> = ({ onLoginSuccess, onBack }) =>
             className={`w-full py-3 rounded-lg text-xs font-mono font-semibold uppercase tracking-widest text-white transition-all cursor-pointer ${
               isLoggingIn || bootStep < initialLogs.length
                 ? "bg-gray-800 border border-gray-750 text-gray-500 cursor-not-allowed"
-                : "bg-orbit-blue hover:bg-orbit-blue/90 shadow-orbit-glow active:scale-95 border border-orbit-blue/30"
+                : "bg-Manthan-blue hover:bg-Manthan-blue/90 shadow-Manthan-glow active:scale-95 border border-Manthan-blue/30"
             }`}
           >
             {isLoggingIn 
@@ -263,7 +263,7 @@ export const AuthFlow: React.FC<AuthFlowProps> = ({ onLoginSuccess, onBack }) =>
             <button
               type="button"
               onClick={handleToggleMode}
-              className="font-mono text-[10px] text-gray-400 hover:text-orbit-blue transition-colors cursor-pointer uppercase flex items-center justify-center gap-1.5 mx-auto"
+              className="font-mono text-[10px] text-gray-400 hover:text-Manthan-blue transition-colors cursor-pointer uppercase flex items-center justify-center gap-1.5 mx-auto"
             >
               {mode === "login" ? (
                 <>

@@ -1,13 +1,13 @@
-# Walkthrough: Customer Intelligence & Synchronization
+﻿# Walkthrough: Customer Intelligence & Synchronization
 
-This document summarizes the changes made to build a Single Source Customer Intelligence Architecture, the Dual Customer Galaxy System, the Regional Intelligence Engine, the Navigation Restructure, and the Onboarding Questionnaire update inside ORBIT.
+This document summarizes the changes made to build a Single Source Customer Intelligence Architecture, the Dual Customer Galaxy System, the Regional Intelligence Engine, the Navigation Restructure, and the Onboarding Questionnaire update inside Manthan.
 
 ---
 
 ## 🚀 Key Implementations
 
 ### 1. Unified CRM Customer Model & Single Source of Truth (`OrbitContext.tsx`)
-- Established the **Customer Galaxy** database inside `OrbitContext.tsx` as the single master customer dataset for the entire ORBIT platform.
+- Established the **Customer Galaxy** database inside `OrbitContext.tsx` as the single master customer dataset for the entire Manthan platform.
 - Extended the `Customer` interface with core CRM/lifecycle fields:
   - `customerId`, `persona`, `totalSpent`, `lastPurchaseDate`, `riskScore`, `lifetimeValue`, `ordersCount`, `customerSentiment`, `reviews`, `sentiment`, `lifecycleStage`, and `growthOpportunity`.
 - Implemented dynamic database enrichment in `getEnrichedCustomers` that computes purchase totals, last purchase dates, and maps customer nodes to their dynamic persona names and lifecycle categories.
@@ -21,7 +21,7 @@ This document summarizes the changes made to build a Single Source Customer Inte
 - Added sentiment editing dropdowns and dynamic review additions in the customer profile drawer. Any updates immediately invoke `updateCustomer`, propagating changes globally.
 
 ### 3. Voice & Lifecycle Analytics (`OrbitAnalytics.tsx`)
-- Added a new `"Voice & Lifecycle"` tab in Orbit Analytics.
+- Added a new `"Voice & Lifecycle"` tab in Manthan Analytics.
 - Rendered dynamic sentiment breakdown metrics (Positive/Neutral/Negative percentage distributions).
 - Rendered interactive lifecycle cohort counts (Recent Buyer, Cooling Period, Miss You, Inactive, Dormant). Clicking a cohort dynamically filters the customer directory list.
 - Embedded a scrollable Customer Voice review feed. Clicking any customer row or review highlights and selects that customer, instantly opening their drawer profile.
@@ -66,13 +66,13 @@ This document summarizes the changes made to build a Single Source Customer Inte
 
 - **TypeScript Compilation**: Checked with `cmd /c npx tsc -b --noEmit` and confirmed **zero type errors or compiler warnings**.
 - **Real-Time Data Synchronization**: Verified that updating a customer's review or sentiment in the Galaxy drawer instantly alters counts and text feeds in both the Boardroom debates and Analytics dashboards.
-- **Onboarding Pipeline Flow**: Verified that picking demo workspaces directly loads the application, whereas dragging and dropping files transitions the user through the ORBIT Analyzer pipeline and subsequently opens the personalized Brand DNA questionnaire pages.
+- **Onboarding Pipeline Flow**: Verified that picking demo workspaces directly loads the application, whereas dragging and dropping files transitions the user through the Manthan Analyzer pipeline and subsequently opens the personalized Brand DNA questionnaire pages.
 
 ---
 
 ## 🎨 Light Theme ("Executive Mode") Implementation
 
-We implemented a complete Light Theme for ORBIT (branded as **Executive Mode**) that provides a premium SaaS aesthetic (similar to Stripe and Linear) while maintaining the original dark theme completely unaltered.
+We implemented a complete Light Theme for Manthan (branded as **Executive Mode**) that provides a premium SaaS aesthetic (similar to Stripe and Linear) while maintaining the original dark theme completely unaltered.
 
 ### Key Changes
 1. **Dynamic Styles System**: Expanded `src/index.css` to define the `.light` theme properties using CSS custom variables mapping to Tailwind colors.

@@ -35,7 +35,7 @@ export const OrbitAnalytics: React.FC = () => {
   const [activeTab, setActiveTab] = useState<"overview" | "funnel" | "diagnostics" | "forecast" | "personas" | "voice">("overview");
   const [selectedLifecycleCohort, setSelectedLifecycleCohort] = useState<string | null>(null);
   const [voiceSearchQuery, setVoiceSearchQuery] = useState<string>("");
-  const [selectedAgent, setSelectedAgent] = useState<"Polaris" | "Vega" | "Nova" | "Atlas" | "Luna" | null>(null);
+  const [selectedAgent, setSelectedAgent] = useState<"Drishti" | "Khoj" | "Rachna" | "Saarthi" | "Pragya" | null>(null);
 
   // Revenue Panel breakdown control
   const [activeRevenueBreakdown, setActiveRevenueBreakdown] = useState<"campaign" | "channel" | "segment" | "month" | "forecast">("campaign");
@@ -273,7 +273,7 @@ export const OrbitAnalytics: React.FC = () => {
       return;
     }
 
-    const systemPrompt = "You are orbit.ai Executive Briefing AI. Deliver 5 high-impact bullet points summarizing current business intelligence. Rely on actual metrics. Use concise, professional, cyber-command style phrasing. Do not return markdown headers or JSON block formatting.";
+    const systemPrompt = "You are Manthan.ai Executive Briefing AI. Deliver 5 high-impact bullet points summarizing current business intelligence. Rely on actual metrics. Use concise, professional, cyber-command style phrasing. Do not return markdown headers or JSON block formatting.";
     const userPrompt = `Analyze these live business parameters:
       Business: "${businessType}" (Aura Threads / Fashion and Apparel)
       Total Revenue: ₹${totalRevenue}
@@ -335,7 +335,7 @@ export const OrbitAnalytics: React.FC = () => {
       return;
     }
 
-    const systemPrompt = `You are the orbit.ai System Diagnostics AI. Analyze business metrics and output a JSON diagnostics report.
+    const systemPrompt = `You are the Manthan.ai System Diagnostics AI. Analyze business metrics and output a JSON diagnostics report.
     Format your response as a single valid JSON object matching this schema exactly:
     {
       "working": "brief statement of what's working",
@@ -390,7 +390,7 @@ export const OrbitAnalytics: React.FC = () => {
     setLaunchSuccessMsg(null);
 
     // Call Context agent log
-    addAgentLog("Atlas", `Initiating autonomous launch directive for: "${rec.title}"`, "action");
+    addAgentLog("Saarthi", `Initiating autonomous launch directive for: "${rec.title}"`, "action");
 
     // Fetch cohort matching recommendation segments
     const matchingCohort = customers.filter(c => {
@@ -409,7 +409,7 @@ export const OrbitAnalytics: React.FC = () => {
     const audienceSize = matchingCohort.length > 0 ? matchingCohort.length : 35;
     const campaignId = `camp_launch_${Date.now()}`;
 
-    // Simulate Atlas dispatch process
+    // Simulate Saarthi dispatch process
     setTimeout(async () => {
       const delivered = audienceSize;
       const opened = Math.round(delivered * (rec.channel === "SMS" ? 0 : 0.76));
@@ -483,8 +483,8 @@ export const OrbitAnalytics: React.FC = () => {
       setLocalCampaigns(prev => [newCampaignObj, ...prev]);
       setLocalOrders(prev => [...newOrdersList, ...prev]);
 
-      addAgentLog("Atlas", `Twilio/Resend dispatch completed. Sent: ${delivered}. Webhook recorded: ${purchases} conversions.`, "chat");
-      addAgentLog("Vega", `Vega logged direct conversion revenue flow: +₹${revenue.toLocaleString()}`, "result");
+      addAgentLog("Saarthi", `Twilio/Resend dispatch completed. Sent: ${delivered}. Webhook recorded: ${purchases} conversions.`, "chat");
+      addAgentLog("Khoj", `Khoj logged direct conversion revenue flow: +₹${revenue.toLocaleString()}`, "result");
 
       setLaunchingMission(null);
       setLaunchSuccessMsg(`Successfully launched: "${rec.title}"! Generated ₹${revenue.toLocaleString()} revenue from ${purchases} converters.`);
@@ -515,7 +515,7 @@ export const OrbitAnalytics: React.FC = () => {
       client: "AI Client Campaign Deliverables Ledger"
     };
 
-    const systemPrompt = `You are the orbit.ai Lead AI Business Consultant. Generate a detailed, highly professional business report in markdown format. 
+    const systemPrompt = `You are the Manthan.ai Lead AI Business Consultant. Generate a detailed, highly professional business report in markdown format. 
     Use titles, stats grids, and bullet lists. Address key trends, leak recovery, and forecasted growth metrics. Do not exceed 400 words.`;
 
     const userPrompt = `Generate a "${typeLabels[type]}" for the business "${businessType}".
@@ -552,7 +552,7 @@ export const OrbitAnalytics: React.FC = () => {
     const dateStr = todayDate.toLocaleDateString();
 
     if (type === "executive") {
-      return `# orbit.ai Executive Briefing Report
+      return `# Manthan.ai Executive Briefing Report
 **Date Generated:** ${dateStr} | **Operational Status:** NOMINAL
 
 ## 1. Executive Performance Summary
@@ -573,11 +573,11 @@ Our analysis confirms **WhatsApp** remains the primary yield driver, outperformi
 1. **Reactivate Churn Nodes:** Immediately launch the *Dormant VIP Win-back Loop* targeting ${atRiskCustomers.length} at-risk buyers.
 2. **Optimize Checkout Gateway:** Deploy automated checkout links inside WhatsApp to capture ₹12,500 in cart leaks.`;
     } else if (type === "investor") {
-      return `# orbit.ai Performance Pitch (Investor Report)
+      return `# Manthan.ai Performance Pitch (Investor Report)
 **Quarterly Assessment:** Q2 | **Valuation Node:** Vanguard-v4.8
 
 ## 1. Financial Highlights
-orbit.ai Core has unlocked positive trajectory indicators across fashion customer databases. Cumulative cohort yield totals **${formatCurrency(totalRevenue)}**, showing an active **+18.5%** quarter-over-quarter expansion trend.
+Manthan.ai Core has unlocked positive trajectory indicators across fashion customer databases. Cumulative cohort yield totals **${formatCurrency(totalRevenue)}**, showing an active **+18.5%** quarter-over-quarter expansion trend.
 
 * **Gross Campaign Billings:** ${formatCurrency(totalCampaignRevenue)}
 * **Average LTV per Cohort:** ${formatCurrency(ltv)}
@@ -591,20 +591,20 @@ The CAC-to-LTV ratio remains healthy, supported by high organic repeat purchase 
 * **Average CAC:** ₹240 (driven by low-cost automated WhatsApp dispatch hooks)
 
 ## 3. Projections & Forecast
-Vega Agent forecasts Q3 baseline revenues extending to **${formatCurrency(totalRevenue * 1.35)}**, representing a **+35%** growth scenario driven by automated RCS festive drops.`;
+Khoj Agent forecasts Q3 baseline revenues extending to **${formatCurrency(totalRevenue * 1.35)}**, representing a **+35%** growth scenario driven by automated RCS festive drops.`;
     } else {
-      return `# orbit.ai Client Campaign Deliverables Ledger
-**Client Profile:** Aura Threads (Fashion and Apparel) | **Active Agent Registry:** Polaris, Nova, Vega, Atlas, Luna
+      return `# Manthan.ai Client Campaign Deliverables Ledger
+**Client Profile:** Aura Threads (Fashion and Apparel) | **Active Agent Registry:** Drishti, Rachna, Khoj, Saarthi, Pragya
 
 ## 1. Outbound Campaign Performance Table
-The following details campaigns dispatched automatically by Orbit AI:
+The following details campaigns dispatched automatically by Manthan AI:
 
 * **Summer Cotton Drop:** Sent to 800 WhatsApp numbers. Delivered: 98%. Generated **₹1,22,106** with **4.8x ROI**.
 * **Diwali VIP Spark:** Sent to 120 Email addresses. Delivered: 100%. Generated **₹61,572** with **3.4x ROI**.
 * **DM Enquiry Recovery:** Sent to 245 WhatsApp checkout drop-offs. Generated **₹62,352** with **3.9x ROI**.
 
 ## 2. Conversion Audit
-Overall campaign open rates hit **${avgOpenRate}%** with a click-through rate of **${avgCTR}%**, indicating strong copywriting relevance generated by Nova copywriter nodes.`;
+Overall campaign open rates hit **${avgOpenRate}%** with a click-through rate of **${avgCTR}%**, indicating strong copywriting relevance generated by Rachna copywriter nodes.`;
     }
   };
 
@@ -648,22 +648,22 @@ Overall campaign open rates hit **${avgOpenRate}%** with a click-through rate of
   const [workflowLogs, setWorkflowLogs] = useState<string[]>([]);
   useEffect(() => {
     const baseLogs = [
-      "Polaris clustered customer database: isolated 4 segments.",
-      "Luna audited billing logs: detected ₹12,500 cart leakage.",
-      "Vega calculated conversion timeline ROI variables.",
-      "Nova compiled creative templates for WhatsApp / Email drops.",
-      "Atlas initialized dispatcher webhooks for dispatch queues."
+      "Drishti clustered customer database: isolated 4 segments.",
+      "Pragya audited billing logs: detected ₹12,500 cart leakage.",
+      "Khoj calculated conversion timeline ROI variables.",
+      "Rachna compiled creative templates for WhatsApp / Email drops.",
+      "Saarthi initialized dispatcher webhooks for dispatch queues."
     ];
     setWorkflowLogs(baseLogs);
 
     // Keep adding live updates
     const interval = setInterval(() => {
       const logPool = [
-        "Polaris: Customer coordinate charts successfully mapped.",
-        "Luna: Inactive VIP segment re-audited.",
-        "Vega: Simulation Timelines recalculated (89.2% accuracy).",
-        "Nova: Created high-CTR catalog drafts.",
-        "Atlas: Twilio REST sockets verified (99.4% net health)."
+        "Drishti: Customer coordinate charts successfully mapped.",
+        "Pragya: Inactive VIP segment re-audited.",
+        "Khoj: Simulation Timelines recalculated (89.2% accuracy).",
+        "Rachna: Created high-CTR catalog drafts.",
+        "Saarthi: Twilio REST sockets verified (99.4% net health)."
       ];
       const randomLog = logPool[Math.floor(Math.random() * logPool.length)];
       setWorkflowLogs(prev => [randomLog, ...prev.slice(0, 4)]);
@@ -782,14 +782,14 @@ Overall campaign open rates hit **${avgOpenRate}%** with a click-through rate of
     <div className={`flex-1 flex overflow-hidden relative ${isLight ? "bg-[#F8FAFC] text-[#0F172A]" : "bg-[#050816] text-white"}`}>
       {/* Background Matrix overlays */}
       <div className="pointer-events-none absolute inset-0 space-grid opacity-35 z-0" />
-      <div className="pointer-events-none absolute inset-0 bg-orbit-glow-blue opacity-15 z-0" />
+      <div className="pointer-events-none absolute inset-0 bg-Manthan-glow-blue opacity-15 z-0" />
 
       {/* Main Workspace Scrollable */}
       <main className="flex-1 flex flex-col min-w-0 overflow-y-auto relative z-10 p-6 space-y-6">
         
         {/* Title Header */}
         <PageHeaderHUD
-          title="orbit.ai Analytics"
+          title="Manthan.ai Analytics"
           subtitle="AI-OPERATIONAL COGNITIVE COMMAND CENTER"
           onSelectAgent={setSelectedAgent}
           actions={
@@ -809,7 +809,7 @@ Overall campaign open rates hit **${avgOpenRate}%** with a click-through rate of
 
         {/* Global Feedback Banner */}
         {launchSuccessMsg && (
-          <div className="bg-orbit-success/15 border border-orbit-success/30 rounded-xl p-3.5 flex items-center justify-between animate-fade-in-up font-mono text-xs text-orbit-success">
+          <div className="bg-Manthan-success/15 border border-Manthan-success/30 rounded-xl p-3.5 flex items-center justify-between animate-fade-in-up font-mono text-xs text-Manthan-success">
             <div className="flex items-center gap-2">
               <CheckCircle2 size={14} className="animate-bounce" />
               <span>{launchSuccessMsg}</span>
@@ -821,27 +821,27 @@ Overall campaign open rates hit **${avgOpenRate}%** with a click-through rate of
         {/* KPI Strip */}
         <div className="grid grid-cols-2 md:grid-cols-5 gap-3.5">
           {[
-            { label: "Total Revenue", value: `₹${(totalRevenue / 1000).toFixed(1)}K`, raw: totalRevenue, delta: "+18.5%", icon: TrendingUp, color: "text-orbit-success", border: "border-orbit-success/15 bg-orbit-success/5" },
-            { label: "Campaign Revenue", value: `₹${(totalCampaignRevenue / 1000).toFixed(1)}K`, raw: totalCampaignRevenue, delta: "+24.2%", icon: Zap, color: "text-orbit-blue", border: "border-orbit-blue/15 bg-orbit-blue/5" },
+            { label: "Total Revenue", value: `₹${(totalRevenue / 1000).toFixed(1)}K`, raw: totalRevenue, delta: "+18.5%", icon: TrendingUp, color: "text-Manthan-success", border: "border-Manthan-success/15 bg-Manthan-success/5" },
+            { label: "Campaign Revenue", value: `₹${(totalCampaignRevenue / 1000).toFixed(1)}K`, raw: totalCampaignRevenue, delta: "+24.2%", icon: Zap, color: "text-Manthan-blue", border: "border-Manthan-blue/15 bg-Manthan-blue/5" },
             { label: "Avg Order Value", value: `₹${Math.round(aov)}`, raw: aov, delta: "+4.1%", icon: ShoppingCart, color: "text-yellow-400", border: "border-yellow-400/15 bg-yellow-400/5" },
-            { label: "Customer LTV", value: `₹${Math.round(ltv)}`, raw: ltv, delta: "+12.6%", icon: Users, color: "text-orbit-purple", border: "border-orbit-purple/15 bg-orbit-purple/5" },
-            { label: "Conversion Rate", value: `${avgConvRate}%`, raw: parseFloat(avgConvRate), delta: "+3.2%", icon: CheckCircle2, color: "text-orbit-pink", border: "border-orbit-pink/15 bg-orbit-pink/5" },
-            { label: "Avg Open Rate", value: `${avgOpenRate}%`, raw: avgOpenRate, delta: "+8.1%", icon: Mail, color: "text-orbit-blue", border: "border-orbit-blue/15 bg-orbit-blue/5" },
-            { label: "Avg CTR", value: `${avgCTR}%`, raw: avgCTR, delta: "+5.6%", icon: MousePointer, color: "text-orbit-purple", border: "border-orbit-purple/15 bg-orbit-purple/5" },
-            { label: "Repeat Purchase Rate", value: `${repeatPurchaseRate}%`, raw: repeatPurchaseRate, delta: "+6.8%", icon: BarChart2, color: "text-orbit-success", border: "border-orbit-success/15 bg-orbit-success/5" },
+            { label: "Customer LTV", value: `₹${Math.round(ltv)}`, raw: ltv, delta: "+12.6%", icon: Users, color: "text-Manthan-purple", border: "border-Manthan-purple/15 bg-Manthan-purple/5" },
+            { label: "Conversion Rate", value: `${avgConvRate}%`, raw: parseFloat(avgConvRate), delta: "+3.2%", icon: CheckCircle2, color: "text-Manthan-pink", border: "border-Manthan-pink/15 bg-Manthan-pink/5" },
+            { label: "Avg Open Rate", value: `${avgOpenRate}%`, raw: avgOpenRate, delta: "+8.1%", icon: Mail, color: "text-Manthan-blue", border: "border-Manthan-blue/15 bg-Manthan-blue/5" },
+            { label: "Avg CTR", value: `${avgCTR}%`, raw: avgCTR, delta: "+5.6%", icon: MousePointer, color: "text-Manthan-purple", border: "border-Manthan-purple/15 bg-Manthan-purple/5" },
+            { label: "Repeat Purchase Rate", value: `${repeatPurchaseRate}%`, raw: repeatPurchaseRate, delta: "+6.8%", icon: BarChart2, color: "text-Manthan-success", border: "border-Manthan-success/15 bg-Manthan-success/5" },
             { label: "Customer Growth", value: "+14.2%", raw: 14.2, delta: "+2.1%", icon: Users, color: "text-yellow-400", border: "border-yellow-400/15 bg-yellow-400/5" },
-            { label: "Revenue Growth", value: "+18.5%", raw: 18.5, delta: "+3.4%", icon: TrendingUp, color: "text-orbit-success", border: "border-orbit-success/15 bg-orbit-success/5" }
+            { label: "Revenue Growth", value: "+18.5%", raw: 18.5, delta: "+3.4%", icon: TrendingUp, color: "text-Manthan-success", border: "border-Manthan-success/15 bg-Manthan-success/5" }
           ].map((m, i) => {
             const Icon = m.icon;
             return (
-              <div key={i} className={`orbit-panel p-3.5 flex flex-col gap-1 hover:scale-[1.03] transition-all duration-300 ${m.border}`}>
+              <div key={i} className={`Manthan-panel p-3.5 flex flex-col gap-1 hover:scale-[1.03] transition-all duration-300 ${m.border}`}>
                 <div className="flex items-center justify-between text-[8px] font-mono text-gray-500">
                   <span className="uppercase tracking-wider truncate max-w-[80px]">{m.label}</span>
                   <Icon size={12} className={m.color} />
                 </div>
                 <div className="flex items-baseline justify-between mt-1">
                   <span className={`font-space text-lg font-bold ${isLight ? "text-[#0F172A]" : "text-white"}`}>{m.value}</span>
-                  <span className="font-mono text-[8.5px] text-orbit-success flex items-center gap-0.5">
+                  <span className="font-mono text-[8.5px] text-Manthan-success flex items-center gap-0.5">
                     <ArrowUpRight size={9} />{m.delta}
                   </span>
                 </div>
@@ -869,12 +869,12 @@ Overall campaign open rates hit **${avgOpenRate}%** with a click-through rate of
                   { label: "At-Risk Customers", val: churnRiskCount.toString(), pct: "+12.1%", comp: "vs last week", isUp: false },
                   { label: "Campaign Success", val: `${campaignSuccessRate}%`, pct: "+2.4%", comp: "vs last month", isUp: true }
                 ].map((kpi, idx) => (
-                  <div key={idx} className={`orbit-panel p-3.5 relative overflow-hidden flex flex-col justify-between min-h-[90px] ${isLight ? "bg-white border-slate-200" : "border-gray-900/60 bg-gray-950/20"}`}>
+                  <div key={idx} className={`Manthan-panel p-3.5 relative overflow-hidden flex flex-col justify-between min-h-[90px] ${isLight ? "bg-white border-slate-200" : "border-gray-900/60 bg-gray-950/20"}`}>
                     <span className="font-mono text-[8px] text-gray-500 uppercase tracking-widest block">{kpi.label}</span>
                     <span className={`font-space text-xl font-bold mt-1 block ${isLight ? "text-[#0F172A]" : "text-white"}`}>{kpi.val}</span>
                     
                     <div className="flex items-center justify-between mt-2 font-mono text-[8px]">
-                      <span className={kpi.isUp ? "text-orbit-success" : "text-red-400"}>
+                      <span className={kpi.isUp ? "text-Manthan-success" : "text-red-400"}>
                         {kpi.isUp ? "▲" : "▼"} {kpi.pct}
                       </span>
                       <span className="text-gray-650 italic">{kpi.comp}</span>
@@ -884,11 +884,11 @@ Overall campaign open rates hit **${avgOpenRate}%** with a click-through rate of
               </div>
 
               {/* Revenue Intelligence Panel */}
-              <div className="orbit-panel p-5 space-y-4">
+              <div className="Manthan-panel p-5 space-y-4">
                 <div className={`flex flex-col sm:flex-row sm:items-center justify-between border-b pb-3 gap-2 ${isLight ? "border-slate-200" : "border-gray-900"}`}>
 
                   <div className="flex items-center gap-2">
-                    <BarChart2 size={14} className="text-orbit-blue" />
+                    <BarChart2 size={14} className="text-Manthan-blue" />
                     <span className={`font-space text-xs font-bold uppercase tracking-wider ${isLight ? "text-slate-900" : "text-white"}`}>Revenue Intelligence Panel</span>
                   </div>
 
@@ -899,7 +899,7 @@ Overall campaign open rates hit **${avgOpenRate}%** with a click-through rate of
                         key={ch}
                         onClick={() => setChannelFilter(ch)}
                         className={`px-2 py-1 rounded transition-all cursor-pointer shrink-0 ${
-                          channelFilter === ch ? (isLight ? "bg-[#EFF6FF] text-blue-600 border-[#BFDBFE] font-bold" : "bg-orbit-blue/20 text-orbit-blue border border-orbit-blue/30 font-bold") : (isLight ? "text-gray-500 hover:text-gray-900" : "text-gray-550 hover:text-gray-300")
+                          channelFilter === ch ? (isLight ? "bg-[#EFF6FF] text-blue-600 border-[#BFDBFE] font-bold" : "bg-Manthan-blue/20 text-Manthan-blue border border-Manthan-blue/30 font-bold") : (isLight ? "text-gray-500 hover:text-gray-900" : "text-gray-550 hover:text-gray-300")
                         }`}
                       >
                         {ch}
@@ -922,7 +922,7 @@ Overall campaign open rates hit **${avgOpenRate}%** with a click-through rate of
                       key={tab.id}
                       onClick={() => setActiveRevenueBreakdown(tab.id as any)}
                       className={`pb-1 border-b transition-all cursor-pointer shrink-0 ${
-                        activeRevenueBreakdown === tab.id ? "text-orbit-purple border-orbit-purple font-extrabold" : "text-gray-500 border-transparent hover:text-gray-300"
+                        activeRevenueBreakdown === tab.id ? "text-Manthan-purple border-Manthan-purple font-extrabold" : "text-gray-500 border-transparent hover:text-gray-300"
                       }`}
                     >
                       {tab.label}
@@ -963,8 +963,8 @@ Overall campaign open rates hit **${avgOpenRate}%** with a click-through rate of
                         { label: "+30 Days", value: totalRevenue + 58000 },
                         { label: "+90 Days", value: totalRevenue + 192000 }
                       ])}
-                      <span className="font-mono text-[8px] text-orbit-purple text-center uppercase tracking-widest animate-pulse">
-                        Vega forecast sequence locked: 89.2% expected accuracy model
+                      <span className="font-mono text-[8px] text-Manthan-purple text-center uppercase tracking-widest animate-pulse">
+                        Khoj forecast sequence locked: 89.2% expected accuracy model
                       </span>
                     </div>
                   )}
@@ -972,7 +972,7 @@ Overall campaign open rates hit **${avgOpenRate}%** with a click-through rate of
               </div>
 
               {/* Channel Performance Center */}
-              <div className="orbit-panel p-5 space-y-4">
+              <div className="Manthan-panel p-5 space-y-4">
                 <div className={`border-b pb-3 ${isLight ? "border-slate-200" : "border-gray-900"}`}>
                   <h3 className={`font-space text-xs font-bold uppercase tracking-wider ${isLight ? "text-slate-900" : "text-white"}`}>Channel Performance Center</h3>
                 </div>
@@ -997,11 +997,11 @@ Overall campaign open rates hit **${avgOpenRate}%** with a click-through rate of
                         <tr key={idx} className={isLight ? "hover:bg-slate-50" : "hover:bg-gray-900/10"}>
                           <td className={`py-2.5 font-bold font-space ${isLight ? "text-slate-900" : "text-white"}`}>{ch.channel}</td>
                           <td className="py-2.5">{ch.sent.toLocaleString()}</td>
-                          <td className="py-2.5 text-orbit-blue">{ch.opens}</td>
-                          <td className="py-2.5 text-orbit-purple">{ch.clicks}</td>
-                          <td className="py-2.5 text-orbit-pink">{ch.conv}</td>
+                          <td className="py-2.5 text-Manthan-blue">{ch.opens}</td>
+                          <td className="py-2.5 text-Manthan-purple">{ch.clicks}</td>
+                          <td className="py-2.5 text-Manthan-pink">{ch.conv}</td>
                           <td className={`py-2.5 text-right font-bold ${isLight ? "text-slate-900" : "text-white"}`}>₹{ch.revenue.toLocaleString()}</td>
-                          <td className="py-2.5 text-right text-orbit-success font-bold">{ch.roi}</td>
+                          <td className="py-2.5 text-right text-Manthan-success font-bold">{ch.roi}</td>
                         </tr>
                       ))}
                     </tbody>
@@ -1010,7 +1010,7 @@ Overall campaign open rates hit **${avgOpenRate}%** with a click-through rate of
               </div>
 
               {/* Customer Intelligence */}
-              <div className="orbit-panel p-5 space-y-4">
+              <div className="Manthan-panel p-5 space-y-4">
                 <div className={`border-b pb-3 ${isLight ? "border-slate-200" : "border-gray-900"}`}>
                   <h3 className={`font-space text-xs font-bold uppercase tracking-wider ${isLight ? "text-slate-900" : "text-white"}`}>Customer Segment Intelligence</h3>
                 </div>
@@ -1022,7 +1022,7 @@ Overall campaign open rates hit **${avgOpenRate}%** with a click-through rate of
                         <div className="flex justify-between items-start">
                           <span className={`font-space text-[10px] font-bold leading-none ${isLight ? "text-slate-900" : "text-white"}`}>{seg.name.split(" ")[0]}</span>
                           <span className={`font-mono text-[8px] px-1 py-0.5 rounded ${
-                            seg.trend.startsWith("+") ? "text-orbit-success bg-orbit-success/5 border border-orbit-success/15" : "text-red-400 bg-red-500/5 border border-red-500/15"
+                            seg.trend.startsWith("+") ? "text-Manthan-success bg-Manthan-success/5 border border-Manthan-success/15" : "text-red-400 bg-red-500/5 border border-red-500/15"
                           }`}>{seg.trend}</span>
                         </div>
                         <span className="font-mono text-[8px] text-gray-500 uppercase tracking-widest mt-0.5 block">{seg.name}</span>
@@ -1035,7 +1035,7 @@ Overall campaign open rates hit **${avgOpenRate}%** with a click-through rate of
                         </div>
                         <div className="flex justify-between">
                           <span className="text-gray-500">Contrib:</span>
-                          <span className="text-orbit-blue font-bold">{seg.contribution}</span>
+                          <span className="text-Manthan-blue font-bold">{seg.contribution}</span>
                         </div>
                         <div className="flex justify-between">
                           <span className="text-gray-500">Avg Spend:</span>
@@ -1047,7 +1047,7 @@ Overall campaign open rates hit **${avgOpenRate}%** with a click-through rate of
                         </div>
                         <div className="flex justify-between">
                           <span className="text-gray-500">Pred. LTV:</span>
-                          <span className="text-orbit-purple font-bold">₹{seg.predictedValue}</span>
+                          <span className="text-Manthan-purple font-bold">₹{seg.predictedValue}</span>
                         </div>
                       </div>
                     </div>
@@ -1056,7 +1056,7 @@ Overall campaign open rates hit **${avgOpenRate}%** with a click-through rate of
               </div>
 
               {/* Mission Performance */}
-              <div className="orbit-panel p-5 space-y-4">
+              <div className="Manthan-panel p-5 space-y-4">
                 <div className={`border-b pb-3 ${isLight ? "border-slate-200" : "border-gray-900"}`}>
                   <h3 className={`font-space text-xs font-bold uppercase tracking-wider ${isLight ? "text-slate-900" : "text-white"}`}>Mission Performance Ledger</h3>
                 </div>
@@ -1086,16 +1086,16 @@ Overall campaign open rates hit **${avgOpenRate}%** with a click-through rate of
                             <td className="py-2.5">
                               <span className={`px-2 py-0.5 rounded text-[8.5px] uppercase ${
                                 camp.status === "Completed" || camp.status === "Delivered"
-                                  ? "bg-orbit-success/10 text-orbit-success border border-orbit-success/20"
+                                  ? "bg-Manthan-success/10 text-Manthan-success border border-Manthan-success/20"
                                   : camp.status === "Sending"
-                                  ? "bg-orbit-blue/10 text-orbit-blue border border-orbit-blue/20 animate-pulse"
+                                  ? "bg-Manthan-blue/10 text-Manthan-blue border border-Manthan-blue/20 animate-pulse"
                                   : "bg-gray-800 text-gray-500 border border-gray-700"
                               }`}>{camp.status}</span>
                             </td>
                             <td className="py-2.5">{camp.sentCount || camp.audienceSize}</td>
-                            <td className="py-2.5 text-orbit-blue">{camp.channel}</td>
+                            <td className="py-2.5 text-Manthan-blue">{camp.channel}</td>
                             <td className={`py-2.5 text-right font-bold ${isLight ? "text-slate-900" : "text-white"}`}>₹{(camp.revenueGenerated || 0).toLocaleString()}</td>
-                            <td className="py-2.5 text-right text-orbit-success font-bold">{roiVal}</td>
+                            <td className="py-2.5 text-right text-Manthan-success font-bold">{roiVal}</td>
                           </tr>
                         );
                       })}
@@ -1110,14 +1110,14 @@ Overall campaign open rates hit **${avgOpenRate}%** with a click-through rate of
             <div className="space-y-6">
               
               {/* AI Executive Summary */}
-              <div className={`orbit-panel p-5 space-y-4 relative overflow-hidden ${isLight ? "border-purple-300 bg-purple-50/50" : "border-orbit-purple/20 bg-orbit-purple/5 shadow-[0_0_25px_rgba(139,92,246,0.15)]"}`}>
+              <div className={`Manthan-panel p-5 space-y-4 relative overflow-hidden ${isLight ? "border-purple-300 bg-purple-50/50" : "border-Manthan-purple/20 bg-Manthan-purple/5 shadow-[0_0_25px_rgba(139,92,246,0.15)]"}`}>
                 {/* Visual scanline */}
-                <div className="absolute top-0 left-0 w-full h-[1px] bg-orbit-purple opacity-40 animate-scan-beam" />
+                <div className="absolute top-0 left-0 w-full h-[1px] bg-Manthan-purple opacity-40 animate-scan-beam" />
                 
                 <div className={`flex justify-between items-center border-b pb-3 ${isLight ? "border-slate-200" : "border-gray-900"}`}>
 
                   <div className="flex items-center gap-2">
-                    <Brain size={14} className="text-orbit-purple animate-pulse" />
+                    <Brain size={14} className="text-Manthan-purple animate-pulse" />
                     <span className={`font-space text-xs font-bold uppercase tracking-wider ${isLight ? "text-slate-900" : "text-white"}`}>Today's Business Briefing</span>
                   </div>
                   <button 
@@ -1133,9 +1133,9 @@ Overall campaign open rates hit **${avgOpenRate}%** with a click-through rate of
                 {aiSummaryLoading ? (
                   <div className="py-6 flex flex-col items-center justify-center gap-2 font-mono text-[9px] text-gray-500">
                     <div className="flex gap-1 animate-pulse">
-                      <span className="w-1.5 h-1.5 rounded-full bg-orbit-purple animate-bounce" />
-                      <span className="w-1.5 h-1.5 rounded-full bg-orbit-purple animate-bounce" style={{ animationDelay: "0.2s" }} />
-                      <span className="w-1.5 h-1.5 rounded-full bg-orbit-purple animate-bounce" style={{ animationDelay: "0.4s" }} />
+                      <span className="w-1.5 h-1.5 rounded-full bg-Manthan-purple animate-bounce" />
+                      <span className="w-1.5 h-1.5 rounded-full bg-Manthan-purple animate-bounce" style={{ animationDelay: "0.2s" }} />
+                      <span className="w-1.5 h-1.5 rounded-full bg-Manthan-purple animate-bounce" style={{ animationDelay: "0.4s" }} />
                     </div>
                     <span className="uppercase tracking-widest mt-1.5">Generating AI Insights...</span>
                   </div>
@@ -1152,7 +1152,7 @@ Overall campaign open rates hit **${avgOpenRate}%** with a click-through rate of
               </div>
 
               {/* AI Recommendations Engine */}
-              <div className="orbit-panel p-5 space-y-4">
+              <div className="Manthan-panel p-5 space-y-4">
                 <div className={`border-b pb-3 ${isLight ? "border-slate-200" : "border-gray-900"}`}>
                   <span className={`font-space text-xs font-bold uppercase tracking-wider ${isLight ? "text-slate-900" : "text-white"}`}>AI Recommendations Engine</span>
                 </div>
@@ -1161,18 +1161,18 @@ Overall campaign open rates hit **${avgOpenRate}%** with a click-through rate of
                   {recommendationsList.map((rec, i) => (
                     <div 
                       key={i} 
-                      className={`p-3.5 rounded-xl border flex flex-col justify-between gap-3 relative overflow-hidden transition-all ${launchingMission === rec.title ? (isLight ? "bg-blue-50/50 border-blue-200" : "bg-orbit-blue/5 border-orbit-blue/20") : (isLight ? "bg-slate-50 border-slate-200 hover:border-slate-300" : "bg-black/25 border-gray-950 hover:border-gray-900")}`}
+                      className={`p-3.5 rounded-xl border flex flex-col justify-between gap-3 relative overflow-hidden transition-all ${launchingMission === rec.title ? (isLight ? "bg-blue-50/50 border-blue-200" : "bg-Manthan-blue/5 border-Manthan-blue/20") : (isLight ? "bg-slate-50 border-slate-200 hover:border-slate-300" : "bg-black/25 border-gray-950 hover:border-gray-900")}`}
                     >
                       <div className="flex items-start justify-between gap-2">
                         <div className="space-y-1">
                           <div className="flex items-center gap-2">
                             <span className={`font-space text-[10px] font-bold ${isLight ? "text-slate-900" : "text-white"}`}>{rec.title}</span>
-                            <span className="font-mono text-[7px] text-orbit-purple border border-orbit-purple/30 bg-orbit-purple/5 px-1.5 py-0.5 rounded uppercase font-bold">{rec.roi}</span>
+                            <span className="font-mono text-[7px] text-Manthan-purple border border-Manthan-purple/30 bg-Manthan-purple/5 px-1.5 py-0.5 rounded uppercase font-bold">{rec.roi}</span>
                           </div>
                           <p className="font-mono text-[8.5px] text-gray-550 leading-normal">{rec.desc}</p>
                         </div>
                         <div className="text-right shrink-0">
-                          <span className="font-mono text-[9px] text-orbit-success font-bold block">{rec.revenue}</span>
+                          <span className="font-mono text-[9px] text-Manthan-success font-bold block">{rec.revenue}</span>
                           <span className="font-mono text-[7px] text-gray-600 block mt-0.5">via {rec.channel}</span>
                         </div>
                       </div>
@@ -1180,8 +1180,8 @@ Overall campaign open rates hit **${avgOpenRate}%** with a click-through rate of
                       <button
                         onClick={() => handleLaunchMission(rec)}
                         disabled={launchingMission !== null}
-                        className={`w-full py-2 bg-gradient-to-tr from-orbit-blue to-orbit-purple text-white font-bold rounded-lg text-[8.5px] uppercase tracking-wider flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
-                          launchingMission === rec.title ? "opacity-50" : "hover:shadow-orbit-glow"
+                        className={`w-full py-2 bg-gradient-to-tr from-Manthan-blue to-Manthan-purple text-white font-bold rounded-lg text-[8.5px] uppercase tracking-wider flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+                          launchingMission === rec.title ? "opacity-50" : "hover:shadow-Manthan-glow"
                         }`}
                       >
                         {launchingMission === rec.title ? (
@@ -1202,18 +1202,18 @@ Overall campaign open rates hit **${avgOpenRate}%** with a click-through rate of
               </div>
 
               {/* Agent Contribution Report */}
-              <div className="orbit-panel p-5 space-y-4">
+              <div className="Manthan-panel p-5 space-y-4">
                 <div className={`border-b pb-3 ${isLight ? "border-slate-200" : "border-gray-900"}`}>
                   <span className={`font-space text-xs font-bold uppercase tracking-wider ${isLight ? "text-slate-900" : "text-white"}`}>Agent Contribution Report</span>
                 </div>
 
                 <div className="grid grid-cols-1 gap-2.5">
                   {[
-                    { agent: "Polaris", act: `Mapped ${customers.length} target customers`, score: 98, role: "Audience cluster compiler" },
-                    { agent: "Luna", act: `Flagged ${atRiskCustomers.length} slipping profiles (₹${lunaMetrics?.recoverableRevenue?.toLocaleString()} at risk)`, score: 91, role: "Leak auditor" },
-                    { agent: "Vega", act: `Forecasted baseline conversions & scenario ROIs`, score: 87, role: "ROI Forecaster" },
-                    { agent: "Nova", act: `Drafted 10+ custom marketing copy variants`, score: 75, role: "Autonomous copywriter" },
-                    { agent: "Atlas", act: `Delivered ${totalSent.toLocaleString()} webhook templates successfully`, score: 95, role: "Outbound dispatcher" }
+                    { agent: "Drishti", act: `Mapped ${customers.length} target customers`, score: 98, role: "Audience cluster compiler" },
+                    { agent: "Pragya", act: `Flagged ${atRiskCustomers.length} slipping profiles (₹${lunaMetrics?.recoverableRevenue?.toLocaleString()} at risk)`, score: 91, role: "Leak auditor" },
+                    { agent: "Khoj", act: `Forecasted baseline conversions & scenario ROIs`, score: 87, role: "ROI Forecaster" },
+                    { agent: "Rachna", act: `Drafted 10+ custom marketing copy variants`, score: 75, role: "Autonomous copywriter" },
+                    { agent: "Saarthi", act: `Delivered ${totalSent.toLocaleString()} webhook templates successfully`, score: 95, role: "Outbound dispatcher" }
                   ].map((contrib, idx) => (
                     <div 
                       key={idx} 
@@ -1226,14 +1226,14 @@ Overall campaign open rates hit **${avgOpenRate}%** with a click-through rate of
                         <p className="font-mono text-[8px] text-gray-500 uppercase mt-0.5">{contrib.role}</p>
                         <p className={`font-mono text-[8.5px] mt-1 ${isLight ? "text-slate-655" : "text-gray-300"}`}>{contrib.act}</p>
                       </div>
-                      <span className="font-mono text-[9px] text-orbit-success bg-orbit-success/5 border border-orbit-success/15 px-2 py-0.5 rounded font-bold">{contrib.score}% sync</span>
+                      <span className="font-mono text-[9px] text-Manthan-success bg-Manthan-success/5 border border-Manthan-success/15 px-2 py-0.5 rounded font-bold">{contrib.score}% sync</span>
                     </div>
                   ))}
                 </div>
               </div>
 
               {/* Export Center */}
-              <div className="orbit-panel p-5 space-y-3.5">
+              <div className="Manthan-panel p-5 space-y-3.5">
                 <div className={`border-b pb-3 ${isLight ? "border-slate-200" : "border-gray-900"}`}>
                   <span className={`font-space text-xs font-bold uppercase tracking-wider ${isLight ? "text-slate-900" : "text-white"}`}>Report & Export Center</span>
                 </div>
@@ -1267,7 +1267,7 @@ Overall campaign open rates hit **${avgOpenRate}%** with a click-through rate of
                       onClick={() => handleGenerateAIReport(report.id as any)}
                       className={`w-full py-2 rounded-xl font-mono text-[8.5px] uppercase tracking-wider flex items-center justify-center gap-1 transition-colors cursor-pointer border ${isLight ? "bg-slate-50 border-slate-200 hover:border-slate-300 text-slate-700" : "bg-gray-900/60 border-gray-800 hover:border-blue-500/30 text-gray-300 hover:text-white"}`}
                     >
-                      <Brain size={10} className="text-orbit-purple" />
+                      <Brain size={10} className="text-Manthan-purple" />
                       <span>{report.label}</span>
                     </button>
                   ))}
@@ -1275,15 +1275,15 @@ Overall campaign open rates hit **${avgOpenRate}%** with a click-through rate of
               </div>
 
               {/* Autonomous Analytics Workflow */}
-              <div className="orbit-panel p-5 space-y-3 font-mono text-[8px]">
+              <div className="Manthan-panel p-5 space-y-3 font-mono text-[8px]">
                 <div className={`border-b pb-3 flex items-center justify-between ${isLight ? "border-slate-200" : "border-gray-900"}`}>
                   <span className={`font-space text-xs font-bold uppercase tracking-wider ${isLight ? "text-slate-900" : "text-white"}`}>Autonomous Workflow</span>
-                  <LoopIcon size={10} className="text-orbit-success animate-spin-slow" />
+                  <LoopIcon size={10} className="text-Manthan-success animate-spin-slow" />
                 </div>
                 <div className="space-y-2 max-h-[120px] overflow-y-auto pr-1">
                   {workflowLogs.map((log, idx) => (
                     <div key={idx} className="flex items-start gap-1 text-gray-400">
-                      <span className="text-orbit-success">▶</span>
+                      <span className="text-Manthan-success">▶</span>
                       <span>{log}</span>
                     </div>
                   ))}
@@ -1297,7 +1297,7 @@ Overall campaign open rates hit **${avgOpenRate}%** with a click-through rate of
 
         {/* Tab 2: Funnel Visualizer */}
         {activeTab === "funnel" && (
-          <div className="orbit-panel p-6 space-y-6">
+          <div className="Manthan-panel p-6 space-y-6">
             <div className={`border-b pb-3 ${isLight ? "border-slate-200" : "border-gray-900"}`}>
               <span className={`font-space text-xs font-bold uppercase tracking-wider ${isLight ? "text-slate-900" : "text-white"}`}>Full Funnel Conversion Performance</span>
             </div>
@@ -1346,9 +1346,9 @@ Overall campaign open rates hit **${avgOpenRate}%** with a click-through rate of
                         <span>{stage.count} profiles</span>
                       </div>
                       <div className="flex justify-between text-gray-550 pt-1 text-[8.5px]">
-                        <span>Conversion: <span className="text-orbit-success">{stage.conversion}</span></span>
+                        <span>Conversion: <span className="text-Manthan-success">{stage.conversion}</span></span>
                         <span>Drop-off: <span className="text-red-400">{stage.dropoff}</span></span>
-                        <span>Rev share: <span className="text-orbit-blue">{stage.contribution}</span></span>
+                        <span>Rev share: <span className="text-Manthan-blue">{stage.contribution}</span></span>
                       </div>
                     </div>
                   ))}
@@ -1365,19 +1365,19 @@ Overall campaign open rates hit **${avgOpenRate}%** with a click-through rate of
             
             {/* System Health Indicators */}
             <div className="lg:col-span-1 space-y-4">
-              <div className="orbit-panel p-5 space-y-3.5">
+              <div className="Manthan-panel p-5 space-y-3.5">
                 <div className="border-b border-gray-900 pb-3">
                   <span className="font-space text-xs font-bold uppercase tracking-wider text-white">AI System Health HUD</span>
                 </div>
 
                 <div className="space-y-3 font-mono text-[10px]">
                   {[
-                    { label: "Campaign Health", rate: "94%", desc: "Autonomous matching accuracy metrics", color: "text-orbit-success" },
-                    { label: "Agent Synchronization", rate: "98%", desc: "Vega, Polaris, and Luna threads active", color: "text-orbit-success" },
-                    { label: "Database Socket Sync", rate: "99.9%", desc: "Firestore collections online", color: "text-orbit-blue" },
-                    { label: "Outbound Delivery", rate: "96.4%", desc: "Twilio message gateway throughput", color: "text-orbit-success" },
-                    { label: "Revenue Health", rate: "92.1%", desc: "Baseline ROI yield ratios stability", color: "text-orbit-purple" },
-                    { label: "Vega Forecast Accuracy", rate: "89.2%", desc: "Deviation offset tolerance", color: "text-orbit-pink" }
+                    { label: "Campaign Health", rate: "94%", desc: "Autonomous matching accuracy metrics", color: "text-Manthan-success" },
+                    { label: "Agent Synchronization", rate: "98%", desc: "Khoj, Drishti, and Pragya threads active", color: "text-Manthan-success" },
+                    { label: "Database Socket Sync", rate: "99.9%", desc: "Firestore collections online", color: "text-Manthan-blue" },
+                    { label: "Outbound Delivery", rate: "96.4%", desc: "Twilio message gateway throughput", color: "text-Manthan-success" },
+                    { label: "Revenue Health", rate: "92.1%", desc: "Baseline ROI yield ratios stability", color: "text-Manthan-purple" },
+                    { label: "Khoj Forecast Accuracy", rate: "89.2%", desc: "Deviation offset tolerance", color: "text-Manthan-pink" }
                   ].map((health, idx) => (
                     <div key={idx} className="p-3 bg-black/20 border border-gray-900 rounded-xl flex items-center justify-between">
                       <div>
@@ -1392,7 +1392,7 @@ Overall campaign open rates hit **${avgOpenRate}%** with a click-through rate of
             </div>
 
             {/* AI Diagnostics Report */}
-            <div className={`lg:col-span-2 orbit-panel p-5 space-y-4 border ${isLight ? "border-red-200 bg-red-50/50" : "border-red-500/15 bg-red-500/5 shadow-[0_0_20px_rgba(239,68,68,0.1)]"}`}>
+            <div className={`lg:col-span-2 Manthan-panel p-5 space-y-4 border ${isLight ? "border-red-200 bg-red-50/50" : "border-red-500/15 bg-red-500/5 shadow-[0_0_20px_rgba(239,68,68,0.1)]"}`}>
               <div className="flex justify-between items-center border-b border-gray-950 pb-3">
                 <div className="flex items-center gap-2">
                   <ShieldAlert size={14} className="text-red-400 animate-pulse" />
@@ -1422,7 +1422,7 @@ Overall campaign open rates hit **${avgOpenRate}%** with a click-through rate of
                   
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="p-3 bg-black/40 border border-gray-900 rounded-xl space-y-1">
-                      <span className="font-bold text-orbit-success block uppercase tracking-wider text-[8px]">✔ What's Working</span>
+                      <span className="font-bold text-Manthan-success block uppercase tracking-wider text-[8px]">✔ What's Working</span>
                       <p className="text-gray-350 leading-relaxed">{aiDiagnostics.working}</p>
                     </div>
                     
@@ -1438,16 +1438,16 @@ Overall campaign open rates hit **${avgOpenRate}%** with a click-through rate of
                   </div>
 
                   <div className="p-3.5 bg-black/40 border border-gray-900 rounded-xl space-y-1">
-                    <span className="font-bold text-orbit-blue block uppercase tracking-wider text-[8px]">✦ Highest Opportunity</span>
+                    <span className="font-bold text-Manthan-blue block uppercase tracking-wider text-[8px]">✦ Highest Opportunity</span>
                     <p className="text-gray-350 leading-relaxed font-bold">{aiDiagnostics.opportunity}</p>
                   </div>
 
                   <div className="p-3.5 bg-black/40 border border-gray-900 rounded-xl space-y-2">
-                    <span className="font-bold text-orbit-purple block uppercase tracking-wider text-[8px]">⚙ Recommended Core Actions</span>
+                    <span className="font-bold text-Manthan-purple block uppercase tracking-wider text-[8px]">⚙ Recommended Core Actions</span>
                     <ul className="space-y-1 text-gray-400">
                       {aiDiagnostics.recommendations?.map((item: string, idx: number) => (
                         <li key={idx} className="flex items-start gap-1.5">
-                          <span className="text-orbit-purple">•</span>
+                          <span className="text-Manthan-purple">•</span>
                           <span>{item}</span>
                         </li>
                       ))}
@@ -1468,12 +1468,12 @@ Overall campaign open rates hit **${avgOpenRate}%** with a click-through rate of
 
         {/* Tab 4: Forecast Center */}
         {activeTab === "forecast" && (
-          <div className="orbit-panel p-6 space-y-6">
+          <div className="Manthan-panel p-6 space-y-6">
             <div className={`flex flex-col sm:flex-row sm:items-center justify-between border-b pb-3 gap-2 ${isLight ? "border-slate-200" : "border-gray-900"}`}>
 
               <div className="flex items-center gap-2">
-                <Brain size={14} className="text-orbit-pink" />
-                <span className="font-space text-xs font-bold uppercase tracking-wider text-white">Vega Forecast Center</span>
+                <Brain size={14} className="text-Manthan-pink" />
+                <span className="font-space text-xs font-bold uppercase tracking-wider text-white">Khoj Forecast Center</span>
               </div>
 
               {/* Period selection */}
@@ -1487,7 +1487,7 @@ Overall campaign open rates hit **${avgOpenRate}%** with a click-through rate of
                     key={p.id}
                     onClick={() => setForecastPeriod(p.id as any)}
                     className={`px-2 py-1 rounded transition-all cursor-pointer ${
-                      forecastPeriod === p.id ? "bg-orbit-pink/20 text-orbit-pink border border-orbit-pink/30" : "text-gray-550 hover:text-gray-300"
+                      forecastPeriod === p.id ? "bg-Manthan-pink/20 text-Manthan-pink border border-Manthan-pink/30" : "text-gray-550 hover:text-gray-300"
                     }`}
                   >
                     {p.label}
@@ -1500,7 +1500,7 @@ Overall campaign open rates hit **${avgOpenRate}%** with a click-through rate of
               
               {/* Forecast SVG Line graph */}
               <div className="lg:col-span-2 bg-black/25 p-5 rounded-2xl border border-gray-950 flex flex-col justify-center relative">
-                <span className="font-mono text-[8.5px] text-gray-550 uppercase tracking-widest block mb-4">Historical vs Vega Predicted Revenue Trends</span>
+                <span className="font-mono text-[8.5px] text-gray-550 uppercase tracking-widest block mb-4">Historical vs Khoj Predicted Revenue Trends</span>
                 
                 <svg viewBox="0 0 500 200" className="w-full h-44 text-white">
                   {/* Grid lines */}
@@ -1575,9 +1575,9 @@ Overall campaign open rates hit **${avgOpenRate}%** with a click-through rate of
 
                 {[
                   { label: "Predicted Revenue", val: forecastPeriod === "7" ? `₹${Math.round(totalRevenue + 14500).toLocaleString()}` : forecastPeriod === "30" ? `₹${Math.round(totalRevenue + 58000).toLocaleString()}` : `₹${Math.round(totalRevenue + 192000).toLocaleString()}`, desc: `Incremental change projection over current total`, color: isLight ? "text-slate-900" : "text-white" },
-                  { label: "Predicted Customer Nodes", val: forecastPeriod === "7" ? `+8 signups` : forecastPeriod === "30" ? `+24 signups` : `+92 signups`, desc: "Expected database size growth", color: "text-orbit-blue" },
-                  { label: "Forecasted Average ROI", val: forecastPeriod === "7" ? "4.1x" : forecastPeriod === "30" ? "4.3x" : "4.5x", desc: "Outbound campaign yield average multiplier", color: "text-orbit-success" },
-                  { label: "Model Confidence Score", val: forecastPeriod === "7" ? "92%" : forecastPeriod === "30" ? "88%" : "84%", desc: "Vega algorithm confidence calculation", color: "text-orbit-pink" }
+                  { label: "Predicted Customer Nodes", val: forecastPeriod === "7" ? `+8 signups` : forecastPeriod === "30" ? `+24 signups` : `+92 signups`, desc: "Expected database size growth", color: "text-Manthan-blue" },
+                  { label: "Forecasted Average ROI", val: forecastPeriod === "7" ? "4.1x" : forecastPeriod === "30" ? "4.3x" : "4.5x", desc: "Outbound campaign yield average multiplier", color: "text-Manthan-success" },
+                  { label: "Model Confidence Score", val: forecastPeriod === "7" ? "92%" : forecastPeriod === "30" ? "88%" : "84%", desc: "Khoj algorithm confidence calculation", color: "text-Manthan-pink" }
                 ].map((item, idx) => (
                   <div key={idx} className="p-3 bg-gray-950/50 border border-gray-900 rounded-xl flex items-center justify-between">
                     <div>
@@ -1629,7 +1629,7 @@ Overall campaign open rates hit **${avgOpenRate}%** with a click-through rate of
                         <div className={`h-2 rounded-full overflow-hidden border ${isLight ? "bg-slate-200 border-slate-350" : "bg-gray-950 border-gray-900"}`}>
 
                           <div 
-                            className="h-full rounded-full bg-gradient-to-r from-orbit-blue to-orbit-purple"
+                            className="h-full rounded-full bg-gradient-to-r from-Manthan-blue to-Manthan-purple"
                             style={{ width: `${contributionPct}%` }}
                           />
                         </div>
@@ -1687,13 +1687,13 @@ Overall campaign open rates hit **${avgOpenRate}%** with a click-through rate of
                         <div className={`h-2 rounded-full overflow-hidden border relative ${isLight ? "bg-slate-200 border-slate-350" : "bg-gray-950 border-gray-900"}`}>
 
                           <div 
-                            className="h-full rounded-full bg-orbit-success"
+                            className="h-full rounded-full bg-Manthan-success"
                             style={{ width: `${pct}%` }}
                           />
                         </div>
                         <div className="flex justify-between text-[8px] text-gray-500">
                           <span>Current value realized</span>
-                          <span className="text-orbit-blue">Growth Headroom: ₹{(potential - current).toLocaleString()}</span>
+                          <span className="text-Manthan-blue">Growth Headroom: ₹{(potential - current).toLocaleString()}</span>
                         </div>
                       </div>
                     );
@@ -1720,7 +1720,7 @@ Overall campaign open rates hit **${avgOpenRate}%** with a click-through rate of
                         <div className={`h-1.5 rounded-full overflow-hidden border ${isLight ? "bg-slate-200 border-slate-300" : "bg-gray-950 border-gray-900"}`}>
 
                           <div 
-                            className="h-full rounded-full bg-orbit-blue"
+                            className="h-full rounded-full bg-Manthan-blue"
                             style={{ width: `${pct}%` }}
                           />
                         </div>
@@ -1789,7 +1789,7 @@ Overall campaign open rates hit **${avgOpenRate}%** with a click-through rate of
 
                   <div className={`flex items-center gap-1.5 border-b pb-3 ${isLight ? "border-slate-200" : "border-gray-900"}`}>
 
-                    <MessageSquare size={16} className="text-orbit-purple" />
+                    <MessageSquare size={16} className="text-Manthan-purple" />
                     <h3 className={`font-space text-xs font-bold uppercase tracking-wider ${isLight ? "text-slate-900" : "text-white"}`}>Customer Sentiment Analysis</h3>
                   </div>
                   
@@ -2018,7 +2018,7 @@ Overall campaign open rates hit **${avgOpenRate}%** with a click-through rate of
             <div className={`flex justify-between items-center border-b pb-3 mb-4 ${isLight ? "border-slate-200" : "border-gray-900"}`}>
 
               <div className="flex items-center gap-2">
-                <Brain size={14} className="text-orbit-purple animate-pulse" />
+                <Brain size={14} className="text-Manthan-purple animate-pulse" />
                 <h3 className={`font-space text-sm font-bold uppercase tracking-wider ${isLight ? "text-slate-900" : "text-white"}`}>
 
                   {reportModalType === "executive" ? "Executive Summary Report" : reportModalType === "investor" ? "Investor Presentation" : "Client Performance Ledger"}
@@ -2036,9 +2036,9 @@ Overall campaign open rates hit **${avgOpenRate}%** with a click-through rate of
               {reportModalLoading ? (
                 <div className="h-44 flex flex-col items-center justify-center gap-2 text-gray-500">
                   <div className="flex gap-1 animate-pulse">
-                    <span className="w-1.5 h-1.5 rounded-full bg-orbit-purple animate-bounce" />
-                    <span className="w-1.5 h-1.5 rounded-full bg-orbit-purple animate-bounce" style={{ animationDelay: "0.2s" }} />
-                    <span className="w-1.5 h-1.5 rounded-full bg-orbit-purple animate-bounce" style={{ animationDelay: "0.4s" }} />
+                    <span className="w-1.5 h-1.5 rounded-full bg-Manthan-purple animate-bounce" />
+                    <span className="w-1.5 h-1.5 rounded-full bg-Manthan-purple animate-bounce" style={{ animationDelay: "0.2s" }} />
+                    <span className="w-1.5 h-1.5 rounded-full bg-Manthan-purple animate-bounce" style={{ animationDelay: "0.4s" }} />
                   </div>
                   <span className="uppercase tracking-widest mt-1">Generating custom report variables...</span>
                 </div>
@@ -2066,7 +2066,7 @@ Overall campaign open rates hit **${avgOpenRate}%** with a click-through rate of
               
               <button 
                 onClick={() => setReportModalType(null)}
-                className="px-4 py-2 bg-orbit-purple hover:bg-purple-650 text-white rounded-lg text-[8.5px] uppercase tracking-wider font-bold cursor-pointer transition-colors"
+                className="px-4 py-2 bg-Manthan-purple hover:bg-purple-650 text-white rounded-lg text-[8.5px] uppercase tracking-wider font-bold cursor-pointer transition-colors"
               >
                 Close Report
               </button>

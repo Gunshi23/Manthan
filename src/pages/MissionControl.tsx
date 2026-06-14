@@ -105,11 +105,11 @@ const RadialGauge: React.FC<{ value: number; max?: number; color: string; label:
 
 /* ─── Agent Info ────────────────────────────────────────────── */
 const AGENT_CONFIG = {
-  Polaris: { color: "#3B82F6", role: "Audience Intelligence" },
-  Luna: { color: "#F59E0B", role: "Opportunity Detection" },
-  Vega: { color: "#8B5CF6", role: "Revenue Forecasting" },
-  Nova: { color: "#EC4899", role: "Campaign Generator" },
-  Atlas: { color: "#22C55E", role: "Campaign Dispatch" }
+  Drishti: { color: "#3B82F6", role: "Audience Intelligence" },
+  Pragya: { color: "#F59E0B", role: "Opportunity Detection" },
+  Khoj: { color: "#8B5CF6", role: "Revenue Forecasting" },
+  Rachna: { color: "#EC4899", role: "Campaign Generator" },
+  Saarthi: { color: "#22C55E", role: "Campaign Dispatch" }
 };
 
 export const MissionControl: React.FC = () => {
@@ -122,7 +122,7 @@ export const MissionControl: React.FC = () => {
   } = useOrbit();
   
   const isLight = theme === "executive";
-  const [selectedAgent, setSelectedAgent] = useState<"Polaris" | "Vega" | "Nova" | "Atlas" | "Luna" | null>(null);
+  const [selectedAgent, setSelectedAgent] = useState<"Drishti" | "Khoj" | "Rachna" | "Saarthi" | "Pragya" | null>(null);
 
   // Timeframe selector state for KPIs
   const [kpiTimeframe, setKpiTimeframe] = useState<"Today" | "This Week" | "This Month">("This Month");
@@ -143,7 +143,7 @@ export const MissionControl: React.FC = () => {
   // Real-Time Execution Pipeline State
   const [pipelineState, setPipelineState] = useState<{
     active: boolean;
-    currentStep: "Polaris" | "Luna" | "Vega" | "Nova" | "Atlas" | "idle";
+    currentStep: "Drishti" | "Pragya" | "Khoj" | "Rachna" | "Saarthi" | "idle";
     logs: string[];
     progress: number;
     missionId?: string;
@@ -186,15 +186,15 @@ export const MissionControl: React.FC = () => {
   // Activity Ticker scrolling entries generator
   useEffect(() => {
     const defaultActivities = [
-      "Polaris clustered 145 repeat buyers based on LTV spikes",
-      "Nova generated personalized RCS Rich Card draft variants",
-      "Vega calculated 4.8x ROI forecast coefficients on slipping cohort",
-      "Atlas dispatched 120 checkout drops via Twilio gateway",
-      "Luna detected an abandoned cart leakage cluster in segment",
-      "Polaris mapped 24 VIP customer churn threats to system dashboard",
-      "Luna audited payment gateway leakage logs for 8 leads",
-      "Vega projected ₹42,500 revenue window in 30-day forecast",
-      "Nova injected brand DNA tokens into Diwali creative template"
+      "Drishti clustered 145 repeat buyers based on LTV spikes",
+      "Rachna generated personalized RCS Rich Card draft variants",
+      "Khoj calculated 4.8x ROI forecast coefficients on slipping cohort",
+      "Saarthi dispatched 120 checkout drops via Twilio gateway",
+      "Pragya detected an abandoned cart leakage cluster in segment",
+      "Drishti mapped 24 VIP customer churn threats to system dashboard",
+      "Pragya audited payment gateway leakage logs for 8 leads",
+      "Khoj projected ₹42,500 revenue window in 30-day forecast",
+      "Rachna injected brand DNA tokens into Diwali creative template"
     ];
 
     setActivityTicker(defaultActivities);
@@ -320,8 +320,8 @@ export const MissionControl: React.FC = () => {
 
     setPipelineState({
       active: true,
-      currentStep: "Polaris",
-      logs: [`[${new Date().toLocaleTimeString()}] Polaris: Initializing segment analysis for goal "${goal}"`],
+      currentStep: "Drishti",
+      logs: [`[${new Date().toLocaleTimeString()}] Drishti: Initializing segment analysis for goal "${goal}"`],
       progress: 10,
       missionGoal: goal,
       completedSteps: []
@@ -329,46 +329,46 @@ export const MissionControl: React.FC = () => {
 
     const sleep = (ms: number) => new Promise(res => setTimeout(res, ms));
 
-    // 1. Polaris step
+    // 1. Drishti step
     await sleep(2000);
-    const pMsg = `Polaris: Segment mapped. Isolated 18 dormant customers with LTV records > ₹8,000.`;
-    addAgentLog("Polaris", pMsg, "action");
+    const pMsg = `Drishti: Segment mapped. Isolated 18 dormant customers with LTV records > ₹8,000.`;
+    addAgentLog("Drishti", pMsg, "action");
     setPipelineState(prev => ({
       ...prev,
-      currentStep: "Luna",
+      currentStep: "Pragya",
       progress: 30,
       logs: [...prev.logs, `[${new Date().toLocaleTimeString()}] ${pMsg}`],
-      completedSteps: [...prev.completedSteps, "Polaris"]
+      completedSteps: [...prev.completedSteps, "Drishti"]
     }));
 
-    // 2. Luna step
+    // 2. Pragya step
     await sleep(2000);
-    const lMsg = `Luna: Leakage audit complete. Detected cart drop opportunity: Potential recovery revenue: ₹12,500.`;
-    addAgentLog("Luna", lMsg, "action");
+    const lMsg = `Pragya: Leakage audit complete. Detected cart drop opportunity: Potential recovery revenue: ₹12,500.`;
+    addAgentLog("Pragya", lMsg, "action");
     setPipelineState(prev => ({
       ...prev,
-      currentStep: "Vega",
+      currentStep: "Khoj",
       progress: 50,
       logs: [...prev.logs, `[${new Date().toLocaleTimeString()}] ${lMsg}`],
-      completedSteps: [...prev.completedSteps, "Luna"]
+      completedSteps: [...prev.completedSteps, "Pragya"]
     }));
 
-    // 3. Vega step
+    // 3. Khoj step
     await sleep(2000);
-    const vMsg = `Vega: Projected ROI: 4.8x. Predicted baseline conversion yield: 28% for channel ${targetChannel}.`;
-    addAgentLog("Vega", vMsg, "thought");
+    const vMsg = `Khoj: Projected ROI: 4.8x. Predicted baseline conversion yield: 28% for channel ${targetChannel}.`;
+    addAgentLog("Khoj", vMsg, "thought");
     setPipelineState(prev => ({
       ...prev,
-      currentStep: "Nova",
+      currentStep: "Rachna",
       progress: 70,
       logs: [...prev.logs, `[${new Date().toLocaleTimeString()}] ${vMsg}`],
-      completedSteps: [...prev.completedSteps, "Vega"]
+      completedSteps: [...prev.completedSteps, "Khoj"]
     }));
 
-    // 4. Nova step
+    // 4. Rachna step
     await sleep(2000);
-    const nMsg = `Nova: Generated personalized campaign copy. Subject: "Upgrade Orbit", Body: "Claim 15% off checkouts".`;
-    addAgentLog("Nova", nMsg, "chat");
+    const nMsg = `Rachna: Generated personalized campaign copy. Subject: "Upgrade Manthan", Body: "Claim 15% off checkouts".`;
+    addAgentLog("Rachna", nMsg, "chat");
     
     // Save generated campaign mock/record to backend API
     let campaignId = "";
@@ -398,14 +398,14 @@ export const MissionControl: React.FC = () => {
 
     setPipelineState(prev => ({
       ...prev,
-      currentStep: "Atlas",
+      currentStep: "Saarthi",
       progress: 90,
-      logs: [...prev.logs, `[${new Date().toLocaleTimeString()}] ${nMsg}`, `[${new Date().toLocaleTimeString()}] Atlas: Gateway channels validated. Initiating Twilio/Resend dispatch queue...`],
-      completedSteps: [...prev.completedSteps, "Nova"],
+      logs: [...prev.logs, `[${new Date().toLocaleTimeString()}] ${nMsg}`, `[${new Date().toLocaleTimeString()}] Saarthi: Gateway channels validated. Initiating Twilio/Resend dispatch queue...`],
+      completedSteps: [...prev.completedSteps, "Rachna"],
       generatedCampaignId: campaignId
     }));
 
-    // 5. Atlas step
+    // 5. Saarthi step
     await sleep(2500);
     
     // Trigger simulated webhook conversions and finalize campaign on backend
@@ -416,7 +416,7 @@ export const MissionControl: React.FC = () => {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             channel: targetChannel,
-            audience: [{ phone: "+919876543210", email: "target@orbit.io", name: "Arjun S." }],
+            audience: [{ phone: "+919876543210", email: "target@manthan.ai", name: "Arjun S." }],
             template: "Hi Arjun, complete your booking today.",
             missionId: campaignId
           })
@@ -426,8 +426,8 @@ export const MissionControl: React.FC = () => {
       }
     }
 
-    const aMsg = `Atlas: Campaign dispatch successful. Sent: 18 messages. Webhooks online for delivery events.`;
-    addAgentLog("Atlas", aMsg, "result");
+    const aMsg = `Saarthi: Campaign dispatch successful. Sent: 18 messages. Webhooks online for delivery events.`;
+    addAgentLog("Saarthi", aMsg, "result");
     
     // Save generated mission history record to backend
     try {
@@ -437,11 +437,11 @@ export const MissionControl: React.FC = () => {
         body: JSON.stringify({
           goal: goal,
           businessType: "Fashion & Retail",
-          Polaris: { segment: "Slipping Away", explanation: "Mapped 18 targets" },
-          Luna: { recoverableRevenue: 12500, inactiveCustomers: 18, abandonedLeads: 8, recoveryConfidence: 91, explanation: "Opportunity active" },
-          Vega: { predictedRoi: 4.8, predictedRevenue: 12500, explanation: "Calculated yields" },
-          Nova: { Email: { subject: "Orbit Promo", body: "15% off" }, WhatsApp: { body: "Promo drop" }, SMS: { body: "Orbit drop" }, RCS: { title: "Orbit Promo", body: "Glow update", mediaUrl: "" } },
-          Atlas: { selectedChannel: targetChannel, explanation: "Dispatch gates armed" },
+          Drishti: { segment: "Slipping Away", explanation: "Mapped 18 targets" },
+          Pragya: { recoverableRevenue: 12500, inactiveCustomers: 18, abandonedLeads: 8, recoveryConfidence: 91, explanation: "Opportunity active" },
+          Khoj: { predictedRoi: 4.8, predictedRevenue: 12500, explanation: "Calculated yields" },
+          Rachna: { Email: { subject: "Manthan Promo", body: "15% off" }, WhatsApp: { body: "Promo drop" }, SMS: { body: "Manthan drop" }, RCS: { title: "Manthan Promo", body: "Glow update", mediaUrl: "" } },
+          Saarthi: { selectedChannel: targetChannel, explanation: "Dispatch gates armed" },
           status: "Completed",
           recommendation: { summary: "Rerun campaigns weekly", confidenceScore: 92 }
         })
@@ -455,7 +455,7 @@ export const MissionControl: React.FC = () => {
       currentStep: "idle",
       progress: 100,
       logs: [...prev.logs, `[${new Date().toLocaleTimeString()}] ${aMsg}`, `[${new Date().toLocaleTimeString()}] System: Mission completed successfully.`],
-      completedSteps: [...prev.completedSteps, "Atlas"]
+      completedSteps: [...prev.completedSteps, "Saarthi"]
     }));
 
     // Trigger lists refresh
@@ -580,7 +580,7 @@ export const MissionControl: React.FC = () => {
     await duplicateMission(id);
   };
 
-  // Atlas Delivery Stats Computations
+  // Saarthi Delivery Stats Computations
   const totalSentCount = campaigns.reduce((s, c) => s + c.sentCount, 0);
   const totalDeliveredCount = campaigns.reduce((s, c) => s + (c.deliveredCount || 0), 0);
   const totalOpenedCount = campaigns.reduce((s, c) => s + (c.openedCount || 0), 0);
@@ -618,13 +618,13 @@ export const MissionControl: React.FC = () => {
     <div className={`flex-1 min-h-0 overflow-y-auto relative transition-colors duration-300 ${isLight ? "bg-gray-50" : "bg-[#050816]"}`}>
       {/* Background Matrix overlays */}
       <div className="pointer-events-none absolute inset-0 space-grid opacity-35 z-0" />
-      <div className="pointer-events-none absolute inset-0 bg-orbit-glow-blue opacity-15 z-0" />
+      <div className="pointer-events-none absolute inset-0 bg-Manthan-glow-blue opacity-15 z-0" />
 
       <div className="relative z-10 p-6 space-y-6">
         {/* ══════════════ HEADER ══════════════ */}
         <PageHeaderHUD
           title="Mission Control"
-          subtitle="orbit.ai OPERATIONAL HQ · REAL-TIME AI EXECUTION HUB"
+          subtitle="Manthan.ai OPERATIONAL HQ · REAL-TIME AI EXECUTION HUB"
           onSelectAgent={setSelectedAgent}
           actions={
             <div className="flex items-center gap-3">
@@ -634,7 +634,7 @@ export const MissionControl: React.FC = () => {
                 <button
                   onClick={toggleDemoMode}
                   className={`w-10 h-5 rounded-full p-0.5 transition-colors cursor-pointer outline-none ${
-                    demoMode ? "bg-orbit-success" : "bg-gray-800"
+                    demoMode ? "bg-Manthan-success" : "bg-gray-800"
                   }`}
                 >
                   <div className={`w-4 h-4 bg-white rounded-full shadow-md transform duration-300 ${demoMode ? "translate-x-5" : "translate-x-0"}`} />
@@ -643,7 +643,7 @@ export const MissionControl: React.FC = () => {
 
               <button
                 onClick={() => setIsCreateModalOpen(true)}
-                className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-orbit-blue to-orbit-purple text-white font-mono text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5 hover:opacity-90 hover:scale-[1.02] active:scale-95 duration-200 cursor-pointer shadow-orbit-glow"
+                className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-Manthan-blue to-Manthan-purple text-white font-mono text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5 hover:opacity-90 hover:scale-[1.02] active:scale-95 duration-200 cursor-pointer shadow-Manthan-glow"
               >
                 <Plus size={12} />
                 Assemble Custom Mission
@@ -656,7 +656,7 @@ export const MissionControl: React.FC = () => {
         <div className="space-y-3">
           <div className="flex justify-between items-center">
             <span className="font-space text-xs font-bold text-white uppercase tracking-wider flex items-center gap-2">
-              <BarChart3 size={14} className="text-orbit-blue animate-pulse" />
+              <BarChart3 size={14} className="text-Manthan-blue animate-pulse" />
               Live Telemetry Ledger
             </span>
             {/* Timeframe Selector */}
@@ -667,7 +667,7 @@ export const MissionControl: React.FC = () => {
                   onClick={() => setKpiTimeframe(tf)}
                   className={`px-3 py-1.5 rounded-md font-bold transition-all cursor-pointer ${
                     kpiTimeframe === tf
-                      ? "bg-orbit-blue text-white shadow-orbit-glow-blue"
+                      ? "bg-Manthan-blue text-white shadow-Manthan-glow-blue"
                       : "text-gray-500 hover:text-gray-300"
                   }`}
                 >
@@ -748,8 +748,8 @@ export const MissionControl: React.FC = () => {
                     </span>
                   </div>
                   <div className="flex items-center gap-1">
-                    {card.up && <ChevronUp size={10} className="text-orbit-success" />}
-                    <span className={`font-mono text-[9px] ${card.up ? "text-orbit-success" : "text-gray-500"}`}>{card.delta}</span>
+                    {card.up && <ChevronUp size={10} className="text-Manthan-success" />}
+                    <span className={`font-mono text-[9px] ${card.up ? "text-Manthan-success" : "text-gray-500"}`}>{card.delta}</span>
                   </div>
                   {card.spark && (
                     <div className="mt-1">
@@ -769,7 +769,7 @@ export const MissionControl: React.FC = () => {
           {/* Persona HUD Grid */}
           <div className="mt-6 space-y-3">
             <div className="flex items-center gap-2">
-              <Fingerprint size={14} className="text-orbit-purple" />
+              <Fingerprint size={14} className="text-Manthan-purple" />
               <span className="font-mono text-[9px] uppercase tracking-wider text-gray-400 font-bold">Persona DNA HUD Intelligence</span>
             </div>
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
@@ -779,7 +779,7 @@ export const MissionControl: React.FC = () => {
               }`} style={{ boxShadow: isLight ? undefined : "0 0 15px rgba(139,92,246,0.05)" }}>
                 <div className="flex justify-between items-center">
                   <span className="font-mono text-[9px] uppercase tracking-wider text-gray-500">Top Persona</span>
-                  <Fingerprint size={12} className="text-orbit-purple animate-pulse" />
+                  <Fingerprint size={12} className="text-Manthan-purple animate-pulse" />
                 </div>
                 <div className="h-9 flex items-center">
                   <span className="font-space text-xs font-bold tracking-tight text-white line-clamp-2 leading-tight">
@@ -798,7 +798,7 @@ export const MissionControl: React.FC = () => {
               }`} style={{ boxShadow: isLight ? undefined : "0 0 15px rgba(34,197,94,0.05)" }}>
                 <div className="flex justify-between items-center">
                   <span className="font-mono text-[9px] uppercase tracking-wider text-gray-500">Highest Revenue</span>
-                  <Crown size={12} className="text-orbit-success" />
+                  <Crown size={12} className="text-Manthan-success" />
                 </div>
                 <div className="h-9 flex items-center">
                   <span className="font-space text-xs font-bold tracking-tight text-white line-clamp-2 leading-tight">
@@ -807,7 +807,7 @@ export const MissionControl: React.FC = () => {
                 </div>
                 <div className="flex justify-between items-center font-mono text-[9px] mt-1 text-gray-400">
                   <span>Revenue Share:</span>
-                  <span className="text-orbit-success font-bold">{highestRevenuePersona ? `${highestRevenuePersona.revenueContributionPct}%` : "0%"}</span>
+                  <span className="text-Manthan-success font-bold">{highestRevenuePersona ? `${highestRevenuePersona.revenueContributionPct}%` : "0%"}</span>
                 </div>
               </div>
 
@@ -836,7 +836,7 @@ export const MissionControl: React.FC = () => {
               }`} style={{ boxShadow: isLight ? undefined : "0 0 15px rgba(245,158,11,0.05)" }}>
                 <div className="flex justify-between items-center">
                   <span className="font-mono text-[9px] uppercase tracking-wider text-gray-500">Growth Opportunity</span>
-                  <TrendingUp size={12} className="text-orbit-amber" />
+                  <TrendingUp size={12} className="text-Manthan-amber" />
                 </div>
                 <div className="h-9 flex items-center">
                   <span className="font-space text-xs font-bold tracking-tight text-white line-clamp-2 leading-tight">
@@ -845,7 +845,7 @@ export const MissionControl: React.FC = () => {
                 </div>
                 <div className="flex justify-between items-center font-mono text-[9px] mt-1 text-gray-400">
                   <span>Potential:</span>
-                  <span className="text-orbit-amber font-bold">₹{growthPersona ? (growthPersona.revenuePotential - growthPersona.predictedLtv).toLocaleString() : "0"}</span>
+                  <span className="text-Manthan-amber font-bold">₹{growthPersona ? (growthPersona.revenuePotential - growthPersona.predictedLtv).toLocaleString() : "0"}</span>
                 </div>
               </div>
             </div>
@@ -862,7 +862,7 @@ export const MissionControl: React.FC = () => {
             <div className={`rounded-xl border p-5 space-y-3 ${isLight ? "bg-white border-gray-200" : "bg-gray-900/40 border-gray-800"}`}>
               <div className="flex justify-between items-center border-b border-gray-800/60 pb-2">
                 <span className="font-space text-xs font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
-                  <Flame size={13} className="text-orbit-purple" />
+                  <Flame size={13} className="text-Manthan-purple" />
                   AI Executive Briefing
                 </span>
                 <button
@@ -882,7 +882,7 @@ export const MissionControl: React.FC = () => {
                 </div>
               ) : (
                 <div className="font-mono text-[9.5px] leading-relaxed text-gray-400 whitespace-pre-line bg-gray-950/35 p-3 rounded-lg border border-gray-850">
-                  {briefing || "orbit.ai currently has no active missions. Click launch opportunity or generate new mission above to begin."}
+                  {briefing || "Manthan.ai currently has no active missions. Click launch opportunity or generate new mission above to begin."}
                 </div>
               )}
             </div>
@@ -891,11 +891,11 @@ export const MissionControl: React.FC = () => {
             <div className={`rounded-xl border p-5 space-y-4 ${isLight ? "bg-white border-gray-200" : "bg-gray-900/40 border-gray-800"}`}>
               <div className="flex justify-between items-center border-b border-gray-800/60 pb-2">
                 <span className="font-space text-xs font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
-                  <Cpu size={13} className="text-orbit-blue" />
+                  <Cpu size={13} className="text-Manthan-blue" />
                   Mission Execution Center
                 </span>
                 {pipelineState.active && (
-                  <span className="font-mono text-[8px] bg-orbit-blue/10 border border-orbit-blue/35 text-orbit-blue px-2 py-0.5 rounded-full uppercase animate-pulse">
+                  <span className="font-mono text-[8px] bg-Manthan-blue/10 border border-Manthan-blue/35 text-Manthan-blue px-2 py-0.5 rounded-full uppercase animate-pulse">
                     Pipeline Active
                   </span>
                 )}
@@ -914,9 +914,9 @@ export const MissionControl: React.FC = () => {
                         <div
                           className={`w-9 h-9 rounded-full flex items-center justify-center border transition-all duration-300 ${
                             isActive
-                              ? "border-white bg-[#1e293b] scale-110 shadow-orbit-glow"
+                              ? "border-white bg-[#1e293b] scale-110 shadow-Manthan-glow"
                               : isCompleted
-                                ? "bg-orbit-success/15 border-orbit-success text-orbit-success"
+                                ? "bg-Manthan-success/15 border-Manthan-success text-Manthan-success"
                                 : "border-gray-800 bg-[#0c0f20]"
                           }`}
                           style={isActive ? { boxShadow: `0 0 15px ${cfg.color}` } : undefined}
@@ -931,7 +931,7 @@ export const MissionControl: React.FC = () => {
                       {idx < 4 && (
                         <div className="h-0.5 flex-1 bg-gray-855 relative">
                           <div
-                            className="absolute inset-y-0 left-0 bg-orbit-success transition-all duration-500"
+                            className="absolute inset-y-0 left-0 bg-Manthan-success transition-all duration-500"
                             style={{ width: isCompleted ? "100%" : "0%" }}
                           />
                         </div>
@@ -948,7 +948,7 @@ export const MissionControl: React.FC = () => {
                 ) : (
                   pipelineState.logs.map((log, i) => (
                     <p key={i} className="leading-relaxed border-l border-gray-800 pl-1.5">
-                      <span className="text-orbit-blue font-bold">&gt;</span> {log}
+                      <span className="text-Manthan-blue font-bold">&gt;</span> {log}
                     </p>
                   ))
                 )}
@@ -959,7 +959,7 @@ export const MissionControl: React.FC = () => {
             <div className={`rounded-xl border p-5 space-y-4 ${isLight ? "bg-white border-gray-200" : "bg-gray-900/40 border-gray-800"}`}>
               <div className="flex justify-between items-center border-b border-gray-800/60 pb-2">
                 <span className="font-space text-xs font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
-                  <Activity size={13} className="text-orbit-success" />
+                  <Activity size={13} className="text-Manthan-success" />
                   Active Pipelines
                 </span>
                 <span className="font-mono text-[9px] text-gray-550">
@@ -984,7 +984,7 @@ export const MissionControl: React.FC = () => {
                             <span className="font-space text-[10px] font-bold text-white uppercase">{c.name}</span>
                             <span className="font-mono text-[8px] text-gray-500 block uppercase">{c.channel} · {c.sentCount} recipients</span>
                           </div>
-                          <span className="font-mono text-[8px] border border-orbit-blue/30 bg-orbit-blue/5 text-orbit-blue px-2 py-0.5 rounded-full uppercase animate-pulse">
+                          <span className="font-mono text-[8px] border border-Manthan-blue/30 bg-Manthan-blue/5 text-Manthan-blue px-2 py-0.5 rounded-full uppercase animate-pulse">
                             {c.status}
                           </span>
                         </div>
@@ -994,7 +994,7 @@ export const MissionControl: React.FC = () => {
                         </div>
                         <div className="space-y-1">
                           <div className="w-full h-1 bg-gray-900 rounded-full overflow-hidden">
-                            <div className="h-full bg-orbit-blue transition-all duration-500" style={{ width: `${progressPct}%` }} />
+                            <div className="h-full bg-Manthan-blue transition-all duration-500" style={{ width: `${progressPct}%` }} />
                           </div>
                           <div className="flex justify-between text-[7.5px] font-mono text-gray-500 uppercase">
                             <span>Delivered: {c.deliveredCount}</span>
@@ -1010,15 +1010,15 @@ export const MissionControl: React.FC = () => {
 
           </div>
 
-          {/* COLUMN 2: OPPORTUNITY SCANNER, ATLAS DELIVERY & SCROLLING ACTIVITY */}
+          {/* COLUMN 2: OPPORTUNITY SCANNER, Saarthi DELIVERY & SCROLLING ACTIVITY */}
           <div className="space-y-6">
             
-            {/* Opportunity Detection powered by Luna */}
+            {/* Opportunity Detection powered by Pragya */}
             <div className={`rounded-xl border p-5 space-y-4 ${isLight ? "bg-white border-gray-200" : "bg-gray-900/40 border-gray-800"}`}>
               <div className="flex justify-between items-center border-b border-gray-800/60 pb-2">
                 <span className="font-space text-xs font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
                   <Shield size={13} className="text-amber-500" />
-                  Luna Opportunity Detector
+                  Pragya Opportunity Detector
                 </span>
                 <button
                   onClick={fetchOpportunities}
@@ -1078,12 +1078,12 @@ export const MissionControl: React.FC = () => {
               </div>
             </div>
 
-            {/* Atlas Delivery Center */}
+            {/* Saarthi Delivery Center */}
             <div className={`rounded-xl border p-5 space-y-4 ${isLight ? "bg-white border-gray-200" : "bg-gray-900/40 border-gray-800"}`}>
               <div className="flex justify-between items-center border-b border-gray-800/60 pb-2">
                 <span className="font-space text-xs font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
-                  <Database size={13} className="text-orbit-success" />
-                  Atlas Delivery Center
+                  <Database size={13} className="text-Manthan-success" />
+                  Saarthi Delivery Center
                 </span>
                 <span className="font-mono text-[9px] text-gray-550">TWILIO + RESEND GATEWAYS</span>
               </div>
@@ -1095,15 +1095,15 @@ export const MissionControl: React.FC = () => {
                 </div>
                 <div className="bg-gray-950/20 border border-gray-850 p-2.5 rounded-lg text-center">
                   <span className="font-mono text-[8px] text-gray-500 uppercase block">Delivered Messages</span>
-                  <span className="font-space text-lg font-bold text-orbit-success">{totalDeliveredCount}</span>
+                  <span className="font-space text-lg font-bold text-Manthan-success">{totalDeliveredCount}</span>
                 </div>
               </div>
 
               <div className="grid grid-cols-3 gap-2 font-mono text-[9.5px]">
                 {[
-                  { label: "Opened", val: totalOpenedCount, color: "text-orbit-purple" },
+                  { label: "Opened", val: totalOpenedCount, color: "text-Manthan-purple" },
                   { label: "Clicked", val: totalClickedCount, color: "text-yellow-450" },
-                  { label: "Converted", val: totalConvertedCount, color: "text-orbit-success" },
+                  { label: "Converted", val: totalConvertedCount, color: "text-Manthan-success" },
                   { label: "Failed", val: totalFailedCount, color: "text-red-400" },
                   { label: "Pending", val: totalPendingCount, color: "text-blue-400" },
                   { label: "Yield", val: `₹${totalCampaignRevenue.toLocaleString()}`, color: "text-white font-bold" }
@@ -1120,7 +1120,7 @@ export const MissionControl: React.FC = () => {
             <div className={`rounded-xl border p-5 space-y-3 ${isLight ? "bg-white border-gray-200" : "bg-gray-900/40 border-gray-800"}`}>
               <div className="flex justify-between items-center border-b border-gray-800/60 pb-2">
                 <span className="font-space text-xs font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
-                  <Activity size={13} className="text-orbit-blue animate-pulse" />
+                  <Activity size={13} className="text-Manthan-blue animate-pulse" />
                   Live Operator Feeds
                 </span>
                 <span className="font-mono text-[8px] text-gray-550 uppercase">Sync active</span>
@@ -1130,7 +1130,7 @@ export const MissionControl: React.FC = () => {
                 <div className="space-y-2 scroll-feed-anim">
                   {activityTicker.map((act, i) => (
                     <div key={i} className="flex gap-2 items-center font-mono text-[8.5px] text-gray-400 truncate border-b border-gray-900/30 pb-1">
-                      <span className="w-1 h-1 rounded-full bg-orbit-blue shrink-0 animate-pulse" />
+                      <span className="w-1 h-1 rounded-full bg-Manthan-blue shrink-0 animate-pulse" />
                       <span>{act}</span>
                     </div>
                   ))}
@@ -1150,10 +1150,10 @@ export const MissionControl: React.FC = () => {
               <div className={`rounded-xl border p-4 space-y-3 ${isLight ? "bg-white border-gray-200" : "bg-gray-900/40 border-gray-800"}`}>
                 <div className="flex justify-between items-center border-b border-gray-800/60 pb-2">
                   <span className="font-space text-xs font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
-                    <Database size={12} className="text-orbit-purple" />
+                    <Database size={12} className="text-Manthan-purple" />
                     Business DNA
                   </span>
-                  <span className={`font-mono text-[8px] px-2 py-0.5 rounded-full border ${workspaceDna.dataSource === "csv" ? "text-orbit-success border-orbit-success/30 bg-orbit-success/5" : "text-orbit-blue border-orbit-blue/30 bg-orbit-blue/5"}`}>
+                  <span className={`font-mono text-[8px] px-2 py-0.5 rounded-full border ${workspaceDna.dataSource === "csv" ? "text-Manthan-success border-Manthan-success/30 bg-Manthan-success/5" : "text-Manthan-blue border-Manthan-blue/30 bg-Manthan-blue/5"}`}>
                     {workspaceDna.dataSource === "csv" ? "📁 DATASET" : "⚡ PRESET"}
                   </span>
                 </div>
@@ -1164,7 +1164,7 @@ export const MissionControl: React.FC = () => {
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-gray-500">Primary KPI</span>
-                    <span className="text-orbit-blue font-bold">{workspaceDna.primaryMetric}</span>
+                    <span className="text-Manthan-blue font-bold">{workspaceDna.primaryMetric}</span>
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-gray-500">Top Category</span>
@@ -1172,14 +1172,14 @@ export const MissionControl: React.FC = () => {
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-gray-500">Growth Est.</span>
-                    <span className="text-orbit-success font-bold">+{workspaceDna.growthRate}% MoM</span>
+                    <span className="text-Manthan-success font-bold">+{workspaceDna.growthRate}% MoM</span>
                   </div>
                 </div>
                 <div className="border-t border-gray-800/60 pt-2">
                   <span className="font-mono text-[7px] text-gray-600 uppercase block mb-1.5">Top Opportunities</span>
                   {workspaceDna.opportunities.slice(0, 2).map((opp, i) => (
                     <div key={i} className="flex items-start gap-1.5 mb-1">
-                      <div className="w-1 h-1 rounded-full bg-orbit-success mt-1.5 shrink-0" />
+                      <div className="w-1 h-1 rounded-full bg-Manthan-success mt-1.5 shrink-0" />
                       <span className="font-mono text-[8.5px] text-gray-400 leading-tight">{opp}</span>
                     </div>
                   ))}
@@ -1192,7 +1192,7 @@ export const MissionControl: React.FC = () => {
               <div className={`rounded-xl border p-5 space-y-4 ${isLight ? "bg-white border-gray-200" : "bg-gray-900/40 border-gray-800"}`}>
                 <div className="flex justify-between items-center border-b border-gray-800/60 pb-2">
                   <span className="font-space text-xs font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
-                    <Award size={13} className="text-orbit-success animate-pulse" />
+                    <Award size={13} className="text-Manthan-success animate-pulse" />
                     Latest Boardroom Verdict
                   </span>
                   <span className="font-mono text-[8px] text-gray-550 flex items-center gap-1">
@@ -1227,14 +1227,14 @@ export const MissionControl: React.FC = () => {
                     <div className="text-gray-300 flex items-center gap-1.5 mt-0.5">
                       <span className="text-red-400 font-semibold">{latestVerdict.currentTrend}</span>
                       <ArrowRight size={10} className="text-gray-500" />
-                      <span className="text-orbit-success font-semibold">{latestVerdict.futureTrend}</span>
+                      <span className="text-Manthan-success font-semibold">{latestVerdict.futureTrend}</span>
                     </div>
                   </div>
 
                   <div className="grid grid-cols-2 gap-3 pt-2 border-t border-gray-900">
                     <div>
                       <span className="text-[7.5px] text-gray-555 uppercase block">Projected Revenue</span>
-                      <span className="text-orbit-success font-bold block text-[10.5px]">₹{latestVerdict.revenueOpportunity.toLocaleString()}</span>
+                      <span className="text-Manthan-success font-bold block text-[10.5px]">₹{latestVerdict.revenueOpportunity.toLocaleString()}</span>
                     </div>
                     <div>
                       <span className="text-[7.5px] text-gray-555 uppercase block">Expected ROI</span>
@@ -1245,20 +1245,20 @@ export const MissionControl: React.FC = () => {
                   {/* 30/60/90 Forecast sub-panel */}
                   <div className="space-y-2 pt-2 border-t border-gray-900">
                     <span className="text-[7.5px] text-gray-500 uppercase block tracking-wider flex items-center gap-1">
-                      <Clock size={10} className="text-orbit-purple" />
+                      <Clock size={10} className="text-Manthan-purple" />
                       Time Machine Forecast
                     </span>
                     <div className="space-y-1.5 text-[8.5px] text-gray-450">
                       <div className="flex gap-2">
-                        <span className="text-orbit-purple font-bold shrink-0 w-8">T+30d:</span>
+                        <span className="text-Manthan-purple font-bold shrink-0 w-8">T+30d:</span>
                         <span className="leading-tight">{latestVerdict.forecast.d30}</span>
                       </div>
                       <div className="flex gap-2">
-                        <span className="text-orbit-purple font-bold shrink-0 w-8">T+60d:</span>
+                        <span className="text-Manthan-purple font-bold shrink-0 w-8">T+60d:</span>
                         <span className="leading-tight">{latestVerdict.forecast.d60}</span>
                       </div>
                       <div className="flex gap-2">
-                        <span className="text-orbit-purple font-bold shrink-0 w-8">T+90d:</span>
+                        <span className="text-Manthan-purple font-bold shrink-0 w-8">T+90d:</span>
                         <span className="leading-tight">{latestVerdict.forecast.d90}</span>
                       </div>
                     </div>
@@ -1271,7 +1271,7 @@ export const MissionControl: React.FC = () => {
             <div className={`rounded-xl border p-5 space-y-4 ${isLight ? "bg-white border-gray-200" : "bg-gray-900/40 border-gray-800"}`}>
               <div className="flex justify-between items-center border-b border-gray-800/60 pb-2">
                 <span className="font-space text-xs font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
-                  <BarChart3 size={13} className="text-orbit-purple" />
+                  <BarChart3 size={13} className="text-Manthan-purple" />
                   Revenue Attribution Metrics
                 </span>
                 <span className="font-mono text-[8px] text-gray-550">Attributed loops</span>
@@ -1284,9 +1284,9 @@ export const MissionControl: React.FC = () => {
                 <div className="space-y-2">
                   <p className="text-gray-500 uppercase text-[8px] font-bold tracking-wider">Revenue by Customer Segment</p>
                   {[
-                    { label: "Loyalists", val: revenueBySegment.Loyalists, color: "bg-orbit-blue" },
+                    { label: "Loyalists", val: revenueBySegment.Loyalists, color: "bg-Manthan-blue" },
                     { label: "Slipping Away", val: revenueBySegment.SlippingAway, color: "bg-amber-500" },
-                    { label: "High-Value Inactive", val: revenueBySegment.HighValueInactive, color: "bg-orbit-purple" },
+                    { label: "High-Value Inactive", val: revenueBySegment.HighValueInactive, color: "bg-Manthan-purple" },
                     { label: "New Signups", val: revenueBySegment.NewSignups, color: "bg-pink-500" }
                   ].map(item => {
                     const ratio = Math.max(2, Math.round((item.val / totalSegmentRev) * 100)) || 25;
@@ -1308,9 +1308,9 @@ export const MissionControl: React.FC = () => {
                 <div className="space-y-2 border-t border-gray-900/80 pt-3">
                   <p className="text-gray-500 uppercase text-[8px] font-bold tracking-wider">Revenue by Channel</p>
                   {[
-                    { label: "WhatsApp", val: revenueByChannel.WhatsApp, color: "bg-orbit-success" },
-                    { label: "Email", val: revenueByChannel.Email, color: "bg-orbit-purple" },
-                    { label: "SMS", val: revenueByChannel.SMS, color: "bg-orbit-blue" },
+                    { label: "WhatsApp", val: revenueByChannel.WhatsApp, color: "bg-Manthan-success" },
+                    { label: "Email", val: revenueByChannel.Email, color: "bg-Manthan-purple" },
+                    { label: "SMS", val: revenueByChannel.SMS, color: "bg-Manthan-blue" },
                     { label: "RCS", val: revenueByChannel.RCS, color: "bg-pink-500" }
                   ].map(item => {
                     const ratio = Math.max(2, Math.round((item.val / totalChannelRev) * 100)) || 25;
@@ -1335,7 +1335,7 @@ export const MissionControl: React.FC = () => {
             <div className={`rounded-xl border p-5 space-y-4 ${isLight ? "bg-white border-gray-200" : "bg-gray-900/40 border-gray-800"}`}>
               <div className="flex justify-between items-center border-b border-gray-800/60 pb-2">
                 <span className="font-space text-xs font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
-                  <Shield size={13} className="text-orbit-success" />
+                  <Shield size={13} className="text-Manthan-success" />
                   Mission Health Ledger
                 </span>
                 <span className="font-mono text-[8px] text-gray-550">Integrity audits</span>
@@ -1353,7 +1353,7 @@ export const MissionControl: React.FC = () => {
                 </div>
                 <div>
                   <span className="text-[7px] text-gray-500 uppercase block mb-0.5">Avg Conv</span>
-                  <span className="text-orbit-success font-bold">{averageConversion}%</span>
+                  <span className="text-Manthan-success font-bold">{averageConversion}%</span>
                 </div>
                 <div>
                   <span className="text-[7px] text-gray-500 uppercase block mb-0.5">Network latency</span>
@@ -1366,7 +1366,7 @@ export const MissionControl: React.FC = () => {
             <div className={`rounded-xl border p-5 space-y-4 ${isLight ? "bg-white border-gray-200" : "bg-gray-900/40 border-gray-800"}`}>
               <div className="flex justify-between items-center border-b border-gray-800/60 pb-2">
                 <span className="font-space text-xs font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
-                  <Activity size={13} className="text-orbit-blue" />
+                  <Activity size={13} className="text-Manthan-blue" />
                   Mission Timeline
                 </span>
                 <span className="font-mono text-[8px] text-gray-550 uppercase">Operational Steps</span>
@@ -1375,28 +1375,28 @@ export const MissionControl: React.FC = () => {
               <div className="relative pl-4 border-l border-gray-800 space-y-3 font-mono text-[9px] text-gray-400 max-h-48 overflow-y-auto scrollbar-thin">
                 {[
                   { title: "Mission Formulated", desc: "AI engine resolved campaign constraints", step: "Detected" },
-                  { title: "Audience Isolated", desc: "Polaris demographic vectors matched", step: "Analyzed" },
-                  { title: "Forecast Rendered", desc: "Vega calculated regression ROI limits", step: "Generated" },
-                  { title: "Marketing Assets Ready", desc: "Nova compiled WhatsApp & Email copy templates", step: "Scheduled" },
-                  { title: "Gateway Port Armed", desc: "Atlas verified delivery latency bounds", step: "Launching" },
+                  { title: "Audience Isolated", desc: "Drishti demographic vectors matched", step: "Analyzed" },
+                  { title: "Forecast Rendered", desc: "Khoj calculated regression ROI limits", step: "Generated" },
+                  { title: "Marketing Assets Ready", desc: "Rachna compiled WhatsApp & Email copy templates", step: "Scheduled" },
+                  { title: "Gateway Port Armed", desc: "Saarthi verified delivery latency bounds", step: "Launching" },
                   { title: "Broadcast Dispatched", desc: "Dispatched over Twilio/Resend channels", step: "Running" },
                   { title: "Engagement Logs Syncing", desc: "Live webhooks monitoring conversions", step: "Completed" }
                 ].map((item, idx) => {
                   const isActiveStep = pipelineState.active && (
-                    (pipelineState.currentStep === "Polaris" && idx <= 1) ||
-                    (pipelineState.currentStep === "Luna" && idx <= 2) ||
-                    (pipelineState.currentStep === "Vega" && idx <= 2) ||
-                    (pipelineState.currentStep === "Nova" && idx <= 3) ||
-                    (pipelineState.currentStep === "Atlas" && idx <= 5)
+                    (pipelineState.currentStep === "Drishti" && idx <= 1) ||
+                    (pipelineState.currentStep === "Pragya" && idx <= 2) ||
+                    (pipelineState.currentStep === "Khoj" && idx <= 2) ||
+                    (pipelineState.currentStep === "Rachna" && idx <= 3) ||
+                    (pipelineState.currentStep === "Saarthi" && idx <= 5)
                   );
                   return (
                     <div key={idx} className="relative">
                       <div className={`absolute -left-[20.5px] top-1 w-2.5 h-2.5 rounded-full border-2 ${
                         isActiveStep
-                          ? "border-orbit-blue bg-orbit-blue shadow-orbit-glow-blue animate-ping"
+                          ? "border-Manthan-blue bg-Manthan-blue shadow-Manthan-glow-blue animate-ping"
                           : "border-gray-800 bg-[#050816]"
                       }`} />
-                      <p className={`font-bold ${isActiveStep ? "text-orbit-blue font-bold" : "text-white"}`}>{item.title}</p>
+                      <p className={`font-bold ${isActiveStep ? "text-Manthan-blue font-bold" : "text-white"}`}>{item.title}</p>
                       <p className="text-[7.5px] text-gray-500 mt-0.5">{item.desc}</p>
                     </div>
                   );
@@ -1417,7 +1417,7 @@ export const MissionControl: React.FC = () => {
                 <button
                   onClick={handleGenerateNewMission}
                   disabled={isGeneratingMission}
-                  className="p-2.5 bg-gray-950 border border-gray-850 rounded-lg hover:border-orbit-blue/40 text-gray-300 hover:text-white flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                  className="p-2.5 bg-gray-950 border border-gray-850 rounded-lg hover:border-Manthan-blue/40 text-gray-300 hover:text-white flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
                 >
                   <Plus size={10} />
                   {isGeneratingMission ? "Planning..." : "Plan Mission"}
@@ -1425,14 +1425,14 @@ export const MissionControl: React.FC = () => {
                 <button
                   onClick={() => triggerExecutionPipeline("Quick Revenue Reactivation")}
                   disabled={pipelineState.active}
-                  className="p-2.5 bg-gray-950 border border-gray-850 rounded-lg hover:border-orbit-success/40 text-gray-300 hover:text-white flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                  className="p-2.5 bg-gray-950 border border-gray-850 rounded-lg hover:border-Manthan-success/40 text-gray-300 hover:text-white flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
                 >
                   <Play size={10} />
                   Launch Loop
                 </button>
                 <button
                   onClick={handleExportReport}
-                  className="p-2.5 bg-gray-950 border border-gray-850 rounded-lg hover:border-orbit-purple/40 text-gray-300 hover:text-white flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                  className="p-2.5 bg-gray-950 border border-gray-850 rounded-lg hover:border-Manthan-purple/40 text-gray-300 hover:text-white flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
                 >
                   <FileText size={10} />
                   Export Stats
@@ -1460,7 +1460,7 @@ export const MissionControl: React.FC = () => {
         <div className={`rounded-xl border p-5 ${isLight ? "bg-white border-gray-200" : "bg-gray-900/40 border-gray-800"}`}>
           <div className="flex justify-between items-center border-b border-gray-800/60 pb-3 mb-4">
             <span className="font-space text-xs font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
-              <Layers size={13} className="text-orbit-blue" />
+              <Layers size={13} className="text-Manthan-blue" />
               Operational Mission Ledger
             </span>
             <span className="font-mono text-[9px] text-gray-550">{missions.length} RECORDED DIRECTIVES</span>
@@ -1490,20 +1490,20 @@ export const MissionControl: React.FC = () => {
                     <tr key={m.id} className="hover:bg-gray-950/20 transition-colors">
                       <td
                         onClick={() => setSelectedMission(m)}
-                        className="py-3 font-space font-bold cursor-pointer hover:text-orbit-blue transition-colors max-w-xs truncate"
+                        className="py-3 font-space font-bold cursor-pointer hover:text-Manthan-blue transition-colors max-w-xs truncate"
                       >
                         {m.goal}
                       </td>
-                      <td className="py-3">{m.Polaris?.segment || "Loyalists"}</td>
-                      <td className="py-3 uppercase text-[9px]">{m.Atlas?.selectedChannel || "WhatsApp"}</td>
+                      <td className="py-3">{m.Drishti?.segment || "Loyalists"}</td>
+                      <td className="py-3 uppercase text-[9px]">{m.Saarthi?.selectedChannel || "WhatsApp"}</td>
                       <td className="py-3 text-right font-space font-bold">
-                        ₹{(m.Vega?.predictedRevenue || 12000).toLocaleString()}
+                        ₹{(m.Khoj?.predictedRevenue || 12000).toLocaleString()}
                       </td>
                       <td className="py-3 text-center">
                         <span className={`px-2 py-0.5 rounded text-[8px] uppercase tracking-wider font-bold ${
-                          m.status === "Completed" ? "bg-orbit-success/10 text-orbit-success border border-orbit-success/20" :
+                          m.status === "Completed" ? "bg-Manthan-success/10 text-Manthan-success border border-Manthan-success/20" :
                           m.status === "Paused" ? "bg-yellow-500/10 text-yellow-500 border border-yellow-500/20" :
-                          m.status === "Running" ? "bg-orbit-blue/10 text-orbit-blue border border-orbit-blue/20 animate-pulse" :
+                          m.status === "Running" ? "bg-Manthan-blue/10 text-Manthan-blue border border-Manthan-blue/20 animate-pulse" :
                           "bg-gray-800/40 text-gray-400"
                         }`}>
                           {m.status || "Detected"}
@@ -1563,7 +1563,7 @@ export const MissionControl: React.FC = () => {
             <div className="absolute inset-0 space-grid opacity-10 pointer-events-none" />
             <div className="flex justify-between items-center border-b border-gray-855 pb-3">
               <span className="font-space text-sm font-bold uppercase tracking-wider flex items-center gap-1.5">
-                <Target className="text-orbit-blue animate-pulse" size={14} />
+                <Target className="text-Manthan-blue animate-pulse" size={14} />
                 Assemble Custom Directive
               </span>
               <button onClick={() => setIsCreateModalOpen(false)} className="text-gray-550 hover:text-white cursor-pointer">
@@ -1590,7 +1590,7 @@ export const MissionControl: React.FC = () => {
                   triggerExecutionPipeline(customGoal);
                   setCustomGoal("");
                 }}
-                className="w-full py-3 rounded-xl bg-gradient-to-r from-orbit-blue to-orbit-purple text-white text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 hover:opacity-90 hover:scale-[1.02] active:scale-95 duration-200 cursor-pointer shadow-orbit-glow"
+                className="w-full py-3 rounded-xl bg-gradient-to-r from-Manthan-blue to-Manthan-purple text-white text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 hover:opacity-90 hover:scale-[1.02] active:scale-95 duration-200 cursor-pointer shadow-Manthan-glow"
               >
                 <Play size={11} />
                 Compile & Dispatch AI Loop
@@ -1609,7 +1609,7 @@ export const MissionControl: React.FC = () => {
             <div className="absolute inset-0 space-grid opacity-10 pointer-events-none" />
             <div className="flex justify-between items-center border-b border-gray-855 pb-3">
               <span className="font-space text-sm font-bold uppercase tracking-wider flex items-center gap-1.5">
-                <Layers className="text-orbit-purple" size={14} />
+                <Layers className="text-Manthan-purple" size={14} />
                 Mission Directive details
               </span>
               <button onClick={() => setSelectedMission(null)} className="text-gray-555 hover:text-white cursor-pointer">
@@ -1625,7 +1625,7 @@ export const MissionControl: React.FC = () => {
                 </div>
                 <div className="p-3 bg-gray-950/20 border border-gray-850 rounded-lg">
                   <span className="text-gray-550 block uppercase text-[7.5px]">Lifecycle Status</span>
-                  <span className="text-orbit-success text-xs font-bold font-space uppercase block mt-0.5">{selectedMission.status}</span>
+                  <span className="text-Manthan-success text-xs font-bold font-space uppercase block mt-0.5">{selectedMission.status}</span>
                 </div>
               </div>
 
@@ -1635,7 +1635,7 @@ export const MissionControl: React.FC = () => {
                 <div className="grid grid-cols-3 gap-2">
                   <div>
                     <span className="text-gray-550 block text-[7px] uppercase">Matched Segment</span>
-                    <span className="text-white">{selectedMission.Polaris?.segment || "Loyalists"}</span>
+                    <span className="text-white">{selectedMission.Drishti?.segment || "Loyalists"}</span>
                   </div>
                   <div>
                     <span className="text-gray-550 block text-[7px] uppercase">Audience Size</span>
@@ -1643,7 +1643,7 @@ export const MissionControl: React.FC = () => {
                   </div>
                   <div>
                     <span className="text-gray-550 block text-[7px] uppercase">Attribution logic</span>
-                    <span className="text-white truncate block">{selectedMission.Polaris?.explanation || "Spike in churn rate risk"}</span>
+                    <span className="text-white truncate block">{selectedMission.Drishti?.explanation || "Spike in churn rate risk"}</span>
                   </div>
                 </div>
               </div>
@@ -1652,7 +1652,7 @@ export const MissionControl: React.FC = () => {
               <div className="p-3 bg-[#1b2532] rounded-lg border border-gray-800 space-y-1">
                 <p className="text-gray-400 uppercase font-bold text-[8px]">Personalized Marketing Copy Preview</p>
                 <div className="bg-[#005d4b] text-white rounded-lg p-2.5 text-[9px] leading-relaxed whitespace-pre-line">
-                  {selectedMission.copy || selectedMission.Nova?.WhatsApp?.body || "Hello, we have exclusive access for you. Claim your slot inside."}
+                  {selectedMission.copy || selectedMission.Rachna?.WhatsApp?.body || "Hello, we have exclusive access for you. Claim your slot inside."}
                 </div>
               </div>
 
@@ -1660,12 +1660,12 @@ export const MissionControl: React.FC = () => {
               <div className="grid grid-cols-2 gap-4">
                 <div className="p-3 bg-gray-950/20 border border-gray-850 rounded-lg space-y-1">
                   <span className="text-gray-500 block uppercase text-[8px] font-bold">Predicted Returns</span>
-                  <p>Revenue: <span className="text-white font-bold font-space text-[11px]">₹{(selectedMission.Vega?.predictedRevenue || selectedMission.predictedRevenue || 12500).toLocaleString()}</span></p>
-                  <p>ROI Factor: <span className="text-orbit-purple font-bold">{selectedMission.Vega?.predictedRoi || selectedMission.predictedRoi || 4.8}x</span></p>
+                  <p>Revenue: <span className="text-white font-bold font-space text-[11px]">₹{(selectedMission.Khoj?.predictedRevenue || selectedMission.predictedRevenue || 12500).toLocaleString()}</span></p>
+                  <p>ROI Factor: <span className="text-Manthan-purple font-bold">{selectedMission.Khoj?.predictedRoi || selectedMission.predictedRoi || 4.8}x</span></p>
                 </div>
                 <div className="p-3 bg-gray-950/20 border border-gray-850 rounded-lg space-y-1">
                   <span className="text-gray-500 block uppercase text-[8px] font-bold">Actual Conversions</span>
-                  <p>Revenue Achieved: <span className="text-orbit-success font-bold font-space text-[11px]">₹{(selectedMission.revenueGenerated || 0).toLocaleString()}</span></p>
+                  <p>Revenue Achieved: <span className="text-Manthan-success font-bold font-space text-[11px]">₹{(selectedMission.revenueGenerated || 0).toLocaleString()}</span></p>
                   <p>Purchasers: <span className="text-white font-bold">{selectedMission.purchaseCount || 0} nodes</span></p>
                 </div>
               </div>
@@ -1675,14 +1675,14 @@ export const MissionControl: React.FC = () => {
                 <p className="text-gray-500 uppercase font-bold text-[8px]">AI Boardroom Collaboration Matrix</p>
                 <div className="space-y-1.5">
                   {[
-                    { name: "Polaris", role: "Audience Intelligence", expl: selectedMission.Polaris?.explanation || "Cohort demographic vector mapping" },
-                    { name: "Luna", role: "Opportunity Recovery", expl: selectedMission.Luna?.explanation || "Revenue leakage audit checks" },
-                    { name: "Vega", role: "ROI Forecasting", expl: selectedMission.Vega?.explanation || "Conversion optimization regressions" },
-                    { name: "Nova", role: "Campaign Generation", expl: selectedMission.Nova?.WhatsApp?.body || "Personalized template creative writes" },
-                    { name: "Atlas", role: "Operations Dispatch", expl: selectedMission.Atlas?.explanation || "Message dispatch & gateway schedules" }
+                    { name: "Drishti", role: "Audience Intelligence", expl: selectedMission.Drishti?.explanation || "Cohort demographic vector mapping" },
+                    { name: "Pragya", role: "Opportunity Recovery", expl: selectedMission.Pragya?.explanation || "Revenue leakage audit checks" },
+                    { name: "Khoj", role: "ROI Forecasting", expl: selectedMission.Khoj?.explanation || "Conversion optimization regressions" },
+                    { name: "Rachna", role: "Campaign Generation", expl: selectedMission.Rachna?.WhatsApp?.body || "Personalized template creative writes" },
+                    { name: "Saarthi", role: "Operations Dispatch", expl: selectedMission.Saarthi?.explanation || "Message dispatch & gateway schedules" }
                   ].map(agent => (
                     <div key={agent.name} className="flex gap-2 items-start border-b border-gray-900/30 pb-1.5 last:border-0 last:pb-0">
-                      <span className="w-1.5 h-1.5 rounded-full bg-orbit-blue mt-1 shrink-0" />
+                      <span className="w-1.5 h-1.5 rounded-full bg-Manthan-blue mt-1 shrink-0" />
                       <div>
                         <p className="text-white font-bold">{agent.name} ({agent.role})</p>
                         <p className="text-[7.5px] text-gray-500 mt-0.5">{agent.expl}</p>

@@ -14,7 +14,7 @@ import { PageHeaderHUD } from "../components/PageHeaderHUD";
 ───────────────────────────────────────────────────────────── */
 interface ReasoningStep {
   id: string;
-  agent: "Polaris" | "Nova" | "Vega" | "Atlas" | "Luna" | "System";
+  agent: "Drishti" | "Rachna" | "Khoj" | "Saarthi" | "Pragya" | "System";
   icon: React.FC<any>;
   label: string;
   detail: string;
@@ -27,11 +27,11 @@ interface ReasoningStep {
    CONSTANTS
 ───────────────────────────────────────────────────────────── */
 const AGENT_META = {
-  Polaris: { color: "#3B82F6", border: "border-blue-500/30",   bg: "bg-blue-500/8",   dot: "bg-blue-500",   glow: "rgba(59,130,246,0.25)" },
-  Nova:    { color: "#EC4899", border: "border-pink-400/30",   bg: "bg-pink-400/8",   dot: "bg-pink-400",   glow: "rgba(236,72,153,0.25)" },
-  Vega:    { color: "#8B5CF6", border: "border-violet-500/30", bg: "bg-violet-500/8", dot: "bg-violet-400",  glow: "rgba(139,92,246,0.25)" },
-  Atlas:   { color: "#22C55E", border: "border-green-500/30",  bg: "bg-green-500/8",  dot: "bg-green-500",  glow: "rgba(34,197,94,0.25)"  },
-  Luna:    { color: "#F59E0B", border: "border-amber-500/30",  bg: "bg-amber-500/8",  dot: "bg-amber-500",  glow: "rgba(245,158,11,0.25)"  },
+  Drishti: { color: "#3B82F6", border: "border-blue-500/30",   bg: "bg-blue-500/8",   dot: "bg-blue-500",   glow: "rgba(59,130,246,0.25)" },
+  Rachna:    { color: "#EC4899", border: "border-pink-400/30",   bg: "bg-pink-400/8",   dot: "bg-pink-400",   glow: "rgba(236,72,153,0.25)" },
+  Khoj:    { color: "#8B5CF6", border: "border-violet-500/30", bg: "bg-violet-500/8", dot: "bg-violet-400",  glow: "rgba(139,92,246,0.25)" },
+  Saarthi:   { color: "#22C55E", border: "border-green-500/30",  bg: "bg-green-500/8",  dot: "bg-green-500",  glow: "rgba(34,197,94,0.25)"  },
+  Pragya:    { color: "#F59E0B", border: "border-amber-500/30",  bg: "bg-amber-500/8",  dot: "bg-amber-500",  glow: "rgba(245,158,11,0.25)"  },
   System:  { color: "#6B7280", border: "border-gray-700",      bg: "bg-gray-800/50",  dot: "bg-gray-500",   glow: "rgba(107,114,128,0.15)" },
 };
 
@@ -57,42 +57,42 @@ const CHANNEL_ICONS: Record<string, string> = {
 function buildReasoningSteps(goal: string): ReasoningStep[] {
   return [
     {
-      id: "s1", agent: "Polaris", icon: Cpu,
+      id: "s1", agent: "Drishti", icon: Cpu,
       label: "Analyze customers",
       detail: `Scanning customer graph database and tracking parameters matching: "${goal}"`,
       status: "pending", ts: "",
       metric: undefined,
     },
     {
-      id: "s2", agent: "Polaris", icon: Target,
+      id: "s2", agent: "Drishti", icon: Target,
       label: "Find audience",
       detail: "Filtering cohort DNA, identifying VIP flags, and evaluating churn risk metrics",
       status: "pending", ts: "",
       metric: undefined,
     },
     {
-      id: "s3", agent: "Luna", icon: Activity,
+      id: "s3", agent: "Pragya", icon: Activity,
       label: "Recover leaks",
-      detail: "Luna auditing abandoned leads, inactive profiles, and estimating recoverable revenue leaks",
+      detail: "Pragya auditing abandoned leads, inactive profiles, and estimating recoverable revenue leaks",
       status: "pending", ts: "",
       metric: undefined,
     },
     {
-      id: "s4", agent: "Vega", icon: BarChart2,
+      id: "s4", agent: "Khoj", icon: BarChart2,
       label: "Predict revenue",
       detail: "Running regression modeling and computing conversion yield ROI curves",
       status: "pending", ts: "",
       metric: undefined,
     },
     {
-      id: "s5", agent: "Nova", icon: Sparkles,
+      id: "s5", agent: "Rachna", icon: Sparkles,
       label: "Generate campaign",
       detail: "Personalizing marketing templates and copywriting across multi-channel segments",
       status: "pending", ts: "",
       metric: undefined,
     },
     {
-      id: "s6", agent: "Atlas", icon: Radio,
+      id: "s6", agent: "Saarthi", icon: Radio,
       label: "Select channel",
       detail: "Testing dispatcher server nodes and checking delivery pathways latency",
       status: "pending", ts: "",
@@ -122,7 +122,7 @@ export const CommandCenter: React.FC = () => {
   const isLight = theme === "executive";
 
   /* selected agent profile card state */
-  const [_selectedAgent, setSelectedAgent] = useState<"Polaris" | "Vega" | "Nova" | "Atlas" | "Luna" | null>(null);
+  const [_selectedAgent, setSelectedAgent] = useState<"Drishti" | "Khoj" | "Rachna" | "Saarthi" | "Pragya" | null>(null);
 
   /* mobile sidebar drawers state */
   const [showQuickMissions, setShowQuickMissions] = useState(false);
@@ -209,7 +209,7 @@ export const CommandCenter: React.FC = () => {
     setCurrentStep(-1);
 
     /* sequential agent online animation */
-    const agents = ["Polaris", "Nova", "Vega", "Atlas", "Luna"];
+    const agents = ["Drishti", "Rachna", "Khoj", "Saarthi", "Pragya"];
     agents.forEach((a, i) =>
       setTimeout(() => setAgentsOnline(prev => [...prev, a]), 400 + i * 550)
     );
@@ -261,9 +261,9 @@ export const CommandCenter: React.FC = () => {
   return (
     <div className={`flex-1 flex overflow-hidden relative ${isLight ? "bg-[#F8FAFC]" : "bg-[#050816]"}`}>
       {/* ── AMBIENT CYBER GRIDS & GLOWS ── */}
-      <div className="pointer-events-none absolute inset-0 space-grid opacity-30 z-0 animate-orbit-pulse" />
-      {!isLight && <div className="pointer-events-none absolute inset-0 bg-orbit-glow-blue opacity-25 z-0" />}
-      <div className="pointer-events-none absolute top-10 right-10 w-96 h-96 rounded-full bg-orbit-glow-purple opacity-20 z-0" />
+      <div className="pointer-events-none absolute inset-0 space-grid opacity-30 z-0 animate-Manthan-pulse" />
+      {!isLight && <div className="pointer-events-none absolute inset-0 bg-Manthan-glow-blue opacity-25 z-0" />}
+      <div className="pointer-events-none absolute top-10 right-10 w-96 h-96 rounded-full bg-Manthan-glow-purple opacity-20 z-0" />
 
       {/* ════════════════════════════════════════
           LEFT SIDEBAR — Suggested Commands
@@ -320,7 +320,7 @@ export const CommandCenter: React.FC = () => {
                 <p className={`font-mono text-[10px] truncate ${isLight ? "text-gray-700 font-medium" : "text-gray-300"}`}>{c.name}</p>
                 <div className="flex items-center justify-between">
                   <span className={`font-mono text-[8px] ${isLight ? "text-gray-400" : "text-gray-500"}`}>{c.channel}</span>
-                  <span className={`font-mono text-[8px] font-bold ${c.status === "Completed" ? "text-orbit-success animate-pulse" : "text-orbit-blue"}`}>
+                  <span className={`font-mono text-[8px] font-bold ${c.status === "Completed" ? "text-Manthan-success animate-pulse" : "text-Manthan-blue"}`}>
                     {c.status}
                   </span>
                 </div>
@@ -335,9 +335,9 @@ export const CommandCenter: React.FC = () => {
         {/* System status */}
         <div className={`p-4 border-t bg-gray-950/10 ${isLight ? "border-gray-100 bg-gray-550/10" : "border-gray-800/60 bg-gray-950/20"}`}>
           <div className="flex flex-wrap gap-x-4 gap-y-1.5">
-            {["Polaris", "Nova", "Vega", "Atlas", "Luna"].map(a => (
+            {["Drishti", "Rachna", "Khoj", "Saarthi", "Pragya"].map(a => (
               <div key={a} className="flex items-center gap-1.5 min-w-[70px]">
-                <span className="w-1.5 h-1.5 rounded-full bg-orbit-success animate-pulse" />
+                <span className="w-1.5 h-1.5 rounded-full bg-Manthan-success animate-pulse" />
                 <span className={`font-mono text-[9px] ${isLight ? "text-gray-650" : "text-gray-400"}`}>{a}</span>
               </div>
             ))}
@@ -354,7 +354,7 @@ export const CommandCenter: React.FC = () => {
         <div className={`shrink-0 px-6 pt-4 backdrop-blur-md ${isLight ? "bg-white/50" : "bg-gray-950/30"}`}>
           <PageHeaderHUD
             title="Command Center"
-            subtitle="orbit.ai BRAIN · AUTONOMOUS OPERATIONS NODE"
+            subtitle="Manthan.ai BRAIN · AUTONOMOUS OPERATIONS NODE"
             onSelectAgent={setSelectedAgent}
             actions={
               <div className="flex items-center gap-4">
@@ -364,7 +364,7 @@ export const CommandCenter: React.FC = () => {
                     onClick={() => { setShowQuickMissions(!showQuickMissions); setShowAgentFeed(false); }}
                     className={`px-2 py-1 rounded border font-mono text-[8.5px] cursor-pointer transition-colors ${
                       showQuickMissions 
-                        ? "bg-orbit-blue/20 text-orbit-blue border-orbit-blue/30" 
+                        ? "bg-Manthan-blue/20 text-Manthan-blue border-Manthan-blue/30" 
                         : isLight ? "border-gray-200 bg-white text-gray-600 hover:border-gray-300" : "border-gray-800 bg-gray-950/40 text-gray-450 hover:border-gray-750"
                     }`}
                   >
@@ -374,7 +374,7 @@ export const CommandCenter: React.FC = () => {
                     onClick={() => { setShowAgentFeed(!showAgentFeed); setShowQuickMissions(false); }}
                     className={`lg:hidden px-2 py-1 rounded border font-mono text-[8.5px] cursor-pointer transition-colors ${
                       showAgentFeed 
-                        ? "bg-orbit-purple/20 text-orbit-purple border-orbit-purple/30" 
+                        ? "bg-Manthan-purple/20 text-Manthan-purple border-Manthan-purple/30" 
                         : isLight ? "border-gray-200 bg-white text-gray-600 hover:border-gray-300" : "border-gray-800 bg-gray-950/40 text-gray-450 hover:border-gray-750"
                     }`}
                   >
@@ -387,20 +387,20 @@ export const CommandCenter: React.FC = () => {
                   isLight ? "text-gray-500 border-gray-200 bg-gray-50" : "text-gray-400 border-gray-800/80 bg-gray-950/20"
                 }`}>
                   <div className="flex items-center gap-1">
-                    <span className={`w-1.5 h-1.5 rounded-full animate-pulse ${config.geminiKey ? "bg-orbit-success" : "bg-red-500"}`} />
+                    <span className={`w-1.5 h-1.5 rounded-full animate-pulse ${config.geminiKey ? "bg-Manthan-success" : "bg-red-500"}`} />
                     <span>COGNITIVE NODE: {config.geminiKey ? "ONLINE" : "OFFLINE"}</span>
                   </div>
                   <span className={isLight ? "text-gray-300" : "text-gray-850"}>|</span>
                   <div className="flex items-center gap-1">
-                    <span className="w-1.5 h-1.5 rounded-full bg-orbit-success animate-pulse" />
+                    <span className="w-1.5 h-1.5 rounded-full bg-Manthan-success animate-pulse" />
                     <span>CORE SYNC: NOMINAL</span>
                   </div>
                 </div>
 
                 {/* Live mission pill */}
                 {mission.isActive && (
-                  <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-orbit-blue/30 bg-orbit-blue/10 font-mono text-[10px] text-orbit-blue">
-                    <span className="w-1.5 h-1.5 rounded-full bg-orbit-blue animate-ping" />
+                  <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-Manthan-blue/30 bg-Manthan-blue/10 font-mono text-[10px] text-Manthan-blue">
+                    <span className="w-1.5 h-1.5 rounded-full bg-Manthan-blue animate-ping" />
                     MISSION ACTIVE
                   </div>
                 )}
@@ -420,21 +420,21 @@ export const CommandCenter: React.FC = () => {
 
           {/* ── IDLE STATE: big hero prompt ── */}
           {!missionStarted && (
-            <div className="flex flex-col items-center justify-center min-h-[360px] text-center gap-8 animate-orbit-pulse">
+            <div className="flex flex-col items-center justify-center min-h-[360px] text-center gap-8 animate-Manthan-pulse">
               <div className="relative">
-                <div className={`w-20 h-20 rounded-2xl bg-gradient-to-tr from-orbit-blue to-orbit-purple flex items-center justify-center border ${
+                <div className={`w-20 h-20 rounded-2xl bg-gradient-to-tr from-Manthan-blue to-Manthan-purple flex items-center justify-center border ${
                   isLight ? "shadow-[0_8px_30px_rgba(59,130,246,0.15)] border-blue-200" : "shadow-[0_0_40px_rgba(59,130,246,0.3)] border-white/10"
                 }`}>
                   <Cpu size={32} className="text-white animate-pulse" />
                 </div>
-                <div className={`absolute -inset-3 rounded-3xl border animate-ping opacity-60 ${isLight ? "border-blue-300/30" : "border-orbit-blue/20"}`} />
+                <div className={`absolute -inset-3 rounded-3xl border animate-ping opacity-60 ${isLight ? "border-blue-300/30" : "border-Manthan-blue/20"}`} />
               </div>
               <div className="space-y-2">
                 <h2 className={`font-space text-2xl font-bold tracking-tight ${isLight ? "text-slate-900" : "text-white"}`}>
                   Initiate Autonomous Mission Directive
                 </h2>
                 <p className={`font-mono text-[11px] max-w-sm leading-relaxed mx-auto ${isLight ? "text-slate-500" : "text-gray-500"}`}>
-                  Submit a critical business objective. orbit.ai's neural agents will formulate cohorts, project conversions, write creatives, and launch.
+                  Submit a critical business objective. Manthan.ai's neural agents will formulate cohorts, project conversions, write creatives, and launch.
                 </p>
               </div>
               
@@ -516,7 +516,7 @@ export const CommandCenter: React.FC = () => {
                 </div>
  
                 <div className="space-y-2">
-                  {["Polaris", "Nova", "Vega", "Atlas", "Luna"].map((agent) => {
+                  {["Drishti", "Rachna", "Khoj", "Saarthi", "Pragya"].map((agent) => {
                     const isOnline = agentsOnline.includes(agent);
                     return (
                       <div key={agent} className="flex items-center gap-2 font-mono h-5">
@@ -560,15 +560,15 @@ export const CommandCenter: React.FC = () => {
             <div className={`rounded-2xl border p-5 space-y-1 relative overflow-hidden backdrop-blur-md ${
               isLight ? "border-gray-200 bg-white shadow-sm" : "border-gray-800/80 bg-gray-900/40"
             }`}>
-              {!isLight && <div className="absolute top-0 right-0 w-32 h-32 bg-orbit-glow-purple pointer-events-none opacity-10" />}
+              {!isLight && <div className="absolute top-0 right-0 w-32 h-32 bg-Manthan-glow-purple pointer-events-none opacity-10" />}
               
               <div className={`flex items-center gap-2 border-b pb-3 mb-4 ${isLight ? "border-gray-100" : "border-gray-800"}`}>
-                <Cpu size={13} className="text-orbit-purple animate-pulse" />
+                <Cpu size={13} className="text-Manthan-purple animate-pulse" />
                 <span className={`font-mono text-[10px] font-bold uppercase tracking-widest ${isLight ? "text-gray-700" : "text-gray-300"}`}>
                   AI Reasoning Timeline
                 </span>
                 {mission.step !== "idle" && mission.step !== "ready" && mission.step !== "dispatched" && (
-                  <span className="ml-auto font-mono text-[9px] text-orbit-blue flex items-center gap-1.5 animate-pulse">
+                  <span className="ml-auto font-mono text-[9px] text-Manthan-blue flex items-center gap-1.5 animate-pulse">
                     <Loader2 size={10} className="animate-spin" /> Reasoning Active
                   </span>
                 )}
@@ -674,20 +674,20 @@ export const CommandCenter: React.FC = () => {
           {/* ── POST-LAUNCH CONFIRMATION ── */}
           {launchFired && (
             <div className={`rounded-2xl border p-6 text-center space-y-3 ${
-              isLight ? "border-emerald-200 bg-emerald-50/15" : "border-orbit-success/30 bg-orbit-success/5"
+              isLight ? "border-emerald-200 bg-emerald-50/15" : "border-Manthan-success/30 bg-Manthan-success/5"
             }`}
               style={isLight ? undefined : { boxShadow: "0 0 40px rgba(34,197,94,0.12)" }}>
               <div className="flex items-center justify-center gap-3">
-                <CheckCircle2 size={24} className="text-orbit-success animate-bounce" />
+                <CheckCircle2 size={24} className="text-Manthan-success animate-bounce" />
                 <span className={`font-space text-lg font-bold tracking-tight ${isLight ? "text-gray-900" : "text-white"}`}>Mission Dispatched</span>
               </div>
               <p className={`font-mono text-[10px] ${isLight ? "text-gray-600" : "text-gray-400"}`}>
-                Atlas is routing {mission.audienceCount} targets via <span className={`font-bold ${isLight ? "text-gray-950" : "text-white"}`}>{mission.selectedChannel}</span>.
+                Saarthi is routing {mission.audienceCount} targets via <span className={`font-bold ${isLight ? "text-gray-950" : "text-white"}`}>{mission.selectedChannel}</span>.
                 Track progress in Mission Control.
               </p>
               <div className="flex justify-center gap-3">
-                <div className="flex items-center gap-1.5 font-mono text-[9px] text-orbit-success bg-orbit-success/10 px-3 py-1 rounded-full border border-orbit-success/20 animate-pulse">
-                  <span className="w-1.5 h-1.5 rounded-full bg-orbit-success animate-ping" />
+                <div className="flex items-center gap-1.5 font-mono text-[9px] text-Manthan-success bg-Manthan-success/10 px-3 py-1 rounded-full border border-Manthan-success/20 animate-pulse">
+                  <span className="w-1.5 h-1.5 rounded-full bg-Manthan-success animate-ping" />
                   Campaign Running
                 </div>
               </div>
@@ -703,8 +703,8 @@ export const CommandCenter: React.FC = () => {
           <div
             className={`flex items-end gap-3 rounded-2xl border p-3.5 transition-all duration-200 ${
               isLight 
-                ? "border-gray-200 bg-white focus-within:border-orbit-blue/50 focus-within:shadow-[0_0_20px_rgba(37,99,235,0.08)]" 
-                : "border-[rgba(255,255,255,0.12)] bg-[#0F172A]/85 focus-within:border-orbit-blue/50 focus-within:shadow-[0_0_20px_rgba(59,130,246,0.15)]"
+                ? "border-gray-200 bg-white focus-within:border-Manthan-blue/50 focus-within:shadow-[0_0_20px_rgba(37,99,235,0.08)]" 
+                : "border-[rgba(255,255,255,0.12)] bg-[#0F172A]/85 focus-within:border-Manthan-blue/50 focus-within:shadow-[0_0_20px_rgba(59,130,246,0.15)]"
             }`}
           >
             {isListening ? (
@@ -722,7 +722,7 @@ export const CommandCenter: React.FC = () => {
                   ))}
                 </div>
                 <span className="font-mono text-xs text-blue-500 tracking-wider animate-pulse uppercase">
-                  orbit.ai Voice Input Active · Listening for directive...
+                  Manthan.ai Voice Input Active · Listening for directive...
                 </span>
               </div>
             ) : (
@@ -756,7 +756,7 @@ export const CommandCenter: React.FC = () => {
                 disabled={!inputVal.trim()}
                 className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-mono text-[11px] font-bold uppercase tracking-wider transition-all cursor-pointer ${
                   inputVal.trim()
-                    ? "bg-gradient-to-r from-orbit-blue to-orbit-purple text-white shadow-[0_0_20px_rgba(59,130,246,0.4)] hover:shadow-[0_0_20px_rgba(139,92,246,0.5)] hover:opacity-90 active:scale-95"
+                    ? "bg-gradient-to-r from-Manthan-blue to-Manthan-purple text-white shadow-[0_0_20px_rgba(59,130,246,0.4)] hover:shadow-[0_0_20px_rgba(139,92,246,0.5)] hover:opacity-90 active:scale-95"
                     : isLight ? "bg-gray-100 text-gray-400 cursor-not-allowed border border-gray-200" : "bg-[#162032] text-gray-500 cursor-not-allowed border border-[rgba(255,255,255,0.04)]"
                 }`}
               >
@@ -781,7 +781,7 @@ export const CommandCenter: React.FC = () => {
           isLight ? "border-gray-100 bg-gray-50/50" : "border-gray-800/60 bg-gray-950/20"
         }`}>
           <div className="flex items-center gap-2">
-            <Radio size={12} className="text-orbit-success animate-pulse" />
+            <Radio size={12} className="text-Manthan-success animate-pulse" />
             <span className={`font-mono text-[9px] font-bold uppercase tracking-widest ${isLight ? "text-gray-700" : "text-white"}`}>Live Agent Feed</span>
           </div>
           <button onClick={() => setShowAgentFeed(false)} className={`lg:hidden cursor-pointer ${isLight ? "text-gray-400 hover:text-gray-900" : "text-gray-550 hover:text-white"}`}>✕</button>
@@ -820,9 +820,9 @@ export const CommandCenter: React.FC = () => {
                 <p className={`font-mono text-[9px] leading-relaxed ${isLight ? "text-gray-700" : "text-gray-300"}`}>{log.message}</p>
                 <div className="mt-1.5">
                   <span className={`font-mono text-[7px] uppercase px-1.5 py-0.5 rounded ${
-                    log.type === "chat"    ? "bg-orbit-blue/10 text-orbit-blue" :
-                    log.type === "action"  ? "bg-orbit-purple/10 text-orbit-purple" :
-                    log.type === "result"  ? "bg-orbit-success/10 text-orbit-success" :
+                    log.type === "chat"    ? "bg-Manthan-blue/10 text-Manthan-blue" :
+                    log.type === "action"  ? "bg-Manthan-purple/10 text-Manthan-purple" :
+                    log.type === "result"  ? "bg-Manthan-success/10 text-Manthan-success" :
                     isLight ? "bg-gray-105 text-gray-500" : "bg-gray-800 text-gray-500"
                   }`}>
                     {log.type}
@@ -838,7 +838,7 @@ export const CommandCenter: React.FC = () => {
         <div className={`shrink-0 p-3 border-t grid grid-cols-2 gap-2 ${
           isLight ? "border-gray-200 bg-gray-50" : "border-gray-800/60 bg-gray-950/40"
         }`}>
-          {(["Polaris", "Nova", "Vega", "Atlas", "Luna"] as const).map(agent => {
+          {(["Drishti", "Rachna", "Khoj", "Saarthi", "Pragya"] as const).map(agent => {
             const meta = AGENT_META[agent];
             const lastLog = agentLogs.find(l => l.agent === agent);
             const cpuLoad = Math.round(15 + (agent.length * 7) + (Math.sin(Date.now() / 12000) * 10));
@@ -908,7 +908,7 @@ const MissionBanner: React.FC<{
       className={`rounded-2xl border p-6 relative overflow-hidden transition-all duration-300 ${
         isLight 
           ? "border-gray-200 bg-gradient-to-r from-blue-50/50 via-white to-purple-50/50 shadow-sm"
-          : "border-orbit-blue/40 bg-gradient-to-r from-orbit-blue/15 via-[#0F172A] to-orbit-purple/15"
+          : "border-Manthan-blue/40 bg-gradient-to-r from-Manthan-blue/15 via-[#0F172A] to-Manthan-purple/15"
       }`}
       style={isLight ? undefined : { boxShadow: "0 0 45px rgba(59,130,246,0.22)" }}
     >
@@ -922,9 +922,9 @@ const MissionBanner: React.FC<{
         {/* Header row */}
         <div className="flex items-start justify-between gap-4">
           <div className="flex items-center gap-3">
-            <div className="w-2.5 h-2.5 rounded-full bg-orbit-blue animate-ping" />
+            <div className="w-2.5 h-2.5 rounded-full bg-Manthan-blue animate-ping" />
             <div>
-              <span className="font-mono text-[10px] font-bold text-orbit-blue uppercase tracking-[0.2em]">
+              <span className="font-mono text-[10px] font-bold text-Manthan-blue uppercase tracking-[0.2em]">
                 {heading}
               </span>
               <p className={`font-space text-base font-bold mt-0.5 leading-snug ${isLight ? "text-gray-900" : "text-white"}`}>
@@ -947,7 +947,7 @@ const MissionBanner: React.FC<{
         {/* Lead agents row */}
         <div className="flex flex-wrap items-center gap-3">
           <span className={`font-mono text-[9px] uppercase tracking-wider ${isLight ? "text-gray-400" : "text-gray-500"}`}>Lead Agents</span>
-          {(["Polaris", "Vega", "Nova", "Atlas", "Luna"] as const).map(a => {
+          {(["Drishti", "Khoj", "Rachna", "Saarthi", "Pragya"] as const).map(a => {
             const meta = AGENT_META[a];
             return (
               <div key={a} className="flex items-center gap-1.5">
@@ -963,14 +963,14 @@ const MissionBanner: React.FC<{
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               {mission.step !== "ready" && mission.step !== "dispatched" && (
-                <Loader2 size={11} className="text-orbit-blue animate-spin" />
+                <Loader2 size={11} className="text-Manthan-blue animate-spin" />
               )}
               {(mission.step === "ready" || mission.step === "dispatched") && (
-                <CheckCircle2 size={11} className="text-orbit-success" />
+                <CheckCircle2 size={11} className="text-Manthan-success" />
               )}
               <span className={`font-mono text-[10px] ${isLight ? "text-gray-700" : "text-gray-300"}`}>{stepLabels[mission.step]}</span>
             </div>
-            <span className="font-mono text-[10px] text-orbit-blue font-bold">{pct}%</span>
+            <span className="font-mono text-[10px] text-Manthan-blue font-bold">{pct}%</span>
           </div>
           <div className={`w-full h-1.5 rounded-full overflow-hidden ${isLight ? "bg-gray-100" : "bg-gray-800"}`}>
             <div
@@ -990,16 +990,16 @@ const MissionBanner: React.FC<{
         {mission.audienceCount > 0 && (
           <div className={`flex items-center gap-4 pt-1 border-t ${isLight ? "border-gray-100" : "border-gray-800/60"}`}>
             <div className="flex items-center gap-1.5">
-              <Users size={11} className="text-orbit-blue animate-pulse" />
+              <Users size={11} className="text-Manthan-blue animate-pulse" />
               <span className={`font-mono text-[10px] ${isLight ? "text-gray-600" : "text-gray-300"}`}>
                 <span className={`font-bold ${isLight ? "text-gray-950" : "text-white"}`}>{mission.audienceCount}</span> targets
               </span>
             </div>
             {mission.predictedRevenue > 0 && (
               <div className="flex items-center gap-1.5">
-                <TrendingUp size={11} className="text-orbit-success animate-pulse" />
+                <TrendingUp size={11} className="text-Manthan-success animate-pulse" />
                 <span className={`font-mono text-[10px] ${isLight ? "text-gray-650" : "text-gray-300"}`}>
-                  <span className="text-orbit-success font-bold">₹{mission.predictedRevenue.toLocaleString()}</span> forecast
+                  <span className="text-Manthan-success font-bold">₹{mission.predictedRevenue.toLocaleString()}</span> forecast
                 </span>
               </div>
             )}
@@ -1030,14 +1030,14 @@ const MissionBanner: React.FC<{
 ───────────────────────────────────────────────────────────── */
 const MissionOutcomeCards: React.FC<{
   mission: ReturnType<typeof useOrbit>["mission"];
-  onSelectAgent: (agent: "Polaris" | "Vega" | "Nova" | "Atlas" | "Luna") => void;
+  onSelectAgent: (agent: "Drishti" | "Khoj" | "Rachna" | "Saarthi" | "Pragya") => void;
 }> = ({ mission, onSelectAgent }) => {
   const { theme } = useOrbit();
   const isLight = theme === "executive";
 
   const cards = [
     {
-      agent: "Polaris" as const,
+      agent: "Drishti" as const,
       icon: Users,
       title: "Audience Identified",
       value: `${mission.audienceCount} customers`,
@@ -1046,7 +1046,7 @@ const MissionOutcomeCards: React.FC<{
       color: "#3B82F6",
     },
     {
-      agent: "Vega" as const,
+      agent: "Khoj" as const,
       icon: TrendingUp,
       title: "Revenue Forecast",
       value: `₹${mission.predictedRevenue.toLocaleString()}`,
@@ -1055,7 +1055,7 @@ const MissionOutcomeCards: React.FC<{
       color: "#8B5CF6",
     },
     {
-      agent: "Nova" as const,
+      agent: "Rachna" as const,
       icon: Sparkles,
       title: "Campaign Generated",
       value: "4 channel variants",
@@ -1064,20 +1064,20 @@ const MissionOutcomeCards: React.FC<{
       color: "#EC4899",
     },
     {
-      agent: "Atlas" as const,
+      agent: "Saarthi" as const,
       icon: Radio,
       title: "Channel Selected",
       value: mission.selectedChannel,
-      detail: "Optimal delivery window computed. Atlas nodes verified.",
+      detail: "Optimal delivery window computed. Saarthi nodes verified.",
       action: `Launch via ${mission.selectedChannel} →`,
       color: "#22C55E",
     },
     {
-      agent: "Luna" as const,
+      agent: "Pragya" as const,
       icon: Activity,
       title: "Revenue Recovery",
       value: "₹12,000 potential",
-      detail: "Luna detected 17 abandoned leads and generated follow-up hooks.",
+      detail: "Pragya detected 17 abandoned leads and generated follow-up hooks.",
       action: "Review Opportunities →",
       color: "#F59E0B",
     },
@@ -1108,7 +1108,7 @@ const MissionOutcomeCards: React.FC<{
                   {card.agent}
                 </span>
               </div>
-              <span className="font-mono text-[8px] text-orbit-success border border-orbit-success/30 bg-orbit-success/5 px-1.5 py-0.5 rounded-full font-semibold">
+              <span className="font-mono text-[8px] text-Manthan-success border border-Manthan-success/30 bg-Manthan-success/5 px-1.5 py-0.5 rounded-full font-semibold">
                 COMPLETE
               </span>
             </div>
@@ -1156,7 +1156,7 @@ const LaunchSequence: React.FC<{
   return (
     <div
       className={`rounded-2xl border p-5 space-y-4 ${
-        isLight ? "border-emerald-200 bg-emerald-50/20 shadow-sm" : "border-orbit-success/30 bg-orbit-success/5"
+        isLight ? "border-emerald-200 bg-emerald-50/20 shadow-sm" : "border-Manthan-success/30 bg-Manthan-success/5"
       }`}
       style={{ 
         boxShadow: isLight ? undefined : "0 0 40px rgba(34,197,94,0.1)", 
@@ -1164,10 +1164,10 @@ const LaunchSequence: React.FC<{
       }}
     >
       <div className="flex items-center gap-3">
-        <Play size={16} className="text-orbit-success animate-pulse" />
+        <Play size={16} className="text-Manthan-success animate-pulse" />
         <div>
-          <p className="font-mono text-[10px] font-bold text-orbit-success uppercase tracking-widest">Launch Sequence Ready</p>
-          <p className={`font-mono text-[9px] mt-0.5 ${isLight ? "text-gray-500" : "text-gray-500"}`}>All neural components aligned. Atlas dispatch buffer cleared.</p>
+          <p className="font-mono text-[10px] font-bold text-Manthan-success uppercase tracking-widest">Launch Sequence Ready</p>
+          <p className={`font-mono text-[9px] mt-0.5 ${isLight ? "text-gray-500" : "text-gray-500"}`}>All neural components aligned. Saarthi dispatch buffer cleared.</p>
         </div>
       </div>
 
@@ -1182,7 +1182,7 @@ const LaunchSequence: React.FC<{
           <div key={i} className={`flex items-center gap-1.5 p-2 rounded-lg border ${
             isLight ? "bg-white border-gray-200" : "bg-gray-900/40 border-gray-800"
           }`}>
-            <CheckCircle2 size={11} className="text-orbit-success shrink-0" />
+            <CheckCircle2 size={11} className="text-Manthan-success shrink-0" />
             <span className={`font-mono text-[9px] ${isLight ? "text-gray-700" : "text-gray-300"}`}>{item.label}</span>
           </div>
         ))}
@@ -1205,7 +1205,7 @@ const LaunchSequence: React.FC<{
         </div>
         <ArrowRight size={14} className="text-gray-750 shrink-0" />
         <div className="text-center flex-1">
-          <p className="font-space text-lg font-bold text-orbit-success">₹{mission.predictedRevenue.toLocaleString()}</p>
+          <p className="font-space text-lg font-bold text-Manthan-success">₹{mission.predictedRevenue.toLocaleString()}</p>
           <p className="font-mono text-[8px] text-gray-500 uppercase tracking-wider">Forecast</p>
         </div>
       </div>
@@ -1216,7 +1216,7 @@ const LaunchSequence: React.FC<{
           <>
             <button
               onClick={handleArm}
-              className="flex-1 py-3 rounded-xl bg-gradient-to-r from-orbit-success to-emerald-400 text-white font-mono text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 hover:opacity-90 active:scale-95 transition-all cursor-pointer"
+              className="flex-1 py-3 rounded-xl bg-gradient-to-r from-Manthan-success to-emerald-400 text-white font-mono text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 hover:opacity-90 active:scale-95 transition-all cursor-pointer"
               style={{ boxShadow: "0 0 25px rgba(34,197,94,0.3)" }}
             >
               <Play size={14} />
@@ -1230,11 +1230,11 @@ const LaunchSequence: React.FC<{
             </button>
           </>
         ) : (
-          <div className="flex-1 py-3 rounded-xl border border-orbit-success/40 bg-orbit-success/10 flex items-center justify-center gap-3">
-            <span className="font-space text-2xl font-bold text-orbit-success tabular-nums animate-ping">
+          <div className="flex-1 py-3 rounded-xl border border-Manthan-success/40 bg-Manthan-success/10 flex items-center justify-center gap-3">
+            <span className="font-space text-2xl font-bold text-Manthan-success tabular-nums animate-ping">
               {countdown > 0 ? countdown : "🚀"}
             </span>
-            <span className="font-mono text-[10px] text-orbit-success uppercase tracking-wider animate-pulse">
+            <span className="font-mono text-[10px] text-Manthan-success uppercase tracking-wider animate-pulse">
               {countdown > 0 ? `DISPATCHING IN ${countdown}...` : "LAUNCHED"}
             </span>
           </div>

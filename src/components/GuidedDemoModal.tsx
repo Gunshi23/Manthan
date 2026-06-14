@@ -33,7 +33,7 @@ interface Agent {
 
 const AGENTS: Agent[] = [
   {
-    name: "POLARIS",
+    name: "Drishti",
     role: "Audience Intelligence",
     color: "#3B82F6",
     glow: "rgba(59, 130, 246, 0.3)",
@@ -51,7 +51,7 @@ const AGENTS: Agent[] = [
     ]
   },
   {
-    name: "LUNA",
+    name: "Pragya",
     role: "Opportunity Detection",
     color: "#F59E0B",
     glow: "rgba(245, 158, 11, 0.3)",
@@ -69,7 +69,7 @@ const AGENTS: Agent[] = [
     ]
   },
   {
-    name: "VEGA",
+    name: "Khoj",
     role: "Predictive Analytics",
     color: "#8B5CF6",
     glow: "rgba(139, 92, 246, 0.3)",
@@ -87,7 +87,7 @@ const AGENTS: Agent[] = [
     ]
   },
   {
-    name: "NOVA",
+    name: "Rachna",
     role: "Campaign Creator",
     color: "#EC4899",
     glow: "rgba(236, 72, 153, 0.3)",
@@ -105,7 +105,7 @@ const AGENTS: Agent[] = [
     ]
   },
   {
-    name: "ATLAS",
+    name: "Saarthi",
     role: "Operations Dispatch",
     color: "#22C55E",
     glow: "rgba(34, 197, 94, 0.3)",
@@ -316,8 +316,8 @@ export const GuidedDemoModal: React.FC<GuidedDemoModalProps> = ({ isOpen, onClos
     setLiveMessagesSent(12);
     setLiveActivity([
       "[SYSTEM] Autonomous campaign launched successfully.",
-      `[ATLAS] Dispatched initial wave (12/150 targets).`,
-      "[LUNA] Checking recoup triggers on WhatsApp...",
+      `[Saarthi] Dispatched initial wave (12/150 targets).`,
+      "[Pragya] Checking recoup triggers on WhatsApp...",
       `[SYSTEM] First conversion recorded: Order #1892 (₹${initialRevenue.toLocaleString()})`
     ]);
 
@@ -339,15 +339,15 @@ export const GuidedDemoModal: React.FC<GuidedDemoModalProps> = ({ isOpen, onClos
 
         setLiveActivity(act => [
           ...act,
-          `[ATLAS] Cohort conversion detected via ${channelName}.`,
+          `[Saarthi] Cohort conversion detected via ${channelName}.`,
           `[SYSTEM] Recouped ₹${orderVal.toLocaleString()} from ${randomName}.`
         ]);
       } else {
         const diagnostics = [
-          "[VEGA] Retuning send-time delay index.",
-          "[NOVA] Micro-optimizing content delivery headers.",
-          "[ATLAS] Checking delivery status indicators... 100% success rate.",
-          "[POLARIS] Re-evaluating fallback segments."
+          "[Khoj] Retuning send-time delay index.",
+          "[Rachna] Micro-optimizing content delivery headers.",
+          "[Saarthi] Checking delivery status indicators... 100% success rate.",
+          "[Drishti] Re-evaluating fallback segments."
         ];
         const randomDiag = diagnostics[Math.floor(Math.random() * diagnostics.length)];
         setLiveActivity(act => [...act, randomDiag]);
@@ -389,8 +389,8 @@ export const GuidedDemoModal: React.FC<GuidedDemoModalProps> = ({ isOpen, onClos
       {/* Floating particles background */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none select-none z-0">
         <div className="absolute inset-0 space-grid opacity-20" />
-        <div className="absolute top-1/4 left-1/4 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-orbit-glow-blue opacity-[0.08]" />
-        <div className="absolute bottom-1/4 right-1/4 translate-x-1/2 translate-y-1/2 w-[600px] h-[600px] rounded-full bg-orbit-glow-purple opacity-[0.08]" />
+        <div className="absolute top-1/4 left-1/4 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-Manthan-glow-blue opacity-[0.08]" />
+        <div className="absolute bottom-1/4 right-1/4 translate-x-1/2 translate-y-1/2 w-[600px] h-[600px] rounded-full bg-Manthan-glow-purple opacity-[0.08]" />
         
         {particles.map((p) => (
           <motion.div
@@ -414,13 +414,13 @@ export const GuidedDemoModal: React.FC<GuidedDemoModalProps> = ({ isOpen, onClos
       {/* TOP HUD BAR */}
       <header className="relative z-10 px-6 py-4 flex items-center justify-between border-b border-white/5 backdrop-blur-lg bg-[#050816]/75">
         <div className="flex items-center gap-3">
-          <div className="w-7 h-7 rounded-lg bg-gradient-to-tr from-orbit-blue to-orbit-purple flex items-center justify-center shadow-orbit-glow animate-pulse">
+          <div className="w-7 h-7 rounded-lg bg-gradient-to-tr from-Manthan-blue to-Manthan-purple flex items-center justify-center shadow-Manthan-glow animate-pulse">
             <span className="font-space font-bold text-white text-sm">O</span>
           </div>
           <div>
             <h2 className="font-space font-bold text-sm tracking-widest uppercase flex items-center gap-1.5">
-              ORBIT Guided Tour
-              <span className="text-[9px] font-mono px-1.5 py-0.5 rounded border border-orbit-blue/30 bg-orbit-blue/10 text-orbit-blue tracking-normal normal-case">Cinematic Demonstration</span>
+              Manthan Guided Tour
+              <span className="text-[9px] font-mono px-1.5 py-0.5 rounded border border-Manthan-blue/30 bg-Manthan-blue/10 text-Manthan-blue tracking-normal normal-case">Cinematic Demonstration</span>
             </h2>
             <span className="text-[10px] font-mono text-gray-500 uppercase">SYSTEM STATUS: INTERACTIVE SHOWCASE</span>
           </div>
@@ -437,9 +437,9 @@ export const GuidedDemoModal: React.FC<GuidedDemoModalProps> = ({ isOpen, onClos
                 }}
                 className={`px-3 py-1.5 rounded-lg font-mono text-[10px] font-bold uppercase transition-all ${
                   step === s 
-                    ? "bg-[#1E293B] text-white border border-white/10 shadow-orbit-glow-inset"
+                    ? "bg-[#1E293B] text-white border border-white/10 shadow-Manthan-glow-inset"
                     : currentStepIndex > idx
-                    ? "text-orbit-success opacity-85 hover:text-white"
+                    ? "text-Manthan-success opacity-85 hover:text-white"
                     : "text-gray-500 hover:text-white"
                 }`}
               >
@@ -474,7 +474,7 @@ export const GuidedDemoModal: React.FC<GuidedDemoModalProps> = ({ isOpen, onClos
       {/* AUTO-PLAY TIMELINE PROGRESS BAR */}
       <div className="relative z-10 w-full h-[2px] bg-white/5 overflow-hidden">
         <motion.div 
-          className="h-full bg-gradient-to-r from-orbit-blue via-orbit-purple to-orbit-success"
+          className="h-full bg-gradient-to-r from-Manthan-blue via-Manthan-purple to-Manthan-success"
           style={{ width: `${progress}%` }}
         />
       </div>
@@ -492,20 +492,20 @@ export const GuidedDemoModal: React.FC<GuidedDemoModalProps> = ({ isOpen, onClos
               transition={{ duration: 0.5 }}
               className="max-w-xl w-full text-center space-y-6"
             >
-              <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-orbit-blue/30 bg-orbit-blue/5 text-orbit-blue font-mono text-[9px] uppercase tracking-wider animate-pulse mx-auto">
+              <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-Manthan-blue/30 bg-Manthan-blue/5 text-Manthan-blue font-mono text-[9px] uppercase tracking-wider animate-pulse mx-auto">
                 <Sparkles size={11} />
                 Step 1: Input Objective
               </div>
 
               <h1 className="font-space text-3xl md:text-5xl font-bold tracking-tight text-white leading-tight">
-                What would you like ORBIT to achieve?
+                What would you like Manthan to achieve?
               </h1>
               
               <div className="relative rounded-2xl border border-white/10 bg-[#0F172A]/70 backdrop-blur-md p-5 text-left transition-all duration-300 shadow-2xl">
                 <div className="absolute top-2.5 right-3 text-[8px] font-mono text-gray-500 uppercase tracking-widest">command console</div>
                 <div className="font-mono text-sm leading-relaxed min-h-[50px] text-white flex items-center gap-1">
                   <span>{typedGoal}</span>
-                  {!isTypingComplete && <span className="w-1.5 h-4 bg-orbit-blue animate-pulse shrink-0" />}
+                  {!isTypingComplete && <span className="w-1.5 h-4 bg-Manthan-blue animate-pulse shrink-0" />}
                 </div>
               </div>
 
@@ -514,7 +514,7 @@ export const GuidedDemoModal: React.FC<GuidedDemoModalProps> = ({ isOpen, onClos
                   disabled
                   className={`w-full py-4 rounded-xl font-mono text-[11px] font-bold uppercase tracking-widest border transition-all flex items-center justify-center gap-2 ${
                     isTypingComplete 
-                      ? "bg-gradient-to-r from-orbit-blue to-orbit-purple border-white/10 text-white shadow-orbit-glow scale-[1.01]" 
+                      ? "bg-gradient-to-r from-Manthan-blue to-Manthan-purple border-white/10 text-white shadow-Manthan-glow scale-[1.01]" 
                       : "bg-[#0F172A]/50 border-white/5 text-gray-600"
                   }`}
                 >
@@ -610,7 +610,7 @@ export const GuidedDemoModal: React.FC<GuidedDemoModalProps> = ({ isOpen, onClos
                     </div>
                   ))}
                   {step === "agent-scan" && (
-                    <div className="flex items-center gap-1.5 text-orbit-blue animate-pulse mt-1">
+                    <div className="flex items-center gap-1.5 text-Manthan-blue animate-pulse mt-1">
                       <Loader2 size={8} className="animate-spin" />
                       <span>{AGENTS[activeScanAgent]?.logs[Math.min(Math.floor(scanProgress / 25), 3)] || "Completing loops..."}</span>
                     </div>
@@ -620,7 +620,7 @@ export const GuidedDemoModal: React.FC<GuidedDemoModalProps> = ({ isOpen, onClos
                 {/* Status bar */}
                 <div className="mt-3 pt-3 border-t border-white/5 flex items-center justify-between text-gray-500 text-[8px] uppercase">
                   <span>Output Channel</span>
-                  <span className="text-orbit-blue animate-pulse">Telemetry active</span>
+                  <span className="text-Manthan-blue animate-pulse">Telemetry active</span>
                 </div>
               </div>
             </motion.div>
@@ -637,19 +637,19 @@ export const GuidedDemoModal: React.FC<GuidedDemoModalProps> = ({ isOpen, onClos
               className="max-w-4xl w-full flex flex-col items-center space-y-6"
             >
               <div className="text-center space-y-1.5">
-                <span className="font-mono text-[8px] text-orbit-purple uppercase tracking-[0.2em] animate-pulse">● HOLOGRAPHIC ROUNDTABLE CORE</span>
+                <span className="font-mono text-[8px] text-Manthan-purple uppercase tracking-[0.2em] animate-pulse">● HOLOGRAPHIC ROUNDTABLE CORE</span>
                 <h2 className="font-space text-xl md:text-2xl font-bold uppercase tracking-tight text-white">Boardroom Alignment</h2>
                 <p className="font-mono text-[10px] text-gray-400">Watch the agents coordinate and synthesize the strategy.</p>
               </div>
 
               {/* Roundtable visualization */}
               <div className="relative w-64 h-64 flex items-center justify-center my-3">
-                <div className="absolute inset-0 rounded-full border border-white/5 animate-orbit-spin-slow" />
+                <div className="absolute inset-0 rounded-full border border-white/5 animate-Manthan-spin-slow" />
                 <div className="absolute inset-8 rounded-full border border-dashed border-white/10" />
                 
                 {/* Center Core */}
-                <div className="absolute w-20 h-20 rounded-full border border-orbit-purple/20 bg-orbit-purple/5 flex items-center justify-center animate-pulse shadow-orbit-glow-purple">
-                  <div className="w-12 h-12 rounded-full bg-orbit-purple/10 border border-orbit-purple/30 flex items-center justify-center">
+                <div className="absolute w-20 h-20 rounded-full border border-Manthan-purple/20 bg-Manthan-purple/5 flex items-center justify-center animate-pulse shadow-Manthan-glow-purple">
+                  <div className="w-12 h-12 rounded-full bg-Manthan-purple/10 border border-Manthan-purple/30 flex items-center justify-center">
                     <Cpu size={16} className="text-white animate-spin-slow" />
                   </div>
                 </div>
@@ -724,7 +724,7 @@ export const GuidedDemoModal: React.FC<GuidedDemoModalProps> = ({ isOpen, onClos
               {/* Left Side: Timelines Cards */}
               <div className="lg:col-span-2 space-y-4">
                 <div className="border-b border-white/5 pb-2.5">
-                  <span className="font-mono text-[8px] text-orbit-blue uppercase tracking-widest block">Simulation Outlook Ledger</span>
+                  <span className="font-mono text-[8px] text-Manthan-blue uppercase tracking-widest block">Simulation Outlook Ledger</span>
                   <h2 className="font-space text-lg font-bold uppercase tracking-tight text-white mt-0.5">Timeline Forecast Comparison</h2>
                 </div>
 
@@ -749,7 +749,7 @@ export const GuidedDemoModal: React.FC<GuidedDemoModalProps> = ({ isOpen, onClos
                             }}
                             className={`px-2 py-1 rounded text-[9px] font-mono border text-left transition-all cursor-pointer ${
                               selectedScenario === scenario.id
-                                ? "bg-orbit-blue/15 border-orbit-blue text-white shadow-orbit-glow-inset font-bold"
+                                ? "bg-Manthan-blue/15 border-Manthan-blue text-white shadow-Manthan-glow-inset font-bold"
                                 : "bg-black/20 border-white/5 text-gray-400 hover:text-white"
                             }`}
                           >
@@ -775,7 +775,7 @@ export const GuidedDemoModal: React.FC<GuidedDemoModalProps> = ({ isOpen, onClos
                             }}
                             className={`px-2 py-1 rounded text-[9px] font-mono border text-left transition-all cursor-pointer ${
                               selectedChannel === ch.id
-                                ? "bg-orbit-purple/15 border-orbit-purple text-white shadow-orbit-glow-inset font-bold"
+                                ? "bg-Manthan-purple/15 border-Manthan-purple text-white shadow-Manthan-glow-inset font-bold"
                                 : "bg-black/20 border-white/5 text-gray-400 hover:text-white"
                             }`}
                           >
@@ -801,7 +801,7 @@ export const GuidedDemoModal: React.FC<GuidedDemoModalProps> = ({ isOpen, onClos
                             }}
                             className={`px-2 py-1 rounded text-[9px] font-mono border text-left transition-all cursor-pointer ${
                               simulationDays === horizon.days
-                                ? "bg-orbit-success/15 border-orbit-success text-white shadow-orbit-glow-inset font-bold"
+                                ? "bg-Manthan-success/15 border-Manthan-success text-white shadow-Manthan-glow-inset font-bold"
                                 : "bg-black/20 border-white/5 text-gray-400 hover:text-white"
                             }`}
                           >
@@ -819,7 +819,7 @@ export const GuidedDemoModal: React.FC<GuidedDemoModalProps> = ({ isOpen, onClos
                     onClick={() => setActiveTimeline("conservative")}
                     className={`rounded-xl border p-4 text-left transition-all duration-300 flex flex-col justify-between space-y-3 cursor-pointer ${
                       activeTimeline === "conservative" 
-                        ? "bg-[#0F172A] border-blue-500/50 shadow-orbit-glow-blue scale-[1.01]"
+                        ? "bg-[#0F172A] border-blue-500/50 shadow-Manthan-glow-blue scale-[1.01]"
                         : "bg-[#0F172A]/40 border-white/5 hover:border-white/10 opacity-75"
                     }`}
                   >
@@ -834,7 +834,7 @@ export const GuidedDemoModal: React.FC<GuidedDemoModalProps> = ({ isOpen, onClos
                     <div className="space-y-1 font-mono text-[8px] text-gray-400 border-t border-white/5 pt-2 w-full">
                       <div className="flex justify-between"><span>ROI Multiple:</span><span className="text-white font-bold">{(2.8 * (channelMult === 1.15 ? 1.1 : 1.0)).toFixed(1)}x</span></div>
                       <div className="flex justify-between"><span>Confidence:</span><span className="text-white font-bold">91%</span></div>
-                      <div className="flex justify-between"><span>Fatigue Risk:</span><span className="text-orbit-success font-bold">None</span></div>
+                      <div className="flex justify-between"><span>Fatigue Risk:</span><span className="text-Manthan-success font-bold">None</span></div>
                     </div>
                   </button>
 
@@ -843,7 +843,7 @@ export const GuidedDemoModal: React.FC<GuidedDemoModalProps> = ({ isOpen, onClos
                     onClick={() => setActiveTimeline("recommended")}
                     className={`rounded-xl border p-4 text-left transition-all duration-300 flex flex-col justify-between space-y-3 cursor-pointer ${
                       activeTimeline === "recommended" 
-                        ? "bg-[#0F172A] border-green-500/50 shadow-orbit-glow-green scale-[1.01]"
+                        ? "bg-[#0F172A] border-green-500/50 shadow-Manthan-glow-green scale-[1.01]"
                         : "bg-[#0F172A]/40 border-white/5 hover:border-white/10 opacity-75"
                     }`}
                   >
@@ -867,7 +867,7 @@ export const GuidedDemoModal: React.FC<GuidedDemoModalProps> = ({ isOpen, onClos
                     onClick={() => setActiveTimeline("aggressive")}
                     className={`rounded-xl border p-4 text-left transition-all duration-300 flex flex-col justify-between space-y-3 cursor-pointer ${
                       activeTimeline === "aggressive" 
-                        ? "bg-[#0F172A] border-purple-500/50 shadow-orbit-glow-purple scale-[1.01]"
+                        ? "bg-[#0F172A] border-purple-500/50 shadow-Manthan-glow-purple scale-[1.01]"
                         : "bg-[#0F172A]/40 border-white/5 hover:border-white/10 opacity-75"
                     }`}
                   >
@@ -941,7 +941,7 @@ export const GuidedDemoModal: React.FC<GuidedDemoModalProps> = ({ isOpen, onClos
                 </div>
 
                 <div className="text-[10px] font-mono text-gray-400 leading-relaxed bg-black/30 p-2.5 rounded-lg border border-white/5">
-                  <span className="text-green-400 font-bold block text-[8px] uppercase tracking-widest mb-0.5">Vega Insights</span>
+                  <span className="text-green-400 font-bold block text-[8px] uppercase tracking-widest mb-0.5">Khoj Insights</span>
                   Timeline B leverages a staggered discount trigger over a {simulationDays}-day cycle, balancing ROI with customer fatigue.
                 </div>
               </div>
@@ -958,12 +958,12 @@ export const GuidedDemoModal: React.FC<GuidedDemoModalProps> = ({ isOpen, onClos
               transition={{ duration: 0.5 }}
               className="max-w-2xl w-full text-center space-y-6"
             >
-              <div className="w-12 h-12 rounded-full border border-green-500/20 bg-green-500/5 flex items-center justify-center mx-auto text-green-400 animate-pulse shadow-orbit-glow-green">
+              <div className="w-12 h-12 rounded-full border border-green-500/20 bg-green-500/5 flex items-center justify-center mx-auto text-green-400 animate-pulse shadow-Manthan-glow-green">
                 <CheckCircle2 size={22} />
               </div>
 
               <div className="space-y-1">
-                <span className="font-mono text-[8px] text-orbit-success uppercase tracking-[0.2em] font-bold">consensus reached</span>
+                <span className="font-mono text-[8px] text-Manthan-success uppercase tracking-[0.2em] font-bold">consensus reached</span>
                 <h1 className="font-space text-3xl font-bold uppercase tracking-tight text-white">Mission Package Prepared</h1>
                 <p className="font-mono text-[10px] text-gray-400">All neural systems nominal. Verification parameters verified.</p>
               </div>
@@ -976,17 +976,17 @@ export const GuidedDemoModal: React.FC<GuidedDemoModalProps> = ({ isOpen, onClos
                 </div>
                 <div className="text-center p-2 rounded bg-white/[0.01]">
                   <span className="text-gray-550 block font-mono text-[8px] uppercase">Channel</span>
-                  <span className="text-orbit-blue font-space font-bold text-sm block mt-1">
+                  <span className="text-Manthan-blue font-space font-bold text-sm block mt-1">
                     {selectedChannel === "whatsapp" ? "WhatsApp" : "Omnichannel"}
                   </span>
                 </div>
                 <div className="text-center p-2 rounded bg-white/[0.01]">
                   <span className="text-gray-550 block font-mono text-[8px] uppercase">Confidence</span>
-                  <span className="text-orbit-purple font-space font-bold text-sm block mt-1">89%</span>
+                  <span className="text-Manthan-purple font-space font-bold text-sm block mt-1">89%</span>
                 </div>
                 <div className="text-center p-2 rounded bg-white/[0.01]">
                   <span className="text-gray-550 block font-mono text-[8px] uppercase">Revenue Forecast</span>
-                  <span className="text-orbit-success font-space font-bold text-sm block mt-1">
+                  <span className="text-Manthan-success font-space font-bold text-sm block mt-1">
                     ₹{finalRecommended.toLocaleString()}
                   </span>
                 </div>
@@ -1022,7 +1022,7 @@ export const GuidedDemoModal: React.FC<GuidedDemoModalProps> = ({ isOpen, onClos
               <div className="lg:col-span-3 space-y-6">
                 <div className="flex justify-between items-center border-b border-white/5 pb-3">
                   <div>
-                    <span className="font-mono text-[8px] text-orbit-success uppercase tracking-widest block animate-pulse">● LIVE CAMPAIGN RUNNING</span>
+                    <span className="font-mono text-[8px] text-Manthan-success uppercase tracking-widest block animate-pulse">● LIVE CAMPAIGN RUNNING</span>
                     <h2 className="font-space text-lg font-bold uppercase tracking-tight text-white mt-0.5">Mission Control Console</h2>
                   </div>
                   
@@ -1076,7 +1076,7 @@ export const GuidedDemoModal: React.FC<GuidedDemoModalProps> = ({ isOpen, onClos
                       </span>
                     </div>
                     <div className="w-full bg-white/5 h-1 rounded-full overflow-hidden border border-white/5">
-                      <div className="h-full bg-gradient-to-r from-orbit-blue to-orbit-purple" style={{ width: `${(liveMessagesSent/150)*100}%` }} />
+                      <div className="h-full bg-gradient-to-r from-Manthan-blue to-Manthan-purple" style={{ width: `${(liveMessagesSent/150)*100}%` }} />
                     </div>
                   </div>
                 </div>
@@ -1088,10 +1088,10 @@ export const GuidedDemoModal: React.FC<GuidedDemoModalProps> = ({ isOpen, onClos
                   </h3>
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                     {[
-                      { name: "Polaris", desc: "Audience Targeter", color: "text-orbit-blue" },
-                      { name: "Vega", desc: "Forecasting Multiplier", color: "text-orbit-purple" },
-                      { name: "Nova", desc: "Copy Generator", color: "text-orbit-pink" },
-                      { name: "Atlas", desc: "Delivery Gateway", color: "text-orbit-success" }
+                      { name: "Drishti", desc: "Audience Targeter", color: "text-Manthan-blue" },
+                      { name: "Khoj", desc: "Forecasting Multiplier", color: "text-Manthan-purple" },
+                      { name: "Rachna", desc: "Copy Generator", color: "text-Manthan-pink" },
+                      { name: "Saarthi", desc: "Delivery Gateway", color: "text-Manthan-success" }
                     ].map((ag) => (
                       <div key={ag.name} className="flex items-center gap-2.5 p-2 rounded-lg border border-white/[0.04] bg-[#0F172A]">
                         <span className="relative flex h-2 w-2">
@@ -1113,7 +1113,7 @@ export const GuidedDemoModal: React.FC<GuidedDemoModalProps> = ({ isOpen, onClos
                 <div className="flex-1 overflow-y-auto space-y-2.5 text-green-400 select-none scrollbar-thin">
                   <div className="text-gray-500 border-b border-white/5 pb-2 mb-2 uppercase text-[8px] tracking-widest font-bold flex items-center justify-between">
                     <span>Active Telemetry</span>
-                    <span className="inline-flex items-center gap-1 text-orbit-success animate-pulse">
+                    <span className="inline-flex items-center gap-1 text-Manthan-success animate-pulse">
                       <span className="h-1.5 w-1.5 rounded-full bg-green-400" />
                       Live Feed
                     </span>
@@ -1129,7 +1129,7 @@ export const GuidedDemoModal: React.FC<GuidedDemoModalProps> = ({ isOpen, onClos
                 <div className="pt-4 space-y-2">
                   <button
                     onClick={onEnterOS}
-                    className="w-full py-3 rounded-xl bg-gradient-to-r from-orbit-blue to-orbit-purple hover:scale-[1.01] text-white font-mono text-[10px] font-bold uppercase tracking-widest transition-all cursor-pointer flex items-center justify-center gap-1.5 shadow-orbit-glow"
+                    className="w-full py-3 rounded-xl bg-gradient-to-r from-Manthan-blue to-Manthan-purple hover:scale-[1.01] text-white font-mono text-[10px] font-bold uppercase tracking-widest transition-all cursor-pointer flex items-center justify-center gap-1.5 shadow-Manthan-glow"
                   >
                     <span>Boot Real OS</span>
                     <ArrowRight size={11} />
