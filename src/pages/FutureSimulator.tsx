@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+﻿import React, { useState, useEffect, useRef } from "react";
 import { 
   Cpu, Sparkles, Activity, Check, Send, 
   RefreshCw, Play, ArrowRight, Brain
@@ -398,7 +398,7 @@ export const FutureSimulator: React.FC = () => {
 
     if (config.geminiKey) {
       try {
-        const systemPrompt = `You are Vega, the AI Predictive Analytics Agent for ORBIT. The user has set up their business (category: "${selectedAudience}").
+        const systemPrompt = `You are Vega, the AI Predictive Analytics Agent for orbit.ai. The user has set up their business (category: "${selectedAudience}").
 They are querying a growth timeline mutation or what-if scenario in the Future Simulator: "${queryText}".
 Formulate your response as a valid JSON object matching this schema exactly:
 {

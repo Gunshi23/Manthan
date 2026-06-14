@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+﻿import React, { useState } from "react";
 import { useOrbit } from "../context/OrbitContext";
 import type { Persona } from "../context/OrbitContext";
 import { 
@@ -114,7 +114,7 @@ export const OrbitPersonas: React.FC = () => {
             <div className="w-2 h-2 rounded-full bg-orbit-purple animate-pulse" />
             <span className="font-mono text-[10px] tracking-widest text-orbit-purple font-bold uppercase">DNA Analysis Lab</span>
           </div>
-          <h1 className={`text-2xl font-space font-bold tracking-tight ${isLight ? "text-slate-800" : "text-white"}`}>Orbit Personas</h1>
+          <h1 className={`text-2xl font-space font-bold tracking-tight ${isLight ? "text-slate-800" : "text-white"}`}>orbit.ai Personas</h1>
           <div className="flex items-center gap-2 mt-1">
             <p className={`font-mono text-xs ${isLight ? "text-slate-500" : "text-gray-400"}`}>Customer DNA Intelligence Lab & Archetype Clusters</p>
             {workspaceDna && (

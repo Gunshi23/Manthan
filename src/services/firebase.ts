@@ -1,4 +1,4 @@
-import { initializeApp, getApps, getApp } from "firebase/app";
+﻿import { initializeApp, getApps, getApp } from "firebase/app";
 import { getFirestore, Firestore } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
 
@@ -24,7 +24,7 @@ const useMockAuth = typeof window !== "undefined" && (
 );
 
 if (useMockAuth) {
-  console.warn("Running ORBIT in Sandbox Mode with mock authentication.");
+  console.warn("Running orbit.ai in Sandbox Mode with mock authentication.");
   auth = {
     currentUser: { email: "operator@orbit.io", uid: "mock-operator-uid" },
     onAuthStateChanged: (callback: any) => {

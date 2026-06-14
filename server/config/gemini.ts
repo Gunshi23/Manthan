@@ -1,4 +1,4 @@
-import * as dotenv from "dotenv";
+﻿import * as dotenv from "dotenv";
 dotenv.config();
 
 export let GEMINI_API_KEY = process.env.GEMINI_API_KEY || process.env.VITE_GEMINI_API_KEY || "";

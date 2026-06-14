@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+﻿import React, { useState, useEffect } from "react";
 import { Shield, Eye, EyeOff, Lock, User, Cpu, UserPlus } from "lucide-react";
 import { auth } from "../services/firebase";
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from "firebase/auth";
@@ -20,7 +20,7 @@ export const AuthFlow: React.FC<AuthFlowProps> = ({ onLoginSuccess, onBack }) =>
 
   const initialLogs = [
     "LOG: SECURE CONNECTION SOCKET CREATED AT PROTOCOL IP:192.112.5.44",
-    "LOG: RETRIEVING ORBIT ENCRYPTED KEYS...",
+    "LOG: RETRIEVING orbit.ai ENCRYPTED KEYS...",
     "LOG: HANDSHAKE COMPLETED WITH VANGUARD SERVER CORES.",
     "LOG: DECRYPTING BIO-SIGNATURE MODULES...",
     "LOG: WAITING FOR OPERATOR IDENTIFICATION CREDENTIALS..."

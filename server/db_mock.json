@@ -1,4 +1,4 @@
-{
+﻿{
   "brand_dna": {
     "dna_aura_threads": {
       "id": "dna_aura_threads",
@@ -34810,7 +34810,7 @@
       "id": "log_1",
       "agent": "System",
       "timestamp": "10:00:01 AM",
-      "message": "ORBIT Core System online. Loading brand intelligence matrices for Aura Threads node.",
+      "message": "orbit.ai Core System online. Loading brand intelligence matrices for Aura Threads node.",
       "type": "thought",
       "createdAt": "2026-06-01T10:00:01Z"
     },

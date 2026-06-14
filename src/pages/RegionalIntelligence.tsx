@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback } from "react";
+﻿import React, { useState, useMemo, useCallback } from "react";
 import {
   MapPin, TrendingUp, Users, Target,
   BarChart2, Send, RefreshCw, AlertCircle,
@@ -275,23 +275,23 @@ export const RegionalIntelligence: React.FC = () => {
     const agentPrompts: { agent: BoardroomInsight["agent"]; systemPrompt: string }[] = [
       {
         agent: "Polaris",
-        systemPrompt: `You are Polaris, the Customer Intelligence agent for ORBIT. Regional data: Top cities by revenue: ${topCities}. Top regional personas: ${topPersonas}. Answer in 2-3 short sentences: Who is buying and from where? Mention specific cities and persona types. Be data-driven and specific.`
+        systemPrompt: `You are Polaris, the Customer Intelligence agent for orbit.ai. Regional data: Top cities by revenue: ${topCities}. Top regional personas: ${topPersonas}. Answer in 2-3 short sentences: Who is buying and from where? Mention specific cities and persona types. Be data-driven and specific.`
       },
       {
         agent: "Luna",
-        systemPrompt: `You are Luna, the Revenue Recovery agent for ORBIT. Regional data: City breakdown: ${topCities}. Question: What revenue opportunities exist in under-performing regions? Mention specific cities. 2-3 sentences max. Focus on recovery tactics.`
+        systemPrompt: `You are Luna, the Revenue Recovery agent for orbit.ai. Regional data: City breakdown: ${topCities}. Question: What revenue opportunities exist in under-performing regions? Mention specific cities. 2-3 sentences max. Focus on recovery tactics.`
       },
       {
         agent: "Vega",
-        systemPrompt: `You are Vega, the Growth Strategy agent for ORBIT. Regional data: ${topCities}. Question: Which region has the highest growth potential and why? Name specific cities. Quantify with percentages or revenue estimates. 2-3 sentences.`
+        systemPrompt: `You are Vega, the Growth Strategy agent for orbit.ai. Regional data: ${topCities}. Question: Which region has the highest growth potential and why? Name specific cities. Quantify with percentages or revenue estimates. 2-3 sentences.`
       },
       {
         agent: "Nova",
-        systemPrompt: `You are Nova, the Campaign Architecture agent for ORBIT. Regional personas: ${topPersonas}. Question: What specific campaigns should run in each region? Name city-persona combinations and campaign types. 2-3 sentences.`
+        systemPrompt: `You are Nova, the Campaign Architecture agent for orbit.ai. Regional personas: ${topPersonas}. Question: What specific campaigns should run in each region? Name city-persona combinations and campaign types. 2-3 sentences.`
       },
       {
         agent: "Atlas",
-        systemPrompt: `You are Atlas, the Execution Engine agent for ORBIT. Regional data: ${topCities}. Question: Can we execute region-specific campaigns now? What channels work best per city? Mention WhatsApp/Email/RCS preferences by region. 2-3 sentences.`
+        systemPrompt: `You are Atlas, the Execution Engine agent for orbit.ai. Regional data: ${topCities}. Question: Can we execute region-specific campaigns now? What channels work best per city? Mention WhatsApp/Email/RCS preferences by region. 2-3 sentences.`
       },
     ];
 

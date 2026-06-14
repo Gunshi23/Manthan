@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+﻿import React, { useState, useEffect, useRef } from "react";
 import { useOrbit } from "../context/OrbitContext";
 import type { BoardroomVerdict, Customer } from "../context/OrbitContext";
 import { callGeminiAPI, parseGeminiJson } from "../utils/gemini";
@@ -1960,7 +1960,7 @@ Please generate a 25-message (5 rounds) debate between the agents (Polaris, Luna
                 isLight ? "bg-emerald-50/20 border-emerald-300/40 text-emerald-700" : "bg-[#050816] border-green-500/20 text-green-400"
               }`}>
                 <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-ping" />
-                <span className="text-[7.5px] font-bold uppercase tracking-widest">Synced with ORBIT Core</span>
+                <span className="text-[7.5px] font-bold uppercase tracking-widest">Synced with orbit.ai Core</span>
               </div>
             </div>
           </div>

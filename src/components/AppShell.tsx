@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useMemo } from "react";
+﻿import React, { useState, useRef, useEffect, useMemo } from "react";
 import { 
   Terminal, Activity, Star, Zap, Users, Mic, BarChart2, 
   Radio, ChevronRight, Cpu,
@@ -62,7 +62,7 @@ const NAV_SECTIONS: NavSection[] = [
     color: "#22c55e",
     items: [
       { id: "customer-galaxy",      icon: Star,        label: "Customer Galaxy",  shortLabel: "GLX", step: 1 },
-      { id: "orbit-personas",       icon: Fingerprint, label: "Orbit Personas",   shortLabel: "DNA", step: 2 },
+      { id: "orbit-personas",       icon: Fingerprint, label: "orbit.ai Personas",   shortLabel: "DNA", step: 2 },
     ],
   },
   {
@@ -98,7 +98,7 @@ const NAV_SECTIONS: NavSection[] = [
     label: "ANALYTICS",
     color: "#06b6d4",
     items: [
-      { id: "analytics",            icon: BarChart2,   label: "Orbit Analytics",  shortLabel: "ANL", step: 10 },
+      { id: "analytics",            icon: BarChart2,   label: "orbit.ai Analytics",  shortLabel: "ANL", step: 10 },
       { id: "future-simulator",     icon: Cpu,         label: "Future Simulator", shortLabel: "FUT", step: 11 },
     ],
   },
@@ -146,14 +146,14 @@ export const AppShell: React.FC<ShellProps> = ({ activePage, onNavigate, childre
     return null;
   }, [currentWorkspaceId, workspaces]);
 
-  // ORBIT COPILOT State variables
+  // orbit.ai Copilot State variables
   const [isOpenCopilot, setIsOpenCopilot] = useState(false);
   const [copilotInput, setCopilotInput] = useState("");
   const [isCopilotListening, setIsCopilotListening] = useState(false);
   const [copilotHistory, setCopilotHistory] = useState<{ sender: "user" | "copilot"; text: string; timestamp: string; action?: { label: string; page: Page } }[]>([
     {
       sender: "copilot",
-      text: "Hello! I am your ORBIT Copilot co-founder. I have access to your Brand DNA, Customer Data, Campaigns, and Agent Insights. Ask me anything about your growth operations.",
+      text: "Hello! I am your orbit.ai Copilot co-founder. I have access to your Brand DNA, Customer Data, Campaigns, and Agent Insights. Ask me anything about your growth operations.",
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     }
   ]);
@@ -223,9 +223,9 @@ export const AppShell: React.FC<ShellProps> = ({ activePage, onNavigate, childre
       
       if (config.geminiKey) {
         try {
-          const systemPrompt = `You are Orbit Copilot, a co-founder AI assistant for ORBIT. You have access to the user's business metadata (category: "${businessType}").
+          const systemPrompt = `You are orbit.ai Copilot, a co-founder AI assistant for orbit.ai. You have access to the user's business metadata (category: "${businessType}").
 Respond to the user's query about their business or campaigns in a concise, professional, growth-focused tone, speaking as their AI co-founder partner.
-Suggest a next action step if appropriate, which we can map to a dashboard page in ORBIT.
+Suggest a next action step if appropriate, which we can map to a dashboard page in orbit.ai.
 Format your response as a valid JSON object matching this schema:
 {
   "replyText": "your response speech here...",
@@ -248,7 +248,7 @@ Return ONLY the raw JSON object. Do not include markdown tags or extra explanati
             geminiSuccess = true;
           }
         } catch (clientErr) {
-          console.warn("Gemini API error in client-side Orbit Copilot fallback:", clientErr);
+          console.warn("Gemini API error in client-side orbit.ai Copilot fallback:", clientErr);
         }
       }
     }
@@ -319,9 +319,7 @@ Return ONLY the raw JSON object. Do not include markdown tags or extra explanati
           <div className="w-7 h-7 rounded-lg bg-gradient-to-tr from-orbit-blue to-orbit-purple flex items-center justify-center shadow-orbit-glow animate-glow-pulse">
             <span className="font-space font-bold text-white text-xs">O</span>
           </div>
-          <span className={`font-space font-bold text-sm tracking-widest uppercase ${isLight ? "text-gray-900" : "text-white"}`}>
-            Orbit
-          </span>
+          <span className={`font-space font-bold text-sm tracking-widest uppercase ${isLight ? "text-gray-900" : "text-white"}`}>orbit.ai</span>
           <span className={`font-mono text-[9px] px-1.5 py-0.5 rounded border hidden sm:inline ${
             isLight ? "border-gray-200 text-gray-400" : "border-orbit-blue/30 text-orbit-blue/70 bg-orbit-blue/5"
           }`}>v4.81</span>
@@ -335,7 +333,7 @@ Return ONLY the raw JSON object. Do not include markdown tags or extra explanati
                   ? "border-gray-200 bg-gray-100/50 text-gray-700" 
                   : "border-gray-800 bg-gray-950/40 text-gray-300"
               }`}
-              title="Switch ORBIT workspace"
+              title="Switch orbit.ai workspace"
             >
               <span className={`w-1.5 h-1.5 rounded-full ${
                 activeWorkspace ? (activeWorkspace.type === "demo" ? "bg-orbit-blue shadow-orbit-glow" : "bg-orbit-success shadow-orbit-success") : "bg-red-500"
@@ -781,7 +779,7 @@ Return ONLY the raw JSON object. Do not include markdown tags or extra explanati
 
 
           {/* ════════════════════════════════════════
-              ORBIT COPILOT FLOATING BUTTON
+              orbit.ai Copilot FLOATING BUTTON
           ════════════════════════════════════════ */}
           <button
             onClick={() => setIsOpenCopilot(!isOpenCopilot)}
@@ -791,13 +789,13 @@ Return ONLY the raw JSON object. Do not include markdown tags or extra explanati
                 : "bg-gradient-to-tr from-orbit-blue to-orbit-purple border-orbit-purple/60 text-white"
             }`}
             style={!isOpenCopilot ? { boxShadow: "0 0 25px rgba(139,92,246,0.6), 0 0 60px rgba(59,130,246,0.25), 0 4px 15px rgba(0,0,0,0.5)" } : undefined}
-            title="Toggle ORBIT Copilot Assistant"
+            title="Toggle orbit.ai Copilot Assistant"
           >
             {isOpenCopilot ? <X size={20} /> : <MessageSquare size={20} className="animate-pulse" />}
           </button>
 
           {/* ════════════════════════════════════════
-              ORBIT COPILOT SIDE DRAWER
+              orbit.ai Copilot SIDE DRAWER
           ════════════════════════════════════════ */}
           {isOpenCopilot && (
             <div 
@@ -813,7 +811,7 @@ Return ONLY the raw JSON object. Do not include markdown tags or extra explanati
                 <div className="flex items-center gap-2">
                   <Sparkles size={14} className="text-orbit-purple animate-pulse" />
                   <div>
-                    <h3 className="font-space text-xs font-bold text-white uppercase tracking-wider leading-none">Orbit Copilot</h3>
+                    <h3 className="font-space text-xs font-bold text-white uppercase tracking-wider leading-none">orbit.ai Copilot</h3>
                     <span className="font-mono text-[7px] text-gray-550 uppercase tracking-widest mt-0.5 block">AI Co-founder Assistant</span>
                   </div>
                 </div>

@@ -1,5 +1,5 @@
-/**
- * Gemini API utility for ORBIT.
+﻿/**
+ * Gemini API utility for orbit.ai.
  * Provides a helper to query the Gemini API using native fetch.
  */
 

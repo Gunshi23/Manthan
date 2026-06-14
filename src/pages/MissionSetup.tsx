@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+﻿import React, { useState } from "react";
 import { useOrbit } from "../context/OrbitContext";
 import { TrendingUp, UserMinus, Rocket, ShieldCheck, ArrowRight, Loader2 } from "lucide-react";
 
@@ -90,7 +90,7 @@ export const MissionSetup: React.FC<MissionSetupProps> = ({ onSetupComplete }) =
               Establish Core Objective
             </h1>
             <p className="text-sm text-gray-400 max-w-xl mx-auto">
-              Select an objective node. ORBIT will calibrate its AI agent boardroom weights to optimize segmentation, copy, and channel execution for this priority.
+              Select an objective node. orbit.ai will calibrate its AI agent boardroom weights to optimize segmentation, copy, and channel execution for this priority.
             </p>
           </div>
 

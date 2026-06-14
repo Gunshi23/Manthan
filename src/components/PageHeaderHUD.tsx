@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+﻿import React, { useState, useEffect, useRef } from "react";
 import { useOrbit } from "../context/OrbitContext";
 import { X, Mic, PhoneOff, Radio } from "lucide-react";
 import { VOICE_AGENT_SETTINGS } from "../config/voiceAgentSettings";
@@ -468,7 +468,7 @@ export const PageHeaderHUD: React.FC<PageHeaderHUDProps> = ({
                         : "bg-blue-950/20 border-blue-900/30 text-blue-200 font-medium"
                   }`}>
                     <div className="text-[7.5px] uppercase tracking-wider text-gray-500 mb-1">
-                      {log.role === "user" ? "Operator Node" : "ORBIT Core Voice"}
+                      {log.role === "user" ? "Operator Node" : "orbit.ai Core Voice"}
                     </div>
                     <div>{log.text}</div>
                   </div>

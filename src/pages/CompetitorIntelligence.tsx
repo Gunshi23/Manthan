@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useMemo } from "react";
+﻿import React, { useState, useEffect, useRef, useMemo } from "react";
 import {
   Sparkles, Activity, Compass, RefreshCw, TrendingUp,
   TrendingDown, AlertTriangle, CheckCircle2, Zap, Target, Brain,
@@ -553,7 +553,7 @@ export const CompetitorIntelligence: React.FC = () => {
               <div className="flex items-center gap-2 mb-3">
                 <Brain size={14} className={isLight ? "text-purple-600" : "text-purple-400"} />
                 <span className={`font-space text-xs font-bold uppercase tracking-wider ${isLight ? "text-[#0F172A]" : "text-white"}`}>What Should I Do Next?</span>
-                <span className="ml-auto font-mono text-[8px] text-gray-500">ORBIT Executive Intelligence</span>
+                <span className="ml-auto font-mono text-[8px] text-gray-500">orbit.ai Executive Intelligence</span>
               </div>
               <div className="grid grid-cols-4 gap-3">
                 {[

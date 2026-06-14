@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, useCallback, useRef, useMemo } from "react";
+﻿import React, { createContext, useContext, useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { callGeminiAPI, parseGeminiJson } from "../utils/gemini";
 import { sendCampaign } from "../services/twilioService";
 import { sendEmailCampaign } from "../services/resendService";
@@ -1000,7 +1000,7 @@ export const OrbitProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         id: "log_1",
         agent: "System" as const,
         timestamp: new Date(Date.now() - 3600000).toLocaleTimeString(),
-        message: "ORBIT Core System online. Version 4.8.1-Vanguard.",
+        message: "orbit.ai Core System online. Version 4.8.1-Vanguard.",
         type: "thought" as const
       },
       {
@@ -1900,7 +1900,7 @@ Classify this business and extract intelligence. Return ONLY a valid JSON object
       recoveryConfidence
     });
 
-    addAgentLog("System", `Calibrated ORBIT Core parameters for ${type} node schema. Mapped ${newCustomers.length} profiles, regenerated transaction registers.`, "thought");
+    addAgentLog("System", `Calibrated orbit.ai Core parameters for ${type} node schema. Mapped ${newCustomers.length} profiles, regenerated transaction registers.`, "thought");
   }, [addAgentLog]);
 
   // Set initial theme on HTML class
@@ -2287,8 +2287,8 @@ Do not return any markdown code block formatting. Only return the raw JSON objec
 
       copy = {
         Email: {
-          subject: `Exclusive Access: Elevate Your Setup with Orbit Core`,
-          body: `Hello {{name}},\n\nYour journey with ORBIT is just beginning. As one of our select targets, we are opening up access to the all-new Cyberwear Implant upgrades. \n\nGet yours today with priority shipping.\n\nBest regards,\nOrbit Intelligence Network`
+          subject: `Exclusive Access: Elevate Your Setup with orbit.ai Core`,
+          body: `Hello {{name}},\n\nYour journey with ORBIT is just beginning. As one of our select targets, we are opening up access to the all-new Cyberwear Implant upgrades. \n\nGet yours today with priority shipping.\n\nBest regards,\norbit.ai Intelligence Network`
         },
         WhatsApp: {
           body: whatsAppBody
@@ -2814,7 +2814,7 @@ Do not return any markdown code block formatting. Only return the raw JSON objec
         id: "log_init",
         agent: "System",
         timestamp: new Date().toLocaleTimeString(),
-        message: "ORBIT Core cleared and reinitialized.",
+        message: "orbit.ai Core cleared and reinitialized.",
         type: "thought"
       }
     ]);

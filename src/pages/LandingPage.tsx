@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+﻿import React, { useState } from "react";
 import { Sparkles, Terminal, ArrowRight, Play, Activity } from "lucide-react";
 import { motion } from "framer-motion";
 import { GuidedDemoModal } from "../components/GuidedDemoModal";
@@ -25,9 +25,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnterOS }) => {
           <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-orbit-blue to-orbit-purple flex items-center justify-center shadow-orbit-glow animate-orbit-pulse">
             <span className="font-space font-bold text-white text-lg">O</span>
           </div>
-          <span className="font-space font-bold text-xl tracking-wider uppercase text-white bg-clip-text text-transparent bg-gradient-to-r from-white via-gray-200 to-gray-400">
-            Orbit
-          </span>
+          <span className="font-space font-bold text-xl tracking-wider uppercase text-white bg-clip-text text-transparent bg-gradient-to-r from-white via-gray-200 to-gray-400">orbit.ai</span>
         </div>
         
         <div className="flex items-center gap-6">
@@ -72,7 +70,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnterOS }) => {
           transition={{ duration: 0.8, delay: 0.2 }}
           className="text-gray-400 text-lg md:text-xl max-w-2xl mb-12 font-inter leading-relaxed"
         >
-          Keep Every Customer In Your Orbit. ORBIT orchestrates autonomous AI agents to segment users, model conversion ROI, generate copy, and launch campaigns.
+          Keep Every Customer In Your Orbit. orbit.ai orchestrates autonomous AI agents to segment users, model conversion ROI, generate copy, and launch campaigns.
         </motion.p>
 
         <motion.div
@@ -94,7 +92,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnterOS }) => {
             className="group px-8 py-4 rounded-xl border border-orbit-blue/30 bg-[#0F172A]/85 hover:bg-[#1E293B] text-sm font-semibold text-white transition-all duration-300 flex items-center justify-center gap-2 shadow-orbit-glow-inset hover:border-orbit-blue/60 cursor-pointer"
           >
             <Play size={14} className="fill-current text-orbit-blue group-hover:scale-110 transition-transform" />
-            Watch ORBIT In Action
+            Watch orbit.ai In Action
           </button>
         </motion.div>
 
@@ -123,7 +121,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnterOS }) => {
             </h2>
             
             <p className="text-xs text-gray-400 font-mono leading-relaxed">
-              Witness how ORBIT links audience mapping, copywriting, ROI simulations, and final campaign dispatching. See our agents align live in the boardroom in under 60 seconds.
+              Witness how orbit.ai links audience mapping, copywriting, ROI simulations, and final campaign dispatching. See our agents align live in the boardroom in under 60 seconds.
             </p>
 
             <button
@@ -131,7 +129,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnterOS }) => {
               className="mt-2 group px-5 py-2.5 rounded-lg bg-orbit-blue/15 border border-orbit-blue/40 text-xs font-mono text-orbit-blue hover:bg-orbit-blue hover:text-white transition-all flex items-center gap-2 shadow-orbit-glow-inset cursor-pointer"
             >
               <Play size={12} className="fill-current text-orbit-blue" />
-              Watch ORBIT In Action
+              Watch orbit.ai In Action
             </button>
           </div>
 
@@ -234,7 +232,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnterOS }) => {
 
       {/* Footer */}
       <footer className="relative z-10 px-8 py-6 border-t border-gray-800/40 text-center flex flex-col sm:flex-row items-center justify-between gap-4">
-        <span className="text-xs font-mono text-gray-500">© 2026 ORBIT ORBITAL SYSTEMS INC. LICENSE: VANGUARD-A9</span>
+        <span className="text-xs font-mono text-gray-500">© 2026 orbit.ai · All Rights Reserved</span>
         <div className="flex gap-6 text-xs font-mono text-gray-500">
           <a href="#" className="hover:text-white transition-colors">POLARIS NODE</a>
           <a href="#" className="hover:text-white transition-colors">VEGA ENGINE</a>

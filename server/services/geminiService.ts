@@ -1,4 +1,4 @@
-import { getGeminiApiKey } from "../config/gemini";
+﻿import { getGeminiApiKey } from "../config/gemini";
 
 // Helper to call Gemini REST API using native fetch
 export async function callGeminiAPI(
@@ -218,8 +218,8 @@ Only return the raw JSON object.`;
 
 export async function generateCopilotResponse(message: string, context: { brandDna?: any, campaigns?: any[], opportunities?: any[] }) {
   try {
-    const sys = `You are Orbit Copilot, a co-founder AI assistant for ORBIT. Respond to the user's query about their business or campaigns in a concise, professional, growth-focused tone, speaking as their AI co-founder partner.
-Suggest a next action step if appropriate, which we can map to a dashboard page in ORBIT.
+    const sys = `You are orbit.ai Copilot, a co-founder AI assistant for orbit.ai. Respond to the user's query about their business or campaigns in a concise, professional, growth-focused tone, speaking as their AI co-founder partner.
+Suggest a next action step if appropriate, which we can map to a dashboard page in orbit.ai.
 Format your response as a valid JSON object matching this schema:
 {
   "replyText": "your response speech here...",

@@ -1,4 +1,4 @@
-import { db } from "../server/config/firebase";
+﻿import { db } from "../server/config/firebase";
 
 // Helper to clear collection
 async function clearCollection(name: string) {
@@ -53,7 +53,7 @@ const CHANNELS: ("Email" | "WhatsApp" | "SMS" | "RCS")[] = ["WhatsApp", "Email",
 
 // Seed function
 async function seed() {
-  console.log("🌱 STARTING FIRESTORE SEEDING SYSTEM FOR ORBIT...");
+  console.log("🌱 STARTING FIRESTORE SEEDING SYSTEM for orbit.ai.ai...");
   console.log("Business Target: Aura Threads (Women's Fashion & Kurtis)");
 
   // 1. Clear existing collections to prevent duplicates
@@ -781,7 +781,7 @@ async function seed() {
     console.log("✅ Seeded 30 Analytics Snapshots");
 
     console.log("🎉 FIRESTORE SEEDING COMPLETED SUCCESSFULLY!");
-    console.log("Ready for ORBIT: 500 customers, 2500 orders, campaigns, logs, simulations, and market signals mapped.");
+    console.log("Ready for orbit.ai: 500 customers, 2500 orders, campaigns, logs, simulations, and market signals mapped.");
   } catch (err: any) {
     console.error("❌ Firestore Seeding failed:", err.message || err);
   }

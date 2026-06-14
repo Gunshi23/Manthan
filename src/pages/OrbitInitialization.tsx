@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+﻿import React, { useState, useEffect } from "react";
 import { Check, Cpu } from "lucide-react";
 
 interface OrbitInitializationProps {
@@ -11,7 +11,7 @@ export const OrbitInitialization: React.FC<OrbitInitializationProps> = ({ onComp
   const [completedLines, setCompletedLines] = useState<Set<number>>(new Set());
 
   const steps = [
-    { text: "Initializing Orbit Core...", type: "header", delay: 100 },
+    { text: "Initializing orbit.ai Core...", type: "header", delay: 100 },
     { text: "Neural Intelligence Online", type: "check", delay: 500 },
     { text: "Audience Intelligence Online", type: "check", delay: 900 },
     { text: "Campaign Engine Online", type: "check", delay: 1300 },
@@ -69,7 +69,7 @@ export const OrbitInitialization: React.FC<OrbitInitializationProps> = ({ onComp
     <div className="relative min-h-screen bg-orbit-bg space-grid flex flex-col items-center justify-center p-6 text-white overflow-hidden">
       <div className="scanlines" />
 
-      {/* Futuristic Orbit Core animation ring */}
+      {/* Futuristic orbit.ai Core animation ring */}
       <div className="relative w-40 h-40 mb-12 flex items-center justify-center">
         {/* Pulsing ring */}
         <div className="absolute inset-0 rounded-full border border-orbit-blue/30 animate-orbit-pulse" />

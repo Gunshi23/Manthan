@@ -1,4 +1,4 @@
-import { RESEND_API_KEY, RESEND_FROM_EMAIL } from "../config/resend";
+﻿import { RESEND_API_KEY, RESEND_FROM_EMAIL } from "../config/resend";
 import { db } from "../config/firebase";
 import { Recipient } from "./twilioService";
 

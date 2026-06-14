@@ -1,4 +1,4 @@
-import { getDb } from "./firebase";
+﻿import { getDb } from "./firebase";
 import { collection, addDoc, doc, updateDoc } from "firebase/firestore";
 
 interface FirebaseConfig {

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo } from "react";
+﻿import React, { useState, useEffect, useCallback, useMemo } from "react";
 import {
   Mail, MessageCircle, Phone, Layers, Sparkles, Edit3, Eye,
   BarChart3, RefreshCw, Wand2, Scissors, Dna, Play,
@@ -117,7 +117,7 @@ function buildFallbackPlan(goal: string, businessType: string, personas?: Person
       Email: { 
         subject: targetPersona ? `Special Drop for our ${targetPersona.name}` : `Exclusive Offer: ${goal.slice(0, 40)}`, 
         body: targetPersona 
-          ? `Hi {{name}},\n\nWe've crafted a special recommendation just for you. Based on your preferences, we suggest trying our latest collections.\n\nRecommended: ${targetPersona.suggestedCampaign}\n\nUse code ORBIT20 for exclusive perks.\n\nWarm regards,\nOrbit Intelligence`
+          ? `Hi {{name}},\n\nWe've crafted a special recommendation just for you. Based on your preferences, we suggest trying our latest collections.\n\nRecommended: ${targetPersona.suggestedCampaign}\n\nUse code ORBIT20 for exclusive perks.\n\nWarm regards,\norbit.ai Intelligence`
           : `Hi {{name}},\n\nWe noticed you haven't shopped with us recently. As one of our valued customers, we've curated a special offer just for you.\n\nUse code ORBIT20 for 20% off your next purchase.\n\nShop now before it expires!\n\nWarm regards,\nAura Threads` 
       },
       WhatsApp: { 
@@ -419,7 +419,7 @@ export const GrowthEngine: React.FC = () => {
       : "Dormant Customer";
 
     const defaultMsg = automationTemplates[activeAutomationCategory].body;
-    const systemPrompt = `You are the ORBIT Growth Campaign Copywriter.
+    const systemPrompt = `You are the orbit.ai Growth Campaign Copywriter.
 Optimize the following automated lifecycle campaign template body:
 "${defaultMsg}"
 
@@ -439,7 +439,7 @@ Do not return any markdown code block formatting. Return only the raw text of th
         const hasProfessionals = targetCohort.some(c => (c.persona || "").includes("Professional") || (c.persona || "").includes("Working"));
         
         if (activeAutomationCategory === "review") {
-          optimizedBody = `Hi {{name}},\n\nThank you for choosing ${businessType.toLowerCase().includes("fashion") ? "Aura Threads" : "ORBIT"}. We hope you are loving your new purchase.\n\nYour review helps our community. Could you leave a quick rating?\n\nBest,\nTeam Orbit`;
+          optimizedBody = `Hi {{name}},\n\nThank you for choosing ${businessType.toLowerCase().includes("fashion") ? "Aura Threads" : "orbit.ai"}. We hope you are loving your new purchase.\n\nYour review helps our community. Could you leave a quick rating?\n\nBest,\nTeam Orbit`;
         } else if (activeAutomationCategory === "checkin") {
           if (hasProfessionals) {
             optimizedBody = `Hi {{name}},\n\nJust checking in on your office wear and smart-casual selections. How is the fit and comfort?\n\nLet us know if you need sizing adjustments.\n\nWarmly,\nAura Threads Support`;
@@ -695,7 +695,7 @@ Do not return any markdown code block formatting. Return only the raw text of th
     try {
       let newBody = currentBody;
       if (config.geminiKey) {
-        const res = await callGeminiAPI(prompt, "You are Nova, ORBIT's expert campaign copywriter. Return only the rewritten copy, no explanations.", config.geminiKey);
+        const res = await callGeminiAPI(prompt, "You are Nova, orbit.ai's expert campaign copywriter. Return only the rewritten copy, no explanations.", config.geminiKey);
         newBody = res.trim();
       } else {
         // Fallback transforms
@@ -750,7 +750,7 @@ Format as JSON: { "Polaris": "...", "Luna": "...", "Vega": "...", "Nova": "...",
     Vega: `My predictive models calculate a ${missionPlan?.Vega.predictedRoi || 0}x ROI at ${missionPlan?.Vega.confidenceScore || 89}% confidence. The conversion curve for this segment peaks within a 14-day window, so time-sensitive messaging maximizes yield.`,
     Nova: `I generated 5 campaign variants tailored to different emotional registers — professional, urgent, luxury, friendly, and emotional. The WhatsApp format was prioritized due to its 92% open rate for this segment. All copy uses {{name}} personalization for higher CTR.`,
     Atlas: `Deployment pathways verified. ${missionPlan?.Atlas.selectedChannel} selected as primary channel. I've pre-validated recipient consent, routing endpoints, and webhook callbacks for delivery tracking. Zero configuration needed.`,
-    overall: `ORBIT recommends this campaign because it represents the highest-confidence, highest-ROI action available given your current customer data and business objective. Every element — audience, copy, channel, and timing — has been optimized by the collective intelligence of all 5 AI agents.`,
+    overall: `orbit.ai recommends this campaign because it represents the highest-confidence, highest-ROI action available given your current customer data and business objective. Every element — audience, copy, channel, and timing — has been optimized by the collective intelligence of all 5 AI agents.`,
   });
 
   /* ── Launch Campaign ── */
@@ -859,7 +859,7 @@ Format as JSON: { "Polaris": "...", "Luna": "...", "Vega": "...", "Nova": "...",
               </div>
               <div>
                 <h2 className="font-space text-sm font-bold text-white uppercase tracking-wider">Mission Command</h2>
-                <p className="font-mono text-[9px] text-gray-500">Define your growth objective — ORBIT will do the rest</p>
+                <p className="font-mono text-[9px] text-gray-500">Define your growth objective — orbit.ai will do the rest</p>
               </div>
             </div>
 
@@ -1033,7 +1033,7 @@ Format as JSON: { "Polaris": "...", "Luna": "...", "Vega": "...", "Nova": "...",
                   <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-purple-500 to-blue-600 flex items-center justify-center">
                     <Brain size={12} className="text-white" />
                   </div>
-                  <h2 className={`font-space text-xs font-bold uppercase tracking-wider ${isLight ? "text-[#0F172A]" : "text-white"}`}>Why ORBIT Recommends This</h2>
+                  <h2 className={`font-space text-xs font-bold uppercase tracking-wider ${isLight ? "text-[#0F172A]" : "text-white"}`}>Why orbit.ai Recommends This</h2>
                 </div>
 
                 <div className="space-y-3">
@@ -1862,7 +1862,7 @@ Format as JSON: { "Polaris": "...", "Luna": "...", "Vega": "...", "Nova": "...",
 
                   {explainData.overall && (
                     <div className="p-4 rounded-xl border border-blue-500/20 bg-blue-500/5">
-                      <p className="font-space text-[10px] font-bold text-blue-400 mb-1">ORBIT's Overall Recommendation</p>
+                      <p className="font-space text-[10px] font-bold text-blue-400 mb-1">orbit.ai's Overall Recommendation</p>
                       <p className="font-mono text-[9px] text-gray-400 leading-relaxed">{explainData.overall}</p>
                     </div>
                   )}

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+﻿import React, { useState, useEffect, useRef } from "react";
 import { useOrbit } from "../context/OrbitContext";
 import {
   TrendingUp, Target, Zap, Shield,
@@ -624,7 +624,7 @@ export const MissionControl: React.FC = () => {
         {/* ══════════════ HEADER ══════════════ */}
         <PageHeaderHUD
           title="Mission Control"
-          subtitle="ORBIT OPERATIONAL HEADQUARTERS · REAL-TIME AI EXECUTION HUB"
+          subtitle="orbit.ai OPERATIONAL HQ · REAL-TIME AI EXECUTION HUB"
           onSelectAgent={setSelectedAgent}
           actions={
             <div className="flex items-center gap-3">
@@ -882,7 +882,7 @@ export const MissionControl: React.FC = () => {
                 </div>
               ) : (
                 <div className="font-mono text-[9.5px] leading-relaxed text-gray-400 whitespace-pre-line bg-gray-950/35 p-3 rounded-lg border border-gray-850">
-                  {briefing || "ORBIT currently has no active missions. Click launch opportunity or generate new mission above to begin."}
+                  {briefing || "orbit.ai currently has no active missions. Click launch opportunity or generate new mission above to begin."}
                 </div>
               )}
             </div>

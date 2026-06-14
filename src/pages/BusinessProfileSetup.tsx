@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
+﻿import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { 
   ShoppingBag, Utensils, Dumbbell, Layers, Upload, Loader2, Check,
   FileText, Database, Play, Server, AlertCircle,
@@ -283,7 +283,7 @@ export const BusinessProfileSetup: React.FC<BusinessProfileSetupProps> = ({ onSe
     let geminiReport: any = null;
     if (config.geminiKey) {
       try {
-        const systemPrompt = `You are the ORBIT AI Organization Decoded Node. Analyze the user's business onboarding profile and generate a custom Brand DNA report.
+        const systemPrompt = `You are the orbit.ai AI Organization Decoded Node. Analyze the user's business onboarding profile and generate a custom Brand DNA report.
 Format your response as a valid JSON object matching this schema exactly:
 {
   "potRevenue": "₹X,XX,XXX" (Estimated recoverable revenue from leakages, e.g. "₹34,500"),
@@ -438,7 +438,7 @@ Style: "${growthPersonality}"`;
           <div className="flex items-center justify-between border-b border-gray-950/60 pb-4">
             <div className="flex items-center gap-2">
               <Loader2 size={16} className="text-orbit-purple animate-spin" />
-              <span className="font-space text-xs font-bold uppercase tracking-wider text-white">ORBIT Analyzer Pipeline</span>
+              <span className="font-space text-xs font-bold uppercase tracking-wider text-white">orbit.ai Analyzer Pipeline</span>
             </div>
             <span className="font-mono text-xs text-orbit-purple font-bold">{progressPct}% Complete</span>
           </div>
@@ -493,7 +493,7 @@ Style: "${growthPersonality}"`;
               Smart Onboarding System
             </span>
             <h1 className="text-3xl md:text-5xl font-bold font-space tracking-tight">
-              Welcome to ORBIT
+              Welcome to orbit.ai
             </h1>
             <p className="text-xs md:text-sm text-gray-400 max-w-lg mx-auto leading-relaxed font-mono">
               Choose how you would like to start your AI Business Operating System.

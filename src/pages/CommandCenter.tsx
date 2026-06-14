@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from "react";
+﻿import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useOrbit } from "../context/OrbitContext";
 import {
   Send, Mic, MicOff, X, ChevronRight,
@@ -354,7 +354,7 @@ export const CommandCenter: React.FC = () => {
         <div className={`shrink-0 px-6 pt-4 backdrop-blur-md ${isLight ? "bg-white/50" : "bg-gray-950/30"}`}>
           <PageHeaderHUD
             title="Command Center"
-            subtitle="ORBIT BRAIN · AUTONOMOUS OPERATIONS NODE"
+            subtitle="orbit.ai BRAIN · AUTONOMOUS OPERATIONS NODE"
             onSelectAgent={setSelectedAgent}
             actions={
               <div className="flex items-center gap-4">
@@ -434,7 +434,7 @@ export const CommandCenter: React.FC = () => {
                   Initiate Autonomous Mission Directive
                 </h2>
                 <p className={`font-mono text-[11px] max-w-sm leading-relaxed mx-auto ${isLight ? "text-slate-500" : "text-gray-500"}`}>
-                  Submit a critical business objective. ORBIT's neural agents will formulate cohorts, project conversions, write creatives, and launch.
+                  Submit a critical business objective. orbit.ai's neural agents will formulate cohorts, project conversions, write creatives, and launch.
                 </p>
               </div>
               
@@ -722,7 +722,7 @@ export const CommandCenter: React.FC = () => {
                   ))}
                 </div>
                 <span className="font-mono text-xs text-blue-500 tracking-wider animate-pulse uppercase">
-                  ORBIT Voice Input Active · Listening for directive...
+                  orbit.ai Voice Input Active · Listening for directive...
                 </span>
               </div>
             ) : (

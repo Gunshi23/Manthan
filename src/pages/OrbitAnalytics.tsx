@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+﻿import React, { useState, useEffect, useMemo } from "react";
 import { 
   TrendingUp, Mail, MousePointer, ShoppingCart, Users, BarChart2, 
   ArrowUpRight, CheckCircle2, Download, 
@@ -273,7 +273,7 @@ export const OrbitAnalytics: React.FC = () => {
       return;
     }
 
-    const systemPrompt = "You are ORBIT Executive Briefing AI. Deliver 5 high-impact bullet points summarizing current business intelligence. Rely on actual metrics. Use concise, professional, cyber-command style phrasing. Do not return markdown headers or JSON block formatting.";
+    const systemPrompt = "You are orbit.ai Executive Briefing AI. Deliver 5 high-impact bullet points summarizing current business intelligence. Rely on actual metrics. Use concise, professional, cyber-command style phrasing. Do not return markdown headers or JSON block formatting.";
     const userPrompt = `Analyze these live business parameters:
       Business: "${businessType}" (Aura Threads / Fashion and Apparel)
       Total Revenue: ₹${totalRevenue}
@@ -335,7 +335,7 @@ export const OrbitAnalytics: React.FC = () => {
       return;
     }
 
-    const systemPrompt = `You are the ORBIT System Diagnostics AI. Analyze business metrics and output a JSON diagnostics report.
+    const systemPrompt = `You are the orbit.ai System Diagnostics AI. Analyze business metrics and output a JSON diagnostics report.
     Format your response as a single valid JSON object matching this schema exactly:
     {
       "working": "brief statement of what's working",
@@ -515,7 +515,7 @@ export const OrbitAnalytics: React.FC = () => {
       client: "AI Client Campaign Deliverables Ledger"
     };
 
-    const systemPrompt = `You are the ORBIT Lead AI Business Consultant. Generate a detailed, highly professional business report in markdown format. 
+    const systemPrompt = `You are the orbit.ai Lead AI Business Consultant. Generate a detailed, highly professional business report in markdown format. 
     Use titles, stats grids, and bullet lists. Address key trends, leak recovery, and forecasted growth metrics. Do not exceed 400 words.`;
 
     const userPrompt = `Generate a "${typeLabels[type]}" for the business "${businessType}".
@@ -552,7 +552,7 @@ export const OrbitAnalytics: React.FC = () => {
     const dateStr = todayDate.toLocaleDateString();
 
     if (type === "executive") {
-      return `# ORBIT Executive Briefing Report
+      return `# orbit.ai Executive Briefing Report
 **Date Generated:** ${dateStr} | **Operational Status:** NOMINAL
 
 ## 1. Executive Performance Summary
@@ -573,11 +573,11 @@ Our analysis confirms **WhatsApp** remains the primary yield driver, outperformi
 1. **Reactivate Churn Nodes:** Immediately launch the *Dormant VIP Win-back Loop* targeting ${atRiskCustomers.length} at-risk buyers.
 2. **Optimize Checkout Gateway:** Deploy automated checkout links inside WhatsApp to capture ₹12,500 in cart leaks.`;
     } else if (type === "investor") {
-      return `# ORBIT Performance Pitch (Investor Report)
+      return `# orbit.ai Performance Pitch (Investor Report)
 **Quarterly Assessment:** Q2 | **Valuation Node:** Vanguard-v4.8
 
 ## 1. Financial Highlights
-Orbit Core has unlocked positive trajectory indicators across fashion customer databases. Cumulative cohort yield totals **${formatCurrency(totalRevenue)}**, showing an active **+18.5%** quarter-over-quarter expansion trend.
+orbit.ai Core has unlocked positive trajectory indicators across fashion customer databases. Cumulative cohort yield totals **${formatCurrency(totalRevenue)}**, showing an active **+18.5%** quarter-over-quarter expansion trend.
 
 * **Gross Campaign Billings:** ${formatCurrency(totalCampaignRevenue)}
 * **Average LTV per Cohort:** ${formatCurrency(ltv)}
@@ -593,7 +593,7 @@ The CAC-to-LTV ratio remains healthy, supported by high organic repeat purchase 
 ## 3. Projections & Forecast
 Vega Agent forecasts Q3 baseline revenues extending to **${formatCurrency(totalRevenue * 1.35)}**, representing a **+35%** growth scenario driven by automated RCS festive drops.`;
     } else {
-      return `# ORBIT Client Campaign Deliverables Ledger
+      return `# orbit.ai Client Campaign Deliverables Ledger
 **Client Profile:** Aura Threads (Fashion and Apparel) | **Active Agent Registry:** Polaris, Nova, Vega, Atlas, Luna
 
 ## 1. Outbound Campaign Performance Table
@@ -622,7 +622,7 @@ Overall campaign open rates hit **${avgOpenRate}%** with a click-through rate of
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");
     link.setAttribute("href", encodedUri);
-    link.setAttribute("download", `ORBIT_Campaigns_Ledger_${todayStr}.csv`);
+    link.setAttribute("download", `orbit_ai_Campaigns_Ledger_${todayStr}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -789,7 +789,7 @@ Overall campaign open rates hit **${avgOpenRate}%** with a click-through rate of
         
         {/* Title Header */}
         <PageHeaderHUD
-          title="Orbit Analytics"
+          title="orbit.ai Analytics"
           subtitle="AI-OPERATIONAL COGNITIVE COMMAND CENTER"
           onSelectAgent={setSelectedAgent}
           actions={
