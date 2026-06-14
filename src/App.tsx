@@ -58,7 +58,7 @@ function App() {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
-        setStage(prev => (prev === 'landing' || prev === 'auth') ? 'init' : prev);
+        setStage(prev => (prev === 'auth') ? 'init' : prev);
       } else {
         setStage(prev => (prev !== 'landing' && prev !== 'auth') ? 'landing' : prev);
         setOnboardingCompleted(false);
