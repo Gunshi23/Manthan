@@ -1,4 +1,4 @@
-﻿import { Router } from "express";
+import { Router } from "express";
 import { generateBoardroomDiscussion } from "../services/geminiService";
 import { db } from "../config/firebase";
 

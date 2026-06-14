@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useOrbit } from "../context/OrbitContext";
 import { X, Mic, PhoneOff, Radio } from "lucide-react";
 import { VOICE_AGENT_SETTINGS } from "../config/voiceAgentSettings";

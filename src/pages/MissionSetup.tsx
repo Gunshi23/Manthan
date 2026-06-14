@@ -1,4 +1,4 @@
-﻿import React, { useState } from "react";
+import React, { useState } from "react";
 import { useOrbit } from "../context/OrbitContext";
 import { TrendingUp, UserMinus, Rocket, ShieldCheck, ArrowRight, Loader2 } from "lucide-react";
 

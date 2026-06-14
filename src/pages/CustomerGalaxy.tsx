@@ -1,4 +1,4 @@
-﻿import React, { useRef, useEffect, useState, useMemo } from "react";
+import React, { useRef, useEffect, useState, useMemo } from "react";
 import { useOrbit } from "../context/OrbitContext";
 import type { Customer } from "../context/OrbitContext";
 import { 

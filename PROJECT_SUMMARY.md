@@ -1,4 +1,4 @@
-﻿# Manthan: Autonomous Growth Marketing Command Center
+# Manthan: Autonomous Growth Marketing Command Center
 
 Manthan is a real-time autonomous growth marketing command center. It integrates multi-agent AI coordination, database analytics telemetry, conversational voice uplink, and automated messaging campaign flows.
 

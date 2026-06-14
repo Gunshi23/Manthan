@@ -1,4 +1,4 @@
-﻿# Manthan: Autonomous Growth Marketing Command Center
+# Manthan: Autonomous Growth Marketing Command Center
 ## System Design & Architectural Specification
 
 This document details the system design, file mappings, data flow pipelines, and integration topologies of the **Manthan** Autonomous Growth Marketing Command Center.

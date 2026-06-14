@@ -1,4 +1,4 @@
-﻿import React, { useState } from "react";
+import React, { useState } from "react";
 import { Sparkles, Terminal, ArrowRight, Play, Activity } from "lucide-react";
 import { motion } from "framer-motion";
 import { GuidedDemoModal } from "../components/GuidedDemoModal";

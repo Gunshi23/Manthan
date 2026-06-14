@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { Shield, Eye, EyeOff, Lock, User, Cpu, UserPlus } from "lucide-react";
 import { auth } from "../services/firebase";
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from "firebase/auth";

@@ -1,4 +1,4 @@
-﻿import * as dotenv from "dotenv";
+import * as dotenv from "dotenv";
 dotenv.config();
 
 export const TWILIO_ACCOUNT_SID = process.env.TWILIO_ACCOUNT_SID || "";

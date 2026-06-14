@@ -1,4 +1,4 @@
-﻿import { getGeminiApiKey } from "../config/gemini";
+import { getGeminiApiKey } from "../config/gemini";
 
 // Helper to call Gemini REST API using native fetch
 export async function callGeminiAPI(

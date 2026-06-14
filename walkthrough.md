@@ -1,4 +1,4 @@
-﻿# Walkthrough: Customer Intelligence & Synchronization
+# Walkthrough: Customer Intelligence & Synchronization
 
 This document summarizes the changes made to build a Single Source Customer Intelligence Architecture, the Dual Customer Galaxy System, the Regional Intelligence Engine, the Navigation Restructure, and the Onboarding Questionnaire update inside Manthan.
 

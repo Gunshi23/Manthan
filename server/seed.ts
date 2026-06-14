@@ -1,4 +1,4 @@
-﻿import { db } from "./config/firebase";
+import { db } from "./config/firebase";
 
 const customers = [
   { id: "cust_1", name: "Aarav Mehta", email: "aarav.mehta@galaxy.net", phone: "+919876543210", segment: "Loyalists", ltv: 45000, purchaseCount: 8, churnRisk: 12, churnTrend: "stable" },

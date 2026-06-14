@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Gemini API utility for Manthan.ai.
  * Provides a helper to query the Gemini API using native fetch.
  */

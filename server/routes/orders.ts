@@ -1,4 +1,4 @@
-﻿import { Router } from "express";
+import { Router } from "express";
 import { db } from "../config/firebase";
 import { isResourceExhausted, getFallbackData } from "../utils/fallback";
 

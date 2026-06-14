@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { 
   ShoppingBag, Utensils, Dumbbell, Layers, Upload, Loader2, Check,
   FileText, Database, Play, Server, AlertCircle,

@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useOrbit } from "../context/OrbitContext";
 import type { BoardroomVerdict, Customer } from "../context/OrbitContext";
 import { callGeminiAPI, parseGeminiJson } from "../utils/gemini";

@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect, useRef, useMemo } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import {
   Sparkles, Activity, Compass, RefreshCw, TrendingUp,
   TrendingDown, AlertTriangle, CheckCircle2, Zap, Target, Brain,

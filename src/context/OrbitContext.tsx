@@ -1,4 +1,4 @@
-﻿import React, { createContext, useContext, useState, useEffect, useCallback, useRef, useMemo } from "react";
+import React, { createContext, useContext, useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { callGeminiAPI, parseGeminiJson } from "../utils/gemini";
 import { sendCampaign } from "../services/twilioService";
 import { sendEmailCampaign } from "../services/resendService";

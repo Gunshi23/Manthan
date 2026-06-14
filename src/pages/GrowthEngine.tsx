@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect, useCallback, useMemo } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import {
   Mail, MessageCircle, Phone, Layers, Sparkles, Edit3, Eye,
   BarChart3, RefreshCw, Wand2, Scissors, Dna, Play,

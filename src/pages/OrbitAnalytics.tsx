@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { 
   TrendingUp, Mail, MousePointer, ShoppingCart, Users, BarChart2, 
   ArrowUpRight, CheckCircle2, Download, 

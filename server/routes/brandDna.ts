@@ -1,4 +1,4 @@
-﻿import { Router } from "express";
+import { Router } from "express";
 import { generateBrandDNA } from "../services/geminiService";
 import { db } from "../config/firebase";
 

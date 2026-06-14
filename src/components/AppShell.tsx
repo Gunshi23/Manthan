@@ -1,4 +1,4 @@
-﻿import React, { useState, useRef, useEffect, useMemo } from "react";
+import React, { useState, useRef, useEffect, useMemo } from "react";
 import { 
   Terminal, Activity, Star, Zap, Users, Mic, BarChart2, 
   Radio, ChevronRight, Cpu,
@@ -12,7 +12,7 @@ type Page =
   | "command-center" 
   | "mission-control" 
   | "customer-galaxy" 
-  | "Manthan-personas"
+  | "orbit-personas"
   | "growth-engine" 
   | "future-simulator"
   | "opportunity-radar"
@@ -62,7 +62,7 @@ const NAV_SECTIONS: NavSection[] = [
     color: "#22c55e",
     items: [
       { id: "customer-galaxy",      icon: Star,        label: "Customer Galaxy",  shortLabel: "GLX", step: 1 },
-      { id: "Manthan-personas",       icon: Fingerprint, label: "Manthan.ai Personas",   shortLabel: "DNA", step: 2 },
+      { id: "orbit-personas",       icon: Fingerprint, label: "Manthan.ai Personas",   shortLabel: "DNA", step: 2 },
     ],
   },
   {

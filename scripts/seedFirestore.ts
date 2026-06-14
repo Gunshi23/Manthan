@@ -1,4 +1,4 @@
-﻿import { db } from "../server/config/firebase";
+import { db } from "../server/config/firebase";
 
 // Helper to clear collection
 async function clearCollection(name: string) {
