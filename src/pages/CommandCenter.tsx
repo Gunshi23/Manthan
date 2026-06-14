@@ -123,6 +123,10 @@ export const CommandCenter: React.FC = () => {
   /* selected agent profile card state */
   const [selectedAgent, setSelectedAgent] = useState<"Polaris" | "Vega" | "Nova" | "Atlas" | "Luna" | null>(null);
 
+  /* mobile sidebar drawers state */
+  const [showQuickMissions, setShowQuickMissions] = useState(false);
+  const [showAgentFeed, setShowAgentFeed] = useState(false);
+
   /* input */
   const [inputVal, setInputVal]       = useState("");
   const [isListening, setIsListening] = useState(false);
@@ -191,6 +195,8 @@ export const CommandCenter: React.FC = () => {
   const handleSubmit = useCallback((goal: string) => {
     if (!goal.trim()) return;
     setInputVal("");
+    setShowQuickMissions(false);
+    setShowAgentFeed(false);
     setMissionStarted(true);
     setActivationPhase(true);
     setActivationDone(false);
@@ -261,16 +267,20 @@ export const CommandCenter: React.FC = () => {
       {/* ════════════════════════════════════════
           LEFT SIDEBAR — Suggested Commands
       ════════════════════════════════════════ */}
-      <aside className="w-58 shrink-0 flex flex-col border-r border-gray-800/60 bg-gray-950/40 backdrop-blur-md overflow-y-auto relative z-10">
+      <aside className={`w-58 shrink-0 flex flex-col border-r border-gray-800/60 bg-gray-950/40 backdrop-blur-md overflow-y-auto relative z-10 transition-all duration-300
+        ${showQuickMissions ? "fixed inset-y-12 left-0 w-64 z-30 bg-[#050816] border-r border-gray-800 flex h-[calc(100vh-3rem)]" : "hidden xl:flex"}`}>
+        <div className="p-4 border-b border-gray-800/60 flex items-center justify-between">
+          <p className="font-mono text-[9px] text-gray-550 uppercase tracking-[0.15em]">Quick Missions</p>
+          <button onClick={() => setShowQuickMissions(false)} className="xl:hidden text-gray-550 hover:text-white cursor-pointer">✕</button>
+        </div>
         <div className="p-4 border-b border-gray-800/60">
-          <p className="font-mono text-[9px] text-gray-500 uppercase tracking-[0.15em] mb-3">Quick Missions</p>
           <div className="flex flex-col gap-1.5">
             {SUGGESTED_COMMANDS.map((cmd, i) => {
               const Icon = cmd.icon;
               return (
                 <button
                   key={i}
-                  onClick={() => { setInputVal(cmd.label); inputRef.current?.focus(); }}
+                  onClick={() => { setInputVal(cmd.label); inputRef.current?.focus(); setShowQuickMissions(false); }}
                   className="group flex items-start gap-2 p-2.5 rounded-lg border border-gray-850 bg-gray-900/10 hover:border-blue-500/30 hover:bg-blue-500/5 hover:shadow-[0_0_15px_rgba(59,130,246,0.1)] transition-all text-left cursor-pointer duration-200"
                 >
                   <Icon size={12} className="text-gray-500 group-hover:text-blue-400 shrink-0 mt-0.5 transition-colors" />
@@ -307,14 +317,11 @@ export const CommandCenter: React.FC = () => {
 
         {/* System status */}
         <div className="p-4 border-t border-gray-800/60 bg-gray-950/20">
-          <div className="flex flex-col gap-1.5">
+          <div className="flex flex-wrap gap-x-4 gap-y-1.5">
             {["Polaris", "Nova", "Vega", "Atlas", "Luna"].map(a => (
-              <div key={a} className="flex items-center justify-between">
-                <div className="flex items-center gap-1.5">
-                  <span className="w-1.5 h-1.5 rounded-full bg-orbit-success animate-pulse" />
-                  <span className="font-mono text-[9px] text-gray-400">{a}</span>
-                </div>
-                <span className="font-mono text-[8px] text-orbit-success">ONLINE</span>
+              <div key={a} className="flex items-center gap-1.5 min-w-[70px]">
+                <span className="w-1.5 h-1.5 rounded-full bg-orbit-success animate-pulse" />
+                <span className="font-mono text-[9px] text-gray-400">{a}</span>
               </div>
             ))}
           </div>
@@ -334,8 +341,28 @@ export const CommandCenter: React.FC = () => {
             onSelectAgent={setSelectedAgent}
             actions={
               <div className="flex items-center gap-4">
+                {/* Mobile sidebar toggles */}
+                <div className="xl:hidden flex items-center gap-1.5">
+                  <button 
+                    onClick={() => { setShowQuickMissions(!showQuickMissions); setShowAgentFeed(false); }}
+                    className={`px-2 py-1 rounded border font-mono text-[8.5px] cursor-pointer hover:border-gray-750 transition-colors ${
+                      showQuickMissions ? "bg-orbit-blue/20 text-orbit-blue border-orbit-blue/30" : "border-gray-800 bg-gray-950/40 text-gray-400"
+                    }`}
+                  >
+                    Missions
+                  </button>
+                  <button 
+                    onClick={() => { setShowAgentFeed(!showAgentFeed); setShowQuickMissions(false); }}
+                    className={`lg:hidden px-2 py-1 rounded border font-mono text-[8.5px] cursor-pointer hover:border-gray-750 transition-colors ${
+                      showAgentFeed ? "bg-orbit-purple/20 text-orbit-purple border-orbit-purple/30" : "border-gray-800 bg-gray-950/40 text-gray-400"
+                    }`}
+                  >
+                    Feed
+                  </button>
+                </div>
+
                 {/* HUD Diagnostic readout */}
-                <div className="hidden lg:flex items-center gap-4 font-mono text-[9px] text-gray-500 border border-gray-800/80 bg-gray-950/20 px-3 py-1.5 rounded-lg">
+                <div className="hidden lg:flex items-center gap-4 font-mono text-[9px] text-gray-550 border border-gray-800/80 bg-gray-950/20 px-3 py-1.5 rounded-lg">
                   <div className="flex items-center gap-1">
                     <span className={`w-1.5 h-1.5 rounded-full animate-pulse ${config.geminiKey ? "bg-orbit-success" : "bg-red-500"}`} />
                     <span>COGNITIVE NODE: {config.geminiKey ? "ONLINE" : "OFFLINE"}</span>
@@ -680,13 +707,14 @@ export const CommandCenter: React.FC = () => {
       {/* ════════════════════════════════════════
           RIGHT PANEL — Live Agent Activity
       ════════════════════════════════════════ */}
-      <aside className="w-64 shrink-0 flex flex-col border-l border-gray-800/60 bg-gray-950/40 backdrop-blur-md overflow-hidden relative z-10">
+      <aside className={`w-64 shrink-0 flex flex-col border-l border-gray-800/60 bg-gray-950/40 backdrop-blur-md overflow-hidden relative z-10 transition-all duration-300
+        ${showAgentFeed ? "fixed inset-y-12 right-0 w-72 z-30 bg-[#050816] border-l border-gray-800 flex h-[calc(100vh-3rem)]" : "hidden lg:flex"}`}>
         <div className="p-4 border-b border-gray-800/60 flex items-center justify-between bg-gray-950/20">
           <div className="flex items-center gap-2">
             <Radio size={12} className="text-orbit-success animate-pulse" />
             <span className="font-mono text-[9px] font-bold text-white uppercase tracking-widest">Live Agent Feed</span>
           </div>
-          <span className="font-mono text-[8px] text-orbit-success border border-orbit-success/30 bg-orbit-success/5 px-1.5 py-0.5 rounded-full animate-pulse">LIVE</span>
+          <button onClick={() => setShowAgentFeed(false)} className="lg:hidden text-gray-550 hover:text-white cursor-pointer">✕</button>
         </div>
 
         <div className="flex-1 overflow-y-auto p-3 space-y-2">
@@ -826,7 +854,7 @@ const MissionBanner: React.FC<{
         </div>
 
         {/* Lead agents row */}
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3">
           <span className="font-mono text-[9px] text-gray-500 uppercase tracking-wider">Lead Agents</span>
           {(["Polaris", "Vega", "Nova", "Atlas", "Luna"] as const).map(a => {
             const meta = AGENT_META[a];

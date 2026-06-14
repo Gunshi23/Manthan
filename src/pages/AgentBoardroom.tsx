@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useOrbit } from "../context/OrbitContext";
-import type { BoardroomVerdict } from "../context/OrbitContext";
+import type { BoardroomVerdict, Customer } from "../context/OrbitContext";
 import { callGeminiAPI, parseGeminiJson } from "../utils/gemini";
 import { 
   Zap, MessageSquare, Cpu, Users, BarChart2, Sparkles, 
@@ -656,52 +656,135 @@ const getTimeMachineSimulation = (days: number, region: string, persona: string,
   }
 };
 
-const generateDynamicFallbackScript = (region: string, persona: string, businessType: string): BoardroomMessage[] => {
+interface BoardroomCohortStats {
+  cohortSize: number;
+  avgRisk: number;
+  totalLTV: number;
+  preferredChannel: string;
+  primarySentiment: string;
+  recentReview: string;
+}
+
+const getBoardroomCohortStats = (customers: Customer[], region: string, persona: string): BoardroomCohortStats => {
+  const filtered = customers.filter(c => {
+    const rMatch = c.region?.toLowerCase() === region.toLowerCase();
+    const pMatch = c.persona?.toLowerCase() === persona.toLowerCase();
+    return rMatch && pMatch;
+  });
+
+  if (filtered.length === 0) {
+    return {
+      cohortSize: 0,
+      avgRisk: 0,
+      totalLTV: 0,
+      preferredChannel: "Email",
+      primarySentiment: "Neutral",
+      recentReview: "No direct customer reviews available for this cohort."
+    };
+  }
+
+  const cohortSize = filtered.length;
+  const avgRisk = Math.round(
+    filtered.reduce((sum, c) => sum + (c.riskScore ?? c.churnRisk ?? 0), 0) / cohortSize
+  );
+  const totalLTV = filtered.reduce((sum, c) => sum + (c.lifetimeValue ?? c.ltv ?? 0), 0);
+
+  const channelCounts: Record<string, number> = {};
+  filtered.forEach(c => {
+    const ch = c.preferredChannel || "Email";
+    channelCounts[ch] = (channelCounts[ch] || 0) + 1;
+  });
+  let preferredChannel = "Email";
+  let maxChannelCount = 0;
+  Object.entries(channelCounts).forEach(([ch, count]) => {
+    if (count > maxChannelCount) {
+      maxChannelCount = count;
+      preferredChannel = ch;
+    }
+  });
+
+  const sentimentCounts: Record<string, number> = {};
+  filtered.forEach(c => {
+    const s = c.sentiment || c.customerSentiment || "Neutral";
+    sentimentCounts[s] = (sentimentCounts[s] || 0) + 1;
+  });
+  let primarySentiment = "Neutral";
+  let maxSentimentCount = 0;
+  Object.entries(sentimentCounts).forEach(([s, count]) => {
+    if (count > maxSentimentCount) {
+      maxSentimentCount = count;
+      primarySentiment = s;
+    }
+  });
+
+  let recentReview = "";
+  for (const c of filtered) {
+    if (c.reviews && c.reviews.length > 0 && c.reviews[0]) {
+      recentReview = c.reviews[0];
+      break;
+    }
+  }
+  if (!recentReview) {
+    recentReview = "No recent review available for this cohort.";
+  }
+
+  return {
+    cohortSize,
+    avgRisk,
+    totalLTV,
+    preferredChannel,
+    primarySentiment,
+    recentReview
+  };
+};
+
+const generateDynamicFallbackScript = (region: string, persona: string, businessType: string, customers: Customer[]): BoardroomMessage[] => {
   const trends = getTrendAnalysis(region, persona, businessType);
   const isFashion = businessType.toLowerCase().includes("fashion") || businessType.toLowerCase().includes("apparel");
   const pName = persona;
+  const stats = getBoardroomCohortStats(customers, region, persona);
 
   const script: BoardroomMessage[] = [
     // ROUND 1: DISCOVERY & SCANS
     {
       agent: "Polaris",
-      message: `Sector scan complete for ${region}. Identified active profiles matching the '${pName}' archetype. Segment demand index stands at 92%.`,
+      message: `Sector scan complete for ${region}. Identified active profiles matching the '${pName}' archetype. Segment demand index stands at 92%. Mapped ${stats.cohortSize} customers within this region.`,
       confidence: 94,
       reasoning: `Matched segment parameters against active customer DB. Found high cluster density in ${region} region.`,
-      stats: `${pName} segment mapped`
+      stats: `${stats.cohortSize} profiles mapped`
     },
     {
       agent: "Luna",
-      message: `Audit of regional sales logs complete. Growth of current trend (${trends.currentTrend}) is slowing down. However, search trends show emerging demand for ${trends.emergingTrend} (+28% MoM).`,
+      message: `Audit of regional sales logs complete. The primary sentiment of this cohort is ${stats.primarySentiment}. Key customer review: "${stats.recentReview}".`,
       confidence: 93,
-      reasoning: `Queried product order logs and compared last 30 days vs previous 30 days. Emerging trend momentum is high.`,
-      stats: `${trends.emergingTrend} emerging`
+      reasoning: `Queried product order logs and compared last 30 days vs previous 30 days. Primary sentiment detected is ${stats.primarySentiment}.`,
+      stats: `${stats.primarySentiment} sentiment`
     },
     {
       agent: "Vega",
-      message: `Modeling 30-Day Demand forecast. Remaining on the current trend returns a flat revenue curve. Transitioning to ${trends.emergingTrend} yields a projected ₹45K revenue spike.`,
+      message: `Modeling 30-Day Demand forecast. Average risk is ${stats.avgRisk}%. Total cohort LTV stands at ₹${stats.totalLTV.toLocaleString()}. Transitioning to ${trends.emergingTrend} yields a projected ₹45K revenue spike.`,
       confidence: 88,
       reasoning: `Regression model based on regional conversion rate (4.2%) and average basket value (₹3,200).`,
-      stats: `30d: Stable / +₹45K`
+      stats: `LTV: ₹${stats.totalLTV.toLocaleString()}`
     },
     {
       agent: "Nova",
-      message: `Creative positioning prepared. Proposing campaign: '${isFashion ? "NEXT DROP" : "ORBIT COGNITIVE CORE"}'. We will focus styling around ${trends.emergingTrend} to target ${region} audiences.`,
+      message: `Creative positioning prepared. Proposing campaign: '${isFashion ? "NEXT DROP" : "ORBIT COGNITIVE CORE"}'. We will focus styling around ${trends.emergingTrend} via preferred channel: ${stats.preferredChannel}.`,
       confidence: 91,
-      reasoning: `A/B testing shows visual grids containing minimalist aesthetics drive 25% higher CTR on Gen Z & Professionals.`,
-      stats: "Campaign draft ready"
+      reasoning: `A/B testing shows visual grids containing minimalist aesthetics drive 25% higher CTR. Preferred channel is ${stats.preferredChannel}.`,
+      stats: `Preferred: ${stats.preferredChannel}`
     },
     {
       agent: "Atlas",
-      message: `Operations check. Standard delivery dispatch channels are responsive. We recommend scheduling dispatch on Tuesday 10:30 AM via RCS for maximum visual impact.`,
+      message: `Operations check. Preferred channel ${stats.preferredChannel} dispatch queue is responsive. We recommend scheduling dispatch on Tuesday 10:30 AM for maximum visual impact.`,
       confidence: 95,
       reasoning: `Checked API gateway queues, zero latency detected. SMS backup routes configured for push-disabled profiles.`,
-      stats: "Channels standby"
+      stats: `${stats.preferredChannel} standby`
     },
     // ROUND 2: DEEPER DEMOGRAPHICS & TRENDS
     {
       agent: "Polaris",
-      message: `Auditing audience demographics. This segment in ${region} is mostly aged ${persona.includes("Gen Z") ? "18-24" : "25-45"}, with high mobile engagement. They represent a high-value growth opportunity.`,
+      message: `Auditing audience demographics. This segment in ${region} is mostly aged ${pName.includes("Gen Z") ? "18-24" : "25-45"}, with high mobile engagement. They represent a high-value growth opportunity.`,
       confidence: 92,
       reasoning: `Aggregated age brackets and preferred channels for target customers. Mobile session count averages 6.2 per week.`,
       stats: "Demographics mapped"
@@ -715,10 +798,10 @@ const generateDynamicFallbackScript = (region: string, persona: string, business
     },
     {
       agent: "Vega",
-      message: `60-Day demand simulation complete. If we pivot stock, we forecast a cumulative revenue impact of ₹85K. If we delay, we risk losing 18% of this cohort's LTV.`,
+      message: `60-Day demand simulation complete. If we pivot stock, we forecast a cumulative revenue impact of ₹85K. If we delay, we risk losing 18% of this cohort's LTV of ₹${stats.totalLTV.toLocaleString()}.`,
       confidence: 90,
       reasoning: `Calculated churn hazard rates against delay times. Every week of delay increases cohort exit rate by 2.4%.`,
-      stats: "60d: Growth / +₹85K"
+      stats: `LTV at risk: ₹${Math.round(stats.totalLTV * 0.18).toLocaleString()}`
     },
     {
       agent: "Nova",
@@ -851,7 +934,7 @@ const generateDynamicFallbackScript = (region: string, persona: string, business
    AGENT BOARDROOM
  ───────────────────────────────────────────────────────────── */
 export const AgentBoardroom: React.FC = () => {
-  const { addAgentLog, config, businessType, latestVerdict, updateLatestVerdict } = useOrbit();
+  const { addAgentLog, config, businessType, latestVerdict, updateLatestVerdict, personas, customers } = useOrbit();
   const [selectedScenario, setSelectedScenario] = useState(0);
   const [debateActive, setDebateActive] = useState(false);
   const [debateMsgs, setDebateMsgs] = useState<BoardroomMessage[]>([]);
@@ -859,7 +942,16 @@ export const AgentBoardroom: React.FC = () => {
 
   // Selected Region and Persona states (Trend Intelligence)
   const [selectedRegion, setSelectedRegion] = useState<string>("North Delhi");
-  const [selectedPersona, setSelectedPersona] = useState<string>("Student / Gen Z");
+  const [selectedPersona, setSelectedPersona] = useState<string>("");
+
+  useEffect(() => {
+    if (personas && personas.length > 0) {
+      const exists = personas.some(p => p.name === selectedPersona);
+      if (!exists) {
+        setSelectedPersona(personas[0].name);
+      }
+    }
+  }, [personas, selectedPersona]);
 
   // Scanned trends state
   const [isScanningTrends, setIsScanningTrends] = useState<boolean>(false);
@@ -1126,7 +1218,17 @@ Format your response as a single valid JSON object matching this schema:
 }
 Do not return any markdown code block formatting. Only return the raw JSON object.`;
 
-          const prompt = `Business type: "${businessType}". Region: "${selectedRegion}". Persona: "${selectedPersona}". Current Trend: "${scannedTrends.currentTrend}". Emerging Trend: "${scannedTrends.emergingTrend}". Please generate a 25-message (5 rounds) debate between the agents.`;
+          const stats = getBoardroomCohortStats(customers, selectedRegion, selectedPersona);
+          const prompt = `Business type: "${businessType}". Region: "${selectedRegion}". Persona: "${selectedPersona}". Current Trend: "${scannedTrends.currentTrend}". Emerging Trend: "${scannedTrends.emergingTrend}". 
+Cohort Statistics for "${selectedPersona}" in "${selectedRegion}":
+- Cohort size: ${stats.cohortSize}
+- Average churn risk: ${stats.avgRisk}%
+- Total Lifetime Value (LTV): ₹${stats.totalLTV.toLocaleString()}
+- Preferred communication channel: ${stats.preferredChannel}
+- Primary customer sentiment: ${stats.primarySentiment}
+- Sample customer review: "${stats.recentReview}"
+
+Please generate a 25-message (5 rounds) debate between the agents (Polaris, Luna, Vega, Nova, Atlas in sequence for 5 rounds). Ensure the agents explicitly discuss these specific statistics, sentiments, and quotes in their arguments.`;
           const res = await callGeminiAPI(prompt, sys, config.geminiKey);
           const parsed = parseGeminiJson<any>(res, null);
           
@@ -1147,7 +1249,7 @@ Do not return any markdown code block formatting. Only return the raw JSON objec
       // If Gemini failed or key not present, use the fallback script
       if (generatedScript.length === 0) {
         addTelemetry(`Generating dynamic debate for ${selectedRegion} - ${selectedPersona}...`);
-        generatedScript = generateDynamicFallbackScript(selectedRegion, selectedPersona, businessType);
+        generatedScript = generateDynamicFallbackScript(selectedRegion, selectedPersona, businessType, customers);
         activeName = `${selectedRegion} ${selectedPersona} Strategic Pivot`;
         activeDesc = `Formulating pivot strategy for ${selectedPersona} in ${selectedRegion} from ${scannedTrends.currentTrend} to ${scannedTrends.emergingTrend}.`;
         setCurrentScenarioName(activeName);
@@ -1222,8 +1324,15 @@ Do not return any markdown code block formatting. Only return the raw JSON objec
                 disabled={debateActive}
                 className="w-full bg-gray-950 border border-gray-800 rounded-lg p-2 text-[10px] text-white focus:outline-none focus:border-purple-500/50 mt-1 cursor-pointer"
               >
-                {["Student / Gen Z", "Young Working Professional", "Homemaker", "Traditional Buyer", "Premium Fashion Enthusiast", "Festival Shopper"].map(p => (
-                  <option key={p} value={p}>{p.toUpperCase()}</option>
+                {(personas && personas.length > 0 ? personas : [
+                  { name: "Student / Gen Z" },
+                  { name: "Young Working Professional" },
+                  { name: "Homemaker" },
+                  { name: "Traditional Buyer" },
+                  { name: "Premium Fashion Enthusiast" },
+                  { name: "Festival Shopper" }
+                ]).map(p => (
+                  <option key={p.name} value={p.name}>{p.name.toUpperCase()}</option>
                 ))}
               </select>
             </div>

@@ -265,13 +265,13 @@ export const PageHeaderHUD: React.FC<PageHeaderHUDProps> = ({
             </button>
           </div>
         </div>
-        <div className="flex items-center gap-4">
+        <div className="flex flex-wrap items-center gap-4">
           <h1 className={`font-space text-2xl lg:text-3xl font-bold tracking-tight ${
             isLight ? "text-gray-900" : "text-white"
           }`}>
             {title}
           </h1>
-          {actions && <div className="flex items-center gap-2">{actions}</div>}
+          {actions && <div className="flex items-center gap-2 max-w-full overflow-x-auto scrollbar-none">{actions}</div>}
         </div>
         <p className={`text-[10px] font-mono mt-1 tracking-widest uppercase ${
           isLight ? "text-gray-550" : "text-gray-450"

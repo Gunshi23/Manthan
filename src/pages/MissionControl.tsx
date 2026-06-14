@@ -118,7 +118,7 @@ export const MissionControl: React.FC = () => {
     revenueGoal, theme, lunaMetrics, customers, addAgentLog,
     missions, refreshMissions, updateMissionStatus, duplicateMission, deleteMission,
     topPersona, riskPersona, growthPersona, highestRevenuePersona,
-    latestVerdict
+    latestVerdict, workspaceDna
   } = useOrbit();
   
   const isLight = theme === "executive";
@@ -1144,7 +1144,49 @@ export const MissionControl: React.FC = () => {
 
           {/* COLUMN 3: REVENUE ATTRIBUTION, MISSION HEALTH, timeline & COMMANDS */}
           <div className="space-y-6">
-            
+
+            {/* Business DNA HUD */}
+            {workspaceDna && (
+              <div className={`rounded-xl border p-4 space-y-3 ${isLight ? "bg-white border-gray-200" : "bg-gray-900/40 border-gray-800"}`}>
+                <div className="flex justify-between items-center border-b border-gray-800/60 pb-2">
+                  <span className="font-space text-xs font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
+                    <Database size={12} className="text-orbit-purple" />
+                    Business DNA
+                  </span>
+                  <span className={`font-mono text-[8px] px-2 py-0.5 rounded-full border ${workspaceDna.dataSource === "csv" ? "text-orbit-success border-orbit-success/30 bg-orbit-success/5" : "text-orbit-blue border-orbit-blue/30 bg-orbit-blue/5"}`}>
+                    {workspaceDna.dataSource === "csv" ? "📁 DATASET" : "⚡ PRESET"}
+                  </span>
+                </div>
+                <div className="space-y-2 font-mono text-[9px]">
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-500">Industry</span>
+                    <span className="text-white font-bold">{workspaceDna.industryType}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-500">Primary KPI</span>
+                    <span className="text-orbit-blue font-bold">{workspaceDna.primaryMetric}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-500">Top Category</span>
+                    <span className="text-white">{workspaceDna.topCategory}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-500">Growth Est.</span>
+                    <span className="text-orbit-success font-bold">+{workspaceDna.growthRate}% MoM</span>
+                  </div>
+                </div>
+                <div className="border-t border-gray-800/60 pt-2">
+                  <span className="font-mono text-[7px] text-gray-600 uppercase block mb-1.5">Top Opportunities</span>
+                  {workspaceDna.opportunities.slice(0, 2).map((opp, i) => (
+                    <div key={i} className="flex items-start gap-1.5 mb-1">
+                      <div className="w-1 h-1 rounded-full bg-orbit-success mt-1.5 shrink-0" />
+                      <span className="font-mono text-[8.5px] text-gray-400 leading-tight">{opp}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {/* Latest Boardroom Verdict */}
             {latestVerdict && (
               <div className={`rounded-xl border p-5 space-y-4 ${isLight ? "bg-white border-gray-200" : "bg-gray-900/40 border-gray-800"}`}>

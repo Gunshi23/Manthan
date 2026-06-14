@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect, useCallback, use
 import { callGeminiAPI, parseGeminiJson } from "../utils/gemini";
 import { sendCampaign } from "../services/twilioService";
 import { sendEmailCampaign } from "../services/resendService";
+import * as XLSX from "xlsx";
 
 // Theme types
 export type ThemeMode = "command-center" | "executive";
@@ -59,6 +60,26 @@ export interface Customer {
   x: number; // Galaxy coordinate
   y: number; // Galaxy coordinate
   region: string;
+  
+  customerId?: string;
+  persona?: string;
+  totalSpent?: number;
+  lastPurchaseDate?: string;
+  riskScore?: number;
+  lifetimeValue?: number;
+  ordersCount?: number;
+  customerSentiment?: "Positive" | "Neutral" | "Negative";
+  growthOpportunity?: string;
+  reviews?: string[];
+  sentiment?: "Positive" | "Neutral" | "Negative";
+  lifecycleStage?: "Recent Buyer" | "Cooling Period" | "Miss You" | "Inactive" | "Dormant";
+  birthday?: string;   // "MM-DD" format e.g. "02-14"
+  ageGroup?: "Teen" | "Young Adult" | "Adult" | "Senior"; // for Seasonal Intelligence targeting
+  // Regional Intelligence fields
+  city?: string;
+  state?: string;
+  pincode?: string;
+  country?: string;
 }
 
 // Campaign Interface
@@ -163,6 +184,41 @@ export interface BoardroomVerdict {
   timestamp: string;
 }
 
+// Business DNA — the universal profile derived from uploaded data or manual setup
+export interface BusinessDNA {
+  // Core identity
+  industryType: string;          // e.g. "Restaurant", "Gym", "Fashion Brand"
+  businessModel: string;         // e.g. "B2C Subscription", "D2C Retail"
+  detectedLanguage: string;      // e.g. "INR", "USD"
+  currency: string;
+  
+  // Key metrics extracted from data
+  totalRevenue: number;
+  totalCustomers: number;
+  totalTransactions: number;
+  avgOrderValue: number;
+  topProduct: string;
+  topCategory: string;
+  growthRate: number;            // % month-over-month estimated
+  
+  // AI-derived insights
+  primaryMetric: string;         // Most important KPI for this industry
+  secondaryMetric: string;
+  riskAreas: string[];           // Top 3 risk areas
+  opportunities: string[];       // Top 3 opportunities
+  
+  // Data source metadata
+  dataSource: "csv" | "json" | "manual" | "preset";
+  columns: string[];             // Detected column names from upload
+  sampleRows: number;            // Row count of uploaded file
+  uploadedAt: string;            // ISO timestamp
+  
+  // Personalization hooks
+  suggestedPersonaNames: string[]; // Industry-appropriate persona archetypes
+  suggestedCampaignTypes: string[];
+  primaryChannel: string;
+}
+
 interface OrbitContextType {
   theme: ThemeMode;
   setTheme: (theme: ThemeMode) => void;
@@ -171,6 +227,9 @@ interface OrbitContextType {
   orders: Order[];
   agentLogs: AgentLog[];
   config: SystemConfig;
+  selectedCustomerId: string | null;
+  setSelectedCustomerId: (id: string | null) => void;
+  updateCustomer: (customerId: string, updatedFields: Partial<Customer>) => void;
   mission: MissionState;
   revenueGoal: number;
   growthScore: number;
@@ -184,6 +243,7 @@ interface OrbitContextType {
   updateConfig: (newConfig: Partial<SystemConfig>) => void;
   startMission: (goal: string) => void;
   launchMissionCampaign: (channel: "Email" | "WhatsApp" | "SMS" | "RCS") => void;
+  addCampaign: (campaign: Campaign) => void;
   cancelMission: () => void;
   runSimulationStep: () => void;
   clearSimData: () => void;
@@ -201,6 +261,23 @@ interface OrbitContextType {
   generatePersonas: () => Promise<void>;
   latestVerdict: BoardroomVerdict | null;
   updateLatestVerdict: (verdict: BoardroomVerdict) => void;
+  // Universal Business Intelligence & Workspaces
+  workspaceDna: BusinessDNA | null;
+  isAnalyzingDataset: boolean;
+  uploadDatasetAndReconfigure: (file: File) => Promise<void>;
+  applyDnaPreset: (industryKey: string) => void;
+  workspaces: WorkspaceMetadata[];
+  currentWorkspaceId: string | null;
+  switchWorkspace: (id: string) => Promise<void>;
+  deleteWorkspace: (id: string) => void;
+}
+
+export interface WorkspaceMetadata {
+  id: string;
+  name: string;
+  type: "demo" | "uploaded";
+  businessType: string;
+  uploadedAt?: string;
 }
 
 const OrbitContext = createContext<OrbitContextType | undefined>(undefined);
@@ -251,7 +328,20 @@ const generateMockCustomers = (businessType: string = "Fashion & Apparel"): Cust
     categories = ["Server Cluster Licenses", "Dedicated API Gateways", "Cognitive Nodes SaaS", "Master DB Integrations", "Orbit Cloud Access", "SLA Support Nodes"];
   }
 
-  const regions = ["North Delhi", "South Delhi", "Mumbai", "Bangalore", "Lucknow", "Noida"];
+  // Geo data pool — 10 Indian cities
+  const GEO_POOL = [
+    { city: "New Delhi",  state: "Delhi",          region: "North Delhi",  pincode: "110001", country: "India" },
+    { city: "Noida",      state: "Uttar Pradesh",   region: "Noida",       pincode: "201301", country: "India" },
+    { city: "Lucknow",    state: "Uttar Pradesh",   region: "Lucknow",     pincode: "226001", country: "India" },
+    { city: "Mumbai",     state: "Maharashtra",     region: "Mumbai",      pincode: "400001", country: "India" },
+    { city: "Pune",       state: "Maharashtra",     region: "South Delhi", pincode: "411001", country: "India" },
+    { city: "Bangalore",  state: "Karnataka",       region: "Bangalore",   pincode: "560001", country: "India" },
+    { city: "Chennai",    state: "Tamil Nadu",       region: "Bangalore",   pincode: "600001", country: "India" },
+    { city: "Hyderabad",  state: "Telangana",       region: "South Delhi", pincode: "500001", country: "India" },
+    { city: "Kolkata",    state: "West Bengal",     region: "Noida",       pincode: "700001", country: "India" },
+    { city: "Ahmedabad",  state: "Gujarat",         region: "Mumbai",      pincode: "380001", country: "India" },
+  ];
+
   const list: Customer[] = [];
 
   for (let i = 0; i < 80; i++) {
@@ -289,6 +379,18 @@ const generateMockCustomers = (businessType: string = "Fashion & Apparel"): Cust
     const predictedNextPurchase = churnRisk > 80 ? "Unlikely" : `In ${1 + Math.floor(Math.random() * 3)} weeks (${months[new Date().getMonth() % 12]} ${Math.floor(Math.random() * 28) + 1})`;
     const predictedCategory = categories[Math.floor(Math.random() * categories.length)];
 
+    // Generate a random birthday (month-day)
+    const bdMonth = String(1 + (i * 7 % 12)).padStart(2, "0");
+    const bdDay = String(1 + (i * 13 % 28)).padStart(2, "0");
+    const birthday = `${bdMonth}-${bdDay}`;
+
+    // ageGroup derived from persona segment index
+    const ageGroupPool: Customer["ageGroup"][] = ["Teen", "Young Adult", "Adult", "Senior"];
+    const ageGroup = ageGroupPool[(i * 3) % ageGroupPool.length];
+
+    // Geo assignment
+    const geo = GEO_POOL[i % GEO_POOL.length];
+
     list.push({
       id: `cust_${1000 + i}`,
       name,
@@ -306,7 +408,13 @@ const generateMockCustomers = (businessType: string = "Fashion & Apparel"): Cust
       avatar: `https://images.unsplash.com/photo-${1500000000000 + (i * 100000)}?auto=format&fit=crop&w=100&h=100&q=80`,
       x,
       y,
-      region: regions[i % regions.length]
+      region: geo.region,
+      birthday,
+      ageGroup,
+      city: geo.city,
+      state: geo.state,
+      pincode: geo.pincode,
+      country: geo.country,
     });
   }
 
@@ -582,16 +690,178 @@ const mapCustomersToPersonas = (customers: Customer[], businessType: string): Pe
       aiInsightsTargeting: "Festival shoppers buy in large batches but exhibit high dormancy. Re-engaging them with holiday lookbooks and guaranteed cutoff delivery times captures seasonal peaks."
     }
   ];
-};;
+};
+
+const getPersonaName = (c: Customer, dna: BusinessDNA | null): string => {
+  let idx = 0;
+  if (c.segment === "New Signups") {
+    idx = 0;
+  } else if (c.segment === "Loyalists" && c.ltv < 4000) {
+    idx = 1;
+  } else if (c.segment === "Slipping Away" && c.purchaseCount < 4) {
+    idx = 2;
+  } else if (c.segment === "Slipping Away" && c.purchaseCount >= 4) {
+    idx = 3;
+  } else if (c.segment === "Loyalists" && c.ltv >= 4000) {
+    idx = 4;
+  } else if (c.segment === "High-Value Inactive") {
+    idx = 5;
+  }
+  
+  if (dna && dna.suggestedPersonaNames && dna.suggestedPersonaNames[idx]) {
+    return dna.suggestedPersonaNames[idx];
+  }
+  
+  const fallbacks = [
+    "Student / Gen Z",
+    "Young Working Professional",
+    "Homemaker",
+    "Traditional Buyer",
+    "Premium Fashion Enthusiast",
+    "Festival Shopper"
+  ];
+  return fallbacks[idx];
+};
+
+const getEnrichedCustomers = (rawCustomers: Customer[], rawOrders: Order[], dna: BusinessDNA | null): Customer[] => {
+  return rawCustomers.map(c => {
+    const customerOrders = rawOrders.filter(o => o.customerId === c.id);
+    const sortedOrders = [...customerOrders].sort((a, b) => b.date.localeCompare(a.date));
+    
+    let lastPurchaseDate = "2026-05-15";
+    if (sortedOrders[0]) {
+      lastPurchaseDate = sortedOrders[0].date;
+    } else {
+      const idNum = parseInt(c.id.replace(/\D/g, "")) || 0;
+      let daysAgo = 10;
+      if (c.segment === "Loyalists") {
+        daysAgo = 10 + (idNum % 30);
+      } else if (c.segment === "New Signups") {
+        daysAgo = 1 + (idNum % 15);
+      } else if (c.segment === "Slipping Away") {
+        daysAgo = 61 + (idNum % 45);
+      } else if (c.segment === "High-Value Inactive") {
+        daysAgo = 100 + (idNum % 120);
+      }
+      
+      const calcDate = new Date(new Date("2026-06-14").getTime() - daysAgo * 24 * 60 * 60 * 1000);
+      lastPurchaseDate = calcDate.toISOString().split("T")[0];
+    }
+
+    const currentDate = new Date("2026-06-14");
+    const lastDate = new Date(lastPurchaseDate);
+    const diffTime = Math.abs(currentDate.getTime() - lastDate.getTime());
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    
+    let lifecycleStage: "Recent Buyer" | "Cooling Period" | "Miss You" | "Inactive" | "Dormant" = "Dormant";
+    if (diffDays <= 30) lifecycleStage = "Recent Buyer";
+    else if (diffDays <= 60) lifecycleStage = "Cooling Period";
+    else if (diffDays <= 90) lifecycleStage = "Miss You";
+    else if (diffDays <= 180) lifecycleStage = "Inactive";
+
+    const totalSpent = customerOrders.reduce((sum, o) => sum + o.amount, 0) || c.ltv || 0;
+    const ordersCount = customerOrders.length || c.purchaseCount || 0;
+    
+    const personaName = getPersonaName(c, dna);
+
+    let sentiment: "Positive" | "Neutral" | "Negative" = "Neutral";
+    let reviews: string[] = [];
+    
+    const idNum = parseInt(c.id.replace(/\D/g, "")) || 0;
+    if (c.segment === "Loyalists" || c.churnRisk < 30) {
+      sentiment = "Positive";
+      const pool = [
+        "Excellent experience, absolutely love the quality and design!",
+        "Prompt delivery and very friendly support. Highly recommended.",
+        "Perfect fit and material. Will definitely buy again.",
+        "The best brand in the market. Consistent performance and superb style."
+      ];
+      reviews = [pool[idNum % pool.length], pool[(idNum + 1) % pool.length]];
+    } else if (c.segment === "Slipping Away" || c.churnRisk > 70) {
+      sentiment = "Negative";
+      const pool = [
+        "Disappointed with the recent purchase. Quality has gone down.",
+        "Customer support was unresponsive when I asked for a return.",
+        "Overpriced for the build quality. Looking for alternatives.",
+        "Delivery was delayed by a week, and the package was slightly damaged."
+      ];
+      reviews = [pool[idNum % pool.length]];
+    } else if (c.segment === "High-Value Inactive") {
+      sentiment = "Neutral";
+      const pool = [
+        "Loved the premium collection, but haven't seen any new styles lately.",
+        "Great service in the past, but the app has been lagging recently.",
+        "Decent collection, but I wish there were more budget-friendly options.",
+        "Good experience overall, though I haven't bought anything in a while."
+      ];
+      reviews = [pool[idNum % pool.length]];
+    } else {
+      sentiment = "Positive";
+      const pool = [
+        "Nice onboarding experience, eagerly waiting to place my next order.",
+        "Smooth check-out process. Looking forward to exploring more products.",
+        "Decent quality, but shipping took a bit longer than expected."
+      ];
+      reviews = [pool[idNum % pool.length]];
+    }
+
+    const finalReviews = c.reviews && c.reviews.length > 0 ? c.reviews : reviews;
+    const finalSentiment = c.sentiment || sentiment;
+
+    let growthOpportunity = "Cross-sell premium accessories and early access VIP releases. Target average order value increase of 25%.";
+    if (c.segment === "Slipping Away") {
+      growthOpportunity = "Launch high-intent re-engagement campaign via WhatsApp with a 15% discount code valid for 48 hours.";
+    } else if (c.segment === "High-Value Inactive") {
+      growthOpportunity = "Deploy win-back flow featuring personalized collection highlights and an exclusive milestone gift.";
+    } else if (c.segment === "New Signups") {
+      growthOpportunity = "Nurture with first-purchase welcome series. Highlight top-selling items in their preferred channel.";
+    }
+
+    return {
+      ...c,
+      customerId: c.id,
+      persona: personaName,
+      totalSpent,
+      lastPurchaseDate,
+      riskScore: c.churnRisk,
+      lifetimeValue: c.ltv,
+      ordersCount,
+      reviews: finalReviews,
+      sentiment: finalSentiment,
+      lifecycleStage,
+      customerSentiment: finalSentiment,
+      growthOpportunity,
+      birthday: c.birthday,
+      ageGroup: c.ageGroup,
+      city: c.city,
+      state: c.state,
+      pincode: c.pincode,
+      country: c.country,
+    };
+  });
+};
 
 export const OrbitProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
   const [theme, setThemeState] = useState<ThemeMode>("command-center");
+  const [workspaces, setWorkspaces] = useState<WorkspaceMetadata[]>(() => {
+    const saved = localStorage.getItem("orbit_workspaces");
+    return saved ? JSON.parse(saved) : [];
+  });
+
+  const [currentWorkspaceId, setCurrentWorkspaceId] = useState<string | null>(() => {
+    return localStorage.getItem("orbit_current_workspace_id") || null;
+  });
+
   const [businessType, setBusinessType] = useState<string>(() => {
+    const currentId = localStorage.getItem("orbit_current_workspace_id");
+    if (!currentId) return "Fashion & Apparel";
     return localStorage.getItem("orbit_business_type") || "Fashion & Apparel";
   });
 
   const [latestVerdict, setLatestVerdict] = useState<BoardroomVerdict | null>(() => {
+    const currentId = localStorage.getItem("orbit_current_workspace_id");
+    if (!currentId) return null;
     const saved = localStorage.getItem("orbit_latest_verdict");
     if (saved) return JSON.parse(saved);
     const isFashion = businessType.toLowerCase().includes("fashion") || businessType.toLowerCase().includes("apparel");
@@ -622,7 +892,18 @@ export const OrbitProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   const [missions, setMissions] = useState<any[]>([]);
 
-  const [customers, setCustomers] = useState<Customer[]>(() => {
+  // Universal Business Intelligence - Business DNA
+  const [workspaceDna, setWorkspaceDna] = useState<BusinessDNA | null>(() => {
+    const currentId = localStorage.getItem("orbit_current_workspace_id");
+    if (!currentId) return null;
+    const saved = localStorage.getItem("orbit_workspace_dna");
+    return saved ? JSON.parse(saved) : null;
+  });
+  const [isAnalyzingDataset, setIsAnalyzingDataset] = useState(false);
+
+  const [rawCustomers, setCustomers] = useState<Customer[]>(() => {
+    const currentId = localStorage.getItem("orbit_current_workspace_id");
+    if (!currentId) return [];
     const saved = localStorage.getItem("orbit_customers");
     const savedType = localStorage.getItem("orbit_business_type") || "Fashion & Apparel";
     if (!saved) return generateMockCustomers(savedType);
@@ -652,14 +933,28 @@ export const OrbitProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       };
     });
   });
-  
+
   const [orders, setOrders] = useState<Order[]>(() => {
+    const currentId = localStorage.getItem("orbit_current_workspace_id");
+    if (!currentId) return [];
     const saved = localStorage.getItem("orbit_orders");
     const savedType = localStorage.getItem("orbit_business_type") || "Fashion & Apparel";
     return saved ? JSON.parse(saved) : generateMockOrders(generateMockCustomers(savedType), savedType);
   });
 
+  const [selectedCustomerId, setSelectedCustomerId] = useState<string | null>(null);
+
+  const customers = useMemo(() => {
+    return getEnrichedCustomers(rawCustomers, orders, workspaceDna);
+  }, [rawCustomers, orders, workspaceDna]);
+
+  const updateCustomer = useCallback((id: string, updatedFields: Partial<Customer>) => {
+    setCustomers(prev => prev.map(c => c.id === id ? { ...c, ...updatedFields } : c));
+  }, []);
+
   const [campaigns, setCampaigns] = useState<Campaign[]>(() => {
+    const currentId = localStorage.getItem("orbit_current_workspace_id");
+    if (!currentId) return [];
     const saved = localStorage.getItem("orbit_campaigns");
     return saved ? JSON.parse(saved) : [
       {
@@ -723,6 +1018,8 @@ export const OrbitProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   });
 
   const [personas, setPersonas] = useState<Persona[]>(() => {
+    const currentId = localStorage.getItem("orbit_current_workspace_id");
+    if (!currentId) return [];
     const saved = localStorage.getItem("orbit_personas");
     if (saved) return JSON.parse(saved);
     const savedType = localStorage.getItem("orbit_business_type") || "Fashion & Apparel";
@@ -790,6 +1087,8 @@ export const OrbitProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   });
 
   const [lunaMetrics, setLunaMetrics] = useState<LunaMetrics>(() => {
+    const currentId = localStorage.getItem("orbit_current_workspace_id");
+    if (!currentId) return { recoverableRevenue: 0, opportunityScore: 0, inactiveCustomers: 0, abandonedLeads: 0, recoveryConfidence: 0 };
     const saved = localStorage.getItem("orbit_luna_metrics");
     return saved ? JSON.parse(saved) : {
       recoverableRevenue: 20550,
@@ -874,6 +1173,12 @@ export const OrbitProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   useEffect(() => {
     localStorage.setItem("orbit_personas", JSON.stringify(personas));
   }, [personas]);
+
+  useEffect(() => {
+    if (workspaceDna) {
+      localStorage.setItem("orbit_workspace_dna", JSON.stringify(workspaceDna));
+    }
+  }, [workspaceDna]);
 
   // Sync personas dynamically when customer base changes locally
   useEffect(() => {
@@ -1030,15 +1335,19 @@ export const OrbitProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   * High-Value Inactive: ${inactive.length} customers (average LTV: ₹${avgInactiveLtv})
   * New Signups: ${newSignups.length} customers (average LTV: ₹${avgNewLtv})
 - Channel preferences: WhatsApp (${channelsCount.WhatsApp}), Email (${channelsCount.Email}), SMS (${channelsCount.SMS}), RCS (${channelsCount.RCS})
-- Business Type: "${businessType}"
+- Business Type: "${workspaceDna ? workspaceDna.industryType : businessType}"
+${workspaceDna ? `- Primary Metric: ${workspaceDna.primaryMetric}
+- Business Model: ${workspaceDna.businessModel}
+- Top Category: ${workspaceDna.topCategory}
+- Suggested Persona Names: ${workspaceDna.suggestedPersonaNames.join(", ")}` : ""}
 
-Generate exactly 6 customer personas/archetypes representing this customer base:
-1. Student / Gen Z (Age Range 18-24, digital-native, budget-conscious)
+Generate exactly 6 customer personas/archetypes that are SPECIFIC to the "${workspaceDna ? workspaceDna.industryType : businessType}" business.
+${workspaceDna ? `Use these industry-specific persona names: ${workspaceDna.suggestedPersonaNames.slice(0, 6).map((n, i) => `${i + 1}. ${n}`).join(", ")}` : `1. Student / Gen Z (Age Range 18-24, digital-native, budget-conscious)
 2. Young Working Professional (Age Range 25-34, fast-paced, convenience-oriented)
 3. Homemaker (Age Range 35-50, family-centric, comfort/value-focused)
 4. Traditional Buyer (Age Range 50+, classic styling, low digital engagement)
 5. Premium Fashion Enthusiast (Age Range 28-45, luxury, status-driven)
-6. Festival Shopper (Age Range 21-40, high-volume event/occasion seasonal purchases)
+6. Festival Shopper (Age Range 21-40, high-volume event/occasion seasonal purchases)`}
 
 For each persona, generate:
 1. Name (exactly one of the 6 names above)
@@ -1126,11 +1435,332 @@ Return a single valid JSON object with a "personas" array containing these 6 per
     const localPersonas = mapCustomersToPersonas(customers, businessType);
     setPersonas(localPersonas);
     addAgentLog("Polaris", `Clustered ${localPersonas.length} Customer DNA profiles dynamically using local mapping.`, "result");
-  }, [customers, businessType, config.geminiKey, addAgentLog]);
+  }, [customers, businessType, workspaceDna, config.geminiKey, addAgentLog]);
+
+  // ─── UNIVERSAL BUSINESS INTELLIGENCE ENGINE ─────────────────────────────────
+
+  /** Parse a CSV string into array of row objects */
+  const parseCSV = (text: string): Record<string, string>[] => {
+    const lines = text.split(/\r?\n/).filter(l => l.trim());
+    if (lines.length < 2) return [];
+    const headers = lines[0].split(",").map(h => h.trim().replace(/^"|"$/g, ""));
+    return lines.slice(1).map(line => {
+      const vals = line.split(",").map(v => v.trim().replace(/^"|"$/g, ""));
+      const obj: Record<string, string> = {};
+      headers.forEach((h, i) => { obj[h] = vals[i] ?? ""; });
+      return obj;
+    });
+  };
+
+  /** Detect currency/language from column values */
+  const detectCurrency = (rows: Record<string, string>[]): string => {
+    const sample = rows.slice(0, 20).map(r => Object.values(r).join(" ")).join(" ");
+    if (/₹|INR|Rs\.?/i.test(sample)) return "INR";
+    if (/\$|USD/i.test(sample)) return "USD";
+    if (/€|EUR/i.test(sample)) return "EUR";
+    if (/£|GBP/i.test(sample)) return "GBP";
+    return "INR"; // default for Indian market
+  };
+
+  /** Build a lightweight summary of column data for Gemini */
+  const buildDataSummary = (headers: string[], rows: Record<string, string>[], maxRows = 8): string => {
+    const sample = rows.slice(0, maxRows).map(r => headers.map(h => `${h}: ${r[h] ?? ""}`).join(" | ")).join("\n");
+    return `Columns: ${headers.join(", ")}\nSample rows (${Math.min(maxRows, rows.length)} of ${rows.length}):\n${sample}`;
+  };
+
+  /** Generate a fallback DNA for a given industry when Gemini is unavailable */
+  const buildFallbackDna = (industryType: string, totalRevenue: number, totalCustomers: number, columns: string[], sampleRows: number): BusinessDNA => {
+    const dnaPrefabs: Record<string, Partial<BusinessDNA>> = {
+      "restaurant": { businessModel: "B2C Food Service", primaryMetric: "Orders", secondaryMetric: "Avg Check Size", topProduct: "Signature Dish", topCategory: "Dine-In", growthRate: 12, riskAreas: ["Weekend capacity limits", "High staff turnover", "Food cost inflation"], opportunities: ["Lunch corporate delivery", "Loyalty punch-card program", "Weekend brunch upsell"], suggestedPersonaNames: ["Regular Diner", "Corporate Lunch Crowd", "Weekend Foodie", "Health-Conscious Eater", "Delivery-Only Customer", "Special Occasion Guest"], suggestedCampaignTypes: ["Weekday lunch combo", "Birthday perks", "Table pre-booking"], primaryChannel: "WhatsApp" },
+      "gym": { businessModel: "B2C Subscription", primaryMetric: "Active Members", secondaryMetric: "Churn Rate", topProduct: "Monthly Membership", topCategory: "Fitness", growthRate: 18, riskAreas: ["New year churn spike", "Unused memberships", "Competitor pricing"], opportunities: ["Personal training upsell", "Supplement retail", "Corporate wellness packages"], suggestedPersonaNames: ["Weekend Warrior", "Daily Fitness Devotee", "Corporate Wellness Buyer", "New Year Resolver", "Weight-Loss Seeker", "Athlete in Training"], suggestedCampaignTypes: ["Renewal reminder", "Referral program", "Personal trainer promo"], primaryChannel: "WhatsApp" },
+      "real estate": { businessModel: "B2C Property Sales & Rental", primaryMetric: "Listings Closed", secondaryMetric: "Revenue Per Deal", topProduct: "2BHK Apartment", topCategory: "Residential", growthRate: 8, riskAreas: ["Interest rate hikes", "Slow inventory movement", "Lead-to-closure ratio"], opportunities: ["NRI investor outreach", "Pre-launch access programs", "Smart home upgrades"], suggestedPersonaNames: ["First-Time Buyer", "Real Estate Investor", "NRI Buyer", "Upgrader Family", "Rental Seeker", "Commercial Buyer"], suggestedCampaignTypes: ["Site visit invite", "Pre-launch offer", "Investment ROI report"], primaryChannel: "Email" },
+      "hospital": { businessModel: "B2C Healthcare", primaryMetric: "Patient Visits", secondaryMetric: "Revenue Per Consultation", topProduct: "General OPD", topCategory: "Primary Care", growthRate: 10, riskAreas: ["Patient retention", "Insurance claim delays", "Seasonal surge management"], opportunities: ["Health check packages", "Telemedicine expansion", "Corporate tie-ups"], suggestedPersonaNames: ["Regular Patient", "Preventive Care Seeker", "Corporate Tie-Up Patient", "Senior Citizen", "Pediatric Care Parent", "Emergency Walk-In"], suggestedCampaignTypes: ["Annual health check", "Vaccination reminder", "Specialist appointment"], primaryChannel: "SMS" },
+      "saas": { businessModel: "B2B SaaS Subscription", primaryMetric: "MRR", secondaryMetric: "Churn Rate", topProduct: "Pro Plan", topCategory: "Productivity Software", growthRate: 25, riskAreas: ["Free-to-paid conversion", "Enterprise churn risk", "Feature adoption gap"], opportunities: ["Annual plan upgrades", "Add-on seat sales", "API partner integrations"], suggestedPersonaNames: ["Startup Founder", "Enterprise Admin", "Individual Developer", "SMB Operations Team", "Tech-First Power User", "Cost-Conscious Evaluator"], suggestedCampaignTypes: ["Trial expiry nudge", "Upgrade to annual", "Feature education email"], primaryChannel: "Email" },
+      "electronics": { businessModel: "B2C Retail", primaryMetric: "Units Sold", secondaryMetric: "Margin Per SKU", topProduct: "Smartphone", topCategory: "Mobile & Accessories", growthRate: 14, riskAreas: ["Post-season inventory", "Grey market pricing", "Return rates"], opportunities: ["Extended warranty sales", "Smart home bundle", "Corporate bulk orders"], suggestedPersonaNames: ["Tech Enthusiast", "Budget Buyer", "Corporate Procurement", "Upgrade Seeker", "Gift Buyer", "Brand Loyalist"], suggestedCampaignTypes: ["Festive exchange offer", "EMI zero-cost", "New launch pre-order"], primaryChannel: "RCS" },
+      "coaching": { businessModel: "B2C Education Services", primaryMetric: "Enrollments", secondaryMetric: "Batch Fill Rate", topProduct: "JEE / NEET Batch", topCategory: "Competitive Exam Prep", growthRate: 20, riskAreas: ["Mid-session dropout", "Faculty quality consistency", "Online competitor pricing"], opportunities: ["Doubt-clearing sessions", "Mock test series", "Parent engagement portal"], suggestedPersonaNames: ["Aspirant Student", "Parent Decision Maker", "Repeater Candidate", "Online Learner", "Scholarship Seeker", "Drop-Year Student"], suggestedCampaignTypes: ["Free demo class", "Scholarship test", "Result success story"], primaryChannel: "WhatsApp" },
+      "travel": { businessModel: "B2C Travel Agency", primaryMetric: "Bookings", secondaryMetric: "Revenue Per Booking", topProduct: "International Tour Package", topCategory: "Leisure Travel", growthRate: 22, riskAreas: ["Last-minute cancellations", "Visa rejection impact", "Seasonal demand spikes"], opportunities: ["Honeymoon package upsell", "Corporate MICE bookings", "Solo traveler groups"], suggestedPersonaNames: ["Honeymoon Planner", "Family Vacationer", "Solo Explorer", "Budget Backpacker", "Luxury Traveler", "Corporate Traveler"], suggestedCampaignTypes: ["Early bird offer", "Flash sale weekend", "Visa-free destination promo"], primaryChannel: "WhatsApp" },
+      "fashion": { businessModel: "D2C Fashion Brand", primaryMetric: "Revenue", secondaryMetric: "Repeat Purchase Rate", topProduct: "Oversized Streetwear", topCategory: "Casual Wear", growthRate: 15, riskAreas: ["Inventory clearance", "Trend obsolescence", "Return rates"], opportunities: ["VIP early access drops", "Festival collection", "Gen Z social commerce"], suggestedPersonaNames: ["Student / Gen Z", "Young Working Professional", "Homemaker", "Traditional Buyer", "Premium Fashion Enthusiast", "Festival Shopper"], suggestedCampaignTypes: ["New collection drop", "VIP pre-launch", "Flash sale"], primaryChannel: "RCS" }
+    };
+    const key = Object.keys(dnaPrefabs).find(k => industryType.toLowerCase().includes(k)) || "fashion";
+    const prefab = dnaPrefabs[key] || dnaPrefabs["fashion"];
+    return {
+      industryType,
+      businessModel: prefab.businessModel!,
+      detectedLanguage: "en",
+      currency: "INR",
+      totalRevenue,
+      totalCustomers,
+      totalTransactions: Math.round(totalCustomers * 2.5),
+      avgOrderValue: totalCustomers > 0 ? Math.round(totalRevenue / Math.max(totalCustomers * 2.5, 1)) : 1500,
+      topProduct: prefab.topProduct!,
+      topCategory: prefab.topCategory!,
+      growthRate: prefab.growthRate!,
+      primaryMetric: prefab.primaryMetric!,
+      secondaryMetric: prefab.secondaryMetric!,
+      riskAreas: prefab.riskAreas!,
+      opportunities: prefab.opportunities!,
+      dataSource: "csv",
+      columns,
+      sampleRows,
+      uploadedAt: new Date().toISOString(),
+      suggestedPersonaNames: prefab.suggestedPersonaNames!,
+      suggestedCampaignTypes: prefab.suggestedCampaignTypes!,
+      primaryChannel: prefab.primaryChannel!
+    };
+  };
+
+  /** Upload & analyze a dataset file (CSV, JSON or XLSX) */
+  const uploadDatasetAndReconfigure = useCallback(async (file: File) => {
+    setIsAnalyzingDataset(true);
+    addAgentLog("System", `Dataset received: ${file.name} (${(file.size / 1024).toFixed(1)} KB). Initializing Business DNA Engine...`, "thought");
+
+    try {
+      let rows: Record<string, string>[] = [];
+      let headers: string[] = [];
+
+      if (file.name.endsWith(".json")) {
+        const text = await file.text();
+        const parsed = JSON.parse(text);
+        rows = Array.isArray(parsed) ? parsed : parsed.data || parsed.rows || [];
+        headers = rows.length > 0 ? Object.keys(rows[0]) : [];
+      } else if (file.name.endsWith(".xlsx") || file.name.endsWith(".xls")) {
+        const buffer = await file.arrayBuffer();
+        const workbook = XLSX.read(buffer, { type: "array" });
+        const firstSheetName = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[firstSheetName];
+        const parsedData = XLSX.utils.sheet_to_json<any>(worksheet);
+        rows = parsedData.map(r => {
+          const newRow: Record<string, string> = {};
+          Object.keys(r).forEach(k => { newRow[k] = String(r[k]); });
+          return newRow;
+        });
+        headers = rows.length > 0 ? Object.keys(rows[0]) : [];
+      } else {
+        // CSV
+        const text = await file.text();
+        rows = parseCSV(text);
+        headers = rows.length > 0 ? Object.keys(rows[0]) : [];
+      }
+
+      const currency = detectCurrency(rows);
+      const sampleRows = rows.length;
+      addAgentLog("Polaris", `Parsed ${sampleRows} records with ${headers.length} columns. Detected currency: ${currency}.`, "action");
+
+      // Extract numeric revenue and customer count heuristically
+      const revenueKeys = headers.filter(h => /revenue|amount|total|sales|price|value|earnings/i.test(h));
+      const customerKeys = headers.filter(h => /customer|client|user|buyer|member|id/i.test(h));
+      let totalRevenue = 0;
+      const uniqueCustomers = new Set<string>();
+
+      rows.forEach(row => {
+        revenueKeys.forEach(k => {
+          const val = parseFloat(String(row[k]).replace(/[^0-9.]/g, ""));
+          if (!isNaN(val)) totalRevenue += val;
+        });
+        customerKeys.slice(0, 1).forEach(k => {
+          if (row[k]) uniqueCustomers.add(row[k]);
+        });
+      });
+
+      const totalCustomers = uniqueCustomers.size || Math.round(sampleRows * 0.6);
+      const dataSummary = buildDataSummary(headers, rows);
+
+      let dna: BusinessDNA;
+
+      if (config.geminiKey) {
+        addAgentLog("Polaris", "Sending dataset schema to Gemini for industry classification and DNA extraction...", "action");
+        const geminiPrompt = `You are the ORBIT Universal Business DNA Engine.
+
+Analyze this dataset schema and sample data, then return a complete Business DNA profile.
+
+DATASET DETAILS:
+File: ${file.name}
+Total Rows: ${sampleRows}
+Detected Currency: ${currency}
+Estimated Total Revenue: ${totalRevenue.toFixed(0)}
+Estimated Unique Customers: ${totalCustomers}
+
+${dataSummary}
+
+Classify this business and extract intelligence. Return ONLY a valid JSON object with this exact schema:
+{
+  "industryType": "string (e.g. Restaurant, Gym, Fashion Brand, SaaS, Hospital, Real Estate, Electronics Store, Coaching Institute, Travel Agency)",
+  "businessModel": "string (e.g. B2C Subscription, D2C Retail, B2B SaaS)",
+  "detectedLanguage": "en",
+  "currency": "${currency}",
+  "totalRevenue": number,
+  "totalCustomers": number,
+  "totalTransactions": number,
+  "avgOrderValue": number,
+  "topProduct": "string (most popular product/service inferred)",
+  "topCategory": "string (main product category)",
+  "growthRate": number (estimated % MoM growth),
+  "primaryMetric": "string (most important KPI for this industry)",
+  "secondaryMetric": "string (second most important KPI)",
+  "riskAreas": ["string", "string", "string"],
+  "opportunities": ["string", "string", "string"],
+  "dataSource": "csv",
+  "columns": ${JSON.stringify(headers)},
+  "sampleRows": ${sampleRows},
+  "uploadedAt": "${new Date().toISOString()}",
+  "suggestedPersonaNames": ["string x6 — industry-appropriate customer archetypes"],
+  "suggestedCampaignTypes": ["string", "string", "string"],
+  "primaryChannel": "WhatsApp | Email | SMS | RCS"
+}`;
+
+        try {
+          const res = await callGeminiAPI(geminiPrompt, "You are the ORBIT Business DNA Engine. Return only valid JSON.", config.geminiKey);
+          const parsed = parseGeminiJson<any>(res, null);
+          if (parsed && parsed.industryType) {
+            dna = { ...parsed, dataSource: "csv", columns: headers, sampleRows, uploadedAt: new Date().toISOString() };
+            addAgentLog("Polaris", `Business DNA decoded: ${dna.industryType} — ${dna.businessModel}. Primary metric: ${dna.primaryMetric}.`, "result");
+          } else {
+            throw new Error("Invalid Gemini DNA response");
+          }
+        } catch (err) {
+          console.warn("Gemini DNA extraction failed, using fallback:", err);
+          // Heuristic industry detection from filename + columns
+          const hint = (file.name + " " + headers.join(" ")).toLowerCase();
+          const industryGuess = hint.includes("restaurant") || hint.includes("food") || hint.includes("order") ? "Restaurant"
+            : hint.includes("gym") || hint.includes("member") || hint.includes("fitness") ? "Gym"
+            : hint.includes("hospital") || hint.includes("patient") || hint.includes("doctor") ? "Hospital"
+            : hint.includes("saas") || hint.includes("subscription") || hint.includes("mrr") ? "SaaS Startup"
+            : hint.includes("real estate") || hint.includes("property") || hint.includes("listing") ? "Real Estate Agency"
+            : hint.includes("travel") || hint.includes("booking") || hint.includes("hotel") ? "Travel Agency"
+            : hint.includes("electronics") || hint.includes("gadget") || hint.includes("device") ? "Electronics Store"
+            : hint.includes("coaching") || hint.includes("student") || hint.includes("course") ? "Coaching Institute"
+            : "Fashion Brand";
+          dna = buildFallbackDna(industryGuess, totalRevenue, totalCustomers, headers, sampleRows);
+        }
+      } else {
+        const hint = (file.name + " " + headers.join(" ")).toLowerCase();
+        const industryGuess = hint.includes("restaurant") || hint.includes("food") ? "Restaurant"
+          : hint.includes("gym") || hint.includes("member") ? "Gym"
+          : hint.includes("hospital") || hint.includes("patient") ? "Hospital"
+          : hint.includes("saas") || hint.includes("subscription") ? "SaaS Startup"
+          : hint.includes("real estate") || hint.includes("property") ? "Real Estate Agency"
+          : hint.includes("travel") || hint.includes("booking") ? "Travel Agency"
+          : hint.includes("electronics") || hint.includes("gadget") ? "Electronics Store"
+          : hint.includes("coaching") || hint.includes("student") ? "Coaching Institute"
+          : "Fashion Brand";
+        dna = buildFallbackDna(industryGuess, totalRevenue, totalCustomers, headers, sampleRows);
+        addAgentLog("Polaris", `Gemini not available. Heuristic classification: ${dna.industryType}.`, "result");
+      }
+
+      const newCustomers = generateMockCustomers(dna.industryType);
+      const newOrders = generateMockOrders(newCustomers, dna.industryType);
+      const newPersonas = mapCustomersToPersonas(newCustomers, dna.industryType);
+      const initialLunaMetrics = {
+        recoverableRevenue: Math.round(totalRevenue * 0.05) || 20550,
+        opportunityScore: 85,
+        inactiveCustomers: Math.max(1, Math.round(newCustomers.length * 0.15)),
+        abandonedLeads: Math.max(1, Math.round(newCustomers.length * 0.2)),
+        recoveryConfidence: 91
+      };
+      const initialAgentLogs = [
+        {
+          id: `log_${Date.now()}`,
+          agent: "System" as const,
+          timestamp: new Date().toLocaleTimeString(),
+          message: `Calibrated ORBIT modules for uploaded business: ${file.name}.`,
+          type: "thought" as const
+        }
+      ];
+
+      // Save new workspace data in localStorage
+      const newId = "uploaded-" + Date.now();
+      const newWorkspaceMetadata: WorkspaceMetadata = {
+        id: newId,
+        name: file.name,
+        type: "uploaded",
+        businessType: dna.industryType,
+        uploadedAt: new Date().toISOString()
+      };
+
+      const dataToSave = {
+        workspaceDna: dna,
+        customers: newCustomers,
+        orders: newOrders,
+        campaigns: [],
+        personas: newPersonas,
+        latestVerdict: null,
+        agentLogs: initialAgentLogs,
+        missions: [],
+        lunaMetrics: initialLunaMetrics
+      };
+      
+      localStorage.setItem(`orbit_workspace_data_${newId}`, JSON.stringify(dataToSave));
+
+      // Update workspaces metadata
+      const nextList = [...workspaces, newWorkspaceMetadata];
+      setWorkspaces(nextList);
+      localStorage.setItem("orbit_workspaces", JSON.stringify(nextList));
+
+      // Persist DNA and configure current active workspace
+      setWorkspaceDna(dna);
+      localStorage.setItem("orbit_workspace_dna", JSON.stringify(dna));
+      setBusinessType(dna.industryType);
+      localStorage.setItem("orbit_business_type", dna.industryType);
+      setCustomers(newCustomers);
+      localStorage.setItem("orbit_customers", JSON.stringify(newCustomers));
+      setOrders(newOrders);
+      localStorage.setItem("orbit_orders", JSON.stringify(newOrders));
+      setCampaigns([]);
+      localStorage.setItem("orbit_campaigns", JSON.stringify([]));
+      setPersonas(newPersonas);
+      localStorage.setItem("orbit_personas", JSON.stringify(newPersonas));
+      setLatestVerdict(null);
+      localStorage.removeItem("orbit_latest_verdict");
+      setLunaMetrics(initialLunaMetrics);
+      localStorage.setItem("orbit_luna_metrics", JSON.stringify(initialLunaMetrics));
+      setAgentLogs(initialAgentLogs);
+      setMissions([]);
+
+      setCurrentWorkspaceId(newId);
+      localStorage.setItem("orbit_current_workspace_id", newId);
+
+      // Persist brand DNA to backend
+      fetch("/api/brand-dna", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ businessType: dna.industryType, growthStyle: "High Growth", dna })
+      }).catch(() => {});
+
+      addAgentLog("System", `ORBIT reconfigured for ${dna.industryType}. All modules updated to industry DNA profile.`, "thought");
+
+    } catch (err) {
+      console.error("Dataset upload failed:", err);
+      addAgentLog("System", `Dataset processing error: ${err}. Please check file format.`, "result");
+    } finally {
+      setIsAnalyzingDataset(false);
+    }
+  }, [config.geminiKey, addAgentLog, workspaces, currentWorkspaceId]);
+
+  /** Apply a known industry DNA preset (no file upload needed) */
+  const applyDnaPreset = useCallback((industryKey: string) => {
+    const dna = buildFallbackDna(industryKey, 0, 80, [], 0);
+    dna.dataSource = "preset";
+    setWorkspaceDna(dna);
+    localStorage.setItem("orbit_workspace_dna", JSON.stringify(dna));
+    setBusinessType(dna.industryType);
+    const newCustomers = generateMockCustomers(dna.industryType);
+    const newOrders = generateMockOrders(newCustomers, dna.industryType);
+    setCustomers(newCustomers);
+    setOrders(newOrders);
+    setTimeout(() => {
+      setPersonas(mapCustomersToPersonas(newCustomers, dna.industryType));
+    }, 100);
+    addAgentLog("System", `Applied ${industryKey} DNA preset. ORBIT modules reconfigured.`, "thought");
+    fetch("/api/brand-dna", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ businessType: dna.industryType, growthStyle: "High Growth" })
+    }).catch(() => {});
+  }, [addAgentLog]);
 
   const personalizeForBusiness = useCallback((type: string) => {
     setBusinessType(type);
-    
+
     // Sync Brand DNA to backend
     fetch("/api/brand-dna", {
       method: "POST",
@@ -1738,6 +2368,10 @@ Do not return any markdown code block formatting. Only return the raw JSON objec
     }
   }, [customers, config, addAgentLog, businessType, cancelMission]);
 
+  const addCampaign = useCallback((campaign: Campaign) => {
+    setCampaigns(prev => [campaign, ...prev]);
+  }, []);
+
   // Launch simulated campaign and run engagement loops
   const launchMissionCampaign = useCallback(async (channel: "Email" | "WhatsApp" | "SMS" | "RCS") => {
     if (!mission.isActive) return;
@@ -2182,6 +2816,181 @@ Do not return any markdown code block formatting. Only return the raw JSON objec
     ]);
   };
 
+  const switchWorkspace = useCallback(async (id: string) => {
+    // 1. Save current workspace data if it is an uploaded one
+    if (currentWorkspaceId && currentWorkspaceId.startsWith("uploaded-")) {
+      const dataToSave = {
+        workspaceDna,
+        customers,
+        orders,
+        campaigns,
+        personas,
+        latestVerdict,
+        agentLogs,
+        missions,
+        lunaMetrics
+      };
+      localStorage.setItem(`orbit_workspace_data_${currentWorkspaceId}`, JSON.stringify(dataToSave));
+    }
+
+    if (!id) {
+      setCurrentWorkspaceId(null);
+      localStorage.removeItem("orbit_current_workspace_id");
+      setWorkspaceDna(null);
+      localStorage.removeItem("orbit_workspace_dna");
+      setCustomers([]);
+      setOrders([]);
+      setPersonas([]);
+      setCampaigns([]);
+      setLatestVerdict(null);
+      setAgentLogs([]);
+      setMissions([]);
+      setLunaMetrics({ recoverableRevenue: 0, opportunityScore: 0, inactiveCustomers: 0, abandonedLeads: 0, recoveryConfidence: 0 });
+      return;
+    }
+
+    // 2. Load the new workspace
+    setCurrentWorkspaceId(id);
+    localStorage.setItem("orbit_current_workspace_id", id);
+
+    if (id.startsWith("demo-")) {
+      const presetKey = id === "demo-fashion" ? "Fashion & Apparel"
+        : id === "demo-restaurant" ? "Restaurant"
+        : id === "demo-gym" ? "Gym"
+        : "SaaS Startup";
+      
+      const dna = buildFallbackDna(presetKey, 0, 80, [], 0);
+      dna.dataSource = "preset";
+      setWorkspaceDna(dna);
+      localStorage.setItem("orbit_workspace_dna", JSON.stringify(dna));
+      setBusinessType(dna.industryType);
+      localStorage.setItem("orbit_business_type", dna.industryType);
+      
+      const newCustomers = generateMockCustomers(dna.industryType);
+      const newOrders = generateMockOrders(newCustomers, dna.industryType);
+      setCustomers(newCustomers);
+      localStorage.setItem("orbit_customers", JSON.stringify(newCustomers));
+      setOrders(newOrders);
+      localStorage.setItem("orbit_orders", JSON.stringify(newOrders));
+      
+      const isFashion = presetKey.toLowerCase().includes("fashion") || presetKey.toLowerCase().includes("apparel");
+      const tempLatestVerdict = {
+        scenarioName: isFashion ? "North Delhi Minimal Streetwear Launch" : `${presetKey} Growth Window`,
+        scenarioDescription: isFashion ? "Targeting Students/Gen Z in North Delhi shifting from Korean Fashion to Minimal Streetwear." : `Boardroom strategy for ${presetKey} expansion opportunities.`,
+        targetPersona: isFashion ? "Student / Gen Z" : "Weekend Warrior",
+        region: "North Delhi",
+        currentTrend: isFashion ? "Oversized Korean Fashion" : "General Baseline",
+        futureTrend: isFashion ? "Minimal Streetwear" : "Accelerated Expansion",
+        revenueOpportunity: 145000,
+        expectedRoi: 4.5,
+        launchDate: "Immediate (within 14 days)",
+        confidenceScore: 92,
+        forecast: {
+          d30: "Trend Stable - initial baseline begins.",
+          d60: "Growth accelerating.",
+          d90: "Adoption peak reached."
+        },
+        timestamp: new Date().toISOString()
+      };
+      setLatestVerdict(tempLatestVerdict);
+      localStorage.setItem("orbit_latest_verdict", JSON.stringify(tempLatestVerdict));
+
+      const tempLunaMetrics = {
+        recoverableRevenue: presetKey === "Fashion & Apparel" ? 20550 : presetKey === "Restaurant" ? 12400 : presetKey === "Gym" ? 8900 : 34500,
+        opportunityScore: 88,
+        inactiveCustomers: 12,
+        abandonedLeads: 17,
+        recoveryConfidence: 91
+      };
+      setLunaMetrics(tempLunaMetrics);
+      localStorage.setItem("orbit_luna_metrics", JSON.stringify(tempLunaMetrics));
+
+      setMissions([]);
+      setAgentLogs([
+        {
+          id: `log_${Date.now()}`,
+          agent: "System",
+          timestamp: new Date().toLocaleTimeString(),
+          message: `Calibrated ORBIT boardroom registers for ${presetKey} Demo workspace.`,
+          type: "thought"
+        }
+      ]);
+      
+      setTimeout(() => {
+        const p = mapCustomersToPersonas(newCustomers, dna.industryType);
+        setPersonas(p);
+        localStorage.setItem("orbit_personas", JSON.stringify(p));
+      }, 100);
+
+      fetch("/api/brand-dna", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ businessType: dna.industryType, growthStyle: "High Growth", dna })
+      }).catch(() => {});
+
+    } else {
+      // It is an uploaded workspace
+      const saved = localStorage.getItem(`orbit_workspace_data_${id}`);
+      if (saved) {
+        const data = JSON.parse(saved);
+        setWorkspaceDna(data.workspaceDna);
+        localStorage.setItem("orbit_workspace_dna", JSON.stringify(data.workspaceDna));
+        setBusinessType(data.workspaceDna.industryType);
+        localStorage.setItem("orbit_business_type", data.workspaceDna.industryType);
+        
+        setCustomers(data.customers || []);
+        localStorage.setItem("orbit_customers", JSON.stringify(data.customers || []));
+        setOrders(data.orders || []);
+        localStorage.setItem("orbit_orders", JSON.stringify(data.orders || []));
+        setCampaigns(data.campaigns || []);
+        localStorage.setItem("orbit_campaigns", JSON.stringify(data.campaigns || []));
+        setPersonas(data.personas || []);
+        localStorage.setItem("orbit_personas", JSON.stringify(data.personas || []));
+        
+        setLatestVerdict(data.latestVerdict || null);
+        if (data.latestVerdict) {
+          localStorage.setItem("orbit_latest_verdict", JSON.stringify(data.latestVerdict));
+        } else {
+          localStorage.removeItem("orbit_latest_verdict");
+        }
+
+        setLunaMetrics(data.lunaMetrics || { recoverableRevenue: 0, opportunityScore: 0, inactiveCustomers: 0, abandonedLeads: 0, recoveryConfidence: 0 });
+        if (data.lunaMetrics) {
+          localStorage.setItem("orbit_luna_metrics", JSON.stringify(data.lunaMetrics));
+        }
+
+        setAgentLogs(data.agentLogs || []);
+        setMissions(data.missions || []);
+      }
+    }
+  }, [currentWorkspaceId, workspaceDna, customers, orders, campaigns, personas, latestVerdict, agentLogs, missions, lunaMetrics]);
+
+  const deleteWorkspace = useCallback((id: string) => {
+    const nextList = workspaces.filter(w => w.id !== id);
+    setWorkspaces(nextList);
+    localStorage.setItem("orbit_workspaces", JSON.stringify(nextList));
+    localStorage.removeItem(`orbit_workspace_data_${id}`);
+
+    if (currentWorkspaceId === id) {
+      if (nextList.length > 0) {
+        switchWorkspace(nextList[0].id);
+      } else {
+        setCurrentWorkspaceId(null);
+        localStorage.removeItem("orbit_current_workspace_id");
+        setWorkspaceDna(null);
+        localStorage.removeItem("orbit_workspace_dna");
+        setCustomers([]);
+        setOrders([]);
+        setPersonas([]);
+        setCampaigns([]);
+        setLatestVerdict(null);
+        setAgentLogs([]);
+        setMissions([]);
+        setLunaMetrics({ recoverableRevenue: 0, opportunityScore: 0, inactiveCustomers: 0, abandonedLeads: 0, recoveryConfidence: 0 });
+      }
+    }
+  }, [workspaces, currentWorkspaceId, switchWorkspace]);
+
   // Run minor organic simulations in background if in autonomous mode
   useEffect(() => {
     if (!config.autonomousMode) return;
@@ -2204,6 +3013,9 @@ Do not return any markdown code block formatting. Only return the raw JSON objec
       orders,
       agentLogs,
       config,
+      selectedCustomerId,
+      setSelectedCustomerId,
+      updateCustomer,
       mission,
       revenueGoal,
       growthScore,
@@ -2213,6 +3025,7 @@ Do not return any markdown code block formatting. Only return the raw JSON objec
       updateConfig,
       startMission,
       launchMissionCampaign,
+      addCampaign,
       cancelMission,
       runSimulationStep,
       clearSimData,
@@ -2233,7 +3046,15 @@ Do not return any markdown code block formatting. Only return the raw JSON objec
       personaDistribution,
       generatePersonas,
       latestVerdict,
-      updateLatestVerdict
+      updateLatestVerdict,
+      workspaceDna,
+      isAnalyzingDataset,
+      uploadDatasetAndReconfigure,
+      applyDnaPreset,
+      workspaces,
+      currentWorkspaceId,
+      switchWorkspace,
+      deleteWorkspace
     }}>
       {children}
     </OrbitContext.Provider>

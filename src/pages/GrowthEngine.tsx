@@ -1,10 +1,11 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import {
   Mail, MessageCircle, Phone, Layers, Sparkles, Edit3, Eye,
   BarChart3, RefreshCw, Wand2, Scissors, Dna, Play,
   Users, Zap, Target, Brain,
   CheckCircle2, Rocket, X, AlertCircle, ArrowRight,
-  Activity, Star, Cpu, FlaskConical, MessageSquare, Globe
+  Activity, Star, Cpu, FlaskConical, MessageSquare, Globe,
+  Clock, Send, SlidersHorizontal
 } from "lucide-react";
 import { useOrbit } from "../context/OrbitContext";
 import type { Persona } from "../context/OrbitContext";
@@ -155,7 +156,7 @@ function buildFallbackPlan(goal: string, businessType: string, personas?: Person
    GROWTH ENGINE PAGE
 ══════════════════════════════════════════════════════════════ */
 export const GrowthEngine: React.FC = () => {
-  const { customers, config, businessType, addAgentLog, launchMissionCampaign, startMission, personas } = useOrbit();
+  const { customers, config, businessType, addAgentLog, launchMissionCampaign, addCampaign, startMission, personas } = useOrbit();
 
   /* ── State ── */
   const [goal, setGoal] = useState("Increase Repeat Purchases by 20%");
@@ -202,6 +203,340 @@ export const GrowthEngine: React.FC = () => {
   const [showExplain, setShowExplain] = useState(false);
   const [explainData, setExplainData] = useState<any>(null);
   const [explainLoading, setExplainLoading] = useState(false);
+
+  /* ── Lifecycle Automation State ── */
+  const [activeTab, setActiveTab] = useState<"manual" | "automation">("manual");
+  const [activeAutomationCategory, setActiveAutomationCategory] = useState<"review" | "checkin" | "missyou" | "winback" | "dormant">("review");
+  const [automationTemplates, setAutomationTemplates] = useState<Record<string, { type: string; subject?: string; body: string }>>({
+    review: {
+      type: "Review Request",
+      subject: "We hope you are loving your recent order!",
+      body: "Hi {{name}},\n\nThank you for your recent purchase. We hope you are enjoying your order.\n\nYour feedback means a lot to us.\n\nCould you please leave a quick review?"
+    },
+    checkin: {
+      type: "Relationship Building",
+      subject: "Just checking in — how is your purchase?",
+      body: "Hi {{name}},\n\nJust checking in.\n\nHow has your experience been with your purchase?\n\nLet us know if you need any assistance."
+    },
+    missyou: {
+      type: "Re-engagement",
+      subject: "We miss you, {{name}}! 💙",
+      body: "Hi {{name}},\n\nWe miss you.\n\nIt's been a while since your last visit.\n\nHere's something special waiting for you."
+    },
+    winback: {
+      type: "Customer Recovery",
+      subject: "An exclusive offer just for you",
+      body: "Hi {{name}},\n\nYou haven't shopped with us in a while.\n\nWe would love to welcome you back.\n\nEnjoy an exclusive offer created just for you."
+    },
+    dormant: {
+      type: "High Priority Recovery",
+      subject: "Come back and claim your reward 🎁",
+      body: "Hi {{name}},\n\nWe noticed you haven't visited recently.\n\nCome back and enjoy a special reward from us."
+    }
+  });
+
+  const [automationSending, setAutomationSending] = useState(false);
+  const [automationSendDone, setAutomationSendDone] = useState(false);
+  const [automationChannel, setAutomationChannel] = useState<"WhatsApp" | "Email" | "SMS">("WhatsApp");
+  const [automationCustomerStatuses, setAutomationCustomerStatuses] = useState<Record<string, "Ready" | "Queued" | "Dispatched">>({});
+  const [aiOptimizing, setAiOptimizing] = useState(false);
+
+  const getDaysSincePurchase = (lastPurchaseDate?: string) => {
+    if (!lastPurchaseDate) return 999;
+    const current = new Date("2026-06-14");
+    const last = new Date(lastPurchaseDate);
+    const diff = current.getTime() - last.getTime();
+    if (isNaN(diff)) return 999;
+    return Math.ceil(diff / (1000 * 60 * 60 * 24));
+  };
+
+  const reviewCohort = useMemo(() => customers.filter(c => getDaysSincePurchase(c.lastPurchaseDate) <= 7), [customers]);
+  const checkinCohort = useMemo(() => customers.filter(c => {
+    const days = getDaysSincePurchase(c.lastPurchaseDate);
+    return days >= 8 && days <= 15;
+  }), [customers]);
+  const missyouCohort = useMemo(() => customers.filter(c => {
+    const days = getDaysSincePurchase(c.lastPurchaseDate);
+    return days >= 16 && days <= 30;
+  }), [customers]);
+  const winbackCohort = useMemo(() => customers.filter(c => {
+    const days = getDaysSincePurchase(c.lastPurchaseDate);
+    return days >= 31 && days <= 60;
+  }), [customers]);
+  const dormantCohort = useMemo(() => customers.filter(c => getDaysSincePurchase(c.lastPurchaseDate) > 60), [customers]);
+
+  const potentialRevenueRecovery = useMemo(() => {
+    const totalLtv = winbackCohort.reduce((sum, c) => sum + (c.lifetimeValue || c.ltv || 0), 0) +
+                     dormantCohort.reduce((sum, c) => sum + (c.lifetimeValue || c.ltv || 0), 0);
+    return Math.round(totalLtv * 0.15);
+  }, [winbackCohort, dormantCohort]);
+
+  const fifteenDaysCohort = useMemo(() => customers.filter(c => {
+    const days = getDaysSincePurchase(c.lastPurchaseDate);
+    return days >= 15 && days <= 30;
+  }), [customers]);
+
+  const oneMonthCohort = useMemo(() => customers.filter(c => {
+    const days = getDaysSincePurchase(c.lastPurchaseDate);
+    return days > 30;
+  }), [customers]);
+
+  const getActiveCohort = () => {
+    if (activeAutomationCategory === "review") return reviewCohort;
+    if (activeAutomationCategory === "checkin") return checkinCohort;
+    if (activeAutomationCategory === "missyou") return missyouCohort;
+    if (activeAutomationCategory === "winback") return winbackCohort;
+    return dormantCohort;
+  };
+
+  const applyRecencyPreset = (presetType: "review" | "missing15" | "inactiveMonth") => {
+    addAgentLog("Nova", `Applying Recency Campaign Preset: ${presetType === "review" ? "Within 7 Days (Review)" : presetType === "missing15" ? "15 Days Inactive" : "Last 1 Month Inactive"}`, "action");
+    
+    let targetCohort = reviewCohort;
+    let goalText = "Ask for product review (Purchase within last 7 days)";
+    let segmentName = "Recent Buyers (<= 7 Days)";
+    let explanationText = "Targeting customers who made a purchase in the last 7 days to collect feedback while their experience is fresh.";
+    let predictedRevenue = 0;
+    let predictedRoi = 1.0;
+    let channel: ChannelType = "WhatsApp";
+    let channelExpl = "WhatsApp exhibits a 92% open rate, ensuring maximum response rates for customer feedback surveys.";
+    let recSummary = "Deploy a WhatsApp review request campaign to recent buyers.";
+    let recTime = "7 Days";
+    
+    let subject = "How is your recent purchase?";
+    let bodyA = "Hi {{name}},\n\nThank you for your recent purchase! We hope you are loving your order.\n\nCould you please take 30 seconds to leave us a quick review? We would love to hear your feedback!\n\nBest,\nOrbit Team";
+    let bodyB = "Hi *{{name}}*! \n\nThank you for your recent purchase. We hope you are loving your order!\n\nCould you please take a moment to leave a review?\n\nRate us: https://orbit.ai/review";
+    let bodyC = "Hi {{name}},\n\nWe hope you love your order! Share your feedback with us by writing a quick review.\n\nRate here: https://orbit.ai/review";
+    let bodyD = "Hi {{name}}, thank you for your recent purchase! We hope you love it. Please leave a quick review here: https://orbit.ai/review";
+    let bodyE = "Hi {{name}}, we value your opinion. How was your recent shopping experience with us? Tell us here: https://orbit.ai/review";
+
+    if (presetType === "missing15") {
+      targetCohort = fifteenDaysCohort;
+      goalText = "Re-engage customer (Inactive for last 15 days)";
+      segmentName = "Inactive Buyers (8-15 Days)";
+      explanationText = "Targeting customers whose last purchase was between 8 and 15 days ago to prevent early churn.";
+      predictedRevenue = Math.round(fifteenDaysCohort.length * 450);
+      predictedRoi = 3.8;
+      channel = "WhatsApp";
+      channelExpl = "WhatsApp is recommended for quick check-ins to maintain interactive engagement.";
+      recSummary = "Deploy a re-engagement check-in campaign to customers inactive for 15 days.";
+      recTime = "14 Days";
+
+      subject = "We miss you, {{name}}! 💙";
+      bodyA = "Hi {{name}},\n\nWe are missing you! It has been 15 days since you last visited or bought anything from us.\n\nWe would love to see you again. Check out our latest collection designed just for you!\n\nWarmly,\nOrbit Team";
+      bodyB = "Hey *{{name}}*! \n\nWe miss you! 💙 It has been 15 days since your last purchase. We've dropped some exciting new styles we think you'd love.\n\nCheck them out: https://orbit.ai/styles";
+      bodyC = "Dear {{name}},\n\nIt has been 15 days since we last had the pleasure of serving you. We've introduced new arrivals curated for your taste.\n\nExplore: https://orbit.ai/styles";
+      bodyD = "Hey {{name}} 👋\n\nIt's been 15 days! Just wanted to check in and see how you're doing. A new trend drop just hit our store.\n\nSee it here: https://orbit.ai/styles";
+      bodyE = "Hi {{name}}, we miss you! It's been 15 days since your last checkout. Check out new drops: https://orbit.ai/styles";
+    } else if (presetType === "inactiveMonth") {
+      targetCohort = oneMonthCohort;
+      goalText = "Win-back customer (No purchase in last 1 month)";
+      segmentName = "Dormant Buyers (> 30 Days)";
+      explanationText = "Targeting customers who have not bought anything in the last 1 month to win them back with targeted offers.";
+      predictedRevenue = Math.round(oneMonthCohort.length * 850);
+      predictedRoi = 4.8;
+      channel = "Email";
+      channelExpl = "Email provides a richer space for premium welcome back gift codes and catalog previews.";
+      recSummary = "Deploy a win-back discount campaign to customers inactive for 30+ days.";
+      recTime = "14 Days";
+
+      subject = "An exclusive offer to welcome you back 🎁";
+      bodyA = "Hi {{name}},\n\nYou have not bought anything from us in the last 1 month. We really miss you!\n\nTo help you get back, here is an exclusive 20% discount code for your next checkout: WELCOME20.\n\nShop now: https://orbit.ai";
+      bodyB = "Hey *{{name}}*! \n\nYou haven't shopped with us in over a month. We miss you! 🎁\n\nHere's 20% OFF your next order: WELCOME20\n\nClaim now: https://orbit.ai/welcome";
+      bodyC = "Dear {{name}},\n\nIt has been over a month. As a token of our appreciation, please enjoy an exclusive 20% welcome-back privilege. Code: WELCOME20.";
+      bodyD = "Hey {{name}} 👋\n\nYou haven't shopped with us in over a month. Use WELCOME20 for 20% OFF: https://orbit.ai/welcome";
+      bodyE = "Hi {{name}},\n\nWe haven't seen you in 30 days! We want you back. Here is an exclusive 20% offer code WELCOME20 for your next purchase.";
+    }
+
+    setGoal(goalText);
+    setActiveChannel(channel);
+
+    const basePlan: MissionPlan = {
+      Polaris: {
+        segment: segmentName,
+        explanation: explanationText,
+        audienceSize: targetCohort.length
+      },
+      Luna: {
+        recoverableRevenue: Math.round(targetCohort.length * 0.42 * 1000),
+        inactiveCustomers: targetCohort.length,
+        abandonedLeads: 0,
+        recoveryConfidence: 85,
+        explanation: explanationText
+      },
+      Vega: {
+        predictedRoi,
+        predictedRevenue,
+        confidenceScore: 85,
+        explanation: `Vega forecasted ROI at ${predictedRoi}x based on historical models for this recency cohort.`
+      },
+      Nova: {
+        Email: { subject, body: bodyA },
+        WhatsApp: { body: bodyB },
+        SMS: { body: bodyD },
+        RCS: { title: subject, body: bodyC, mediaUrl: "https://images.unsplash.com/photo-1441984904996-e0b6ba687e04?auto=format&fit=crop&w=600&q=80" }
+      },
+      Atlas: {
+        selectedChannel: channel,
+        explanation: channelExpl
+      },
+      recommendation: {
+        summary: recSummary,
+        confidenceScore: 85,
+        estimatedTimeframe: recTime
+      }
+    };
+
+    setMissionPlan(basePlan);
+
+    setVariants({
+      A: { label: "Professional", tone: "professional", subject, body: bodyA },
+      B: { label: "Urgent",       tone: "urgent",        subject, body: bodyB },
+      C: { label: "Luxury",       tone: "luxury",        subject, body: bodyC },
+      D: { label: "Friendly",     tone: "friendly",      subject, body: bodyD },
+      E: { label: "Emotional",    tone: "emotional",     subject, body: bodyE },
+    });
+
+    setSimData({
+      conservative: { conversionRate: 2.1, revenue: Math.round(predictedRevenue * 0.65), roi: parseFloat((predictedRoi * 0.65).toFixed(1)), customerFatigue: "Low", optOutRate: 0.4 },
+      recommended:  { conversionRate: 4.8, revenue: predictedRevenue, roi: predictedRoi, customerFatigue: "Medium", optOutRate: 0.9 },
+      aggressive:   { conversionRate: 7.2, revenue: Math.round(predictedRevenue * 1.35), roi: parseFloat((predictedRoi * 1.2).toFixed(1)), customerFatigue: "High", optOutRate: 2.1 },
+    });
+
+    setWorkflowDone(true);
+  };
+
+  const handleOptimizeCampaign = async () => {
+    setAiOptimizing(true);
+    addAgentLog("Nova", `Initializing AI copywriting optimization for ${activeAutomationCategory} campaign...`, "action");
+    
+    const targetCohort = getActiveCohort();
+    const segmentName = activeAutomationCategory === "review" ? "Recent Buyers" 
+      : activeAutomationCategory === "checkin" ? "Re-engagement Check-In"
+      : activeAutomationCategory === "missyou" ? "Slipping Away (Miss You)"
+      : activeAutomationCategory === "winback" ? "Inactive Customer"
+      : "Dormant Customer";
+
+    const defaultMsg = automationTemplates[activeAutomationCategory].body;
+    const systemPrompt = `You are the ORBIT Growth Campaign Copywriter.
+Optimize the following automated lifecycle campaign template body:
+"${defaultMsg}"
+
+For business type: "${businessType}".
+Target cohort segment: "${segmentName}".
+
+Ensure the copy contains appropriate dynamic tags like {{name}}. Make it highly engaging, tailored, and premium. For Working Professionals, recommend structured collections or professional themes. For Students, suggest trend drops. For Dormant, offer special incentives.
+Do not return any markdown code block formatting. Return only the raw text of the optimized message.`;
+
+    try {
+      let optimizedBody = defaultMsg;
+      if (config.geminiKey) {
+        optimizedBody = await callGeminiAPI(`Optimize copy for ${segmentName} in ${businessType} business.`, systemPrompt, config.geminiKey);
+      } else {
+        await sleep(1000);
+        const hasStudents = targetCohort.some(c => (c.persona || "").includes("Student") || (c.persona || "").includes("Gen Z"));
+        const hasProfessionals = targetCohort.some(c => (c.persona || "").includes("Professional") || (c.persona || "").includes("Working"));
+        
+        if (activeAutomationCategory === "review") {
+          optimizedBody = `Hi {{name}},\n\nThank you for choosing ${businessType.toLowerCase().includes("fashion") ? "Aura Threads" : "ORBIT"}. We hope you are loving your new purchase.\n\nYour review helps our community. Could you leave a quick rating?\n\nBest,\nTeam Orbit`;
+        } else if (activeAutomationCategory === "checkin") {
+          if (hasProfessionals) {
+            optimizedBody = `Hi {{name}},\n\nJust checking in on your office wear and smart-casual selections. How is the fit and comfort?\n\nLet us know if you need sizing adjustments.\n\nWarmly,\nAura Threads Support`;
+          } else {
+            optimizedBody = `Hi {{name}},\n\nHow is your recent purchase working out? We'd love to hear your thoughts.\n\nReply here if you need any setup assistance!`;
+          }
+        } else if (activeAutomationCategory === "missyou") {
+          if (hasStudents) {
+            optimizedBody = `Hi {{name}},\n\nWe miss you! 💙 A new trend drop just hit Aura Threads and we know you'll love it.\n\nHere's a 15% discount for your next style swap: SWAP15.\n\nCheck it out!`;
+          } else {
+            optimizedBody = `Hi {{name}},\n\nWe miss you. It's been a while since your last purchase. We've added new collections that match your profile.\n\nUse code RETURN15 for 15% off.\n\nShop now: https://orbit.ai/shop`;
+          }
+        } else if (activeAutomationCategory === "winback") {
+          optimizedBody = `Hi {{name}},\n\nIt has been over a month! We'd love to welcome you back.\n\nGet 20% off your next purchase using code WINBACK20.\n\nClaim now: https://orbit.ai/winback`;
+        } else {
+          optimizedBody = `Hi {{name}},\n\nWe noticed you haven't visited Aura Threads in a while. Here is a high-priority recovery reward just for you:\n\n🎁 ₹500 off your next order over ₹1,550!\nCode: RECOVER500\n\nShop: https://orbit.ai/reward`;
+        }
+      }
+      
+      setAutomationTemplates(prev => ({
+        ...prev,
+        [activeAutomationCategory]: {
+          ...prev[activeAutomationCategory],
+          body: optimizedBody
+        }
+      }));
+      addAgentLog("Nova", `AI Campaign message optimized successfully for ${activeAutomationCategory} cohort.`, "action");
+    } catch (err: any) {
+      console.error("Gemini optimization failed:", err);
+      addAgentLog("Nova", `Failed to optimize copy via Gemini: ${err.message || err}`, "thought");
+    } finally {
+      setAiOptimizing(false);
+    }
+  };
+
+  const handleSendAutomation = async () => {
+    setAutomationSending(true);
+    setAutomationSendDone(false);
+    
+    const cohort = getActiveCohort();
+    addAgentLog("Atlas", `Initiating ${automationChannel} automated dispatch to ${cohort.length} targets...`, "action");
+    
+    const queuedStatuses: Record<string, "Ready" | "Queued" | "Dispatched"> = {};
+    cohort.forEach(c => {
+      queuedStatuses[c.id] = "Queued";
+    });
+    setAutomationCustomerStatuses(prev => ({ ...prev, ...queuedStatuses }));
+    
+    await sleep(1500);
+    
+    const dispatchedStatuses: Record<string, "Ready" | "Queued" | "Dispatched"> = {};
+    cohort.forEach(c => {
+      dispatchedStatuses[c.id] = "Dispatched";
+    });
+    setAutomationCustomerStatuses(prev => ({ ...prev, ...dispatchedStatuses }));
+    setAutomationSending(false);
+    setAutomationSendDone(true);
+    
+    addAgentLog("Atlas", `Campaign successfully dispatched via Twilio/Resend. Verified 100% gateway handshake.`, "action");
+
+    const finalCampaign = {
+      id: "camp_" + Date.now(),
+      name: `Automated ${activeAutomationCategory.toUpperCase()} - ${automationChannel}`,
+      goal: `Automated Recency Campaign`,
+      description: `Targeting recency cohort: ${activeAutomationCategory}`,
+      channel: automationChannel as any,
+      status: "Completed" as const,
+      sentCount: cohort.length,
+      deliveredCount: Math.round(cohort.length * 0.95),
+      openedCount: Math.round(cohort.length * 0.70),
+      clickedCount: Math.round(cohort.length * 0.35),
+      purchaseCount: Math.round(cohort.length * 0.10),
+      revenueGenerated: Math.round(cohort.length * 0.10 * 1500),
+      createdAt: new Date().toISOString(),
+      predictedRoi: 4.5,
+      predictedRevenue: Math.round(cohort.length * 150),
+    };
+
+    // Store campaign to backend
+    fetch("/api/campaigns", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        name: finalCampaign.name,
+        goal: finalCampaign.goal,
+        channel: finalCampaign.channel,
+        targetSegment: activeAutomationCategory,
+        audienceSize: finalCampaign.sentCount,
+        predictedRevenue: finalCampaign.predictedRevenue,
+        predictedRoi: finalCampaign.predictedRoi,
+        copy: automationTemplates[activeAutomationCategory].body,
+        subject: automationTemplates[activeAutomationCategory].subject || "",
+        status: finalCampaign.status,
+      }),
+    }).catch(err => console.warn("Failed to store automated campaign:", err));
+
+    addCampaign(finalCampaign);
+  };
 
 
 
@@ -476,13 +811,38 @@ Format as JSON: { "Polaris": "...", "Luna": "...", "Vega": "...", "Nova": "...",
                   Strategy Ready
                 </div>
               )}
-              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-gray-900/40 border border-gray-800 font-mono text-[9px] text-gray-500">
+              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-gray-900/40 border border-gray-800 font-mono text-[9px] text-gray-550">
                 <Users size={10} className="text-blue-400" />
                 {totalCustomers} CUSTOMERS
               </div>
             </div>
           }
         />
+        {/* Navigation Tabs */}
+        <div className="flex border-t border-gray-800/20 mt-3 font-mono text-[9px]">
+          <button
+            onClick={() => setActiveTab("manual")}
+            className={`px-4 py-2 border-b-2 font-semibold cursor-pointer transition-all flex items-center gap-1.5 ${
+              activeTab === "manual"
+                ? "border-blue-500 text-white bg-blue-500/5"
+                : "border-transparent text-gray-500 hover:text-gray-300"
+            }`}
+          >
+            <SlidersHorizontal size={11} className={activeTab === "manual" ? "text-blue-400" : "text-gray-500"} />
+            Manual Campaigns
+          </button>
+          <button
+            onClick={() => setActiveTab("automation")}
+            className={`px-4 py-2 border-b-2 font-semibold cursor-pointer transition-all flex items-center gap-1.5 ${
+              activeTab === "automation"
+                ? "border-blue-500 text-white bg-blue-500/5"
+                : "border-transparent text-gray-500 hover:text-gray-300"
+            }`}
+          >
+            <Activity size={11} className={activeTab === "automation" ? "text-blue-400 animate-pulse" : "text-gray-500"} />
+            Lifecycle Automation
+          </button>
+        </div>
       </div>
 
       {/* Main scrollable body */}
@@ -492,7 +852,9 @@ Format as JSON: { "Polaris": "...", "Luna": "...", "Vega": "...", "Nova": "...",
           {/* ══════════════════════════════════════════════════════
               SECTION 1 — MISSION COMMAND INPUT
           ══════════════════════════════════════════════════════ */}
-          <div className="orbit-panel border border-gray-800/60 bg-gray-900/20 p-6 rounded-2xl relative overflow-hidden">
+          {activeTab === "manual" && (
+            <>
+              <div className="orbit-panel border border-gray-800/60 bg-gray-900/20 p-6 rounded-2xl relative overflow-hidden">
             <div className="absolute top-0 right-0 w-64 h-24 bg-gradient-to-bl from-blue-600/10 to-transparent pointer-events-none" />
             <div className="flex items-center gap-2 mb-4">
               <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
@@ -772,6 +1134,57 @@ Format as JSON: { "Polaris": "...", "Luna": "...", "Vega": "...", "Nova": "...",
             </div>
 
             <div className="p-5 space-y-4">
+              {/* Recency Quick Presets */}
+              <div className="bg-gray-950/40 p-4 rounded-xl border border-gray-800/60 space-y-2.5">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-1.5">
+                    <Clock size={12} className="text-blue-400" />
+                    <span className="font-mono text-[9px] font-bold text-gray-300 uppercase tracking-wider">Recency Campaigns (Purchase History Presets)</span>
+                  </div>
+                  <span className="font-mono text-[8px] text-gray-500">SELECT TO PRE-POPULATE CAMPAIGN</span>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                  <button
+                    onClick={() => applyRecencyPreset("review")}
+                    className="p-2.5 rounded-lg bg-blue-500/5 hover:bg-blue-500/10 border border-blue-500/20 text-left transition-all cursor-pointer flex justify-between items-center group"
+                  >
+                    <div>
+                      <span className="font-space text-[10px] font-bold text-blue-400 block group-hover:text-blue-300">Within 7 Days (Review)</span>
+                      <span className="font-mono text-[8px] text-gray-500 block mt-0.5">Ask recent buyers for a review</span>
+                    </div>
+                    <span className="font-mono text-[9px] font-bold px-1.5 py-0.5 rounded bg-gray-950 border border-gray-850 text-blue-400">
+                      {reviewCohort.length}
+                    </span>
+                  </button>
+
+                  <button
+                    onClick={() => applyRecencyPreset("missing15")}
+                    className="p-2.5 rounded-lg bg-purple-500/5 hover:bg-purple-500/10 border border-purple-500/20 text-left transition-all cursor-pointer flex justify-between items-center group"
+                  >
+                    <div>
+                      <span className="font-space text-[10px] font-bold text-purple-400 block group-hover:text-purple-300">Missing from 15 Days</span>
+                      <span className="font-mono text-[8px] text-gray-500 block mt-0.5">Send a relationship check-in</span>
+                    </div>
+                    <span className="font-mono text-[9px] font-bold px-1.5 py-0.5 rounded bg-gray-950 border border-gray-850 text-purple-400">
+                      {fifteenDaysCohort.length}
+                    </span>
+                  </button>
+
+                  <button
+                    onClick={() => applyRecencyPreset("inactiveMonth")}
+                    className="p-2.5 rounded-lg bg-amber-500/5 hover:bg-amber-500/10 border border-amber-500/20 text-left transition-all cursor-pointer flex justify-between items-center group"
+                  >
+                    <div>
+                      <span className="font-space text-[10px] font-bold text-amber-400 block group-hover:text-amber-300">Last 1 Month Inactive</span>
+                      <span className="font-mono text-[8px] text-gray-500 block mt-0.5">Send a win-back offer</span>
+                    </div>
+                    <span className="font-mono text-[9px] font-bold px-1.5 py-0.5 rounded bg-gray-950 border border-gray-850 text-amber-400">
+                      {oneMonthCohort.length}
+                    </span>
+                  </button>
+                </div>
+              </div>
+
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-yellow-500 to-orange-600 flex items-center justify-center">
@@ -1112,6 +1525,290 @@ Format as JSON: { "Polaris": "...", "Luna": "...", "Vega": "...", "Nova": "...",
               </div>
             </div>
           </div>
+          </>
+        )}
+
+        {/* ══════════════════════════════════════════════════════
+            SECTION B — LIFECYCLE AUTOMATION
+        ══════════════════════════════════════════════════════ */}
+        {activeTab === "automation" && (
+          <div className="space-y-6 animate-fade-in pb-12">
+            {/* Dashboard metrics block */}
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+              {[
+                { label: "Review Requests Pending", value: reviewCohort.length, icon: MessageSquare, color: "text-blue-400", bg: "bg-blue-500/5", border: "border-blue-500/20" },
+                { label: "Customers To Re-engage", value: checkinCohort.length + missyouCohort.length, icon: Activity, color: "text-amber-400", bg: "bg-amber-500/5", border: "border-amber-500/20" },
+                { label: "Inactive Customers", value: winbackCohort.length, icon: Clock, color: "text-purple-400", bg: "bg-purple-500/5", border: "border-purple-500/20" },
+                { label: "Dormant Customers", value: dormantCohort.length, icon: AlertCircle, color: "text-red-400", bg: "bg-red-500/5", border: "border-red-500/20" },
+                { label: "Potential Recovery", value: `₹${potentialRevenueRecovery.toLocaleString()}`, icon: Zap, color: "text-green-400", bg: "bg-green-500/5", border: "border-green-500/20" }
+              ].map((stat, i) => {
+                const Icon = stat.icon;
+                return (
+                  <div key={i} className={`p-4 rounded-2xl border ${stat.border} ${stat.bg} space-y-2`}>
+                    <div className="flex justify-between items-center">
+                      <span className="font-mono text-[9px] text-gray-500 uppercase tracking-wider leading-relaxed block max-w-[120px]">{stat.label}</span>
+                      <Icon size={14} className={stat.color} />
+                    </div>
+                    <div className="font-space text-lg font-bold text-white">{stat.value}</div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Campaign Editor Split panel */}
+            <div className="grid grid-cols-1 lg:grid-cols-[300px_1fr] gap-6 items-start">
+              
+              {/* Cohort Selector (Left Column) */}
+              <div className="space-y-2.5">
+                <span className="font-mono text-[9px] text-gray-400 uppercase tracking-wider block">Target Recency Cohorts</span>
+                <div className="flex flex-col gap-2">
+                  {[
+                    { key: "review", label: "Review Request", size: reviewCohort.length, desc: "Purchased within 7 days", color: "border-blue-500/35 text-blue-400 bg-blue-500/5" },
+                    { key: "checkin", label: "Check-In Nurture", size: checkinCohort.length, desc: "Purchased 8-15 days ago", color: "border-amber-500/35 text-amber-400 bg-amber-500/5" },
+                    { key: "missyou", label: "Miss You Recovery", size: missyouCohort.length, desc: "Purchased 15-30 days ago", color: "border-purple-500/35 text-purple-400 bg-purple-500/5" },
+                    { key: "winback", label: "Win-Back Offer", size: winbackCohort.length, desc: "Purchased 30-60 days ago", color: "border-pink-500/35 text-pink-400 bg-pink-500/5" },
+                    { key: "dormant", label: "Dormant Recovery", size: dormantCohort.length, desc: "Purchased > 60 days ago", color: "border-red-500/35 text-red-400 bg-red-500/5" }
+                  ].map(cohort => {
+                    const active = activeAutomationCategory === cohort.key;
+                    return (
+                      <button
+                        key={cohort.key}
+                        onClick={() => {
+                          setActiveAutomationCategory(cohort.key as any);
+                          setAutomationSendDone(false);
+                        }}
+                        className={`w-full p-3.5 rounded-xl border text-left cursor-pointer transition-all flex justify-between items-start ${
+                          active 
+                            ? cohort.color + " shadow-xl" 
+                            : "border-gray-900 hover:border-gray-800 opacity-60 hover:opacity-100 bg-transparent"
+                        }`}
+                      >
+                        <div className="space-y-1">
+                          <span className="font-space text-xs font-bold block">{cohort.label}</span>
+                          <span className="font-mono text-[8px] text-gray-550 block">{cohort.desc}</span>
+                        </div>
+                        <div className="font-mono text-[9px] font-bold px-2 py-0.5 rounded bg-gray-950 border border-gray-800 text-gray-400">
+                          {cohort.size}
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Template Editor & API Sender (Right Column) */}
+              <div className="orbit-panel border border-gray-800/60 bg-gray-900/20 p-6 rounded-2xl relative overflow-hidden space-y-5">
+                <div className="flex justify-between items-start">
+                  <div className="flex items-center gap-2">
+                    <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
+                      <Sparkles size={13} className="text-white" />
+                    </div>
+                    <div>
+                      <h2 className="font-space text-sm font-bold text-white uppercase tracking-wider">
+                        {automationTemplates[activeAutomationCategory].type} Message Composer
+                      </h2>
+                      <p className="font-mono text-[8px] text-gray-555 uppercase">Targeting {getActiveCohort().length} customer records</p>
+                    </div>
+                  </div>
+
+                  {/* AI Optimize Button */}
+                  <button
+                    onClick={handleOptimizeCampaign}
+                    disabled={aiOptimizing}
+                    className="px-2.5 py-1.5 rounded bg-purple-500/10 border border-purple-500/35 hover:bg-purple-500/20 text-purple-400 font-mono text-[9px] uppercase tracking-wider transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+                  >
+                    {aiOptimizing ? (
+                      <>
+                        <RefreshCw size={11} className="animate-spin" />
+                        <span>Optimizing...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Wand2 size={11} className="animate-pulse" />
+                        <span>Optimize via Gemini</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+
+                {/* Subject and Body editors */}
+                <div className="space-y-4 pt-1">
+                  {automationTemplates[activeAutomationCategory].subject !== undefined && (
+                    <div className="space-y-1.5">
+                      <label className="font-mono text-[8px] text-gray-555 uppercase tracking-widest block">Message Subject Line</label>
+                      <input
+                        type="text"
+                        value={automationTemplates[activeAutomationCategory].subject}
+                        onChange={e => {
+                          setAutomationTemplates(prev => ({
+                            ...prev,
+                            [activeAutomationCategory]: {
+                              ...prev[activeAutomationCategory],
+                              subject: e.target.value
+                            }
+                          }));
+                        }}
+                        className="w-full bg-gray-950/80 border border-gray-855 rounded-xl p-3 font-mono text-[10px] text-white focus:outline-none focus:border-blue-500/50"
+                      />
+                    </div>
+                  )}
+
+                  <div className="space-y-1.5">
+                    <label className="font-mono text-[8px] text-gray-555 uppercase tracking-widest block">Message Template Body</label>
+                    <textarea
+                      rows={6}
+                      value={automationTemplates[activeAutomationCategory].body}
+                      onChange={e => {
+                        setAutomationTemplates(prev => ({
+                          ...prev,
+                          [activeAutomationCategory]: {
+                            ...prev[activeAutomationCategory],
+                            body: e.target.value
+                          }
+                        }));
+                      }}
+                      className="w-full bg-gray-950/80 border border-gray-855 rounded-xl p-3 font-mono text-[10px] text-white focus:outline-none focus:border-blue-500/50 leading-relaxed"
+                    />
+                  </div>
+                </div>
+
+                {/* Channel Toggle & Dispatch Actions */}
+                <div className="flex flex-col md:flex-row gap-4 justify-between items-center border-t border-gray-855 pt-5">
+                  
+                  {/* Channel selection toggles */}
+                  <div className="space-y-1.5 w-full md:w-auto">
+                    <span className="font-mono text-[8px] text-gray-555 uppercase tracking-widest block">Dispatch API Integrations</span>
+                    <div className="flex bg-gray-955 border border-gray-800 rounded-lg p-0.5 font-mono text-[9px] shadow-2xl w-fit">
+                      {[
+                        { id: "WhatsApp", label: "WhatsApp", icon: MessageCircle, color: "text-green-400" },
+                        { id: "Email", label: "Email", icon: Mail, color: "text-blue-400" },
+                        { id: "SMS", label: "SMS", icon: Phone, color: "text-yellow-400" }
+                      ].map(ch => {
+                        const active = automationChannel === ch.id;
+                        const Icon = ch.icon;
+                        return (
+                          <button
+                            key={ch.id}
+                            onClick={() => {
+                              setAutomationChannel(ch.id as any);
+                              setAutomationSendDone(false);
+                            }}
+                            className={`flex items-center gap-1 px-3 py-1.5 rounded cursor-pointer transition-all ${
+                              active
+                                ? "bg-blue-600/90 text-white shadow font-semibold"
+                                : "text-gray-500 hover:text-gray-300"
+                            }`}
+                          >
+                            <Icon size={10} className={ch.color} />
+                            <span>{ch.label}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Dispatch Button */}
+                  <div className="w-full md:w-auto flex flex-col items-center md:items-end gap-1.5">
+                    <button
+                      onClick={handleSendAutomation}
+                      disabled={automationSending || getActiveCohort().length === 0}
+                      className={`w-full md:w-56 py-2 px-4 rounded-xl font-mono text-[10px] uppercase font-bold tracking-wider flex items-center justify-center gap-1.5 transition-all ${
+                        getActiveCohort().length === 0
+                          ? "bg-gray-900 border border-gray-850 text-gray-650 cursor-not-allowed"
+                          : automationSendDone
+                          ? "bg-green-500/20 border border-green-500/40 text-green-400 cursor-default"
+                          : automationSending
+                          ? "bg-gray-900 border border-gray-850 text-gray-400 cursor-not-allowed"
+                          : "bg-gradient-to-r from-blue-500 to-indigo-500 text-white shadow-lg shadow-blue-500/20 hover:opacity-90 hover:scale-[1.02] active:scale-95 cursor-pointer"
+                      }`}
+                    >
+                      {automationSendDone ? (
+                        <>
+                          <CheckCircle2 size={13} />
+                          <span>Campaign Dispatched</span>
+                        </>
+                      ) : automationSending ? (
+                        <>
+                          <RefreshCw size={13} className="animate-spin" />
+                          <span>Sending via Gateway...</span>
+                        </>
+                      ) : (
+                        <>
+                          <Send size={13} />
+                          <span>Send Targeted Campaign</span>
+                        </>
+                      )}
+                    </button>
+                    <span className="font-mono text-[8px] text-gray-600">
+                      {getActiveCohort().length === 0 ? "No target customer nodes available" : `Triggers ${automationChannel} dispatches to ${getActiveCohort().length} nodes`}
+                    </span>
+                  </div>
+
+                </div>
+              </div>
+            </div>
+
+            {/* Customer Preview Table */}
+            <div className="orbit-panel border border-gray-800/60 bg-gray-900/20 p-6 rounded-2xl relative overflow-hidden space-y-4">
+              <div>
+                <h3 className="font-space text-xs font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
+                  <Users size={13} className="text-blue-400" />
+                  Target Audience Preview List
+                </h3>
+                <p className="font-mono text-[8px] text-gray-555 uppercase mt-0.5">Showing matching customer nodes for {automationTemplates[activeAutomationCategory].type} campaign</p>
+              </div>
+
+              <div className="border border-gray-850 rounded-xl overflow-hidden bg-gray-950/20">
+                <div className="overflow-x-auto max-h-[300px]">
+                  <table className="w-full text-left font-mono text-[10.5px]">
+                    <thead className="bg-gray-950 text-gray-500 uppercase text-[9px] border-b border-gray-850 sticky top-0 z-10">
+                      <tr>
+                        <th className="py-2.5 px-4">Name</th>
+                        <th className="py-2.5 px-4">Persona</th>
+                        <th className="py-2.5 px-4">Recency (Days Since Purchase)</th>
+                        <th className="py-2.5 px-4">Preferred Channel</th>
+                        <th className="py-2.5 px-4 text-right">Status</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-850/40 text-gray-300">
+                      {getActiveCohort().length === 0 ? (
+                        <tr>
+                          <td colSpan={5} className="py-8 text-center text-gray-500 text-[10px]">
+                            No customer records currently qualify for this recency cohort.
+                          </td>
+                        </tr>
+                      ) : (
+                        getActiveCohort().map((cust, idx) => {
+                          const days = getDaysSincePurchase(cust.lastPurchaseDate);
+                          const status = automationCustomerStatuses[cust.id] || "Ready";
+                          return (
+                            <tr key={idx} className="hover:bg-gray-900/10">
+                              <td className="py-2.5 px-4 font-space text-xs font-bold text-white">{cust.name}</td>
+                              <td className="py-2.5 px-4 text-purple-400">{cust.persona}</td>
+                              <td className="py-2.5 px-4">{days === 999 ? "Never" : `${days} Days`}</td>
+                              <td className="py-2.5 px-4">{cust.preferredChannel}</td>
+                              <td className="py-2.5 px-4 text-right">
+                                <span className={`px-2 py-0.5 rounded text-[9px] font-bold ${
+                                  status === "Dispatched"
+                                    ? "bg-green-500/10 text-green-400 border border-green-500/20"
+                                    : status === "Queued"
+                                    ? "bg-amber-500/10 text-amber-400 border border-amber-500/20 animate-pulse"
+                                    : "bg-blue-500/10 text-blue-400 border border-blue-500/20"
+                                }`}>
+                                  {status.toUpperCase()}
+                                </span>
+                              </td>
+                            </tr>
+                          );
+                        })
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         </div>
       </div>

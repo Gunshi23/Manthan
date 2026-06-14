@@ -16,16 +16,44 @@ import { OrbitPersonas } from './pages/OrbitPersonas';
 import { FutureSimulator } from './pages/FutureSimulator';
 import { OpportunityRadar } from './pages/OpportunityRadar';
 import { CompetitorIntelligence } from './pages/CompetitorIntelligence';
+import { SeasonalIntelligence } from './pages/SeasonalIntelligence';
+import { RegionalIntelligence } from './pages/RegionalIntelligence';
 import { auth } from './services/firebase';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
+import { useOrbit } from './context/OrbitContext';
 
 type AppStage = 'landing' | 'auth' | 'init' | 'profile-setup' | 'setup' | 'app';
-type AppPage = 'command-center' | 'mission-control' | 'customer-galaxy' | 'growth-engine' | 'agent-boardroom' | 'analytics' | 'future-simulator' | 'opportunity-radar' | 'competitor-intel' | 'orbit-personas';
+type AppPage = 'command-center' | 'mission-control' | 'customer-galaxy' | 'growth-engine' | 'agent-boardroom' | 'analytics' | 'future-simulator' | 'opportunity-radar' | 'competitor-intel' | 'orbit-personas' | 'seasonal-intelligence' | 'regional-intelligence';
 
 function App() {
   const [stage, setStage] = useState<AppStage>('landing');
   const [activePage, setActivePage] = useState<AppPage>('command-center');
   const [missionGoal, setMissionGoal] = useState<string>('');
+  const [onboardingCompleted, setOnboardingCompleted] = useState<boolean>(false);
+  const { workspaceDna } = useOrbit();
+
+  // Redirect if no workspace exists or onboarding is not completed
+  useEffect(() => {
+    if (stage === 'landing' || stage === 'auth' || stage === 'init') return;
+
+    if (!onboardingCompleted) {
+      // Force users to stay in profile-setup or setup if onboarding is not completed
+      if (stage === 'app') {
+        setStage('profile-setup');
+      }
+    } else {
+      // Once onboarding is completed, ensure a workspace DNA exists before moving to app stage
+      if (workspaceDna === null) {
+        if (stage !== 'profile-setup') {
+          setStage('profile-setup');
+        }
+      } else {
+        if (stage === 'profile-setup' || stage === 'setup') {
+          setStage('app');
+        }
+      }
+    }
+  }, [workspaceDna, stage, onboardingCompleted]);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -33,6 +61,7 @@ function App() {
         setStage(prev => (prev === 'landing' || prev === 'auth') ? 'init' : prev);
       } else {
         setStage(prev => (prev !== 'landing' && prev !== 'auth') ? 'landing' : prev);
+        setOnboardingCompleted(false);
       }
     });
     return unsubscribe;
@@ -52,6 +81,7 @@ function App() {
   const handleProfileComplete = (goal?: string) => {
     if (goal) {
       setMissionGoal(goal);
+      setOnboardingCompleted(true);
       setStage('app');
     } else {
       setStage('setup');
@@ -60,6 +90,7 @@ function App() {
 
   const handleSetupComplete = (goal: string) => {
     setMissionGoal(goal);
+    setOnboardingCompleted(true);
     setStage('app');
   };
 
@@ -69,6 +100,7 @@ function App() {
     } catch (err) {
       console.error("Firebase SignOut error:", err);
     }
+    setOnboardingCompleted(false);
     setStage('landing');
   };
 
@@ -109,6 +141,8 @@ function App() {
       {activePage === 'opportunity-radar' && <OpportunityRadar onNavigate={setActivePage} />}
       {activePage === 'competitor-intel' && <CompetitorIntelligence />}
       {activePage === 'orbit-personas' && <OrbitPersonas />}
+      {activePage === 'seasonal-intelligence' && <SeasonalIntelligence />}
+      {activePage === 'regional-intelligence' && <RegionalIntelligence />}
     </AppShell>
   );
 }

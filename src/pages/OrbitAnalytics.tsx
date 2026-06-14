@@ -3,7 +3,8 @@ import {
   TrendingUp, Mail, MousePointer, ShoppingCart, Users, BarChart2, 
   ArrowUpRight, CheckCircle2, Download, 
   FileText, Brain, RefreshCw, 
-  ShieldAlert, Zap, RefreshCw as LoopIcon, Play
+  ShieldAlert, Zap, RefreshCw as LoopIcon, Play,
+  MessageSquare, Smile, Meh, Frown, UserCheck, Activity, Calendar, DollarSign, AlertTriangle, Cpu, Send, SlidersHorizontal, X, ShoppingBag, Search
 } from "lucide-react";
 import { useOrbit } from "../context/OrbitContext";
 import { PageHeaderHUD } from "../components/PageHeaderHUD";
@@ -20,7 +21,10 @@ export const OrbitAnalytics: React.FC = () => {
     config, 
     addAgentLog,
     lunaMetrics,
-    personas
+    personas,
+    selectedCustomerId,
+    setSelectedCustomerId,
+    updateCustomer
   } = useOrbit();
 
   const isLight = theme === "executive";
@@ -28,7 +32,9 @@ export const OrbitAnalytics: React.FC = () => {
   // Local state for live reactivity when launching missions
   const [localCampaigns, setLocalCampaigns] = useState<any[]>([]);
   const [localOrders, setLocalOrders] = useState<any[]>([]);
-  const [activeTab, setActiveTab] = useState<"overview" | "funnel" | "diagnostics" | "forecast" | "personas">("overview");
+  const [activeTab, setActiveTab] = useState<"overview" | "funnel" | "diagnostics" | "forecast" | "personas" | "voice">("overview");
+  const [selectedLifecycleCohort, setSelectedLifecycleCohort] = useState<string | null>(null);
+  const [voiceSearchQuery, setVoiceSearchQuery] = useState<string>("");
   const [selectedAgent, setSelectedAgent] = useState<"Polaris" | "Vega" | "Nova" | "Atlas" | "Luna" | null>(null);
 
   // Revenue Panel breakdown control
@@ -94,6 +100,13 @@ export const OrbitAnalytics: React.FC = () => {
     const repeatBuyers = customers.filter(c => c.purchaseCount > 1).length;
     return customers.length > 0 ? Math.round((repeatBuyers / customers.length) * 100) : 0;
   }, [customers]);
+
+  const segmentColors: Record<string, string> = {
+    "Loyalists": "#10B981", // Emerald
+    "Slipping Away": "#EF4444", // Red
+    "High-Value Inactive": "#8B5CF6", // Purple
+    "New Signups": "#3B82F6", // Blue
+  };
 
   // Daily, Weekly, Monthly Live stats
   const revenueToday = useMemo(() => {
@@ -780,8 +793,8 @@ Overall campaign open rates hit **${avgOpenRate}%** with a click-through rate of
           subtitle="AI-OPERATIONAL COGNITIVE COMMAND CENTER"
           onSelectAgent={setSelectedAgent}
           actions={
-            <div className="flex items-center gap-1 bg-gray-950 p-1 rounded-xl border border-gray-900 font-mono text-[9px] font-bold">
-              {["overview", "funnel", "diagnostics", "forecast", "personas"].map((tab) => (
+            <div className="flex items-center gap-1 bg-gray-950 p-1 rounded-xl border border-gray-900 font-mono text-[9px] font-bold overflow-x-auto whitespace-nowrap scrollbar-none max-w-full">
+              {["overview", "funnel", "diagnostics", "forecast", "personas", "voice"].map((tab) => (
                 <button
                   key={tab}
                   onClick={() => setActiveTab(tab as any)}
@@ -883,12 +896,12 @@ Overall campaign open rates hit **${avgOpenRate}%** with a click-through rate of
                   </div>
 
                   {/* Channel selectors */}
-                  <div className="flex items-center gap-1 bg-black/60 p-1 rounded-lg border border-gray-900 font-mono text-[8px]">
+                  <div className="flex items-center gap-1 bg-black/60 p-1 rounded-lg border border-gray-900 font-mono text-[8px] overflow-x-auto whitespace-nowrap scrollbar-none max-w-full">
                     {(["All", "WhatsApp", "Email", "SMS", "RCS", "Instagram"] as const).map(ch => (
                       <button
                         key={ch}
                         onClick={() => setChannelFilter(ch)}
-                        className={`px-2 py-1 rounded transition-all cursor-pointer ${
+                        className={`px-2 py-1 rounded transition-all cursor-pointer shrink-0 ${
                           channelFilter === ch ? "bg-orbit-blue/20 text-orbit-blue border border-orbit-blue/30 font-bold" : "text-gray-550 hover:text-gray-300"
                         }`}
                       >
@@ -899,7 +912,7 @@ Overall campaign open rates hit **${avgOpenRate}%** with a click-through rate of
                 </div>
 
                 {/* Sub-selector tabs */}
-                <div className="flex items-center gap-2 border-b border-gray-950 pb-2.5 font-mono text-[8.5px] font-bold">
+                <div className="flex items-center gap-2 border-b border-gray-950 pb-2.5 font-mono text-[8.5px] font-bold overflow-x-auto whitespace-nowrap scrollbar-none max-w-full">
                   {[
                     { id: "campaign", label: "REVENUE BY CAMPAIGN" },
                     { id: "channel", label: "REVENUE BY CHANNEL" },
@@ -910,7 +923,7 @@ Overall campaign open rates hit **${avgOpenRate}%** with a click-through rate of
                     <button
                       key={tab.id}
                       onClick={() => setActiveRevenueBreakdown(tab.id as any)}
-                      className={`pb-1 border-b transition-all cursor-pointer ${
+                      className={`pb-1 border-b transition-all cursor-pointer shrink-0 ${
                         activeRevenueBreakdown === tab.id ? "text-orbit-purple border-orbit-purple font-extrabold" : "text-gray-500 border-transparent hover:text-gray-300"
                       }`}
                     >
@@ -1720,6 +1733,257 @@ Overall campaign open rates hit **${avgOpenRate}%** with a click-through rate of
           </div>
         )}
 
+        {activeTab === "voice" && (() => {
+          const totalCusts = customers.length || 1;
+          const posCount = customers.filter(c => c.customerSentiment === "Positive").length;
+          const negCount = customers.filter(c => c.customerSentiment === "Negative").length;
+          const neuCount = customers.filter(c => c.customerSentiment === "Neutral" || !c.customerSentiment).length;
+
+          const posPct = Math.round((posCount / totalCusts) * 100);
+          const negPct = Math.round((negCount / totalCusts) * 100);
+          const neuPct = Math.round((neuCount / totalCusts) * 100);
+
+          const cohorts = [
+            { id: "Recent Buyer", label: "Recent Buyers", desc: "Purchased within 30d", color: "#10B981", bg: "bg-emerald-500/10", border: "border-emerald-500/20" },
+            { id: "Cooling Period", label: "Cooling Period", desc: "Purchased 31d-60d ago", color: "#3B82F6", bg: "bg-blue-500/10", border: "border-blue-500/20" },
+            { id: "Miss You", label: "Miss You", desc: "Purchased 61d-90d ago", color: "#F59E0B", bg: "bg-amber-500/10", border: "border-amber-500/20" },
+            { id: "Inactive", label: "Inactive", desc: "Purchased 91d-180d ago", color: "#EC4899", bg: "bg-pink-500/10", border: "border-pink-500/20" },
+            { id: "Dormant", label: "Dormant", desc: "Purchased > 180d ago", color: "#EF4444", bg: "bg-red-500/10", border: "border-red-500/20" }
+          ];
+
+          const allReviews: { customerId: string; customerName: string; sentiment: string; text: string }[] = [];
+          customers.forEach(c => {
+            if (c.reviews && c.reviews.length > 0) {
+              c.reviews.forEach(r => {
+                allReviews.push({
+                  customerId: c.id,
+                  customerName: c.name,
+                  sentiment: c.customerSentiment || "Neutral",
+                  text: r
+                });
+              });
+            }
+          });
+
+          const cohortFiltered = customers.filter(c => {
+            const matchesCohort = selectedLifecycleCohort ? c.lifecycleStage === selectedLifecycleCohort : true;
+            const matchesSearch = voiceSearchQuery.trim() === "" ||
+              c.name.toLowerCase().includes(voiceSearchQuery.toLowerCase()) ||
+              c.id.toLowerCase().includes(voiceSearchQuery.toLowerCase()) ||
+              (c.email && c.email.toLowerCase().includes(voiceSearchQuery.toLowerCase()));
+            return matchesCohort && matchesSearch;
+          });
+
+          return (
+            <div className="space-y-6">
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 animate-fade-in">
+                
+                {/* Sentiment Insights */}
+                <div className="lg:col-span-1 bg-gray-950/40 border border-gray-900 rounded-2xl p-5 space-y-4">
+                  <div className="flex items-center gap-1.5 border-b border-gray-900 pb-3">
+                    <MessageSquare size={16} className="text-orbit-purple" />
+                    <h3 className="font-space text-xs font-bold text-white uppercase tracking-wider">Customer Sentiment Analysis</h3>
+                  </div>
+                  
+                  <div className="space-y-4">
+                    <div className="space-y-1.5 font-mono text-[10px]">
+                      <div className="flex justify-between items-baseline">
+                        <span className="text-green-400 font-bold flex items-center gap-1">
+                          <Smile size={12} /> POSITIVE
+                        </span>
+                        <span className="text-gray-400">{posCount} ({posPct}%)</span>
+                      </div>
+                      <div className="h-1.5 bg-gray-950 rounded-full overflow-hidden border border-gray-900">
+                        <div className="h-full rounded-full bg-green-500" style={{ width: `${posPct}%` }} />
+                      </div>
+                    </div>
+
+                    <div className="space-y-1.5 font-mono text-[10px]">
+                      <div className="flex justify-between items-baseline">
+                        <span className="text-gray-300 font-bold flex items-center gap-1">
+                          <Meh size={12} /> NEUTRAL
+                        </span>
+                        <span className="text-gray-400">{neuCount} ({neuPct}%)</span>
+                      </div>
+                      <div className="h-1.5 bg-gray-950 rounded-full overflow-hidden border border-gray-900">
+                        <div className="h-full rounded-full bg-gray-450" style={{ width: `${neuPct}%` }} />
+                      </div>
+                    </div>
+
+                    <div className="space-y-1.5 font-mono text-[10px]">
+                      <div className="flex justify-between items-baseline">
+                        <span className="text-red-400 font-bold flex items-center gap-1">
+                          <Frown size={12} /> NEGATIVE
+                        </span>
+                        <span className="text-gray-400">{negCount} ({negPct}%)</span>
+                      </div>
+                      <div className="h-1.5 bg-gray-950 rounded-full overflow-hidden border border-gray-900">
+                        <div className="h-full rounded-full bg-red-500" style={{ width: `${negPct}%` }} />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Lifecycle Cohorts */}
+                <div className="lg:col-span-2 bg-gray-950/40 border border-gray-900 rounded-2xl p-5 space-y-4">
+                  <div className="flex justify-between items-center border-b border-gray-900 pb-3">
+                    <div className="flex items-center gap-1.5">
+                      <Activity size={16} className="text-blue-400" />
+                      <h3 className="font-space text-xs font-bold text-white uppercase tracking-wider">Customer Lifecycle Cohorts</h3>
+                    </div>
+                    {selectedLifecycleCohort && (
+                      <button 
+                        onClick={() => setSelectedLifecycleCohort(null)}
+                        className="text-[8.5px] font-mono text-gray-500 hover:text-white uppercase transition-colors"
+                      >
+                        Clear Filter [x]
+                      </button>
+                    )}
+                  </div>
+                  
+                  <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+                    {cohorts.map(coh => {
+                      const count = customers.filter(c => c.lifecycleStage === coh.id).length;
+                      const active = selectedLifecycleCohort === coh.id;
+                      
+                      return (
+                        <button
+                          key={coh.id}
+                          onClick={() => setSelectedLifecycleCohort(active ? null : coh.id)}
+                          className={`flex flex-col p-3 rounded-xl border text-left cursor-pointer transition-all hover:scale-[1.02] duration-200 ${coh.bg} ${coh.border} ${
+                            active ? "ring-2 ring-blue-500 border-transparent bg-opacity-30" : "opacity-80 hover:opacity-100"
+                          }`}
+                        >
+                          <span className="font-mono text-[9px] font-bold uppercase" style={{ color: coh.color }}>{coh.label}</span>
+                          <span className="font-space text-xl font-bold text-white my-1">{count}</span>
+                          <span className="font-mono text-[7.5px] text-gray-450 mt-auto leading-tight">{coh.desc}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+              </div>
+
+              {/* Bottom Row: Reviews Feed and Table */}
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                
+                {/* Reviews Feed */}
+                <div className="lg:col-span-4 bg-gray-950/40 border border-gray-900 rounded-2xl p-5 flex flex-col max-h-[480px]">
+                  <div className="flex items-center gap-1.5 border-b border-gray-900 pb-3 mb-3 shrink-0">
+                    <MessageSquare size={15} className="text-purple-400" />
+                    <h3 className="font-space text-xs font-bold text-white uppercase tracking-wider">Customer Voice Feed ({allReviews.length})</h3>
+                  </div>
+
+                  <div className="flex-1 overflow-y-auto space-y-3 pr-1">
+                    {allReviews.length === 0 ? (
+                      <div className="h-full flex items-center justify-center font-mono text-[9px] text-gray-650 uppercase py-10">No customer reviews recorded</div>
+                    ) : (
+                      allReviews.map((rev, idx) => {
+                        const isSelected = selectedCustomerId === rev.customerId;
+                        return (
+                          <div 
+                            key={idx}
+                            onClick={() => setSelectedCustomerId(rev.customerId)}
+                            className={`p-3 rounded-xl border font-mono text-[9.5px] text-gray-350 leading-relaxed cursor-pointer transition-all hover:border-gray-800 ${
+                              isSelected ? "border-blue-500 bg-blue-500/5" : "bg-gray-950/60 border-gray-900"
+                            }`}
+                          >
+                            <div className="flex justify-between items-baseline mb-1.5">
+                              <span className="text-white font-bold hover:underline">{rev.customerName}</span>
+                              <span className={`text-[8px] font-bold px-1.5 py-0.2 rounded ${
+                                rev.sentiment === "Positive" ? "bg-green-500/10 text-green-400 border border-green-500/20" :
+                                rev.sentiment === "Negative" ? "bg-red-500/10 text-red-400 border border-red-500/20" : "bg-gray-900 text-gray-455 border border-gray-800"
+                              }`}>{rev.sentiment}</span>
+                            </div>
+                            <p className="italic">"{rev.text}"</p>
+                          </div>
+                        );
+                      })
+                    )}
+                  </div>
+                </div>
+
+                {/* Directory */}
+                <div className="lg:col-span-8 bg-gray-950/40 border border-gray-900 rounded-2xl p-5 flex flex-col max-h-[480px]">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-gray-900 pb-3 mb-3 shrink-0">
+                    <div className="flex items-center gap-1.5">
+                      <Users size={15} className="text-blue-400" />
+                      <h3 className="font-space text-xs font-bold text-white uppercase tracking-wider">
+                        {selectedLifecycleCohort ? `${selectedLifecycleCohort} Directory` : "All Customers Directory"} ({cohortFiltered.length})
+                      </h3>
+                    </div>
+
+                    <div className="relative w-full sm:w-48">
+                      <Search size={11} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-500" />
+                      <input 
+                        type="text"
+                        placeholder="Search roster..."
+                        value={voiceSearchQuery}
+                        onChange={(e) => setVoiceSearchQuery(e.target.value)}
+                        className="w-full bg-gray-950/80 border border-gray-900 rounded-lg pl-8 pr-3 py-1 font-mono text-[9px] text-white placeholder-gray-650 focus:outline-none focus:border-gray-800 transition-colors"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="flex-1 overflow-y-auto border border-gray-900 rounded-xl bg-black/10">
+                    <table className="w-full text-left border-collapse font-mono text-[9px]">
+                      <thead>
+                        <tr className="border-b border-gray-900 bg-gray-950/40 text-gray-550 uppercase tracking-wider">
+                          <th className="px-3.5 py-2">ID</th>
+                          <th className="px-3.5 py-2">Name</th>
+                          <th className="px-3.5 py-2">Lifecycle Stage</th>
+                          <th className="px-3.5 py-2 text-right">Yield (LTV)</th>
+                          <th className="px-3.5 py-2 text-center">Sentiment</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {cohortFiltered.length === 0 ? (
+                          <tr>
+                            <td colSpan={5} className="text-center py-10 text-gray-600 uppercase font-mono">No matching records</td>
+                          </tr>
+                        ) : (
+                          cohortFiltered.map(c => {
+                            const isSelected = selectedCustomerId === c.id;
+                            return (
+                              <tr 
+                                key={c.id}
+                                onClick={() => setSelectedCustomerId(c.id)}
+                                className={`hover:bg-gray-800/30 cursor-pointer border-b border-gray-900/50 transition-colors ${
+                                  isSelected ? "bg-blue-900/15" : ""
+                                }`}
+                              >
+                                <td className="px-3.5 py-2 font-bold text-gray-450">{c.id}</td>
+                                <td className="px-3.5 py-2 text-white font-medium">{c.name}</td>
+                                <td className="px-3.5 py-2">
+                                  <span className={`px-1.5 py-0.2 rounded border text-[8px] font-bold ${
+                                    c.lifecycleStage === "Recent Buyer" ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" :
+                                    c.lifecycleStage === "Cooling Period" ? "bg-blue-500/10 text-blue-400 border-blue-500/20" :
+                                    c.lifecycleStage === "Miss You" ? "bg-amber-500/10 text-amber-400 border-amber-500/20" :
+                                    c.lifecycleStage === "Inactive" ? "bg-pink-500/10 text-pink-400 border-pink-500/20" :
+                                    "bg-red-500/10 text-red-400 border-red-500/20"
+                                  }`}>{c.lifecycleStage}</span>
+                                </td>
+                                <td className="px-3.5 py-2 text-right font-bold text-white">₹{c.ltv?.toLocaleString()}</td>
+                                <td className="px-3.5 py-2 text-center">
+                                  <span className={`font-bold ${
+                                    c.customerSentiment === "Positive" ? "text-green-400" :
+                                    c.customerSentiment === "Negative" ? "text-red-400" : "text-gray-400"
+                                  }`}>{c.customerSentiment || "Neutral"}</span>
+                                </td>
+                              </tr>
+                            );
+                          })
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+          );
+        })()}
       </main>
 
       {/* ════════════════════════════════════════
@@ -1789,6 +2053,251 @@ Overall campaign open rates hit **${avgOpenRate}%** with a click-through rate of
         </div>
       )}
 
+      <AgentCardModal agent={selectedAgent} onClose={() => setSelectedAgent(null)} />
+
+      {/* Synchronized Customer Profile Drawer */}
+      {selectedCustomerId && (() => {
+        const detail = customers.find(c => c.id === selectedCustomerId);
+        if (!detail) return null;
+        const color = segmentColors[detail.segment] || "#ffffff";
+        
+        // Generate timeline events
+        const customerTimelineEvents: {
+          date: string;
+          type: "purchase" | "campaign" | "segment" | "activity";
+          title: string;
+          description: string;
+          amount?: number;
+        }[] = [
+          {
+            date: "2025-12-14",
+            type: "activity",
+            title: "Account Created",
+            description: "Successfully onboarded into CRM node system."
+          },
+          {
+            date: "2025-12-14",
+            type: "segment",
+            title: "Initial Segment: New Signups",
+            description: "Added to exploration cohort."
+          }
+        ];
+
+        // Let's compute stable dates for timeline based on detail.id to keep it simple and compile-safe
+        const idNum = parseInt(detail.id.replace(/\D/g, "")) || 0;
+        const baseTime = new Date("2026-06-14").getTime();
+        
+        const createdDate = new Date(baseTime - (180 + (idNum % 30)) * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+        customerTimelineEvents[0].date = createdDate;
+        customerTimelineEvents[1].date = createdDate;
+
+        const customerOrders = contextOrders.filter(o => o.customerId === detail.id);
+        customerOrders.forEach(o => {
+          customerTimelineEvents.push({
+            date: o.date,
+            type: "purchase",
+            title: `Order Placed: ${o.product}`,
+            description: `Fulfilled via ${o.channel}. Transaction ID: tx_${o.id.replace(/\D/g, "")}`,
+            amount: o.amount
+          });
+        });
+
+        if (detail.segment !== "New Signups") {
+          customerTimelineEvents.push({
+            date: new Date(baseTime - (60 + (idNum % 20)) * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+            type: "segment",
+            title: `Segment Shifted: ${detail.segment}`,
+            description: `Auto-promoted by core AI classification model.`
+          });
+        }
+
+        customerTimelineEvents.push({
+          date: new Date(baseTime - (10 + (idNum % 15)) * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+          type: "campaign",
+          title: `${detail.preferredChannel} Campaign Action`,
+          description: detail.segment === "Slipping Away" 
+            ? "Opened win-back discount offer." 
+            : "Engaged with new arrivals catalog message."
+        });
+
+        customerTimelineEvents.push({
+          date: new Date(baseTime - (1 + (idNum % 5)) * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+          type: "activity",
+          title: "Portal Node Session",
+          description: `Active session logged. Device: Mobile. Location: ${detail.region}.`
+        });
+
+        customerTimelineEvents.sort((a, b) => b.date.localeCompare(a.date));
+
+        return (
+          <aside className="w-[420px] shrink-0 flex flex-col border-l border-gray-800/60 bg-gray-950/85 backdrop-blur-xl p-5 space-y-4 overflow-y-auto relative z-10 animate-fade-in font-mono">
+            {/* Header */}
+            <div className="flex items-start justify-between border-b border-gray-800 pb-3 shrink-0">
+              <div>
+                <div className="text-[9px] font-mono text-gray-550 uppercase tracking-widest mb-1">CRM Profile Node</div>
+                <h2 className="font-space text-lg font-bold text-white tracking-tight leading-snug">{detail.name}</h2>
+                <span className="font-mono text-[10px] text-gray-400 select-all">{detail.email}</span>
+              </div>
+              <button
+                onClick={() => setSelectedCustomerId(null)}
+                className="p-1.5 rounded-lg border border-gray-800 hover:border-gray-700 text-gray-500 hover:text-white transition-colors cursor-pointer"
+              >
+                <X size={14} />
+              </button>
+            </div>
+
+            {/* Status and Sentiment Badges */}
+            <div className="flex items-center gap-2 shrink-0">
+              <div className="flex-1 flex items-center gap-2 p-2 rounded-xl border"
+                   style={{ backgroundColor: `${color}10`, borderColor: `${color}20` }}>
+                <span className="w-2 h-2 rounded-full animate-pulse" style={{ backgroundColor: color }} />
+                <span className="font-mono text-[10px] font-bold uppercase" style={{ color }}>
+                  {detail.segment}
+                </span>
+              </div>
+              <div className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-gray-850 bg-gray-900/30 font-mono text-[10px]">
+                <span className="text-gray-550">SENTIMENT:</span>
+                <select
+                  value={detail.customerSentiment || "Neutral"}
+                  onChange={(e) => {
+                    const val = e.target.value as "Positive" | "Neutral" | "Negative";
+                    updateCustomer(detail.id, { sentiment: val, customerSentiment: val });
+                  }}
+                  className={`bg-transparent font-bold cursor-pointer outline-none border-none p-0 ${
+                    detail.customerSentiment === "Positive" ? "text-green-400" :
+                    detail.customerSentiment === "Negative" ? "text-red-400" : "text-gray-300"
+                  }`}
+                >
+                  <option value="Positive" className="bg-gray-900 text-green-400 font-bold">Positive</option>
+                  <option value="Neutral" className="bg-gray-900 text-gray-300 font-bold">Neutral</option>
+                  <option value="Negative" className="bg-gray-900 text-red-400 font-bold">Negative</option>
+                </select>
+              </div>
+            </div>
+
+            {/* Core Details Grid */}
+            <div className="grid grid-cols-2 gap-2.5 shrink-0">
+              {[
+                { label: "Customer ID", value: detail.id, icon: <SlidersHorizontal size={11} className="text-gray-400" /> },
+                { label: "Phone Node", value: detail.phone, icon: <Smile size={11} className="text-gray-400" /> },
+                { label: "LTV (Yield)", value: `₹${detail.ltv?.toLocaleString()}`, icon: <DollarSign size={11} className="text-amber-400" /> },
+                { label: "Total Spent", value: `₹${(detail.totalSpent || 0).toLocaleString()}`, icon: <DollarSign size={11} className="text-green-400" /> },
+                { label: "Risk Score", value: `${detail.churnRisk}%`, icon: <AlertTriangle size={11} className="text-red-400" /> },
+                { label: "Preferred Channel", value: detail.preferredChannel, icon: <Send size={11} className="text-blue-400" /> },
+                { label: "Persona Archetype", value: detail.persona || "Unclassified", icon: <Cpu size={11} className="text-purple-400" /> },
+                { label: "Last Purchase", value: detail.lastPurchaseDate || "N/A", icon: <Calendar size={11} className="text-teal-400" /> }
+              ].map((kpi, i) => (
+                <div key={i} className="bg-gray-900/20 border border-gray-850 rounded-xl p-3 shadow-sm hover:border-gray-800 transition-all">
+                  <div className="flex items-center gap-1 mb-1">
+                    {kpi.icon}
+                    <span className="font-mono text-[8.5px] text-gray-550 uppercase tracking-wider">{kpi.label}</span>
+                  </div>
+                  <span className="font-space text-xs font-bold text-white mt-1 block truncate" title={kpi.value}>
+                    {kpi.value}
+                  </span>
+                </div>
+              ))}
+            </div>
+
+            {/* Growth Opportunity Card */}
+            <div className="p-3.5 rounded-xl bg-purple-500/5 border border-purple-500/20 space-y-1 shrink-0">
+              <div className="flex items-center gap-1.5 font-mono text-[9px] text-purple-400 font-bold uppercase tracking-wider">
+                <Cpu size={12} className="animate-pulse" />
+                <span>AI Growth Opportunity Directive</span>
+              </div>
+              <p className="font-mono text-[10px] text-gray-350 leading-relaxed">{detail.growthOpportunity || "N/A"}</p>
+            </div>
+
+            {/* Customer Voice Reviews */}
+            <div className="space-y-3 pt-2 shrink-0">
+              <div className="flex justify-between items-center">
+                <h3 className="font-space text-xs font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
+                  <MessageSquare size={13} className="text-purple-400" />
+                  Customer Voice Reviews
+                </h3>
+                <button
+                  onClick={() => {
+                    const newReview = prompt("Enter customer review feedback:");
+                    if (newReview && newReview.trim()) {
+                      const currentReviews = detail.reviews || [];
+                      updateCustomer(detail.id, { reviews: [...currentReviews, newReview.trim()] });
+                    }
+                  }}
+                  className="px-2 py-0.5 border border-purple-500/30 hover:bg-purple-500/20 text-purple-400 rounded text-[8px] font-mono uppercase tracking-wider transition-all cursor-pointer"
+                >
+                  + Add Review
+                </button>
+              </div>
+
+              <div className="space-y-2 max-h-[120px] overflow-y-auto pr-1">
+                {!detail.reviews || detail.reviews.length === 0 ? (
+                  <p className="font-mono text-[9px] text-gray-650 text-center py-2">No reviews recorded</p>
+                ) : (
+                  detail.reviews.map((rev, idx) => (
+                    <div key={idx} className="p-2 bg-gray-900/15 border border-gray-900 rounded-lg font-mono text-[9px] relative group text-gray-350 leading-relaxed">
+                      <button
+                        onClick={() => {
+                          if (confirm("Delete this review?")) {
+                            const updatedReviews = (detail.reviews || []).filter((_, i) => i !== idx);
+                            updateCustomer(detail.id, { reviews: updatedReviews });
+                          }
+                        }}
+                        className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 text-red-500 hover:text-red-400 cursor-pointer p-0.5 rounded transition-all"
+                        title="Delete review"
+                      >
+                        <X size={10} />
+                      </button>
+                      "{rev}"
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+
+            {/* Customer Timeline Ledger */}
+            <div className="space-y-3 pt-2">
+              <h3 className="font-space text-xs font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
+                <Activity size={13} className="text-blue-400" />
+                Customer Lifecycle Timeline
+              </h3>
+              
+              <div className="relative pl-4 space-y-4 border-l border-gray-800/80 ml-2 pt-1">
+                {customerTimelineEvents.map((ev, index) => {
+                  let icon = <UserCheck size={11} className="text-purple-400" />;
+                  let borderCol = "border-purple-500/40 bg-purple-950/20";
+                  if (ev.type === "purchase") {
+                    icon = <ShoppingBag size={11} className="text-green-400" />;
+                    borderCol = "border-green-500/40 bg-green-950/20";
+                  } else if (ev.type === "campaign") {
+                    icon = <Send size={11} className="text-blue-400" />;
+                    borderCol = "border-blue-500/40 bg-blue-950/20";
+                  } else if (ev.type === "segment") {
+                    icon = <SlidersHorizontal size={11} className="text-amber-400" />;
+                    borderCol = "border-amber-500/40 bg-amber-950/20";
+                  }
+                  
+                  return (
+                    <div key={index} className="relative group">
+                      <div className={`absolute -left-[22px] top-0.5 w-3.5 h-3.5 rounded-full border flex items-center justify-center ${borderCol}`}>
+                        {icon}
+                      </div>
+                      
+                      <span className="font-mono text-[8px] text-gray-550 block mb-0.5">{ev.date}</span>
+                      <h4 className="font-space text-[10px] font-bold text-white leading-tight uppercase">{ev.title}</h4>
+                      <p className="font-mono text-[9px] text-gray-450 mt-0.5 leading-snug">{ev.description}</p>
+                      {ev.amount !== undefined && (
+                        <span className="inline-block mt-1 font-mono text-[9px] text-green-400 font-bold bg-green-950/15 border border-green-500/10 px-1.5 py-0.2 rounded">
+                          ₹{ev.amount.toLocaleString()}
+                        </span>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </aside>
+        );
+      })()}
       <AgentCardModal agent={selectedAgent} onClose={() => setSelectedAgent(null)} />
     </div>
   );

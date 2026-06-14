@@ -41,7 +41,8 @@ export const OrbitPersonas: React.FC = () => {
     riskPersona, 
     highestRevenuePersona, 
     generatePersonas, 
-    theme 
+    theme,
+    workspaceDna
   } = useOrbit();
 
   const isLight = theme === "executive";
@@ -76,7 +77,14 @@ export const OrbitPersonas: React.FC = () => {
             <span className="font-mono text-[10px] tracking-widest text-orbit-purple font-bold uppercase">DNA Analysis Lab</span>
           </div>
           <h1 className="text-2xl font-space font-bold tracking-tight">Orbit Personas</h1>
-          <p className="font-mono text-xs text-gray-400 mt-1">Customer DNA Intelligence Lab & Archetype Clusters</p>
+          <div className="flex items-center gap-2 mt-1">
+            <p className="font-mono text-xs text-gray-400">Customer DNA Intelligence Lab & Archetype Clusters</p>
+            {workspaceDna && (
+              <span className="font-mono text-[8px] bg-orbit-blue/10 border border-orbit-blue/30 text-orbit-blue px-2 py-0.5 rounded-full uppercase font-bold">
+                {workspaceDna.industryType}
+              </span>
+            )}
+          </div>
         </div>
 
         <button

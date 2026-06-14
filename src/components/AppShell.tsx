@@ -1,9 +1,9 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useMemo } from "react";
 import { 
   Terminal, Activity, Star, Zap, Users, Mic, BarChart2, 
   Moon, Sun, Radio, ChevronRight, Cpu,
   Compass, Sparkles, MicOff, Send, MessageSquare, X, ArrowRight, LogOut,
-  Fingerprint
+  Fingerprint, Calendar, MapPin, Menu
 } from "lucide-react";
 import { useOrbit } from "../context/OrbitContext";
 import { callGeminiAPI, parseGeminiJson } from "../utils/gemini";
@@ -18,7 +18,9 @@ type Page =
   | "opportunity-radar"
   | "competitor-intel"
   | "agent-boardroom" 
-  | "analytics";
+  | "analytics"
+  | "seasonal-intelligence"
+  | "regional-intelligence";
 
 interface ShellProps {
   activePage: Page;
@@ -28,23 +30,121 @@ interface ShellProps {
   onLogout?: () => void;
 }
 
-const navItems: { id: Page; icon: React.FC<any>; label: string; shortLabel: string }[] = [
-  { id: "command-center", icon: Terminal, label: "Command Center", shortLabel: "CMD" },
-  { id: "mission-control", icon: Activity, label: "Mission Control", shortLabel: "MCT" },
-  { id: "customer-galaxy", icon: Star, label: "Customer Galaxy", shortLabel: "GLX" },
-  { id: "orbit-personas", icon: Fingerprint, label: "Orbit Personas", shortLabel: "DNA" },
-  { id: "growth-engine", icon: Zap, label: "Growth Engine", shortLabel: "GRW" },
-  { id: "future-simulator", icon: Cpu, label: "Future Simulator", shortLabel: "FUT" },
-  { id: "opportunity-radar", icon: Radio, label: "Opportunity Radar", shortLabel: "RDR" },
-  { id: "competitor-intel", icon: Compass, label: "Competitor Intel", shortLabel: "CMP" },
-  { id: "agent-boardroom", icon: Users, label: "Agent Boardroom", shortLabel: "BRD" },
-  { id: "analytics", icon: BarChart2, label: "Orbit Analytics", shortLabel: "ANL" },
+// ─── Workflow sections with labelled groupings ───────────────────────────────
+
+type NavItem = {
+  id: Page;
+  icon: React.FC<any>;
+  label: string;
+  shortLabel: string;
+  step: number;
+};
+
+type NavSection = {
+  id: string;
+  label: string;
+  color: string;
+  items: NavItem[];
+};
+
+const NAV_SECTIONS: NavSection[] = [
+  {
+    id: "hub",
+    label: "HUB",
+    color: "#3b82f6",
+    items: [
+      { id: "command-center",       icon: Terminal,   label: "Command Center",   shortLabel: "CMD", step: 0 },
+    ],
+  },
+  {
+    id: "data",
+    label: "CUSTOMER DATA",
+    color: "#22c55e",
+    items: [
+      { id: "customer-galaxy",      icon: Star,        label: "Customer Galaxy",  shortLabel: "GLX", step: 1 },
+      { id: "orbit-personas",       icon: Fingerprint, label: "Orbit Personas",   shortLabel: "DNA", step: 2 },
+    ],
+  },
+  {
+    id: "intelligence",
+    label: "MARKET INTELLIGENCE",
+    color: "#f59e0b",
+    items: [
+      { id: "seasonal-intelligence",icon: Calendar,    label: "Seasonal Intel",   shortLabel: "SEA", step: 3 },
+      { id: "regional-intelligence",icon: MapPin,      label: "Regional Intel",   shortLabel: "REG", step: 4 },
+      { id: "competitor-intel",     icon: Compass,     label: "Competitor Intel", shortLabel: "CMP", step: 5 },
+    ],
+  },
+  {
+    id: "strategy",
+    label: "STRATEGY",
+    color: "#8b5cf6",
+    items: [
+      { id: "opportunity-radar",    icon: Radio,       label: "Opportunity Radar",shortLabel: "RDR", step: 6 },
+      { id: "agent-boardroom",      icon: Users,       label: "Agent Boardroom",  shortLabel: "BRD", step: 7 },
+    ],
+  },
+  {
+    id: "execution",
+    label: "EXECUTION",
+    color: "#ec4899",
+    items: [
+      { id: "growth-engine",        icon: Zap,         label: "Growth Engine",    shortLabel: "GRW", step: 8 },
+      { id: "mission-control",      icon: Activity,    label: "Mission Control",  shortLabel: "MCT", step: 9 },
+    ],
+  },
+  {
+    id: "analytics",
+    label: "ANALYTICS",
+    color: "#06b6d4",
+    items: [
+      { id: "analytics",            icon: BarChart2,   label: "Orbit Analytics",  shortLabel: "ANL", step: 10 },
+      { id: "future-simulator",     icon: Cpu,         label: "Future Simulator", shortLabel: "FUT", step: 11 },
+    ],
+  },
 ];
 
+// Flat list for backward compat (e.g. keyboard nav, active detection)
+const navItems: NavItem[] = NAV_SECTIONS.flatMap(s => s.items);
+
+
 export const AppShell: React.FC<ShellProps> = ({ activePage, onNavigate, children, missionGoal, onLogout }) => {
-  const { theme, setTheme, agentLogs, mission, networkHealth, config, businessType } = useOrbit();
+  const { 
+    theme, setTheme, agentLogs, mission, networkHealth, config, businessType,
+    workspaces, currentWorkspaceId, switchWorkspace, deleteWorkspace 
+  } = useOrbit();
   const isLight = theme === "executive";
   const latestLog = agentLogs[0];
+
+  // Mobile sidebar drawer state
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+  // WORKSPACE SWITCHER State variables
+  const [showWorkspaceDropdown, setShowWorkspaceDropdown] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Close dropdown on click outside
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setShowWorkspaceDropdown(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const activeWorkspace = useMemo(() => {
+    if (!currentWorkspaceId) return null;
+    if (currentWorkspaceId === "demo-fashion") return { name: "Fashion Brand Demo", type: "demo" as const };
+    if (currentWorkspaceId === "demo-restaurant") return { name: "Restaurant Demo", type: "demo" as const };
+    if (currentWorkspaceId === "demo-gym") return { name: "Gym Demo", type: "demo" as const };
+    if (currentWorkspaceId === "demo-saas") return { name: "SaaS Demo", type: "demo" as const };
+    
+    const found = workspaces.find(w => w.id === currentWorkspaceId);
+    if (found) return { name: found.name, type: "uploaded" as const };
+    return null;
+  }, [currentWorkspaceId, workspaces]);
 
   // ORBIT COPILOT State variables
   const [isOpenCopilot, setIsOpenCopilot] = useState(false);
@@ -203,7 +303,18 @@ Return ONLY the raw JSON object. Do not include markdown tags or extra explanati
         isLight ? "bg-white border-gray-200 shadow-sm" : "bg-[#050816]/90 border-[rgba(255,255,255,0.1)] backdrop-blur-sm"
       }`} style={{ boxShadow: isLight ? undefined : "0 1px 0 rgba(255,255,255,0.05), 0 4px 20px rgba(0,0,0,0.4)" }}>
         {/* Logo */}
-        <div className="flex items-center gap-2.5">
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+            className={`sm:hidden p-1 rounded-lg border transition-colors cursor-pointer mr-1 ${
+              isLight 
+                ? "border-gray-200 hover:bg-gray-100 text-gray-600" 
+                : "border-gray-800 hover:border-gray-700 text-gray-400 hover:text-white"
+            }`}
+            title="Toggle Menu"
+          >
+            <Menu size={14} />
+          </button>
           <div className="w-7 h-7 rounded-lg bg-gradient-to-tr from-orbit-blue to-orbit-purple flex items-center justify-center shadow-orbit-glow animate-glow-pulse">
             <span className="font-space font-bold text-white text-xs">O</span>
           </div>
@@ -213,6 +324,122 @@ Return ONLY the raw JSON object. Do not include markdown tags or extra explanati
           <span className={`font-mono text-[9px] px-1.5 py-0.5 rounded border hidden sm:inline ${
             isLight ? "border-gray-200 text-gray-400" : "border-orbit-blue/30 text-orbit-blue/70 bg-orbit-blue/5"
           }`}>v4.81</span>
+
+          {/* Workspace Switcher dropdown */}
+          <div className="relative ml-2 shrink-0" ref={dropdownRef}>
+            <button
+              onClick={() => setShowWorkspaceDropdown(!showWorkspaceDropdown)}
+              className={`flex items-center gap-1.5 px-2 py-0.5 rounded border font-mono text-[9px] cursor-pointer hover:border-gray-700 transition-colors ${
+                isLight 
+                  ? "border-gray-200 bg-gray-100/50 text-gray-700" 
+                  : "border-gray-800 bg-gray-950/40 text-gray-300"
+              }`}
+              title="Switch ORBIT workspace"
+            >
+              <span className={`w-1.5 h-1.5 rounded-full ${
+                activeWorkspace ? (activeWorkspace.type === "demo" ? "bg-orbit-blue shadow-orbit-glow" : "bg-orbit-success shadow-orbit-success") : "bg-red-500"
+              }`} />
+              <span className="font-bold leading-none select-none max-w-[120px] truncate">
+                {activeWorkspace ? activeWorkspace.name : "Select Workspace"}
+              </span>
+              <span className={`text-[7px] px-1 py-0.2 rounded-sm font-bold uppercase leading-none ${
+                activeWorkspace?.type === "demo" 
+                  ? "bg-orbit-blue/15 text-orbit-blue border border-orbit-blue/20" 
+                  : "bg-orbit-success/15 text-orbit-success border border-orbit-success/20"
+              }`}>
+                {activeWorkspace?.type === "demo" ? "DEMO MODE" : "LIVE"}
+              </span>
+            </button>
+
+            {showWorkspaceDropdown && (
+              <div 
+                className={`absolute top-full left-0 mt-2.5 w-64 rounded-xl border p-2 shadow-2xl z-50 flex flex-col gap-1.5 text-left transition-all ${
+                  isLight ? "bg-white border-gray-200 text-gray-900" : "bg-[#090c1e]/98 border-gray-800 text-white backdrop-blur-md"
+                }`}
+                style={{ animation: "fadeInUp 0.15s cubic-bezier(0.16, 1, 0.3, 1) forwards" }}
+              >
+                {/* Demo Workspaces section */}
+                <div>
+                  <div className="px-2.5 py-1 text-[8px] font-bold font-mono text-gray-500 uppercase tracking-widest border-b border-gray-900/40 mb-1">
+                    Demo Workspaces
+                  </div>
+                  <div className="space-y-0.5">
+                    {[
+                      { id: "demo-fashion", name: "Fashion Brand Demo" },
+                      { id: "demo-restaurant", name: "Restaurant Demo" },
+                      { id: "demo-gym", name: "Gym Demo" },
+                      { id: "demo-saas", name: "SaaS Demo" }
+                    ].map(demo => (
+                      <button
+                        key={demo.id}
+                        onClick={() => { switchWorkspace(demo.id); setShowWorkspaceDropdown(false); }}
+                        className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg font-mono text-[10px] transition-colors cursor-pointer text-left ${
+                          currentWorkspaceId === demo.id 
+                            ? "bg-orbit-blue/10 text-orbit-blue font-bold" 
+                            : "text-gray-400 hover:bg-gray-900/40 hover:text-white"
+                        }`}
+                      >
+                        <span>{demo.name}</span>
+                        {currentWorkspaceId === demo.id && <span className="w-1 h-1 rounded-full bg-orbit-blue" />}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Uploaded Workspaces section */}
+                <div className="border-t border-gray-900/40 pt-1.5">
+                  <div className="px-2.5 py-1 text-[8px] font-bold font-mono text-gray-550 uppercase tracking-widest border-b border-gray-900/40 mb-1">
+                    Uploaded Workspaces
+                  </div>
+                  <div className="space-y-0.5 max-h-36 overflow-y-auto scrollbar-thin">
+                    {workspaces.length === 0 ? (
+                      <div className="px-2.5 py-2 font-mono text-[9px] text-gray-600 italic">
+                        No custom workspaces.
+                      </div>
+                    ) : (
+                      workspaces.map(w => (
+                        <div
+                          key={w.id}
+                          className={`group/item w-full flex items-center justify-between px-2 py-1 rounded-lg transition-colors ${
+                            currentWorkspaceId === w.id 
+                              ? "bg-orbit-success/10 text-orbit-success font-bold" 
+                              : "text-gray-400 hover:bg-gray-900/40 hover:text-white"
+                          }`}
+                        >
+                          <button
+                            onClick={() => { switchWorkspace(w.id); setShowWorkspaceDropdown(false); }}
+                            className="flex-1 font-mono text-[10px] text-left truncate cursor-pointer py-0.5"
+                          >
+                            {w.name}
+                          </button>
+                          <button
+                            onClick={(e) => { e.stopPropagation(); deleteWorkspace(w.id); }}
+                            className="opacity-0 group-hover/item:opacity-100 p-1 rounded hover:bg-red-900/30 hover:text-red-400 text-gray-550 transition-all cursor-pointer text-[8px]"
+                            title="Delete workspace"
+                          >
+                            ✕
+                          </button>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </div>
+
+                {/* Action footer */}
+                <div className="border-t border-gray-900/40 pt-1.5 mt-0.5 flex justify-center">
+                  <button
+                    onClick={() => { 
+                      switchWorkspace(""); 
+                      setShowWorkspaceDropdown(false); 
+                    }}
+                    className="w-full py-1 text-center font-mono text-[9px] text-orbit-purple font-bold hover:text-orbit-purple/80 cursor-pointer"
+                  >
+                    + Upload New Workspace
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Center: Mission Status */}
@@ -273,43 +500,174 @@ Return ONLY the raw JSON object. Do not include markdown tags or extra explanati
 
       {/* Main Layout: Sidebar + Content */}
       <div className="flex flex-1 overflow-hidden">
-        {/* Sidebar */}
-        <aside className={`w-14 lg:w-48 shrink-0 flex flex-col border-r pt-4 pb-4 overflow-y-auto z-20 ${
-          isLight ? "bg-white border-gray-200" : "bg-[#050816]/80 border-[rgba(255,255,255,0.07)] backdrop-blur-sm"
-        }`}>
-          {navItems.map(item => {
-            const Icon = item.icon;
-            const isActive = activePage === item.id;
-            return (
-              <button
-                key={item.id}
-                onClick={() => onNavigate(item.id)}
-                className={`group relative flex items-center gap-3 mx-2 mb-0.5 px-3 py-2.5 rounded-lg transition-all text-left ${
-                  isActive
-                    ? isLight
-                      ? "bg-orbit-blue/10 text-orbit-blue border border-orbit-blue/25"
-                      : "bg-orbit-blue/20 text-orbit-blue border border-orbit-blue/30"
-                    : isLight
-                      ? "text-gray-500 hover:bg-gray-100 hover:text-gray-900 border border-transparent"
-                      : "text-gray-500 hover:bg-[#1E293B]/60 hover:text-gray-200 border border-transparent"
-                }`}
-                style={isActive && !isLight ? { boxShadow: "0 0 20px rgba(59,130,246,0.2), inset 0 0 15px rgba(59,130,246,0.05)" } : undefined}
+        {/* ══ Sidebar ══════════════════════════════════════════════════════ */}
+        <aside className={`shrink-0 flex flex-col border-r overflow-y-auto transition-all duration-350 z-40
+          ${isLight ? "bg-white border-gray-200" : "bg-[#050816]/95 border-[rgba(255,255,255,0.07)] backdrop-blur-sm"}
+          ${isSidebarOpen 
+            ? "fixed inset-y-0 left-0 w-52 h-full z-50 flex shadow-2xl" 
+            : "hidden sm:flex sm:relative sm:w-14 lg:w-52 sm:h-auto"
+          }`}>
+
+          {/* Workflow title strip */}
+          <div className={`flex items-center justify-between px-3 py-2 border-b ${
+            isSidebarOpen ? "flex" : "hidden lg:flex"
+          } ${
+            isLight ? "border-gray-100" : "border-[rgba(255,255,255,0.05)]"
+          }`}>
+            <div className="flex items-center gap-1.5">
+              <div className="w-1.5 h-1.5 rounded-full bg-orbit-blue animate-pulse" />
+              <span className="font-mono text-[8px] uppercase tracking-widest" style={{ color: isLight ? "#9ca3af" : "#475569" }}>
+                Growth Workflow
+              </span>
+            </div>
+            {isSidebarOpen && (
+              <button 
+                onClick={() => setIsSidebarOpen(false)}
+                className="p-1 rounded text-gray-550 hover:text-white hover:bg-gray-900 transition-colors"
               >
-                {/* Active indicator bar */}
-                {isActive && !isLight && (
-                  <span className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 rounded-r bg-orbit-blue" style={{ boxShadow: "0 0 8px rgba(59,130,246,1)" }} />
-                )}
-                <Icon size={16} className="shrink-0" />
-                <span className="font-mono text-[11px] font-bold uppercase tracking-wider hidden lg:block">{item.label}</span>
-                {isActive && <ChevronRight size={12} className="ml-auto hidden lg:block opacity-70" />}
+                <X size={12} />
               </button>
-            );
-          })}
+            )}
+          </div>
+
+          {/* Sectioned navigation */}
+          <div className="flex-1 py-2">
+            {NAV_SECTIONS.map((section, sectionIdx) => {
+              const isSectionActive = section.items.some(i => i.id === activePage);
+              return (
+                <div key={section.id} className="mb-1">
+
+                  {/* Section label — desktop only */}
+                  <div className={`items-center gap-2 px-3 pt-3 pb-1 ${
+                    isSidebarOpen ? "flex" : "hidden lg:flex"
+                  } ${ sectionIdx === 0 ? "pt-1" : "" }`}>
+                    {/* Connector dot from previous section */}
+                    {sectionIdx > 0 && !isSidebarOpen && (
+                      <div className="flex flex-col items-center" style={{ width: 14, marginLeft: -2 }}>
+                        <div className="w-px h-3" style={{ background: `linear-gradient(to bottom, ${NAV_SECTIONS[sectionIdx-1].color}40, ${section.color}40)` }} />
+                        <div className="w-1.5 h-1.5 rounded-full border" style={{ borderColor: section.color + "60", background: section.color + "20" }} />
+                      </div>
+                    )}
+                    <span className="font-mono text-[7.5px] font-bold uppercase tracking-widest"
+                      style={{ color: isSectionActive ? section.color : (isLight ? "#9ca3af" : "#374151") }}>
+                      {section.label}
+                    </span>
+                    <div className="flex-1 h-px ml-1" style={{ background: isSectionActive ? section.color + "30" : (isLight ? "#f3f4f6" : "rgba(255,255,255,0.04)") }} />
+                  </div>
+
+                  {/* Nav items in section */}
+                  {section.items.map((item) => {
+                    const Icon = item.icon;
+                    const isActive = activePage === item.id;
+                    return (
+                      <button
+                        key={item.id}
+                        onClick={() => {
+                          onNavigate(item.id);
+                          setIsSidebarOpen(false);
+                        }}
+                        className={`group relative flex items-center gap-2.5 mx-2 mb-0.5 px-2.5 py-2 rounded-lg transition-all duration-150 text-left w-[calc(100%-16px)] cursor-pointer ${
+                          isActive
+                            ? isLight
+                              ? "border"
+                              : "border"
+                            : isLight
+                              ? "border border-transparent hover:bg-gray-550 hover:border-gray-100"
+                              : "border border-transparent hover:bg-[#0f172a]/60 hover:border-[rgba(255,255,255,0.05)]"
+                        }`}
+                        style={isActive ? {
+                          background: isLight ? section.color + "10" : section.color + "15",
+                          borderColor: section.color + "35",
+                          boxShadow: !isLight ? `0 0 16px ${section.color}18, inset 0 0 10px ${section.color}08` : undefined,
+                        } : undefined}
+                      >
+                        {/* Active left bar */}
+                        {isActive && !isLight && (
+                          <span className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-4 rounded-r"
+                            style={{ background: section.color, boxShadow: `0 0 6px ${section.color}` }} />
+                        )}
+
+                        {/* Step number badge */}
+                        <div className={`w-4 h-4 rounded-full items-center justify-center shrink-0 font-mono text-[7px] font-bold ${
+                          isSidebarOpen ? "flex" : "hidden lg:flex"
+                        }`}
+                          style={{
+                            background: isActive ? section.color + "25" : (isLight ? "#f9fafb" : "rgba(255,255,255,0.04)"),
+                            color: isActive ? section.color : (isLight ? "#9ca3af" : "#374151"),
+                            border: `1px solid ${isActive ? section.color + "40" : (isLight ? "#e5e7eb" : "rgba(255,255,255,0.06)")}`,
+                          }}>
+                          {item.step}
+                        </div>
+
+                        {/* Icon — mobile: centered; desktop: icon only for xs, visible for lg */}
+                        <Icon size={14} className="shrink-0"
+                          style={{ color: isActive ? section.color : (isLight ? "#6b7280" : "#64748b") }} />
+
+                        {/* Label */}
+                        <span className={`font-mono text-[10px] font-bold uppercase tracking-wide truncate ${
+                          isSidebarOpen ? "block" : "hidden lg:block"
+                        }`}
+                          style={{ color: isActive ? section.color : (isLight ? "#374151" : "#94a3b8") }}>
+                          {item.label}
+                        </span>
+
+                        {/* Active chevron */}
+                        {isActive && (
+                          <ChevronRight size={10} className={`ml-auto shrink-0 ${
+                            isSidebarOpen ? "block" : "hidden lg:block"
+                          }`}
+                            style={{ color: section.color + "99" }} />
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Bottom: workflow step progress bar */}
+          <div className="hidden lg:block mx-3 mb-3">
+            {(() => {
+              const currentItem = navItems.find(i => i.id === activePage);
+              const currentSection = NAV_SECTIONS.find(s => s.items.some(i => i.id === activePage));
+              const totalSteps = navItems.filter(i => i.step > 0).length;
+              const currentStep = currentItem?.step ?? 0;
+              const pct = currentStep === 0 ? 0 : Math.round((currentStep / totalSteps) * 100);
+              return (
+                <div className={`p-2.5 rounded-xl border ${
+                  isLight ? "bg-gray-50 border-gray-100" : "border-[rgba(255,255,255,0.06)] bg-[rgba(255,255,255,0.02)]"
+                }`}>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <span className="font-mono text-[7.5px] uppercase tracking-widest" style={{ color: isLight ? "#9ca3af" : "#374151" }}>
+                      Workflow Progress
+                    </span>
+                    <span className="font-mono text-[8px] font-bold" style={{ color: currentSection?.color || "#3b82f6" }}>
+                      Step {currentStep}/{totalSteps}
+                    </span>
+                  </div>
+                  <div className="h-1 rounded-full overflow-hidden" style={{ background: isLight ? "#e5e7eb" : "rgba(255,255,255,0.06)" }}>
+                    <div className="h-full rounded-full transition-all duration-500"
+                      style={{
+                        width: `${pct}%`,
+                        background: currentSection
+                          ? `linear-gradient(90deg, ${currentSection.color}aa, ${currentSection.color})`
+                          : "#3b82f6",
+                        boxShadow: `0 0 6px ${currentSection?.color || "#3b82f6"}80`,
+                      }} />
+                  </div>
+                  <div className="mt-1.5 font-mono text-[7px]" style={{ color: currentSection?.color || "#3b82f6" }}>
+                    {currentSection?.label || "HUB"} — {currentItem?.label || "Command Center"}
+                  </div>
+                </div>
+              );
+            })()}
+          </div>
 
           {/* Bottom: latest agent log */}
           {latestLog && (
             <div
-              className={`mt-auto mx-2 p-3 rounded-lg border text-[9px] font-mono leading-relaxed hidden lg:block ${
+              className={`mx-2 mb-2 p-2.5 rounded-lg border text-[9px] font-mono leading-relaxed hidden lg:block ${
                 isLight ? "border-gray-200 bg-gray-50 text-gray-400" : "border-[rgba(255,255,255,0.08)] text-gray-400"
               }`}
               style={!isLight ? {
@@ -332,14 +690,79 @@ Return ONLY the raw JSON object. Do not include markdown tags or extra explanati
                 latestLog.agent === "Atlas" ? "text-orbit-success" :
                 latestLog.agent === "Luna" ? "text-amber-500" : "text-gray-400"
               }`}>{latestLog.agent}</span>
-              <p className="line-clamp-3">{latestLog.message}</p>
+              <p className="line-clamp-2">{latestLog.message}</p>
             </div>
           )}
         </aside>
 
         {/* Page Content */}
         <main className="flex-1 overflow-hidden flex flex-col min-w-0 relative">
+
+          {/* ══ Workflow Breadcrumb Strip ══════════════════════════════════ */}
+          {(() => {
+            const currentItem = navItems.find(i => i.id === activePage);
+            const currentSection = NAV_SECTIONS.find(s => s.items.some(i => i.id === activePage));
+            if (!currentItem || !currentSection) return null;
+            const totalSteps = navItems.length - 1; // step 0 is command center
+            const pct = currentItem.step === 0 ? 0 : Math.round((currentItem.step / totalSteps) * 100);
+
+            return (
+              <div className={`shrink-0 flex items-center gap-3 px-4 py-1.5 border-b overflow-x-auto ${ isLight ? "bg-white border-gray-100" : "bg-[#050816]/60 border-[rgba(255,255,255,0.05)] backdrop-blur-sm" }`}>
+                {/* Section phase badge */}
+                <span className="font-mono text-[7.5px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full shrink-0"
+                  style={{ color: currentSection.color, background: currentSection.color + "15", border: `1px solid ${currentSection.color}30` }}>
+                  {currentSection.label}
+                </span>
+
+                {/* Arrow */}
+                <ChevronRight size={10} style={{ color: isLight ? "#d1d5db" : "#1e293b" }} className="shrink-0" />
+
+                {/* Page name */}
+                <span className="font-mono text-[9px] font-bold uppercase tracking-wide shrink-0"
+                  style={{ color: currentSection.color }}>
+                  {currentItem.label}
+                </span>
+
+                {/* Mini workflow ribbon — all steps */}
+                <div className="flex items-center gap-0.5 ml-2 shrink-0">
+                  {navItems.map((item, idx) => {
+                    const isSec = NAV_SECTIONS.find(s => s.items.some(i => i.id === item.id));
+                    const isPast = item.step < currentItem.step;
+                    const isCurrent = item.id === activePage;
+                    return (
+                      <React.Fragment key={item.id}>
+                        <button
+                          onClick={() => onNavigate(item.id)}
+                          title={item.label}
+                          className="w-4 h-4 rounded-sm flex items-center justify-center transition-all hover:scale-125 cursor-pointer"
+                          style={{
+                            background: isCurrent ? isSec?.color + "30" : isPast ? isSec?.color + "12" : "transparent",
+                            border: `1px solid ${isCurrent ? isSec?.color + "60" : isPast ? isSec?.color + "30" : (isLight ? "#e5e7eb" : "rgba(255,255,255,0.05)")}`,
+                          }}>
+                          <span className="font-mono text-[6px] font-bold"
+                            style={{ color: isCurrent ? isSec?.color : isPast ? isSec?.color + "80" : (isLight ? "#d1d5db" : "#1e293b") }}>
+                            {item.step}
+                          </span>
+                        </button>
+                        {idx < navItems.length - 1 && (
+                          <div className="w-1.5 h-px shrink-0"
+                            style={{ background: isPast ? (isSec?.color || "#3b82f6") + "40" : (isLight ? "#e5e7eb" : "rgba(255,255,255,0.04)") }} />
+                        )}
+                      </React.Fragment>
+                    );
+                  })}
+                </div>
+
+                {/* Progress % */}
+                <span className="font-mono text-[7px] ml-auto shrink-0" style={{ color: isLight ? "#9ca3af" : "#374151" }}>
+                  {pct}% complete
+                </span>
+              </div>
+            );
+          })()}
+
           {children}
+
 
           {/* ════════════════════════════════════════
               ORBIT COPILOT FLOATING BUTTON

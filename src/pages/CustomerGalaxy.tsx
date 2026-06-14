@@ -1,9 +1,10 @@
-import React, { useRef, useEffect, useState } from "react";
+import React, { useRef, useEffect, useState, useMemo } from "react";
 import { useOrbit } from "../context/OrbitContext";
 import type { Customer } from "../context/OrbitContext";
 import { 
   X, TrendingDown, TrendingUp, Minus, ShoppingBag, Cpu, 
-  Search, SlidersHorizontal, Eye, Compass, ZoomIn, ZoomOut 
+  Search, SlidersHorizontal, Eye, Compass, ZoomIn, ZoomOut,
+  ChevronLeft, ChevronRight, ArrowUpDown, List
 } from "lucide-react";
 import { PageHeaderHUD } from "../components/PageHeaderHUD";
 import { AgentCardModal } from "../components/AgentCardModal";
@@ -52,6 +53,23 @@ export const CustomerGalaxy: React.FC = () => {
   const [selected, setSelected] = useState<Customer | null>(null);
   const [hovered, setHovered] = useState<Customer | null>(null);
   const [selectedAgent, setSelectedAgent] = useState<"Polaris" | "Vega" | "Nova" | "Atlas" | "Luna" | null>(null);
+  const [viewMode, setViewMode] = useState<"galaxy" | "list">("galaxy");
+  const [showCrmFilters, setShowCrmFilters] = useState(false);
+
+  // Sorting
+  const [sortField, setSortField] = useState<string>("ltv");
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
+
+  // Pagination
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const itemsPerPage = 15;
+
+  const segmentColorsMap: Record<Customer["segment"], string> = {
+    "Loyalists": "text-orbit-success border-orbit-success/30 bg-orbit-success/5",
+    "Slipping Away": "text-orbit-pink border-orbit-pink/30 bg-orbit-pink/5",
+    "High-Value Inactive": "text-orbit-amber border-orbit-amber/30 bg-orbit-amber/5",
+    "New Signups": "text-orbit-blue border-orbit-blue/30 bg-orbit-blue/5",
+  };
 
   /* Camera State */
   const [pan, setPan] = useState({ x: 0, y: 0 });
@@ -114,6 +132,49 @@ export const CustomerGalaxy: React.FC = () => {
   });
 
   const filteredOutIds = new Set(customers.filter(c => !filteredCustomers.includes(c)).map(c => c.id));
+
+  // Sort calculation
+  const sortedCustomers = useMemo(() => {
+    return [...filteredCustomers].sort((a, b) => {
+      let valA: any = a[sortField as keyof Customer];
+      let valB: any = b[sortField as keyof Customer];
+      
+      if (typeof valA === "string") {
+        return sortDirection === "asc"
+          ? valA.localeCompare(valB)
+          : valB.localeCompare(valA);
+      } else {
+        return sortDirection === "asc"
+          ? (valA || 0) - (valB || 0)
+          : (valB || 0) - (valA || 0);
+      }
+    });
+  }, [filteredCustomers, sortField, sortDirection]);
+
+  // Search filter for list table
+  const searchedCustomers = useMemo(() => {
+    if (!searchQuery.trim()) return sortedCustomers;
+    const q = searchQuery.toLowerCase();
+    return sortedCustomers.filter(c => 
+      c.id.toLowerCase().includes(q) ||
+      c.name.toLowerCase().includes(q) ||
+      (c.email && c.email.toLowerCase().includes(q)) ||
+      (c.phone && c.phone.toLowerCase().includes(q))
+    );
+  }, [sortedCustomers, searchQuery]);
+
+  // Paginated calculation
+  const paginatedCustomers = useMemo(() => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    return searchedCustomers.slice(startIndex, startIndex + itemsPerPage);
+  }, [searchedCustomers, currentPage]);
+
+  const totalPages = Math.ceil(searchedCustomers.length / itemsPerPage);
+
+  // Sync pagination reset when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [selectedSegments, minLtv, maxChurnRisk, preferredChannel, searchQuery]);
 
   /* Search Auto-Focus */
   const handleSelectCustomer = (cust: Customer) => {
@@ -494,13 +555,22 @@ export const CustomerGalaxy: React.FC = () => {
       {/* ════════════════════════════════════════
           LEFT PANEL — GALAXY CONTROLS
       ════════════════════════════════════════ */}
-      <aside className="w-64 shrink-0 flex flex-col border-r border-gray-800/60 bg-gray-950/45 backdrop-blur-md p-4 space-y-5 overflow-y-auto relative z-10">
-        <div>
-          <h2 className="font-space text-sm font-bold text-white uppercase tracking-wider flex items-center gap-1.5 mb-1">
-            <SlidersHorizontal size={14} className="text-blue-400" />
-            Galaxy Filters
-          </h2>
-          <p className="font-mono text-[8px] text-gray-550 uppercase">Isolate sectors of customer space</p>
+      <aside className={`w-64 shrink-0 flex flex-col border-r border-gray-800/60 bg-[#050816]/95 lg:bg-gray-950/45 backdrop-blur-md p-4 space-y-5 overflow-y-auto relative z-30 transition-all duration-300
+        ${showCrmFilters ? "fixed inset-y-0 left-0 w-64 h-full border-r border-gray-850 flex" : "hidden lg:flex"}`}>
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="font-space text-sm font-bold text-white uppercase tracking-wider flex items-center gap-1.5 mb-1">
+              <SlidersHorizontal size={14} className="text-blue-400" />
+              Galaxy Filters
+            </h2>
+            <p className="font-mono text-[8px] text-gray-550 uppercase">Isolate sectors of customer space</p>
+          </div>
+          <button 
+            onClick={() => setShowCrmFilters(false)}
+            className="lg:hidden p-1 rounded-lg border border-gray-800 text-gray-400 hover:text-white transition-colors cursor-pointer"
+          >
+            <X size={14} />
+          </button>
         </div>
 
         {/* Segment Toggles */}
@@ -626,130 +696,311 @@ export const CustomerGalaxy: React.FC = () => {
             subtitle="Visualizing customer density clusters as constellations"
             onSelectAgent={setSelectedAgent}
             actions={
-              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded bg-gray-900/30 border border-gray-800 font-mono text-[9px] text-gray-500">
-                <Eye size={11} className="text-blue-400" />
-                <span>STARS VISIBLE: {filteredCustomers.length} / {customers.length}</span>
+              <div className="flex items-center gap-2">
+                {/* Mobile Filter Button */}
+                <button
+                  onClick={() => setShowCrmFilters(true)}
+                  className="lg:hidden flex items-center gap-1.5 px-2.5 py-1 rounded bg-gray-900/50 border border-gray-800 text-[10px] text-gray-300 font-mono hover:bg-gray-800 transition-colors"
+                >
+                  <SlidersHorizontal size={12} className="text-blue-400" />
+                  <span>Filters</span>
+                </button>
+
+                {/* View Switcher Toggle */}
+                <div className="flex items-center rounded-lg bg-gray-950 p-0.5 border border-gray-900 font-mono text-[9px]">
+                  <button
+                    onClick={() => setViewMode("galaxy")}
+                    className={`flex items-center gap-1 px-2.5 py-1 rounded-md transition-all cursor-pointer ${
+                      viewMode === "galaxy"
+                        ? "bg-blue-600 text-white font-bold"
+                        : "text-gray-400 hover:text-white"
+                    }`}
+                  >
+                    <Compass size={11} />
+                    <span>Galaxy</span>
+                  </button>
+                  <button
+                    onClick={() => setViewMode("list")}
+                    className={`flex items-center gap-1 px-2.5 py-1 rounded-md transition-all cursor-pointer ${
+                      viewMode === "list"
+                        ? "bg-blue-600 text-white font-bold"
+                        : "text-gray-400 hover:text-white"
+                    }`}
+                  >
+                    <List size={11} />
+                    <span>List</span>
+                  </button>
+                </div>
+
+                <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded bg-gray-900/30 border border-gray-800 font-mono text-[9px] text-gray-500">
+                  <Eye size={11} className="text-blue-400" />
+                  <span>STARS VISIBLE: {filteredCustomers.length} / {customers.length}</span>
+                </div>
               </div>
             }
           />
         </div>
 
-        {/* Canvas Workspace */}
-        <div className="flex-1 relative overflow-hidden bg-[#03040c]">
-          <canvas
-            ref={canvasRef}
-            width={1000}
-            height={850}
-            className="w-full h-full block"
-            onClick={handleCanvasClick}
-            onWheel={handleWheel}
-            onMouseDown={handleMouseDown}
-            onMouseMove={handleMouseMove}
-            onMouseUp={handleMouseUp}
-            onMouseLeave={handleMouseUp}
-            style={{ cursor: isDragging ? "grabbing" : "crosshair" }}
-          />
+        {viewMode === "galaxy" ? (
+          /* Canvas Workspace */
+          <div className="flex-1 relative overflow-hidden bg-[#03040c]">
+            <canvas
+              ref={canvasRef}
+              width={1000}
+              height={850}
+              className="w-full h-full block"
+              onClick={handleCanvasClick}
+              onWheel={handleWheel}
+              onMouseDown={handleMouseDown}
+              onMouseMove={handleMouseMove}
+              onMouseUp={handleMouseUp}
+              onMouseLeave={handleMouseUp}
+              style={{ cursor: isDragging ? "grabbing" : "crosshair" }}
+            />
 
-          {/* Floating HUD Search overlay */}
-          <div className="absolute top-4 left-4 w-64">
-            <div className="relative">
-              <div className="flex items-center gap-2 bg-gray-950/90 border border-gray-800 rounded-xl px-3 py-2 text-white focus-within:border-blue-500/50 shadow-2xl backdrop-blur-md">
-                <Search size={13} className="text-gray-500" />
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={e => {
-                    setSearchQuery(e.target.value);
-                    setShowSuggestions(true);
-                  }}
-                  onFocus={() => setShowSuggestions(true)}
-                  placeholder="Search customer star..."
-                  className="flex-1 bg-transparent text-xs font-mono text-white placeholder-gray-600 focus:outline-none"
-                />
-                {searchQuery && (
-                  <button onClick={() => setSearchQuery("")} className="text-gray-500 hover:text-white cursor-pointer">
-                    <X size={12} />
-                  </button>
+            {/* Floating HUD Search overlay */}
+            <div className="absolute top-4 left-4 w-64">
+              <div className="relative">
+                <div className="flex items-center gap-2 bg-gray-950/90 border border-gray-800 rounded-xl px-3 py-2 text-white focus-within:border-blue-500/50 shadow-2xl backdrop-blur-md">
+                  <Search size={13} className="text-gray-500" />
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={e => {
+                      setSearchQuery(e.target.value);
+                      setShowSuggestions(true);
+                    }}
+                    onFocus={() => setShowSuggestions(true)}
+                    placeholder="Search customer star..."
+                    className="flex-1 bg-transparent text-xs font-mono text-white placeholder-gray-600 focus:outline-none"
+                  />
+                  {searchQuery && (
+                    <button onClick={() => setSearchQuery("")} className="text-gray-500 hover:text-white cursor-pointer">
+                      <X size={12} />
+                    </button>
+                  )}
+                </div>
+
+                {/* Autocomplete suggestions */}
+                {showSuggestions && matchingSuggestions.length > 0 && (
+                  <div className="absolute top-full left-0 right-0 mt-1.5 border border-gray-800 bg-gray-950/95 rounded-xl overflow-hidden shadow-2xl backdrop-blur-md divide-y divide-gray-900 font-mono text-xs">
+                    {matchingSuggestions.map(sug => {
+                      const color = segmentColors[sug.segment];
+                      return (
+                        <button
+                          key={sug.id}
+                          onClick={() => handleSelectCustomer(sug)}
+                          className="w-full text-left px-3 py-2.5 hover:bg-blue-500/5 hover:text-white text-gray-300 flex items-center justify-between cursor-pointer"
+                        >
+                          <div>
+                            <p className="font-semibold">{sug.name}</p>
+                            <span className="text-[9px] text-gray-550 uppercase">{sug.segment}</span>
+                          </div>
+                          <span className="text-[9px] font-bold text-gray-400" style={{ color }}>
+                            ₹{sug.ltv.toLocaleString()}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
                 )}
               </div>
+            </div>
 
-              {/* Autocomplete suggestions */}
-              {showSuggestions && matchingSuggestions.length > 0 && (
-                <div className="absolute top-full left-0 right-0 mt-1.5 border border-gray-800 bg-gray-950/95 rounded-xl overflow-hidden shadow-2xl backdrop-blur-md divide-y divide-gray-900 font-mono text-xs">
-                  {matchingSuggestions.map(sug => {
-                    const color = segmentColors[sug.segment];
-                    return (
-                      <button
-                        key={sug.id}
-                        onClick={() => handleSelectCustomer(sug)}
-                        className="w-full text-left px-3 py-2.5 hover:bg-blue-500/5 hover:text-white text-gray-300 flex items-center justify-between cursor-pointer"
-                      >
-                        <div>
-                          <p className="font-semibold">{sug.name}</p>
-                          <span className="text-[9px] text-gray-550 uppercase">{sug.segment}</span>
-                        </div>
-                        <span className="text-[9px] font-bold text-gray-400" style={{ color }}>
-                          ₹{sug.ltv.toLocaleString()}
-                        </span>
-                      </button>
-                    );
-                  })}
-                </div>
-              )}
+            {/* Canvas guidance hint */}
+            <div className="absolute top-4 right-4 pointer-events-none font-mono text-[8px] text-gray-500 bg-gray-950/80 px-2.5 py-1.5 rounded-lg border border-gray-850 shadow-md">
+              [ WHEEL TO ZOOM · DRAG TO NAVIGATE · CLICK STAR TO INSPECT ]
+            </div>
+
+            {/* Zoom & Pan Camera controls */}
+            <div className="absolute bottom-4 right-4 flex flex-col gap-1.5">
+              <button
+                onClick={() => {
+                  targetZoom.current = Math.min(3.0, targetZoom.current * 1.35);
+                }}
+                title="Zoom In"
+                className="w-9 h-9 rounded-xl bg-gray-950/90 border border-gray-800 text-gray-400 hover:text-white hover:border-gray-700 transition-all flex items-center justify-center cursor-pointer shadow-lg hover:scale-105"
+              >
+                <ZoomIn size={15} />
+              </button>
+              <button
+                onClick={() => {
+                  targetZoom.current = Math.max(0.4, targetZoom.current * 0.75);
+                }}
+                title="Zoom Out"
+                className="w-9 h-9 rounded-xl bg-gray-950/90 border border-gray-800 text-gray-400 hover:text-white hover:border-gray-700 transition-all flex items-center justify-center cursor-pointer shadow-lg hover:scale-105"
+              >
+                <ZoomOut size={15} />
+              </button>
+              <button
+                onClick={() => {
+                  targetZoom.current = 0.85;
+                  const canvas = canvasRef.current;
+                  if (canvas) {
+                    targetPan.current = {
+                      x: canvas.width / 2 - 500 * 0.85,
+                      y: canvas.height / 2 - 500 * 0.85
+                    };
+                  }
+                }}
+                title="Recenter Galaxy"
+                className="w-9 h-9 rounded-xl bg-gray-950/90 border border-gray-800 text-gray-550 hover:text-gray-300 font-mono text-[8px] hover:border-gray-750 transition-all flex items-center justify-center cursor-pointer shadow-lg hover:scale-105"
+              >
+                RST
+              </button>
             </div>
           </div>
+        ) : (
+          /* List Workspace - Tabular Database */
+          <div className="flex-1 flex flex-col min-h-0 bg-[#050816] p-4 sm:p-6 overflow-hidden">
+            {/* Search and Filters Strip */}
+            <div className="shrink-0 flex items-center gap-3 mb-4">
+              <div className="flex-1 max-w-md relative">
+                <div className="flex items-center gap-2 bg-gray-950/90 border border-gray-800 rounded-xl px-3 py-2 text-white focus-within:border-blue-500/50 shadow-2xl backdrop-blur-md">
+                  <Search size={13} className="text-gray-500" />
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={e => setSearchQuery(e.target.value)}
+                    placeholder="Search customer by ID, Name, Email, Phone..."
+                    className="flex-1 bg-transparent text-xs font-mono text-white placeholder-gray-600 focus:outline-none"
+                  />
+                  {searchQuery && (
+                    <button onClick={() => setSearchQuery("")} className="text-gray-500 hover:text-white cursor-pointer">
+                      <X size={12} />
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
 
-          {/* Canvas guidance hint */}
-          <div className="absolute top-4 right-4 pointer-events-none font-mono text-[8px] text-gray-500 bg-gray-950/80 px-2.5 py-1.5 rounded-lg border border-gray-850 shadow-md">
-            [ WHEEL TO ZOOM · DRAG TO NAVIGATE · CLICK STAR TO INSPECT ]
-          </div>
+            {/* Table wrapper with vertical scroll */}
+            <div className="flex-1 overflow-auto border border-gray-800/60 rounded-xl bg-gray-950/20 backdrop-blur-md">
+              <table className="w-full text-left border-collapse font-mono text-xs text-gray-300">
+                <thead>
+                  <tr className="border-b border-gray-800 bg-gray-900/30 text-gray-400 font-bold uppercase tracking-wider text-[9px]">
+                    <th 
+                      onClick={() => {
+                        setSortField("id");
+                        setSortDirection(prev => prev === "asc" ? "desc" : "asc");
+                      }}
+                      className="p-3.5 cursor-pointer hover:bg-gray-900/50 transition-colors select-none"
+                    >
+                      <div className="flex items-center gap-1.5">
+                        <span>ID</span>
+                        <ArrowUpDown size={10} className="text-gray-500" />
+                      </div>
+                    </th>
+                    <th 
+                      onClick={() => {
+                        setSortField("name");
+                        setSortDirection(prev => prev === "asc" ? "desc" : "asc");
+                      }}
+                      className="p-3.5 cursor-pointer hover:bg-gray-900/50 transition-colors select-none"
+                    >
+                      <div className="flex items-center gap-1.5">
+                        <span>Name</span>
+                        <ArrowUpDown size={10} className="text-gray-500" />
+                      </div>
+                    </th>
+                    <th className="p-3.5 hidden md:table-cell">Email</th>
+                    <th className="p-3.5 hidden md:table-cell">Phone</th>
+                    <th className="p-3.5">Segment</th>
+                    <th className="p-3.5 hidden lg:table-cell">Persona</th>
+                    <th 
+                      onClick={() => {
+                        setSortField("ltv");
+                        setSortDirection(prev => prev === "asc" ? "desc" : "asc");
+                      }}
+                      className="p-3.5 cursor-pointer hover:bg-gray-900/50 transition-colors select-none"
+                    >
+                      <div className="flex items-center gap-1.5">
+                        <span>LTV</span>
+                        <ArrowUpDown size={10} className="text-gray-500" />
+                      </div>
+                    </th>
+                    <th className="p-3.5 hidden sm:table-cell">Last Purchase</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-900/60">
+                  {paginatedCustomers.length === 0 ? (
+                    <tr>
+                      <td colSpan={8} className="p-8 text-center text-gray-500 font-mono">
+                        No customer nodes matched the active filters.
+                      </td>
+                    </tr>
+                  ) : (
+                    paginatedCustomers.map((cust) => {
+                      const isSelected = selected?.id === cust.id;
+                      const badgeClass = segmentColorsMap[cust.segment] || "";
+                      return (
+                        <tr 
+                          key={cust.id}
+                          onClick={() => setSelected(cust)}
+                          className={`hover:bg-gray-900/35 transition-colors cursor-pointer ${
+                            isSelected ? "bg-blue-950/20 border-l-2 border-l-blue-500" : ""
+                          }`}
+                        >
+                          <td className="p-3.5 text-[10px] text-gray-500 font-bold">{cust.id}</td>
+                          <td className="p-3.5 text-white font-space font-semibold">{cust.name}</td>
+                          <td className="p-3.5 text-gray-400 hidden md:table-cell">{cust.email || "—"}</td>
+                          <td className="p-3.5 text-gray-400 hidden md:table-cell">{cust.phone || "—"}</td>
+                          <td className="p-3.5">
+                            <span className={`px-2 py-0.5 rounded text-[9px] font-bold border uppercase ${badgeClass}`}>
+                              {cust.segment}
+                            </span>
+                          </td>
+                          <td className="p-3.5 text-gray-400 hidden lg:table-cell truncate max-w-[120px]">
+                            {cust.dna[0] || "—"}
+                          </td>
+                          <td className="p-3.5 font-bold text-white">₹{cust.ltv.toLocaleString()}</td>
+                          <td className="p-3.5 text-gray-400 hidden sm:table-cell">
+                            {cust.predictedNextPurchase ? "Vega Projected" : "—"}
+                          </td>
+                        </tr>
+                      );
+                    })
+                  )}
+                </tbody>
+              </table>
+            </div>
 
-          {/* Zoom & Pan Camera controls */}
-          <div className="absolute bottom-4 right-4 flex flex-col gap-1.5">
-            <button
-              onClick={() => {
-                targetZoom.current = Math.min(3.0, targetZoom.current * 1.35);
-              }}
-              title="Zoom In"
-              className="w-9 h-9 rounded-xl bg-gray-950/90 border border-gray-800 text-gray-400 hover:text-white hover:border-gray-700 transition-all flex items-center justify-center cursor-pointer shadow-lg hover:scale-105"
-            >
-              <ZoomIn size={15} />
-            </button>
-            <button
-              onClick={() => {
-                targetZoom.current = Math.max(0.4, targetZoom.current * 0.75);
-              }}
-              title="Zoom Out"
-              className="w-9 h-9 rounded-xl bg-gray-950/90 border border-gray-800 text-gray-400 hover:text-white hover:border-gray-700 transition-all flex items-center justify-center cursor-pointer shadow-lg hover:scale-105"
-            >
-              <ZoomOut size={15} />
-            </button>
-            <button
-              onClick={() => {
-                targetZoom.current = 0.85;
-                const canvas = canvasRef.current;
-                if (canvas) {
-                  targetPan.current = {
-                    x: canvas.width / 2 - 500 * 0.85,
-                    y: canvas.height / 2 - 500 * 0.85
-                  };
-                }
-              }}
-              title="Recenter Galaxy"
-              className="w-9 h-9 rounded-xl bg-gray-950/90 border border-gray-800 text-gray-500 hover:text-gray-300 font-mono text-[8px] hover:border-gray-750 transition-all flex items-center justify-center cursor-pointer shadow-lg hover:scale-105"
-            >
-              RST
-            </button>
+            {/* Pagination Controls */}
+            {totalPages > 1 && (
+              <div className="shrink-0 flex flex-col sm:flex-row items-center justify-between gap-3 mt-4 px-1 font-mono text-[10px] text-gray-500">
+                <span>
+                  Showing {(currentPage - 1) * itemsPerPage + 1} to {Math.min(currentPage * itemsPerPage, searchedCustomers.length)} of {searchedCustomers.length} nodes
+                </span>
+                <div className="flex items-center gap-1.5">
+                  <button
+                    onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                    disabled={currentPage === 1}
+                    className="p-1.5 rounded border border-gray-800 bg-gray-950 hover:text-white disabled:opacity-40 disabled:hover:text-gray-550 transition-all cursor-pointer"
+                  >
+                    <ChevronLeft size={13} />
+                  </button>
+                  <span className="text-gray-300">
+                    Page <span className="font-bold text-blue-400">{currentPage}</span> of {totalPages}
+                  </span>
+                  <button
+                    onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                    disabled={currentPage === totalPages}
+                    className="p-1.5 rounded border border-gray-800 bg-gray-950 hover:text-white disabled:opacity-40 disabled:hover:text-gray-550 transition-all cursor-pointer"
+                  >
+                    <ChevronRight size={13} />
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
-        </div>
+        )}
       </main>
 
       {/* ════════════════════════════════════════
           RIGHT PANEL — STAR INSPECTOR / DNA
       ════════════════════════════════════════ */}
       {selected && (
-        <aside className="w-80 shrink-0 flex flex-col border-l border-[rgba(255,255,255,0.08)] bg-[#1E293B]/95 backdrop-blur-xl p-5 space-y-4 overflow-y-auto relative z-10 animate-fade-in-up">
-          {/* Header */}
+        <aside className="fixed inset-y-0 right-0 z-50 w-full sm:w-80 sm:relative sm:shrink-0 sm:inset-y-0 sm:z-10 flex flex-col border-l border-[rgba(255,255,255,0.08)] bg-[#1E293B]/95 backdrop-blur-xl p-5 space-y-4 overflow-y-auto h-full sm:h-auto animate-fade-in-up">
           <div className="flex items-start justify-between border-b border-[rgba(255,255,255,0.08)] pb-3">
             <div>
               <h2 className="font-space text-base font-bold text-white tracking-tight leading-snug">{selected.name}</h2>
