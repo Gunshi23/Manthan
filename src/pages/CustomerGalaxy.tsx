@@ -866,7 +866,7 @@ export const CustomerGalaxy: React.FC = () => {
           </div>
         ) : (
           /* List Workspace - Tabular Database */
-          <div className="flex-1 flex flex-col min-h-0 bg-[#050816] p-4 sm:p-6 overflow-hidden">
+          <div className={`flex-1 flex flex-col min-h-0 p-4 sm:p-6 overflow-hidden ${isLight ? "bg-[#F8FAFC]" : "bg-[#050816]"}`}>
             {/* Search and Filters Strip */}
             <div className="shrink-0 flex items-center gap-3 mb-4">
               <div className="flex-1 max-w-md relative">

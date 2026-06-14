@@ -160,7 +160,8 @@ const sleep = (ms: number) => new Promise(r => setTimeout(r, ms));
    COMPETITOR INTELLIGENCE PAGE
 ══════════════════════════════════════════════════════════════ */
 export const CompetitorIntelligence: React.FC = () => {
-  const { businessType, startMission, customers, campaigns, orders } = useOrbit();
+  const { businessType, startMission, customers, campaigns, orders, theme } = useOrbit();
+  const isLight = theme === "executive";
   const [selectedAgent, setSelectedAgent] = useState<"Polaris" | "Vega" | "Nova" | "Atlas" | "Luna" | null>(null);
 
   /* ── Data ── */
@@ -506,12 +507,12 @@ export const CompetitorIntelligence: React.FC = () => {
 
 
   return (
-    <div className="flex-1 flex flex-col overflow-hidden bg-[#050816] relative">
+    <div className={`flex-1 flex flex-col overflow-hidden relative ${isLight ? "bg-[#F8FAFC] text-[#0F172A]" : "bg-[#050816] text-white"}`}>
       <div className="pointer-events-none absolute inset-0 space-grid opacity-25 z-0" />
       <div className="pointer-events-none absolute inset-0 bg-orbit-glow-blue opacity-10 z-0" />
 
       {/* Header */}
-      <div className="shrink-0 px-6 pt-4 bg-gray-950/30 border-b border-gray-800/50 relative z-10">
+      <div className={`shrink-0 px-6 pt-4 border-b relative z-10 ${isLight ? "bg-white border-[#E2E8F0]" : "bg-gray-950/30 border-gray-800/50"}`}>
         <PageHeaderHUD
           title="Competitor Intelligence"
           subtitle="AI-POWERED COMPETITIVE ANALYSIS & MARKET SIGNAL CENTER"
@@ -537,11 +538,11 @@ export const CompetitorIntelligence: React.FC = () => {
 
           {/* ══ SECTION 9 — STICKY EXECUTIVE PANEL (top of page) ══ */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-            <div className="lg:col-span-2 p-5 rounded-2xl border border-purple-500/20 bg-gradient-to-r from-purple-500/5 to-blue-500/5 relative overflow-hidden">
+            <div className={`lg:col-span-2 p-5 rounded-2xl border relative overflow-hidden ${isLight ? "border-purple-300 bg-gradient-to-r from-purple-500/5 to-blue-500/5" : "border-purple-500/20 bg-gradient-to-r from-purple-500/5 to-blue-500/5"}`}>
               <div className="absolute top-0 right-0 w-48 h-24 bg-gradient-to-bl from-purple-600/10 to-transparent pointer-events-none" />
               <div className="flex items-center gap-2 mb-3">
                 <Brain size={14} className="text-purple-400" />
-                <span className="font-space text-xs font-bold text-white uppercase tracking-wider">What Should I Do Next?</span>
+                <span className={`font-space text-xs font-bold uppercase tracking-wider ${isLight ? "text-[#0F172A]" : "text-white"}`}>What Should I Do Next?</span>
                 <span className="ml-auto font-mono text-[8px] text-gray-500">ORBIT Executive Intelligence</span>
               </div>
               <div className="grid grid-cols-4 gap-3">
@@ -551,14 +552,14 @@ export const CompetitorIntelligence: React.FC = () => {
                   { label: "💰 Revenue Potential",  value: `₹${topOpportunity.revenue.toLocaleString()}`,    color: "text-yellow-400" },
                   { label: "📊 Confidence",         value: `${topOpportunity.confidence}%`,                  color: "text-blue-400" },
                 ].map(item => (
-                  <div key={item.label} className="bg-gray-950/50 p-3 rounded-xl border border-gray-800/40">
+                  <div key={item.label} className={`p-3 rounded-xl border ${isLight ? "bg-[#EFF6FF] border-[#BFDBFE]" : "bg-gray-950/50 border-gray-800/40"}`}>
                     <p className="font-mono text-[8px] text-gray-500 leading-tight">{item.label}</p>
                     <p className={`font-space text-[10px] font-bold mt-1 leading-tight ${item.color}`}>{item.value}</p>
                   </div>
                 ))}
               </div>
             </div>
-            <div className="p-5 rounded-2xl border border-green-500/20 bg-green-500/5 flex flex-col gap-3 justify-between">
+            <div className={`p-5 rounded-2xl border flex flex-col gap-3 justify-between ${isLight ? "border-green-300 bg-green-50" : "border-green-500/20 bg-green-500/5"}`}>
               <div>
                 <p className="font-mono text-[8px] text-gray-500 uppercase tracking-wider mb-1">Recommended Action</p>
                 <p className="font-space text-xs font-bold text-green-400">Launch VIP WhatsApp Counter Campaign</p>
@@ -573,19 +574,19 @@ export const CompetitorIntelligence: React.FC = () => {
           </div>
 
           {/* ══ SECTION 1 — COMPETITOR WATCHLIST ══ */}
-          <div className="orbit-panel border border-gray-800/60 bg-gray-900/20 p-5 rounded-2xl">
+          <div className={`orbit-panel p-5 rounded-2xl ${isLight ? "" : "border border-gray-800/60 bg-gray-900/20"}`}>
             <div className="flex items-center gap-2 mb-4">
               <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-red-500 to-orange-600 flex items-center justify-center">
                 <Eye size={12} className="text-white" />
               </div>
-              <h2 className="font-space text-xs font-bold text-white uppercase tracking-wider">Competitor Watchlist</h2>
+              <h2 className={`font-space text-xs font-bold uppercase tracking-wider ${isLight ? "text-[#0F172A]" : "text-white"}`}>Competitor Watchlist</h2>
               <span className="ml-auto font-mono text-[8px] text-gray-600">{competitors.length} BRANDS MONITORED</span>
             </div>
 
             <div className="overflow-x-auto">
               <table className="w-full font-mono text-[9px]">
                 <thead>
-                  <tr className="border-b border-gray-800/60">
+                  <tr className={`border-b ${isLight ? "border-[#E2E8F0]" : "border-gray-800/60"}`}>
                     {["Brand","Follower Growth","Engagement","Campaign Activity","New Products","Promo Status","Top Channel","Threat Level"].map(h => (
                       <th key={h} className="text-left py-2 px-2 text-gray-500 uppercase tracking-wider font-semibold text-[8px]">{h}</th>
                     ))}
@@ -593,11 +594,11 @@ export const CompetitorIntelligence: React.FC = () => {
                 </thead>
                 <tbody>
                   {competitors.map(c => (
-                    <tr key={c.name} className="border-b border-gray-900/40 hover:bg-gray-900/20 transition-colors cursor-pointer">
+                    <tr key={c.name} className={`border-b transition-colors cursor-pointer ${isLight ? "border-[#EFF6FF] hover:bg-[#EFF6FF]" : "border-gray-900/40 hover:bg-gray-900/20"}`}>
                       <td className="py-2.5 px-2">
                         <div className="flex items-center gap-2">
-                          <div className="w-6 h-6 rounded-lg bg-gray-800 flex items-center justify-center text-[8px] font-bold text-white">{c.abbr}</div>
-                          <span className="text-white font-semibold">{c.name}</span>
+                          <div className={`w-6 h-6 rounded-lg flex items-center justify-center text-[8px] font-bold ${isLight ? "bg-[#EFF6FF] text-[#2563EB] border border-[#BFDBFE]" : "bg-gray-800 text-white"}`}>{c.abbr}</div>
+                          <span className={`font-semibold ${isLight ? "text-[#0F172A]" : "text-white"}`}>{c.name}</span>
                         </div>
                       </td>
                       <td className="py-2.5 px-2">
@@ -619,9 +620,9 @@ export const CompetitorIntelligence: React.FC = () => {
                       <td className="py-2.5 px-2 text-gray-300">{c.topChannel}</td>
                       <td className="py-2.5 px-2">
                         <span className={`px-2 py-0.5 rounded-full font-bold text-[7px] border ${
-                          c.threat === "red" ? "border-red-500/40 bg-red-500/10 text-red-400" :
-                          c.threat === "yellow" ? "border-yellow-400/40 bg-yellow-400/10 text-yellow-400" :
-                          "border-green-500/40 bg-green-500/10 text-green-400"}`}>
+                          c.threat === "red" ? (isLight ? "border-red-200 bg-red-500/5 text-red-600" : "border-red-500/40 bg-red-500/10 text-red-400") :
+                          c.threat === "yellow" ? (isLight ? "border-yellow-200 bg-yellow-50 text-amber-600" : "border-yellow-400/40 bg-yellow-400/10 text-yellow-400") :
+                          (isLight ? "border-green-200 bg-green-50 text-emerald-600" : (isLight ? "border-green-200 bg-green-50 text-emerald-600" : "border-green-500/40 bg-green-500/10 text-green-400"))}`}>
                           {c.threat === "red" ? "🔴" : c.threat === "yellow" ? "🟡" : "🟢"} {c.threatLabel}
                         </span>
                       </td>
@@ -633,12 +634,12 @@ export const CompetitorIntelligence: React.FC = () => {
           </div>
 
           {/* ══ SECTION 2 — LIVE MARKET SIGNALS ══ */}
-          <div className="orbit-panel border border-gray-800/60 bg-gray-900/20 p-5 rounded-2xl">
+          <div className={`orbit-panel p-5 rounded-2xl ${isLight ? "" : "border border-gray-800/60 bg-gray-900/20"}`}>
             <div className="flex items-center gap-2 mb-4">
               <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-green-500 to-cyan-600 flex items-center justify-center">
                 <Activity size={12} className="text-white" />
               </div>
-              <h2 className="font-space text-xs font-bold text-white uppercase tracking-wider">Live Market Signals</h2>
+              <h2 className={`font-space text-xs font-bold uppercase tracking-wider ${isLight ? "text-[#0F172A]" : "text-white"}`}>Live Market Signals</h2>
               <div className="ml-auto flex items-center gap-1.5 font-mono text-[8px] text-green-400">
                 <div className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
                 REAL-TIME
@@ -647,7 +648,7 @@ export const CompetitorIntelligence: React.FC = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
               {signals.map(sig => (
                 <div key={sig.id} className={`p-4 rounded-xl border transition-all ${
-                  sig.type === "threat" ? "border-red-500/20 bg-red-500/5" :
+                  sig.type === "threat" ? (isLight ? "border-red-200 bg-red-500/5" : "border-red-500/20 bg-red-500/5") :
                   sig.type === "opportunity" ? "border-green-500/20 bg-green-500/5" :
                   "border-gray-800/40 bg-gray-900/10"}`}>
                   <div className="flex items-start justify-between gap-2 mb-2">
@@ -661,16 +662,16 @@ export const CompetitorIntelligence: React.FC = () => {
                       {sig.trend === "up" ? <TrendingUp size={10} /> : sig.trend === "down" ? <TrendingDown size={10} /> : null}
                     </span>
                   </div>
-                  <p className="font-space text-[10px] font-bold text-white leading-snug mb-1.5">{sig.title}</p>
+                  <p className={`font-space text-[10px] font-bold leading-snug mb-1.5 ${isLight ? "text-[#0F172A]" : "text-white"}`}>{sig.title}</p>
                   <p className="font-mono text-[8px] text-gray-500 leading-relaxed mb-3">{sig.desc}</p>
                   <div className="flex items-center gap-3">
                     <div>
                       <p className="font-mono text-[7px] text-gray-600">Impact</p>
-                      <p className="font-mono text-[9px] font-bold text-white">{sig.impact}%</p>
+                      <p className={`font-mono text-[9px] font-bold ${isLight ? "text-[#0F172A]" : "text-white"}`}>{sig.impact}%</p>
                     </div>
                     <div>
                       <p className="font-mono text-[7px] text-gray-600">Confidence</p>
-                      <p className="font-mono text-[9px] font-bold text-white">{sig.confidence}%</p>
+                      <p className={`font-mono text-[9px] font-bold ${isLight ? "text-[#0F172A]" : "text-white"}`}>{sig.confidence}%</p>
                     </div>
                     <div className="ml-auto flex items-center gap-1">
                       <div className="w-4 h-4 rounded-md flex items-center justify-center text-[8px]"
@@ -686,12 +687,12 @@ export const CompetitorIntelligence: React.FC = () => {
           </div>
 
           {/* ══ SECTION 3 — COMPETITIVE GAP ANALYSIS ══ */}
-          <div className="orbit-panel border border-gray-800/60 bg-gray-900/20 p-5 rounded-2xl">
+          <div className={`orbit-panel p-5 rounded-2xl ${isLight ? "" : "border border-gray-800/60 bg-gray-900/20"}`}>
             <div className="flex items-center gap-2 mb-4">
               <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
                 <BarChart3 size={12} className="text-white" />
               </div>
-              <h2 className="font-space text-xs font-bold text-white uppercase tracking-wider">Competitive Gap Analysis</h2>
+              <h2 className={`font-space text-xs font-bold uppercase tracking-wider ${isLight ? "text-[#0F172A]" : "text-white"}`}>Competitive Gap Analysis</h2>
             </div>
             <div className="space-y-3">
               {gapMetrics.map(m => {
@@ -740,12 +741,12 @@ export const CompetitorIntelligence: React.FC = () => {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
             {/* SECTION 4 — Trend Radar */}
-            <div className="orbit-panel border border-gray-800/60 bg-gray-900/20 p-5 rounded-2xl">
+            <div className={`orbit-panel p-5 rounded-2xl ${isLight ? "" : "border border-gray-800/60 bg-gray-900/20"}`}>
               <div className="flex items-center gap-2 mb-4">
                 <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center">
                   <Compass size={12} className="text-white" />
                 </div>
-                <h2 className="font-space text-xs font-bold text-white uppercase tracking-wider">Trend Radar</h2>
+                <h2 className={`font-space text-xs font-bold uppercase tracking-wider ${isLight ? "text-[#0F172A]" : "text-white"}`}>Trend Radar</h2>
               </div>
               <canvas ref={canvasRef} width={640} height={320} className="w-full rounded-xl border border-gray-900/60" style={{ imageRendering: "pixelated" }} />
               <div className="mt-3 grid grid-cols-2 gap-2">
@@ -753,7 +754,7 @@ export const CompetitorIntelligence: React.FC = () => {
                   <div key={node.id} className="flex items-center gap-2 p-2 rounded-lg bg-gray-950/40 border border-gray-800/30">
                     <div className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: node.color }} />
                     <div className="min-w-0">
-                      <p className="font-mono text-[8px] text-white truncate">{node.label}</p>
+                      <p className={`font-mono text-[8px] truncate ${isLight ? "text-[#0F172A]" : "text-white"}`}>{node.label}</p>
                       <p className="font-mono text-[7px] text-gray-600">{node.score}/100 · {node.growth}</p>
                     </div>
                     <span className={`ml-auto font-mono text-[7px] px-1.5 py-0.5 rounded-md border shrink-0 ${
@@ -766,12 +767,12 @@ export const CompetitorIntelligence: React.FC = () => {
             </div>
 
             {/* SECTION 6 — Campaign Reverse Engineering */}
-            <div className="orbit-panel border border-gray-800/60 bg-gray-900/20 p-5 rounded-2xl">
+            <div className={`orbit-panel p-5 rounded-2xl ${isLight ? "" : "border border-gray-800/60 bg-gray-900/20"}`}>
               <div className="flex items-center gap-2 mb-4">
                 <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-pink-500 to-purple-600 flex items-center justify-center">
                   <Target size={12} className="text-white" />
                 </div>
-                <h2 className="font-space text-xs font-bold text-white uppercase tracking-wider">Campaign Reverse Engineering</h2>
+                <h2 className={`font-space text-xs font-bold uppercase tracking-wider ${isLight ? "text-[#0F172A]" : "text-white"}`}>Campaign Reverse Engineering</h2>
               </div>
               {/* Campaign picker */}
               <div className="flex flex-wrap gap-1.5 mb-4">
@@ -796,7 +797,7 @@ export const CompetitorIntelligence: React.FC = () => {
               ) : reverseData ? (
                 <div className="space-y-3">
                   {[
-                    { label: "Campaign",         value: selectedCampaign.name,        color: "text-white" },
+                    { label: "Campaign",         value: selectedCampaign.name,        color: isLight ? "text-[#0F172A]" : "text-white" },
                     { label: "Type",             value: selectedCampaign.type,        color: "text-blue-400" },
                     { label: "Offer",            value: selectedCampaign.offer,       color: "text-yellow-400" },
                     { label: "Channel",          value: selectedCampaign.channel,     color: "text-green-400" },
@@ -839,12 +840,12 @@ export const CompetitorIntelligence: React.FC = () => {
           </div>
 
           {/* ══ SECTION 5 — AI COMPETITOR REPORT ══ */}
-          <div className="orbit-panel border border-gray-800/60 bg-gray-900/20 p-5 rounded-2xl">
+          <div className={`orbit-panel p-5 rounded-2xl ${isLight ? "" : "border border-gray-800/60 bg-gray-900/20"}`}>
             <div className="flex items-center gap-2 mb-4">
               <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-orange-500 to-red-600 flex items-center justify-center">
                 <Globe size={12} className="text-white" />
               </div>
-              <h2 className="font-space text-xs font-bold text-white uppercase tracking-wider">AI Competitor Report</h2>
+              <h2 className={`font-space text-xs font-bold uppercase tracking-wider ${isLight ? "text-[#0F172A]" : "text-white"}`}>AI Competitor Report</h2>
               <button onClick={handleGenerateReport} disabled={reportLoading}
                 className={`ml-auto flex items-center gap-1.5 px-4 py-2 rounded-xl font-mono text-[9px] font-bold transition-all cursor-pointer border ${
                   reportLoading
@@ -918,12 +919,12 @@ export const CompetitorIntelligence: React.FC = () => {
           <div className="grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-6">
 
             {/* SECTION 7 — Market Opportunities */}
-            <div className="orbit-panel border border-gray-800/60 bg-gray-900/20 p-5 rounded-2xl">
+            <div className={`orbit-panel p-5 rounded-2xl ${isLight ? "" : "border border-gray-800/60 bg-gray-900/20"}`}>
               <div className="flex items-center gap-2 mb-4">
                 <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-yellow-500 to-orange-600 flex items-center justify-center">
                   <TrendingUp size={12} className="text-white" />
                 </div>
-                <h2 className="font-space text-xs font-bold text-white uppercase tracking-wider">Market Opportunities</h2>
+                <h2 className={`font-space text-xs font-bold uppercase tracking-wider ${isLight ? "text-[#0F172A]" : "text-white"}`}>Market Opportunities</h2>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 {opportunities.map(opp => {
@@ -932,7 +933,7 @@ export const CompetitorIntelligence: React.FC = () => {
                     <div key={opp.id} className={`p-4 rounded-xl border transition-all ${
                       opp.urgency === "High" ? "border-red-500/20 bg-red-500/5" : "border-gray-800/40 bg-gray-900/10"}`}>
                       <div className="flex items-start justify-between mb-2">
-                        <p className="font-space text-[10px] font-bold text-white leading-snug">{opp.title}</p>
+                        <p className={`font-space text-[10px] font-bold leading-snug ${isLight ? "text-[#0F172A]" : "text-white"}`}>{opp.title}</p>
                         <span className={`font-mono text-[7px] px-1.5 py-0.5 rounded-full border ml-2 shrink-0 ${
                           opp.urgency === "High" ? "border-red-500/30 text-red-400" : "border-yellow-400/30 text-yellow-400"}`}>
                           {opp.urgency}
@@ -972,12 +973,12 @@ export const CompetitorIntelligence: React.FC = () => {
             </div>
 
             {/* SECTION 8 — Autonomous Response */}
-            <div className="orbit-panel border border-gray-800/60 bg-gray-900/20 p-5 rounded-2xl">
+            <div className={`orbit-panel p-5 rounded-2xl ${isLight ? "" : "border border-gray-800/60 bg-gray-900/20"}`}>
               <div className="flex items-center gap-2 mb-4">
                 <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-purple-500 to-blue-600 flex items-center justify-center">
                   <Cpu size={12} className="text-white" />
                 </div>
-                <h2 className="font-space text-xs font-bold text-white uppercase tracking-wider">Autonomous Response</h2>
+                <h2 className={`font-space text-xs font-bold uppercase tracking-wider ${isLight ? "text-[#0F172A]" : "text-white"}`}>Autonomous Response</h2>
                 {workflowDone && (
                   <div className="ml-auto flex items-center gap-1.5 font-mono text-[8px] text-green-400">
                     <div className="w-1.5 h-1.5 rounded-full bg-green-400" />

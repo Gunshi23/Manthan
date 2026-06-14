@@ -156,7 +156,8 @@ function buildFallbackPlan(goal: string, businessType: string, personas?: Person
    GROWTH ENGINE PAGE
 ══════════════════════════════════════════════════════════════ */
 export const GrowthEngine: React.FC = () => {
-  const { customers, config, businessType, addAgentLog, launchMissionCampaign, addCampaign, startMission, personas } = useOrbit();
+  const { customers, config, businessType, addAgentLog, launchMissionCampaign, addCampaign, startMission, personas, theme } = useOrbit();
+  const isLight = theme === "executive";
 
   /* ── State ── */
   const [goal, setGoal] = useState("Increase Repeat Purchases by 20%");
@@ -792,13 +793,13 @@ Format as JSON: { "Polaris": "...", "Luna": "...", "Vega": "...", "Nova": "...",
   const currentVariant = variants[activeVariant];
 
   return (
-    <div className="flex-1 flex flex-col overflow-hidden bg-[#050816] relative">
+    <div className={`flex-1 flex flex-col overflow-hidden relative ${isLight ? "bg-[#F8FAFC] text-[#0F172A]" : "bg-[#050816] text-white"}`}>
       {/* Background */}
       <div className="pointer-events-none absolute inset-0 space-grid opacity-25 z-0" />
       <div className="pointer-events-none absolute inset-0 bg-orbit-glow-blue opacity-10 z-0" />
 
       {/* Page Header */}
-      <div className="shrink-0 px-6 pt-4 bg-gray-950/30 border-b border-gray-800/50 relative z-10">
+      <div className={`shrink-0 px-6 pt-4 border-b relative z-10 ${isLight ? "bg-white border-[#E2E8F0]" : "bg-gray-950/30 border-gray-800/50"}`}>
         <PageHeaderHUD
           title="Growth Engine"
           subtitle="AI-POWERED GROWTH STRATEGY & CAMPAIGN EXECUTION CENTER"
@@ -819,13 +820,11 @@ Format as JSON: { "Polaris": "...", "Luna": "...", "Vega": "...", "Nova": "...",
           }
         />
         {/* Navigation Tabs */}
-        <div className="flex border-t border-gray-800/20 mt-3 font-mono text-[9px]">
+        <div className={`flex border-t mt-3 font-mono text-[9px] ${isLight ? "border-[#E2E8F0]" : "border-gray-800/20"}`}>
           <button
             onClick={() => setActiveTab("manual")}
             className={`px-4 py-2 border-b-2 font-semibold cursor-pointer transition-all flex items-center gap-1.5 ${
-              activeTab === "manual"
-                ? "border-blue-500 text-white bg-blue-500/5"
-                : "border-transparent text-gray-500 hover:text-gray-300"
+              activeTab === "manual" ? (isLight ? "border-blue-600 text-blue-600 bg-blue-50/50" : "border-blue-500 text-white bg-blue-500/5") : (isLight ? "border-transparent text-gray-500 hover:text-gray-900" : "border-transparent text-gray-500 hover:text-gray-300")
             }`}
           >
             <SlidersHorizontal size={11} className={activeTab === "manual" ? "text-blue-400" : "text-gray-500"} />
@@ -834,9 +833,7 @@ Format as JSON: { "Polaris": "...", "Luna": "...", "Vega": "...", "Nova": "...",
           <button
             onClick={() => setActiveTab("automation")}
             className={`px-4 py-2 border-b-2 font-semibold cursor-pointer transition-all flex items-center gap-1.5 ${
-              activeTab === "automation"
-                ? "border-blue-500 text-white bg-blue-500/5"
-                : "border-transparent text-gray-500 hover:text-gray-300"
+              activeTab === "automation" ? (isLight ? "border-blue-600 text-blue-600 bg-blue-50/50" : "border-blue-500 text-white bg-blue-500/5") : (isLight ? "border-transparent text-gray-500 hover:text-gray-900" : "border-transparent text-gray-500 hover:text-gray-300")
             }`}
           >
             <Activity size={11} className={activeTab === "automation" ? "text-blue-400 animate-pulse" : "text-gray-500"} />
@@ -854,7 +851,7 @@ Format as JSON: { "Polaris": "...", "Luna": "...", "Vega": "...", "Nova": "...",
           ══════════════════════════════════════════════════════ */}
           {activeTab === "manual" && (
             <>
-              <div className="orbit-panel border border-gray-800/60 bg-gray-900/20 p-6 rounded-2xl relative overflow-hidden">
+              <div className={`orbit-panel p-6 rounded-2xl relative overflow-hidden ${isLight ? "" : "border border-gray-800/60 bg-gray-900/20"}`}>
             <div className="absolute top-0 right-0 w-64 h-24 bg-gradient-to-bl from-blue-600/10 to-transparent pointer-events-none" />
             <div className="flex items-center gap-2 mb-4">
               <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
@@ -991,12 +988,12 @@ Format as JSON: { "Polaris": "...", "Luna": "...", "Vega": "...", "Nova": "...",
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
               {/* SECTION 3 — Mission Intelligence */}
-              <div className="orbit-panel border border-gray-800/60 bg-gray-900/20 p-5 rounded-2xl">
+              <div className={`orbit-panel p-5 rounded-2xl ${isLight ? "" : "border border-gray-800/60 bg-gray-900/20"}`}>
                 <div className="flex items-center gap-2 mb-4">
                   <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center">
                     <BarChart3 size={12} className="text-white" />
                   </div>
-                  <h2 className="font-space text-xs font-bold text-white uppercase tracking-wider">Mission Intelligence</h2>
+                  <h2 className={`font-space text-xs font-bold uppercase tracking-wider ${isLight ? "text-[#0F172A]" : "text-white"}`}>Mission Intelligence</h2>
                 </div>
 
                 <div className="grid grid-cols-2 gap-3">
@@ -1031,12 +1028,12 @@ Format as JSON: { "Polaris": "...", "Luna": "...", "Vega": "...", "Nova": "...",
               </div>
 
               {/* SECTION 4 — AI Reasoning */}
-              <div className="orbit-panel border border-gray-800/60 bg-gray-900/20 p-5 rounded-2xl">
+              <div className={`orbit-panel p-5 rounded-2xl ${isLight ? "" : "border border-gray-800/60 bg-gray-900/20"}`}>
                 <div className="flex items-center gap-2 mb-4">
                   <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-purple-500 to-blue-600 flex items-center justify-center">
                     <Brain size={12} className="text-white" />
                   </div>
-                  <h2 className="font-space text-xs font-bold text-white uppercase tracking-wider">Why ORBIT Recommends This</h2>
+                  <h2 className={`font-space text-xs font-bold uppercase tracking-wider ${isLight ? "text-[#0F172A]" : "text-white"}`}>Why ORBIT Recommends This</h2>
                 </div>
 
                 <div className="space-y-3">
@@ -1065,12 +1062,12 @@ Format as JSON: { "Polaris": "...", "Luna": "...", "Vega": "...", "Nova": "...",
           {/* ══════════════════════════════════════════════════════
               SECTION 5 — AUDIENCE EXPLORER
           ══════════════════════════════════════════════════════ */}
-          <div className="orbit-panel border border-gray-800/60 bg-gray-900/20 p-5 rounded-2xl">
+          <div className={`orbit-panel p-5 rounded-2xl ${isLight ? "" : "border border-gray-800/60 bg-gray-900/20"}`}>
             <div className="flex items-center gap-2 mb-4">
               <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-yellow-500 to-orange-600 flex items-center justify-center">
                 <Users size={12} className="text-white" />
               </div>
-              <h2 className="font-space text-xs font-bold text-white uppercase tracking-wider">Audience Explorer</h2>
+              <h2 className={`font-space text-xs font-bold uppercase tracking-wider ${isLight ? "text-[#0F172A]" : "text-white"}`}>Audience Explorer</h2>
               <div className="ml-auto flex gap-1">
                 {segmentCounts.map((seg, idx) => (
                   <button key={seg.key} onClick={() => setSelectedSegmentIdx(idx)}
@@ -1190,7 +1187,7 @@ Format as JSON: { "Polaris": "...", "Luna": "...", "Vega": "...", "Nova": "...",
                   <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-yellow-500 to-orange-600 flex items-center justify-center">
                     <Edit3 size={12} className="text-white" />
                   </div>
-                  <h2 className="font-space text-xs font-bold text-white uppercase tracking-wider">Campaign Generator</h2>
+                  <h2 className={`font-space text-xs font-bold uppercase tracking-wider ${isLight ? "text-[#0F172A]" : "text-white"}`}>Campaign Generator</h2>
                 </div>
 
                 {/* Variant tabs */}
@@ -1329,12 +1326,12 @@ Format as JSON: { "Polaris": "...", "Luna": "...", "Vega": "...", "Nova": "...",
           {/* ══════════════════════════════════════════════════════
               SECTION 7 — CHANNEL STRATEGY
           ══════════════════════════════════════════════════════ */}
-          <div className="orbit-panel border border-gray-800/60 bg-gray-900/20 p-5 rounded-2xl">
+          <div className={`orbit-panel p-5 rounded-2xl ${isLight ? "" : "border border-gray-800/60 bg-gray-900/20"}`}>
             <div className="flex items-center gap-2 mb-4">
               <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-blue-500 to-cyan-600 flex items-center justify-center">
                 <Activity size={12} className="text-white" />
               </div>
-              <h2 className="font-space text-xs font-bold text-white uppercase tracking-wider">Channel Strategy</h2>
+              <h2 className={`font-space text-xs font-bold uppercase tracking-wider ${isLight ? "text-[#0F172A]" : "text-white"}`}>Channel Strategy</h2>
               {missionPlan && (
                 <div className="ml-auto flex items-center gap-1.5 px-2 py-1 rounded-lg bg-green-500/10 border border-green-500/30 font-mono text-[8px] text-green-400">
                   <Star size={9} className="fill-green-400" />
@@ -1378,12 +1375,12 @@ Format as JSON: { "Polaris": "...", "Luna": "...", "Vega": "...", "Nova": "...",
           {/* ══════════════════════════════════════════════════════
               SECTION 8 — FUTURE SIMULATOR
           ══════════════════════════════════════════════════════ */}
-          <div className="orbit-panel border border-gray-800/60 bg-gray-900/20 p-5 rounded-2xl">
+          <div className={`orbit-panel p-5 rounded-2xl ${isLight ? "" : "border border-gray-800/60 bg-gray-900/20"}`}>
             <div className="flex items-center gap-2 mb-4">
               <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center">
                 <FlaskConical size={12} className="text-white" />
               </div>
-              <h2 className="font-space text-xs font-bold text-white uppercase tracking-wider">Future Simulator</h2>
+              <h2 className={`font-space text-xs font-bold uppercase tracking-wider ${isLight ? "text-[#0F172A]" : "text-white"}`}>Future Simulator</h2>
               <button onClick={() => runSimulation()} disabled={!missionPlan || simLoading}
                 className={`ml-auto flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-mono text-[9px] font-bold border transition-all cursor-pointer ${
                   !missionPlan ? "border-gray-800 text-gray-600 cursor-not-allowed" : "border-purple-500/30 bg-purple-500/5 text-purple-300 hover:bg-purple-500/10"
@@ -1451,12 +1448,12 @@ Format as JSON: { "Polaris": "...", "Luna": "...", "Vega": "...", "Nova": "...",
           {/* ══════════════════════════════════════════════════════
               SECTION 11 — ATLAS EXECUTION CENTER
           ══════════════════════════════════════════════════════ */}
-          <div className="orbit-panel border border-gray-800/60 bg-gray-900/20 p-5 rounded-2xl">
+          <div className={`orbit-panel p-5 rounded-2xl ${isLight ? "" : "border border-gray-800/60 bg-gray-900/20"}`}>
             <div className="flex items-center gap-2 mb-5">
               <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center">
                 <Rocket size={12} className="text-white" />
               </div>
-              <h2 className="font-space text-xs font-bold text-white uppercase tracking-wider">Atlas Execution Center</h2>
+              <h2 className={`font-space text-xs font-bold uppercase tracking-wider ${isLight ? "text-[#0F172A]" : "text-white"}`}>Atlas Execution Center</h2>
               {missionPlan && (
                 <div className="ml-auto flex items-center gap-2">
                   <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg border font-mono text-[8px] font-bold ${

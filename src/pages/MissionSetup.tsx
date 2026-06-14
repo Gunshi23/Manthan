@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useOrbit } from "../context/OrbitContext";
 import { TrendingUp, UserMinus, Rocket, ShieldCheck, ArrowRight, Loader2 } from "lucide-react";
 
 interface MissionSetupProps {
@@ -6,6 +7,8 @@ interface MissionSetupProps {
 }
 
 export const MissionSetup: React.FC<MissionSetupProps> = ({ onSetupComplete }) => {
+  const { theme } = useOrbit();
+  const isLight = theme === "executive";
   const [selectedGoal, setSelectedGoal] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [genLogs, setGenLogs] = useState<string[]>([]);
@@ -71,7 +74,7 @@ export const MissionSetup: React.FC<MissionSetupProps> = ({ onSetupComplete }) =
   };
 
   return (
-    <div className="relative min-h-screen bg-orbit-bg space-grid flex flex-col items-center justify-center p-6 text-white overflow-hidden">
+    <div className={`relative min-h-screen space-grid flex flex-col items-center justify-center p-6 overflow-hidden ${isLight ? "bg-[#F8FAFC] text-[#0F172A]" : "bg-orbit-bg text-white"}`}>
       <div className="scanlines" />
 
       {/* Glow */}
@@ -100,7 +103,7 @@ export const MissionSetup: React.FC<MissionSetupProps> = ({ onSetupComplete }) =
                 <button
                   key={item.id}
                   onClick={() => handleSelect(item.title)}
-                  className={`p-6 rounded-xl text-left border bg-gray-900/40 backdrop-blur-md transition-all duration-300 flex gap-5 hover:border-white/20 hover:bg-gray-900/70 group ${
+                  className={`p-6 rounded-xl text-left border transition-all duration-300 flex gap-5 group ${isLight ? "bg-white border-[#E2E8F0] hover:bg-[#EFF6FF] hover:border-blue-400" : "bg-gray-900/40 border-gray-800 hover:border-white/20 hover:bg-gray-900/70"} ${
                     isSelected 
                       ? "border-orbit-blue bg-gray-900/90 shadow-orbit-glow" 
                       : "border-gray-800"
@@ -110,7 +113,7 @@ export const MissionSetup: React.FC<MissionSetupProps> = ({ onSetupComplete }) =
                     <Icon size={20} />
                   </div>
                   <div>
-                    <h3 className="font-space text-lg font-bold text-white mb-2">{item.title}</h3>
+                    <h3 className={`font-space text-lg font-bold mb-2 ${isLight ? "text-[#0F172A]" : "text-white"}`}>{item.title}</h3>
                     <p className="text-xs text-gray-400 leading-relaxed font-mono">{item.desc}</p>
                   </div>
                 </button>

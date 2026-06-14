@@ -45,7 +45,8 @@ interface ChatMessage {
 }
 
 export const FutureSimulator: React.FC = () => {
-  const { addAgentLog, config } = useOrbit();
+  const { addAgentLog, config, theme } = useOrbit();
+  const isLight = theme === "executive";
   const [selectedAgent, setSelectedAgent] = useState<"Polaris" | "Vega" | "Nova" | "Atlas" | "Luna" | null>(null);
   
   // Page mode: "variables" (custom inputs) vs "missions" (mission objectives)
@@ -609,7 +610,7 @@ Context Campaign Strategy: "${selectedCampaignType}"`;
   const focusTimeline = timelines[selectedTimeline];
 
   return (
-    <div className="flex-1 flex overflow-hidden bg-[#050816] relative font-inter">
+    <div className={`flex-1 flex overflow-hidden relative font-inter ${isLight ? "bg-[#F8FAFC] text-[#0F172A]" : "bg-[#050816] text-white"}`}>
       {/* Visual background elements */}
       <div className="pointer-events-none absolute inset-0 space-grid opacity-30 z-0" />
       <div className="pointer-events-none absolute inset-0 bg-orbit-glow-blue opacity-10 z-0" />
@@ -618,27 +619,25 @@ Context Campaign Strategy: "${selectedCampaignType}"`;
       {/* ════════════════════════════════════════
           LEFT COLUMN — SIMULATION CONFIG PANEL
       ════════════════════════════════════════ */}
-      <aside className="w-72 lg:w-80 shrink-0 flex flex-col border-r border-gray-900 bg-gray-950/45 backdrop-blur-md p-4 space-y-4 overflow-y-auto relative z-10">
+      <aside className={`w-72 lg:w-80 shrink-0 flex flex-col border-r backdrop-blur-md p-4 space-y-4 overflow-y-auto relative z-10 ${isLight ? "border-[#E2E8F0] bg-white" : "border-gray-900 bg-gray-950/45"}`}>
         
         {/* Module Header */}
-        <div className="border-b border-gray-900 pb-3 mb-2 flex items-center gap-2">
+        <div className={`border-b pb-3 mb-2 flex items-center gap-2 ${isLight ? "border-[#E2E8F0]" : "border-gray-900"}`}>
           <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-orbit-blue/30 to-orbit-purple/30 border border-orbit-purple/40 flex items-center justify-center">
             <Cpu className="text-orbit-purple animate-pulse" size={16} />
           </div>
           <div>
-            <h2 className="font-space text-sm font-bold text-white uppercase tracking-wider leading-none">Simulation Chamber</h2>
+            <h2 className={`font-space text-sm font-bold uppercase tracking-wider leading-none ${isLight ? "text-[#0F172A]" : "text-white"}`}>Simulation Chamber</h2>
             <span className="font-mono text-[8px] text-gray-550 uppercase tracking-widest mt-1 block">Calibrate parameters</span>
           </div>
         </div>
 
         {/* Mode Selector Toggle */}
-        <div className="grid grid-cols-2 gap-1.5 p-1 bg-gray-950 border border-gray-900 rounded-xl font-mono text-[9px] font-bold">
+        <div className={`grid grid-cols-2 gap-1.5 p-1 rounded-xl font-mono text-[9px] font-bold border ${isLight ? "bg-slate-100 border-[#E2E8F0]" : "bg-gray-950 border-gray-900"}`}>
           <button
             onClick={() => setSimulatorMode("variables")}
             className={`py-2 rounded-lg cursor-pointer transition-all ${
-              simulatorMode === "variables" 
-                ? "bg-gray-900 text-white border border-gray-800 shadow" 
-                : "text-gray-500 hover:text-gray-300"
+              simulatorMode === "variables" ? (isLight ? "bg-white text-blue-600 border-[#BFDBFE] shadow-sm font-bold" : "bg-gray-900 text-white border-gray-800 shadow") : (isLight ? "border-transparent text-gray-500 hover:text-gray-950" : "border-transparent text-gray-500 hover:text-gray-300")
             }`}
           >
             Custom Variables
@@ -646,9 +645,7 @@ Context Campaign Strategy: "${selectedCampaignType}"`;
           <button
             onClick={() => setSimulatorMode("missions")}
             className={`py-2 rounded-lg cursor-pointer transition-all ${
-              simulatorMode === "missions" 
-                ? "bg-gray-900 text-white border border-gray-800 shadow" 
-                : "text-gray-500 hover:text-gray-300"
+              simulatorMode === "missions" ? (isLight ? "bg-white text-blue-600 border-[#BFDBFE] shadow-sm font-bold" : "bg-gray-900 text-white border-gray-800 shadow") : (isLight ? "border-transparent text-gray-500 hover:text-gray-950" : "border-transparent text-gray-500 hover:text-gray-300")
             }`}
           >
             Mission Simulator
@@ -1023,7 +1020,7 @@ Context Campaign Strategy: "${selectedCampaignType}"`;
                       <button
                         key={t.id}
                         onClick={() => setSelectedTimeline(t.id)}
-                        className={`orbit-panel text-left p-4 relative overflow-hidden transition-all duration-300 cursor-pointer flex flex-col justify-between min-h-[160px] border border-gray-800 ${
+                        className={`orbit-panel text-left p-4 relative overflow-hidden transition-all duration-300 cursor-pointer flex flex-col justify-between min-h-[160px] ${isLight ? "border-[#E2E8F0]" : "border-gray-800"} ${
                           isSelected 
                             ? `border-opacity-100 ${t.borderClass} ring-1 ring-white/5 bg-gray-900/40` 
                             : "opacity-65 hover:opacity-95 hover:border-gray-700 bg-gray-950/20"
@@ -1084,7 +1081,7 @@ Context Campaign Strategy: "${selectedCampaignType}"`;
                 {/* LEFT: Interactive Future Graph */}
                 <div className="lg:col-span-2 orbit-panel p-5 flex flex-col min-h-[300px]">
                   <div className="flex items-center justify-between border-b border-gray-900 pb-3 mb-4">
-                    <span className="font-space text-xs font-bold uppercase tracking-wider text-white">Scenario Projection Curves</span>
+                    <span className={`font-space text-xs font-bold uppercase tracking-wider ${isLight ? "text-[#0F172A]" : "text-white"}`}>Scenario Projection Curves</span>
                     
                     {/* Metric Selector Tabs */}
                     <div className="flex items-center gap-1 bg-gray-950 p-0.5 rounded-lg border border-gray-900 font-mono text-[8px] font-bold">
@@ -1184,16 +1181,16 @@ Context Campaign Strategy: "${selectedCampaignType}"`;
                   <div className="border-b border-gray-900 pb-3">
                     <div className="flex items-center gap-1.5">
                       <Sparkles size={13} className="text-orbit-purple" />
-                      <span className="font-space text-xs font-bold uppercase tracking-wider text-white">Vega Recommendation</span>
+                      <span className={`font-space text-xs font-bold uppercase tracking-wider ${isLight ? "text-[#0F172A]" : "text-white"}`}>Vega Recommendation</span>
                     </div>
                   </div>
 
                   <div className="flex-1 space-y-4 font-mono text-[10px]">
                     {/* Vega Header details */}
-                    <div className="flex items-start gap-2.5 p-2 bg-gray-950/50 border border-gray-900 rounded-xl">
+                    <div className={`flex items-start gap-2.5 p-2 rounded-xl border ${isLight ? "bg-[#EFF6FF] border-[#BFDBFE]" : "bg-gray-950/50 border-gray-900"}`}>
                       <div className="w-8 h-8 rounded-full bg-orbit-purple/15 flex items-center justify-center border border-orbit-purple/30 text-orbit-purple font-space font-bold text-xs shrink-0">V</div>
                       <div>
-                        <span className="font-bold text-white block uppercase text-[8px] tracking-wider">Vega analytics agent</span>
+                        <span className={`font-bold block uppercase text-[8px] tracking-wider ${isLight ? "text-slate-900" : "text-white"}`}>Vega analytics agent</span>
                         <p className="text-[10px] text-gray-400 leading-normal mt-0.5">
                           Projected revenue opportunity: <span className="text-white font-bold">₹{focusTimeline.revenue.toLocaleString()}</span>. 
                           Risk profile is <span className={`font-bold ${focusTimeline.risk === "High" ? "text-red-400" : "text-orbit-success"}`}>{focusTimeline.risk}</span>.
@@ -1202,7 +1199,7 @@ Context Campaign Strategy: "${selectedCampaignType}"`;
                     </div>
 
                     {/* Timeline metadata highlights */}
-                    <div className="space-y-2 border-t border-gray-900 pt-3">
+                    <div className={`space-y-2 border-t pt-3 ${isLight ? "border-[#E2E8F0]" : "border-gray-900"}`}>
                       <div className="flex justify-between">
                         <span className="text-gray-550">Recommended Option:</span>
                         <span className="text-white font-bold">{focusTimeline.name}</span>
@@ -1218,7 +1215,7 @@ Context Campaign Strategy: "${selectedCampaignType}"`;
                     </div>
 
                     {/* Bullet strategies */}
-                    <div className="space-y-1.5 border-t border-gray-900 pt-3">
+                    <div className={`space-y-1.5 border-t pt-3 ${isLight ? "border-[#E2E8F0]" : "border-gray-900"}`}>
                       <span className="block text-[8px] text-gray-650 uppercase tracking-widest mb-1">Tactical Strategy Checklist</span>
                       {focusTimeline.recs.map((rec, index) => (
                         <div key={index} className="flex items-start gap-1.5 text-gray-400">
@@ -1241,10 +1238,10 @@ Context Campaign Strategy: "${selectedCampaignType}"`;
 
               {/* BOTTOM: "What If" Chat Panel */}
               <div className="orbit-panel p-5 flex flex-col space-y-4">
-                <div className="flex items-center justify-between border-b border-gray-900 pb-3">
+                <div className={`flex items-center justify-between border-b pb-3 ${isLight ? "border-[#E2E8F0]" : "border-gray-900"}`}>
                   <div className="flex items-center gap-1.5">
                     <Brain size={14} className="text-orbit-blue" />
-                    <span className="font-space text-xs font-bold uppercase tracking-wider text-white">What If AI Console</span>
+                    <span className={`font-space text-xs font-bold uppercase tracking-wider ${isLight ? "text-[#0F172A]" : "text-white"}`}>What If AI Console</span>
                   </div>
                   <span className="font-mono text-[8px] text-gray-550 uppercase">Query timeline mutations</span>
                 </div>
@@ -1253,32 +1250,32 @@ Context Campaign Strategy: "${selectedCampaignType}"`;
                 <div className="flex flex-wrap gap-2">
                   <button
                     onClick={() => handleWhatIfSubmit(undefined, "What if I only target VIP customers?")}
-                    className="px-2.5 py-1.5 rounded-lg border border-gray-900 bg-gray-950/40 text-[9px] font-mono text-gray-400 hover:border-gray-700 hover:text-white transition-colors cursor-pointer"
+                    className={`px-2.5 py-1.5 rounded-lg border text-[9px] font-mono transition-colors cursor-pointer ${isLight ? "bg-[#EFF6FF] border-[#BFDBFE] text-blue-600 hover:bg-blue-100/50 hover:text-blue-700" : "border-gray-900 bg-gray-950/40 text-gray-400 hover:border-gray-700 hover:text-white"}`}
                   >
                     What if I target only VIP customers?
                   </button>
                   <button
                     onClick={() => handleWhatIfSubmit(undefined, "What if I send campaigns through WhatsApp instead of Email?")}
-                    className="px-2.5 py-1.5 rounded-lg border border-gray-900 bg-gray-950/40 text-[9px] font-mono text-gray-400 hover:border-gray-700 hover:text-white transition-colors cursor-pointer"
+                    className={`px-2.5 py-1.5 rounded-lg border text-[9px] font-mono transition-colors cursor-pointer ${isLight ? "bg-[#EFF6FF] border-[#BFDBFE] text-blue-600 hover:bg-blue-100/50 hover:text-blue-700" : "border-gray-900 bg-gray-950/40 text-gray-400 hover:border-gray-700 hover:text-white"}`}
                   >
                     What if I send campaigns through WhatsApp instead of Email?
                   </button>
                   <button
                     onClick={() => handleWhatIfSubmit(undefined, "What if I increase the discount to 25%?")}
-                    className="px-2.5 py-1.5 rounded-lg border border-gray-900 bg-gray-950/40 text-[9px] font-mono text-gray-400 hover:border-gray-700 hover:text-white transition-colors cursor-pointer"
+                    className={`px-2.5 py-1.5 rounded-lg border text-[9px] font-mono transition-colors cursor-pointer ${isLight ? "bg-[#EFF6FF] border-[#BFDBFE] text-blue-600 hover:bg-blue-100/50 hover:text-blue-700" : "border-gray-900 bg-gray-950/40 text-gray-400 hover:border-gray-700 hover:text-white"}`}
                   >
                     What if I increase the discount to 25%?
                   </button>
                   <button
                     onClick={() => handleWhatIfSubmit(undefined, "What if I launch this campaign during Diwali?")}
-                    className="px-2.5 py-1.5 rounded-lg border border-gray-900 bg-gray-950/40 text-[9px] font-mono text-gray-400 hover:border-gray-700 hover:text-white transition-colors cursor-pointer"
+                    className={`px-2.5 py-1.5 rounded-lg border text-[9px] font-mono transition-colors cursor-pointer ${isLight ? "bg-[#EFF6FF] border-[#BFDBFE] text-blue-600 hover:bg-blue-100/50 hover:text-blue-700" : "border-gray-900 bg-gray-950/40 text-gray-400 hover:border-gray-700 hover:text-white"}`}
                   >
                     What if I launch this campaign during Diwali?
                   </button>
                 </div>
 
                 {/* Chat window log */}
-                <div className="h-44 overflow-y-auto bg-black/40 border border-gray-900 rounded-xl p-4 font-mono text-[10px] space-y-4 scrollbar-thin">
+                <div className={`h-44 overflow-y-auto border rounded-xl p-4 font-mono text-[10px] space-y-4 scrollbar-thin ${isLight ? "bg-slate-50 border-[#E2E8F0]" : "bg-black/40 border-gray-900"}`}>
                   {chatHistory.map((msg, index) => {
                     const isVega = msg.sender === "vega";
                     return (
@@ -1290,7 +1287,7 @@ Context Campaign Strategy: "${selectedCampaignType}"`;
                         )}
                         <div className={`space-y-2 max-w-[80%] ${isVega ? "" : "text-right"}`}>
                           <div className={`p-3 rounded-2xl border text-gray-300 leading-relaxed ${
-                            isVega ? "bg-gray-950/50 border-gray-900 text-left" : "bg-orbit-blue/10 border-orbit-blue/30 text-left"
+                            isVega ? (isLight ? "bg-white border-[#E2E8F0] text-slate-800 text-left shadow-sm" : "bg-gray-950/50 border-gray-900 text-left") : (isLight ? "bg-blue-50 border-blue-200 text-blue-800 text-left" : "bg-orbit-blue/10 border-orbit-blue/30 text-left")
                           }`}>
                             <p>{msg.text}</p>
                             
@@ -1345,7 +1342,7 @@ Context Campaign Strategy: "${selectedCampaignType}"`;
                     onChange={e => setChatInput(e.target.value)}
                     disabled={isChatTyping}
                     placeholder="Ask Vega, e.g. What if I increase campaign frequency to twice a week?"
-                    className="flex-1 bg-gray-950 border border-gray-900 rounded-xl px-4 py-3 text-xs font-mono text-white focus:outline-none focus:border-orbit-blue/40 placeholder-gray-650 disabled:opacity-60"
+                    className={`flex-1 rounded-xl px-4 py-3 text-xs font-mono focus:outline-none border ${isLight ? "bg-white border-[#CBD5E1] text-[#0F172A] focus:border-[#2563EB] focus:ring-4 focus:ring-blue-500/15 placeholder-slate-400" : "bg-gray-950 border-gray-900 text-white focus:border-orbit-blue/40 placeholder-gray-650"} disabled:opacity-60`}
                   />
                   <button
                     type="submit"

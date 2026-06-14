@@ -726,7 +726,7 @@ Overall campaign open rates hit **${avgOpenRate}%** with a click-through rate of
           const valLabel = Math.round(maxValue * ratio);
           return (
             <g key={idx}>
-              <line x1={paddingLeft} y1={y} x2={width - paddingRight} y2={y} stroke="rgba(255,255,255,0.04)" strokeDasharray="3 3" />
+              <line x1={paddingLeft} y1={y} x2={width - paddingRight} y2={y} stroke={isLight ? "rgba(0,0,0,0.06)" : "rgba(255,255,255,0.04)"} strokeDasharray="3 3" />
               <text x={paddingLeft - 8} y={y + 3} textAnchor="end" fill="#64748B" className="font-mono text-[8px]">
                 ₹{valLabel >= 1000 ? (valLabel / 1000).toFixed(0) + "K" : valLabel}
               </text>
@@ -735,7 +735,7 @@ Overall campaign open rates hit **${avgOpenRate}%** with a click-through rate of
         })}
 
         {/* X Axis Line */}
-        <line x1={paddingLeft} y1={height - paddingBottom} x2={width - paddingRight} y2={height - paddingBottom} stroke="rgba(255,255,255,0.12)" />
+        <line x1={paddingLeft} y1={height - paddingBottom} x2={width - paddingRight} y2={height - paddingBottom} stroke={isLight ? "rgba(0,0,0,0.1)" : "rgba(255,255,255,0.12)"} />
 
         {/* Bars */}
         {data.map((item, idx) => {
@@ -779,7 +779,7 @@ Overall campaign open rates hit **${avgOpenRate}%** with a click-through rate of
   };
 
   return (
-    <div className="flex-1 flex overflow-hidden bg-[#050816] relative">
+    <div className={`flex-1 flex overflow-hidden relative ${isLight ? "bg-[#F8FAFC] text-[#0F172A]" : "bg-[#050816] text-white"}`}>
       {/* Background Matrix overlays */}
       <div className="pointer-events-none absolute inset-0 space-grid opacity-35 z-0" />
       <div className="pointer-events-none absolute inset-0 bg-orbit-glow-blue opacity-15 z-0" />
@@ -793,16 +793,12 @@ Overall campaign open rates hit **${avgOpenRate}%** with a click-through rate of
           subtitle="AI-OPERATIONAL COGNITIVE COMMAND CENTER"
           onSelectAgent={setSelectedAgent}
           actions={
-            <div className="flex items-center gap-1 bg-gray-950 p-1 rounded-xl border border-gray-900 font-mono text-[9px] font-bold overflow-x-auto whitespace-nowrap scrollbar-none max-w-full">
+            <div className={`flex items-center gap-1 p-1 rounded-xl font-mono text-[9px] font-bold overflow-x-auto whitespace-nowrap scrollbar-none max-w-full border ${isLight ? "bg-slate-100 border-[#E2E8F0]" : "bg-gray-950 border-gray-900"}`}>
               {["overview", "funnel", "diagnostics", "forecast", "personas", "voice"].map((tab) => (
                 <button
                   key={tab}
                   onClick={() => setActiveTab(tab as any)}
-                  className={`px-3 py-1.5 rounded-lg cursor-pointer transition-all uppercase tracking-wider ${
-                    activeTab === tab 
-                      ? "bg-gray-850 text-white border border-gray-800 shadow" 
-                      : "text-gray-550 hover:text-gray-300"
-                  }`}
+                  className={`px-3 py-1.5 rounded-lg cursor-pointer transition-all uppercase tracking-wider ${activeTab === tab ? (isLight ? "bg-white text-blue-600 border-[#BFDBFE] shadow-sm font-bold" : "bg-gray-850 text-white border border-gray-800 shadow") : (isLight ? "text-gray-500 hover:text-gray-900" : "text-gray-550 hover:text-gray-300")}`}
                 >
                   {tab}
                 </button>
@@ -818,7 +814,7 @@ Overall campaign open rates hit **${avgOpenRate}%** with a click-through rate of
               <CheckCircle2 size={14} className="animate-bounce" />
               <span>{launchSuccessMsg}</span>
             </div>
-            <button onClick={() => setLaunchSuccessMsg(null)} className="text-gray-400 hover:text-white cursor-pointer">×</button>
+            <button onClick={() => setLaunchSuccessMsg(null)} className={`cursor-pointer ${isLight ? "text-gray-400 hover:text-slate-900" : "text-gray-400 hover:text-white"}`}>×</button>
           </div>
         )}
 
@@ -844,7 +840,7 @@ Overall campaign open rates hit **${avgOpenRate}%** with a click-through rate of
                   <Icon size={12} className={m.color} />
                 </div>
                 <div className="flex items-baseline justify-between mt-1">
-                  <span className="font-space text-lg font-bold text-white">{m.value}</span>
+                  <span className={`font-space text-lg font-bold ${isLight ? "text-[#0F172A]" : "text-white"}`}>{m.value}</span>
                   <span className="font-mono text-[8.5px] text-orbit-success flex items-center gap-0.5">
                     <ArrowUpRight size={9} />{m.delta}
                   </span>
@@ -873,9 +869,9 @@ Overall campaign open rates hit **${avgOpenRate}%** with a click-through rate of
                   { label: "At-Risk Customers", val: churnRiskCount.toString(), pct: "+12.1%", comp: "vs last week", isUp: false },
                   { label: "Campaign Success", val: `${campaignSuccessRate}%`, pct: "+2.4%", comp: "vs last month", isUp: true }
                 ].map((kpi, idx) => (
-                  <div key={idx} className="orbit-panel p-3.5 relative overflow-hidden flex flex-col justify-between min-h-[90px] border-gray-900/60 bg-gray-950/20">
+                  <div key={idx} className={`orbit-panel p-3.5 relative overflow-hidden flex flex-col justify-between min-h-[90px] ${isLight ? "bg-white border-slate-200" : "border-gray-900/60 bg-gray-950/20"}`}>
                     <span className="font-mono text-[8px] text-gray-500 uppercase tracking-widest block">{kpi.label}</span>
-                    <span className="font-space text-xl font-bold text-white mt-1 block">{kpi.val}</span>
+                    <span className={`font-space text-xl font-bold mt-1 block ${isLight ? "text-[#0F172A]" : "text-white"}`}>{kpi.val}</span>
                     
                     <div className="flex items-center justify-between mt-2 font-mono text-[8px]">
                       <span className={kpi.isUp ? "text-orbit-success" : "text-red-400"}>
@@ -889,20 +885,21 @@ Overall campaign open rates hit **${avgOpenRate}%** with a click-through rate of
 
               {/* Revenue Intelligence Panel */}
               <div className="orbit-panel p-5 space-y-4">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-gray-900 pb-3 gap-2">
+                <div className={`flex flex-col sm:flex-row sm:items-center justify-between border-b pb-3 gap-2 ${isLight ? "border-slate-200" : "border-gray-900"}`}>
+
                   <div className="flex items-center gap-2">
                     <BarChart2 size={14} className="text-orbit-blue" />
-                    <span className="font-space text-xs font-bold uppercase tracking-wider text-white">Revenue Intelligence Panel</span>
+                    <span className={`font-space text-xs font-bold uppercase tracking-wider ${isLight ? "text-slate-900" : "text-white"}`}>Revenue Intelligence Panel</span>
                   </div>
 
                   {/* Channel selectors */}
-                  <div className="flex items-center gap-1 bg-black/60 p-1 rounded-lg border border-gray-900 font-mono text-[8px] overflow-x-auto whitespace-nowrap scrollbar-none max-w-full">
+                  <div className={`flex items-center gap-1 p-1 rounded-lg border font-mono text-[8px] overflow-x-auto whitespace-nowrap scrollbar-none max-w-full ${isLight ? "bg-slate-100 border-slate-200" : "bg-black/60 border-gray-900"}`}>
                     {(["All", "WhatsApp", "Email", "SMS", "RCS", "Instagram"] as const).map(ch => (
                       <button
                         key={ch}
                         onClick={() => setChannelFilter(ch)}
                         className={`px-2 py-1 rounded transition-all cursor-pointer shrink-0 ${
-                          channelFilter === ch ? "bg-orbit-blue/20 text-orbit-blue border border-orbit-blue/30 font-bold" : "text-gray-550 hover:text-gray-300"
+                          channelFilter === ch ? (isLight ? "bg-[#EFF6FF] text-blue-600 border-[#BFDBFE] font-bold" : "bg-orbit-blue/20 text-orbit-blue border border-orbit-blue/30 font-bold") : (isLight ? "text-gray-500 hover:text-gray-900" : "text-gray-550 hover:text-gray-300")
                         }`}
                       >
                         {ch}
@@ -912,7 +909,8 @@ Overall campaign open rates hit **${avgOpenRate}%** with a click-through rate of
                 </div>
 
                 {/* Sub-selector tabs */}
-                <div className="flex items-center gap-2 border-b border-gray-950 pb-2.5 font-mono text-[8.5px] font-bold overflow-x-auto whitespace-nowrap scrollbar-none max-w-full">
+                <div className={`flex items-center gap-2 border-b pb-2.5 font-mono text-[8.5px] font-bold overflow-x-auto whitespace-nowrap scrollbar-none max-w-full ${isLight ? "border-slate-200" : "border-gray-950"}`}>
+
                   {[
                     { id: "campaign", label: "REVENUE BY CAMPAIGN" },
                     { id: "channel", label: "REVENUE BY CHANNEL" },
@@ -933,7 +931,8 @@ Overall campaign open rates hit **${avgOpenRate}%** with a click-through rate of
                 </div>
 
                 {/* Live rendering of custom SVG charts */}
-                <div className="bg-black/35 rounded-xl border border-gray-950 p-4 min-h-[190px] flex items-center justify-center relative">
+                <div className={`rounded-xl border p-4 min-h-[190px] flex items-center justify-center relative ${isLight ? "bg-slate-50 border-slate-200" : "bg-black/35 border-gray-950"}`}>
+
                   
                   {activeRevenueBreakdown === "campaign" && (
                     <div className="w-full">
@@ -974,14 +973,15 @@ Overall campaign open rates hit **${avgOpenRate}%** with a click-through rate of
 
               {/* Channel Performance Center */}
               <div className="orbit-panel p-5 space-y-4">
-                <div className="border-b border-gray-900 pb-3">
-                  <h3 className="font-space text-xs font-bold text-white uppercase tracking-wider">Channel Performance Center</h3>
+                <div className={`border-b pb-3 ${isLight ? "border-slate-200" : "border-gray-900"}`}>
+                  <h3 className={`font-space text-xs font-bold uppercase tracking-wider ${isLight ? "text-slate-900" : "text-white"}`}>Channel Performance Center</h3>
                 </div>
 
                 <div className="overflow-x-auto">
-                  <table className="w-full text-left font-mono text-[9px] divide-y divide-gray-950">
+                  <table className={`w-full text-left font-mono text-[9px] divide-y ${isLight ? "divide-slate-200" : "divide-gray-950"}`}>
+
                     <thead>
-                      <tr className="text-gray-550">
+                      <tr className={isLight ? "text-slate-500" : "text-gray-550"}>
                         <th className="pb-2">CHANNEL</th>
                         <th className="pb-2">MESSAGES SENT</th>
                         <th className="pb-2">OPENS</th>
@@ -991,15 +991,16 @@ Overall campaign open rates hit **${avgOpenRate}%** with a click-through rate of
                         <th className="pb-2 text-right">ROI YIELD</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-gray-950 text-gray-300">
+                    <tbody className={`divide-y text-gray-300 ${isLight ? "divide-slate-100 text-slate-700" : "divide-gray-950"}`}>
+
                       {channelMetrics.map((ch, idx) => (
-                        <tr key={idx} className="hover:bg-gray-900/10">
-                          <td className="py-2.5 font-bold font-space text-white">{ch.channel}</td>
+                        <tr key={idx} className={isLight ? "hover:bg-slate-50" : "hover:bg-gray-900/10"}>
+                          <td className={`py-2.5 font-bold font-space ${isLight ? "text-slate-900" : "text-white"}`}>{ch.channel}</td>
                           <td className="py-2.5">{ch.sent.toLocaleString()}</td>
                           <td className="py-2.5 text-orbit-blue">{ch.opens}</td>
                           <td className="py-2.5 text-orbit-purple">{ch.clicks}</td>
                           <td className="py-2.5 text-orbit-pink">{ch.conv}</td>
-                          <td className="py-2.5 text-right text-white font-bold">₹{ch.revenue.toLocaleString()}</td>
+                          <td className={`py-2.5 text-right font-bold ${isLight ? "text-slate-900" : "text-white"}`}>₹{ch.revenue.toLocaleString()}</td>
                           <td className="py-2.5 text-right text-orbit-success font-bold">{ch.roi}</td>
                         </tr>
                       ))}
@@ -1010,16 +1011,16 @@ Overall campaign open rates hit **${avgOpenRate}%** with a click-through rate of
 
               {/* Customer Intelligence */}
               <div className="orbit-panel p-5 space-y-4">
-                <div className="border-b border-gray-900 pb-3">
-                  <h3 className="font-space text-xs font-bold text-white uppercase tracking-wider">Customer Segment Intelligence</h3>
+                <div className={`border-b pb-3 ${isLight ? "border-slate-200" : "border-gray-900"}`}>
+                  <h3 className={`font-space text-xs font-bold uppercase tracking-wider ${isLight ? "text-slate-900" : "text-white"}`}>Customer Segment Intelligence</h3>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-5 gap-3.5">
                   {customerSegments.map((seg, idx) => (
-                    <div key={idx} className="bg-black/30 border border-gray-900/60 p-3.5 rounded-xl space-y-2 relative overflow-hidden flex flex-col justify-between">
+                    <div key={idx} className={`p-3.5 rounded-xl space-y-2 relative overflow-hidden flex flex-col justify-between border ${isLight ? "bg-slate-50 border-slate-200" : "bg-black/30 border-gray-900/60"}`}>
                       <div>
                         <div className="flex justify-between items-start">
-                          <span className="font-space text-[10px] font-bold text-white leading-none">{seg.name.split(" ")[0]}</span>
+                          <span className={`font-space text-[10px] font-bold leading-none ${isLight ? "text-slate-900" : "text-white"}`}>{seg.name.split(" ")[0]}</span>
                           <span className={`font-mono text-[8px] px-1 py-0.5 rounded ${
                             seg.trend.startsWith("+") ? "text-orbit-success bg-orbit-success/5 border border-orbit-success/15" : "text-red-400 bg-red-500/5 border border-red-500/15"
                           }`}>{seg.trend}</span>
@@ -1030,7 +1031,7 @@ Overall campaign open rates hit **${avgOpenRate}%** with a click-through rate of
                       <div className="space-y-1 mt-2.5 font-mono text-[8.5px]">
                         <div className="flex justify-between">
                           <span className="text-gray-500">Count:</span>
-                          <span className="text-white font-bold">{seg.count}</span>
+                          <span className={`font-bold ${isLight ? "text-slate-900" : "text-white"}`}>{seg.count}</span>
                         </div>
                         <div className="flex justify-between">
                           <span className="text-gray-500">Contrib:</span>
@@ -1038,11 +1039,11 @@ Overall campaign open rates hit **${avgOpenRate}%** with a click-through rate of
                         </div>
                         <div className="flex justify-between">
                           <span className="text-gray-500">Avg Spend:</span>
-                          <span className="text-white">₹{seg.avgSpend}</span>
+                          <span className={isLight ? "text-slate-900" : "text-white"}>₹{seg.avgSpend}</span>
                         </div>
                         <div className="flex justify-between">
                           <span className="text-gray-500">LTV:</span>
-                          <span className="text-white">₹{seg.ltv}</span>
+                          <span className={isLight ? "text-slate-900" : "text-white"}>₹{seg.ltv}</span>
                         </div>
                         <div className="flex justify-between">
                           <span className="text-gray-500">Pred. LTV:</span>
@@ -1056,14 +1057,15 @@ Overall campaign open rates hit **${avgOpenRate}%** with a click-through rate of
 
               {/* Mission Performance */}
               <div className="orbit-panel p-5 space-y-4">
-                <div className="border-b border-gray-900 pb-3">
-                  <h3 className="font-space text-xs font-bold text-white uppercase tracking-wider">Mission Performance Ledger</h3>
+                <div className={`border-b pb-3 ${isLight ? "border-slate-200" : "border-gray-900"}`}>
+                  <h3 className={`font-space text-xs font-bold uppercase tracking-wider ${isLight ? "text-slate-900" : "text-white"}`}>Mission Performance Ledger</h3>
                 </div>
 
                 <div className="overflow-x-auto">
-                  <table className="w-full text-left font-mono text-[9px] divide-y divide-gray-950">
+                  <table className={`w-full text-left font-mono text-[9px] divide-y ${isLight ? "divide-slate-200" : "divide-gray-950"}`}>
+
                     <thead>
-                      <tr className="text-gray-550">
+                      <tr className={isLight ? "text-slate-500" : "text-gray-550"}>
                         <th className="pb-2">MISSION NAME</th>
                         <th className="pb-2">STATUS</th>
                         <th className="pb-2">AUDIENCE SIZE</th>
@@ -1072,14 +1074,15 @@ Overall campaign open rates hit **${avgOpenRate}%** with a click-through rate of
                         <th className="pb-2 text-right">ROI YIELD</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-gray-950 text-gray-300">
+                    <tbody className={`divide-y text-gray-300 ${isLight ? "divide-slate-100 text-slate-700" : "divide-gray-950"}`}>
+
                       {localCampaigns.map((camp, idx) => {
                         const roiVal = camp.revenueGenerated > 0 
                           ? (camp.revenueGenerated / (camp.sentCount * 0.5 || 100)).toFixed(1) + "x" 
                           : "0.0x";
                         return (
-                          <tr key={idx} className="hover:bg-gray-900/10">
-                            <td className="py-2.5 font-bold font-space text-white">{camp.name}</td>
+                          <tr key={idx} className={isLight ? "hover:bg-slate-50" : "hover:bg-gray-900/10"}>
+                            <td className={`py-2.5 font-bold font-space ${isLight ? "text-slate-900" : "text-white"}`}>{camp.name}</td>
                             <td className="py-2.5">
                               <span className={`px-2 py-0.5 rounded text-[8.5px] uppercase ${
                                 camp.status === "Completed" || camp.status === "Delivered"
@@ -1091,7 +1094,7 @@ Overall campaign open rates hit **${avgOpenRate}%** with a click-through rate of
                             </td>
                             <td className="py-2.5">{camp.sentCount || camp.audienceSize}</td>
                             <td className="py-2.5 text-orbit-blue">{camp.channel}</td>
-                            <td className="py-2.5 text-right text-white font-bold">₹{(camp.revenueGenerated || 0).toLocaleString()}</td>
+                            <td className={`py-2.5 text-right font-bold ${isLight ? "text-slate-900" : "text-white"}`}>₹{(camp.revenueGenerated || 0).toLocaleString()}</td>
                             <td className="py-2.5 text-right text-orbit-success font-bold">{roiVal}</td>
                           </tr>
                         );
@@ -1107,19 +1110,20 @@ Overall campaign open rates hit **${avgOpenRate}%** with a click-through rate of
             <div className="space-y-6">
               
               {/* AI Executive Summary */}
-              <div className="orbit-panel p-5 space-y-4 border-orbit-purple/20 bg-orbit-purple/5 relative overflow-hidden shadow-[0_0_25px_rgba(139,92,246,0.15)]">
+              <div className={`orbit-panel p-5 space-y-4 relative overflow-hidden ${isLight ? "border-purple-300 bg-purple-50/50" : "border-orbit-purple/20 bg-orbit-purple/5 shadow-[0_0_25px_rgba(139,92,246,0.15)]"}`}>
                 {/* Visual scanline */}
                 <div className="absolute top-0 left-0 w-full h-[1px] bg-orbit-purple opacity-40 animate-scan-beam" />
                 
-                <div className="flex justify-between items-center border-b border-gray-900 pb-3">
+                <div className={`flex justify-between items-center border-b pb-3 ${isLight ? "border-slate-200" : "border-gray-900"}`}>
+
                   <div className="flex items-center gap-2">
                     <Brain size={14} className="text-orbit-purple animate-pulse" />
-                    <span className="font-space text-xs font-bold uppercase tracking-wider text-white">Today's Business Briefing</span>
+                    <span className={`font-space text-xs font-bold uppercase tracking-wider ${isLight ? "text-slate-900" : "text-white"}`}>Today's Business Briefing</span>
                   </div>
                   <button 
                     onClick={() => generateAISummary()} 
                     disabled={aiSummaryLoading}
-                    className="p-1 hover:bg-gray-900 rounded text-gray-550 hover:text-white transition-colors cursor-pointer"
+                    className={`p-1 rounded transition-colors cursor-pointer ${isLight ? "hover:bg-slate-100 text-gray-400 hover:text-slate-900" : "hover:bg-gray-900 text-gray-550 hover:text-white"}`}
                     title="Refresh AI summary"
                   >
                     <RefreshCw size={11} className={aiSummaryLoading ? "animate-spin" : ""} />
@@ -1136,7 +1140,7 @@ Overall campaign open rates hit **${avgOpenRate}%** with a click-through rate of
                     <span className="uppercase tracking-widest mt-1.5">Generating AI Insights...</span>
                   </div>
                 ) : (
-                  <div className="font-mono text-[9.5px] leading-relaxed text-gray-300 space-y-3.5 whitespace-pre-line">
+                  <div className={`font-mono text-[9.5px] leading-relaxed space-y-3.5 whitespace-pre-line ${isLight ? "text-slate-700" : "text-gray-300"}`}>
                     {aiSummary}
                   </div>
                 )}
@@ -1149,22 +1153,20 @@ Overall campaign open rates hit **${avgOpenRate}%** with a click-through rate of
 
               {/* AI Recommendations Engine */}
               <div className="orbit-panel p-5 space-y-4">
-                <div className="border-b border-gray-900 pb-3">
-                  <span className="font-space text-xs font-bold uppercase tracking-wider text-white">AI Recommendations Engine</span>
+                <div className={`border-b pb-3 ${isLight ? "border-slate-200" : "border-gray-900"}`}>
+                  <span className={`font-space text-xs font-bold uppercase tracking-wider ${isLight ? "text-slate-900" : "text-white"}`}>AI Recommendations Engine</span>
                 </div>
 
                 <div className="space-y-3.5">
                   {recommendationsList.map((rec, i) => (
                     <div 
                       key={i} 
-                      className={`p-3.5 rounded-xl border border-gray-950 flex flex-col justify-between gap-3 relative overflow-hidden transition-all ${
-                        launchingMission === rec.title ? "bg-orbit-blue/5 border-orbit-blue/20" : "bg-black/25 hover:border-gray-900"
-                      }`}
+                      className={`p-3.5 rounded-xl border flex flex-col justify-between gap-3 relative overflow-hidden transition-all ${launchingMission === rec.title ? (isLight ? "bg-blue-50/50 border-blue-200" : "bg-orbit-blue/5 border-orbit-blue/20") : (isLight ? "bg-slate-50 border-slate-200 hover:border-slate-300" : "bg-black/25 border-gray-950 hover:border-gray-900")}`}
                     >
                       <div className="flex items-start justify-between gap-2">
                         <div className="space-y-1">
                           <div className="flex items-center gap-2">
-                            <span className="font-space text-[10px] font-bold text-white">{rec.title}</span>
+                            <span className={`font-space text-[10px] font-bold ${isLight ? "text-slate-900" : "text-white"}`}>{rec.title}</span>
                             <span className="font-mono text-[7px] text-orbit-purple border border-orbit-purple/30 bg-orbit-purple/5 px-1.5 py-0.5 rounded uppercase font-bold">{rec.roi}</span>
                           </div>
                           <p className="font-mono text-[8.5px] text-gray-550 leading-normal">{rec.desc}</p>
@@ -1201,8 +1203,8 @@ Overall campaign open rates hit **${avgOpenRate}%** with a click-through rate of
 
               {/* Agent Contribution Report */}
               <div className="orbit-panel p-5 space-y-4">
-                <div className="border-b border-gray-900 pb-3">
-                  <span className="font-space text-xs font-bold uppercase tracking-wider text-white">Agent Contribution Report</span>
+                <div className={`border-b pb-3 ${isLight ? "border-slate-200" : "border-gray-900"}`}>
+                  <span className={`font-space text-xs font-bold uppercase tracking-wider ${isLight ? "text-slate-900" : "text-white"}`}>Agent Contribution Report</span>
                 </div>
 
                 <div className="grid grid-cols-1 gap-2.5">
@@ -1216,13 +1218,13 @@ Overall campaign open rates hit **${avgOpenRate}%** with a click-through rate of
                     <div 
                       key={idx} 
                       onClick={() => setSelectedAgent(contrib.agent as any)}
-                      className="p-3 bg-gray-950/45 border border-gray-900/60 rounded-xl hover:border-gray-800 transition-colors cursor-pointer flex items-center justify-between"
+                      className={`p-3 rounded-xl border transition-colors cursor-pointer flex items-center justify-between ${isLight ? "bg-slate-50 border-slate-200 hover:border-slate-300" : "bg-gray-950/45 border-gray-900/60 hover:border-gray-800"}`}
                       title={`Click to inspect ${contrib.agent} specs`}
                     >
                       <div>
-                        <span className="font-space text-[10px] font-bold text-white">{contrib.agent}</span>
+                        <span className={`font-space text-[10px] font-bold ${isLight ? "text-slate-900" : "text-white"}`}>{contrib.agent}</span>
                         <p className="font-mono text-[8px] text-gray-500 uppercase mt-0.5">{contrib.role}</p>
-                        <p className="font-mono text-[8.5px] text-gray-300 mt-1">{contrib.act}</p>
+                        <p className={`font-mono text-[8.5px] mt-1 ${isLight ? "text-slate-655" : "text-gray-300"}`}>{contrib.act}</p>
                       </div>
                       <span className="font-mono text-[9px] text-orbit-success bg-orbit-success/5 border border-orbit-success/15 px-2 py-0.5 rounded font-bold">{contrib.score}% sync</span>
                     </div>
@@ -1232,14 +1234,14 @@ Overall campaign open rates hit **${avgOpenRate}%** with a click-through rate of
 
               {/* Export Center */}
               <div className="orbit-panel p-5 space-y-3.5">
-                <div className="border-b border-gray-900 pb-3">
-                  <span className="font-space text-xs font-bold uppercase tracking-wider text-white">Report & Export Center</span>
+                <div className={`border-b pb-3 ${isLight ? "border-slate-200" : "border-gray-900"}`}>
+                  <span className={`font-space text-xs font-bold uppercase tracking-wider ${isLight ? "text-slate-900" : "text-white"}`}>Report & Export Center</span>
                 </div>
 
                 <div className="grid grid-cols-2 gap-2">
                   <button 
                     onClick={() => window.print()}
-                    className="py-2.5 bg-gray-950 border border-gray-900 hover:border-gray-800 text-gray-300 rounded-xl font-mono text-[8.5px] uppercase tracking-wider flex items-center justify-center gap-1.5 cursor-pointer"
+                    className={`py-2.5 border rounded-xl font-mono text-[8.5px] uppercase tracking-wider flex items-center justify-center gap-1.5 cursor-pointer transition-colors ${isLight ? "bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100 hover:border-slate-300" : "bg-gray-950 border-gray-900 hover:border-gray-800 text-gray-300"}`}
                   >
                     <FileText size={10} />
                     <span>Print PDF</span>
@@ -1247,7 +1249,7 @@ Overall campaign open rates hit **${avgOpenRate}%** with a click-through rate of
                   
                   <button 
                     onClick={handleExportCSV}
-                    className="py-2.5 bg-gray-950 border border-gray-900 hover:border-gray-800 text-gray-300 rounded-xl font-mono text-[8.5px] uppercase tracking-wider flex items-center justify-center gap-1.5 cursor-pointer"
+                    className={`py-2.5 border rounded-xl font-mono text-[8.5px] uppercase tracking-wider flex items-center justify-center gap-1.5 cursor-pointer transition-colors ${isLight ? "bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100 hover:border-slate-300" : "bg-gray-950 border-gray-900 hover:border-gray-800 text-gray-300"}`}
                   >
                     <Download size={10} />
                     <span>Export CSV</span>
@@ -1263,7 +1265,7 @@ Overall campaign open rates hit **${avgOpenRate}%** with a click-through rate of
                     <button
                       key={report.id}
                       onClick={() => handleGenerateAIReport(report.id as any)}
-                      className="w-full py-2 bg-gray-900/60 border border-gray-800 hover:border-blue-500/30 text-gray-300 hover:text-white rounded-xl font-mono text-[8.5px] uppercase tracking-wider flex items-center justify-center gap-1 transition-colors cursor-pointer"
+                      className={`w-full py-2 rounded-xl font-mono text-[8.5px] uppercase tracking-wider flex items-center justify-center gap-1 transition-colors cursor-pointer border ${isLight ? "bg-slate-50 border-slate-200 hover:border-slate-300 text-slate-700" : "bg-gray-900/60 border-gray-800 hover:border-blue-500/30 text-gray-300 hover:text-white"}`}
                     >
                       <Brain size={10} className="text-orbit-purple" />
                       <span>{report.label}</span>
@@ -1274,8 +1276,8 @@ Overall campaign open rates hit **${avgOpenRate}%** with a click-through rate of
 
               {/* Autonomous Analytics Workflow */}
               <div className="orbit-panel p-5 space-y-3 font-mono text-[8px]">
-                <div className="border-b border-gray-900 pb-3 flex items-center justify-between">
-                  <span className="font-space text-xs font-bold uppercase tracking-wider text-white">Autonomous Workflow</span>
+                <div className={`border-b pb-3 flex items-center justify-between ${isLight ? "border-slate-200" : "border-gray-900"}`}>
+                  <span className={`font-space text-xs font-bold uppercase tracking-wider ${isLight ? "text-slate-900" : "text-white"}`}>Autonomous Workflow</span>
                   <LoopIcon size={10} className="text-orbit-success animate-spin-slow" />
                 </div>
                 <div className="space-y-2 max-h-[120px] overflow-y-auto pr-1">
@@ -1296,8 +1298,8 @@ Overall campaign open rates hit **${avgOpenRate}%** with a click-through rate of
         {/* Tab 2: Funnel Visualizer */}
         {activeTab === "funnel" && (
           <div className="orbit-panel p-6 space-y-6">
-            <div className="border-b border-gray-900 pb-3">
-              <span className="font-space text-xs font-bold uppercase tracking-wider text-white">Full Funnel Conversion Performance</span>
+            <div className={`border-b pb-3 ${isLight ? "border-slate-200" : "border-gray-900"}`}>
+              <span className={`font-space text-xs font-bold uppercase tracking-wider ${isLight ? "text-slate-900" : "text-white"}`}>Full Funnel Conversion Performance</span>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-center">
@@ -1390,7 +1392,7 @@ Overall campaign open rates hit **${avgOpenRate}%** with a click-through rate of
             </div>
 
             {/* AI Diagnostics Report */}
-            <div className="lg:col-span-2 orbit-panel p-5 space-y-4 border-red-500/15 bg-red-500/5 shadow-[0_0_20px_rgba(239,68,68,0.1)]">
+            <div className={`lg:col-span-2 orbit-panel p-5 space-y-4 border ${isLight ? "border-red-200 bg-red-50/50" : "border-red-500/15 bg-red-500/5 shadow-[0_0_20px_rgba(239,68,68,0.1)]"}`}>
               <div className="flex justify-between items-center border-b border-gray-950 pb-3">
                 <div className="flex items-center gap-2">
                   <ShieldAlert size={14} className="text-red-400 animate-pulse" />
@@ -1399,7 +1401,7 @@ Overall campaign open rates hit **${avgOpenRate}%** with a click-through rate of
                 <button
                   onClick={() => generateAIDiagnostics()}
                   disabled={aiDiagnosticsLoading}
-                  className="p-1 hover:bg-gray-900 rounded text-gray-550 hover:text-white transition-colors cursor-pointer"
+                  className={`p-1 rounded transition-colors cursor-pointer ${isLight ? "hover:bg-slate-100 text-gray-400 hover:text-slate-900" : "hover:bg-gray-900 text-gray-550 hover:text-white"}`}
                   title="Reload diagnostics"
                 >
                   <RefreshCw size={11} className={aiDiagnosticsLoading ? "animate-spin" : ""} />
@@ -1467,7 +1469,8 @@ Overall campaign open rates hit **${avgOpenRate}%** with a click-through rate of
         {/* Tab 4: Forecast Center */}
         {activeTab === "forecast" && (
           <div className="orbit-panel p-6 space-y-6">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-gray-900 pb-3 gap-2">
+            <div className={`flex flex-col sm:flex-row sm:items-center justify-between border-b pb-3 gap-2 ${isLight ? "border-slate-200" : "border-gray-900"}`}>
+
               <div className="flex items-center gap-2">
                 <Brain size={14} className="text-orbit-pink" />
                 <span className="font-space text-xs font-bold uppercase tracking-wider text-white">Vega Forecast Center</span>
@@ -1571,14 +1574,14 @@ Overall campaign open rates hit **${avgOpenRate}%** with a click-through rate of
                 <span className="font-space text-xs font-bold text-gray-400 uppercase tracking-widest block">Forecast Summary Parameters</span>
 
                 {[
-                  { label: "Predicted Revenue", val: forecastPeriod === "7" ? `₹${Math.round(totalRevenue + 14500).toLocaleString()}` : forecastPeriod === "30" ? `₹${Math.round(totalRevenue + 58000).toLocaleString()}` : `₹${Math.round(totalRevenue + 192000).toLocaleString()}`, desc: `Incremental change projection over current total`, color: "text-white" },
+                  { label: "Predicted Revenue", val: forecastPeriod === "7" ? `₹${Math.round(totalRevenue + 14500).toLocaleString()}` : forecastPeriod === "30" ? `₹${Math.round(totalRevenue + 58000).toLocaleString()}` : `₹${Math.round(totalRevenue + 192000).toLocaleString()}`, desc: `Incremental change projection over current total`, color: isLight ? "text-slate-900" : "text-white" },
                   { label: "Predicted Customer Nodes", val: forecastPeriod === "7" ? `+8 signups` : forecastPeriod === "30" ? `+24 signups` : `+92 signups`, desc: "Expected database size growth", color: "text-orbit-blue" },
                   { label: "Forecasted Average ROI", val: forecastPeriod === "7" ? "4.1x" : forecastPeriod === "30" ? "4.3x" : "4.5x", desc: "Outbound campaign yield average multiplier", color: "text-orbit-success" },
                   { label: "Model Confidence Score", val: forecastPeriod === "7" ? "92%" : forecastPeriod === "30" ? "88%" : "84%", desc: "Vega algorithm confidence calculation", color: "text-orbit-pink" }
                 ].map((item, idx) => (
                   <div key={idx} className="p-3 bg-gray-950/50 border border-gray-900 rounded-xl flex items-center justify-between">
                     <div>
-                      <span className="font-bold text-white block">{item.label}</span>
+                      <span className={`font-bold block ${isLight ? "text-slate-900" : "text-white"}`}>{item.label}</span>
                       <span className="text-[7.5px] text-gray-550">{item.desc}</span>
                     </div>
                     <span className={`font-space font-bold text-xs ${item.color}`}>{item.val}</span>
@@ -1623,7 +1626,8 @@ Overall campaign open rates hit **${avgOpenRate}%** with a click-through rate of
                           <span className="text-gray-300">{p.name}</span>
                           <span className="text-white font-bold">{contributionPct}%</span>
                         </div>
-                        <div className="h-2 bg-gray-950 rounded-full overflow-hidden border border-gray-900">
+                        <div className={`h-2 rounded-full overflow-hidden border ${isLight ? "bg-slate-200 border-slate-350" : "bg-gray-950 border-gray-900"}`}>
+
                           <div 
                             className="h-full rounded-full bg-gradient-to-r from-orbit-blue to-orbit-purple"
                             style={{ width: `${contributionPct}%` }}
@@ -1650,7 +1654,7 @@ Overall campaign open rates hit **${avgOpenRate}%** with a click-through rate of
                     else if (score >= 20) badgeColor = "bg-yellow-500/10 text-yellow-400 border border-yellow-500/25";
 
                     return (
-                      <div key={p.id} className="flex justify-between items-center p-3 rounded-lg bg-gray-950/40 border border-gray-900 font-mono text-[10px]">
+                      <div key={p.id} className={`flex justify-between items-center p-3 rounded-lg font-mono text-[10px] border ${isLight ? "bg-slate-50 border-slate-200 text-slate-800" : "bg-gray-950/40 border-gray-900"}`}>
                         <div>
                           <span className="text-gray-300 block font-bold">{p.name}</span>
                           <span className="text-[8px] text-gray-500">Churn trend indicators: {p.riskScore >= 50 ? "Unstable / Inactive" : "Stable / Active"}</span>
@@ -1680,7 +1684,8 @@ Overall campaign open rates hit **${avgOpenRate}%** with a click-through rate of
                           <span>{p.name}</span>
                           <span className="text-white font-bold">₹{current.toLocaleString()} / ₹{potential.toLocaleString()} ({pct}%)</span>
                         </div>
-                        <div className="h-2 bg-gray-950 rounded-full overflow-hidden border border-gray-900 relative">
+                        <div className={`h-2 rounded-full overflow-hidden border relative ${isLight ? "bg-slate-200 border-slate-350" : "bg-gray-950 border-gray-900"}`}>
+
                           <div 
                             className="h-full rounded-full bg-orbit-success"
                             style={{ width: `${pct}%` }}
@@ -1712,7 +1717,8 @@ Overall campaign open rates hit **${avgOpenRate}%** with a click-through rate of
                           <span className="text-white font-bold uppercase">{channel}</span>
                           <span className="text-gray-400">{totalChannelCustomers} customers ({pct}%)</span>
                         </div>
-                        <div className="h-1.5 bg-gray-950 rounded-full overflow-hidden border border-gray-900">
+                        <div className={`h-1.5 rounded-full overflow-hidden border ${isLight ? "bg-slate-200 border-slate-300" : "bg-gray-950 border-gray-900"}`}>
+
                           <div 
                             className="h-full rounded-full bg-orbit-blue"
                             style={{ width: `${pct}%` }}
@@ -1779,10 +1785,12 @@ Overall campaign open rates hit **${avgOpenRate}%** with a click-through rate of
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 animate-fade-in">
                 
                 {/* Sentiment Insights */}
-                <div className="lg:col-span-1 bg-gray-950/40 border border-gray-900 rounded-2xl p-5 space-y-4">
-                  <div className="flex items-center gap-1.5 border-b border-gray-900 pb-3">
+                <div className={`lg:col-span-1 border rounded-2xl p-5 space-y-4 ${isLight ? "bg-white border-slate-200" : "bg-gray-950/40 border-gray-900"}`}>
+
+                  <div className={`flex items-center gap-1.5 border-b pb-3 ${isLight ? "border-slate-200" : "border-gray-900"}`}>
+
                     <MessageSquare size={16} className="text-orbit-purple" />
-                    <h3 className="font-space text-xs font-bold text-white uppercase tracking-wider">Customer Sentiment Analysis</h3>
+                    <h3 className={`font-space text-xs font-bold uppercase tracking-wider ${isLight ? "text-slate-900" : "text-white"}`}>Customer Sentiment Analysis</h3>
                   </div>
                   
                   <div className="space-y-4">
@@ -1793,7 +1801,8 @@ Overall campaign open rates hit **${avgOpenRate}%** with a click-through rate of
                         </span>
                         <span className="text-gray-400">{posCount} ({posPct}%)</span>
                       </div>
-                      <div className="h-1.5 bg-gray-950 rounded-full overflow-hidden border border-gray-900">
+                      <div className={`h-1.5 rounded-full overflow-hidden border ${isLight ? "bg-slate-200 border-slate-300" : "bg-gray-950 border-gray-900"}`}>
+
                         <div className="h-full rounded-full bg-green-500" style={{ width: `${posPct}%` }} />
                       </div>
                     </div>
@@ -1805,7 +1814,8 @@ Overall campaign open rates hit **${avgOpenRate}%** with a click-through rate of
                         </span>
                         <span className="text-gray-400">{neuCount} ({neuPct}%)</span>
                       </div>
-                      <div className="h-1.5 bg-gray-950 rounded-full overflow-hidden border border-gray-900">
+                      <div className={`h-1.5 rounded-full overflow-hidden border ${isLight ? "bg-slate-200 border-slate-300" : "bg-gray-950 border-gray-900"}`}>
+
                         <div className="h-full rounded-full bg-gray-450" style={{ width: `${neuPct}%` }} />
                       </div>
                     </div>
@@ -1817,7 +1827,8 @@ Overall campaign open rates hit **${avgOpenRate}%** with a click-through rate of
                         </span>
                         <span className="text-gray-400">{negCount} ({negPct}%)</span>
                       </div>
-                      <div className="h-1.5 bg-gray-950 rounded-full overflow-hidden border border-gray-900">
+                      <div className={`h-1.5 rounded-full overflow-hidden border ${isLight ? "bg-slate-200 border-slate-300" : "bg-gray-950 border-gray-900"}`}>
+
                         <div className="h-full rounded-full bg-red-500" style={{ width: `${negPct}%` }} />
                       </div>
                     </div>
@@ -1825,11 +1836,13 @@ Overall campaign open rates hit **${avgOpenRate}%** with a click-through rate of
                 </div>
 
                 {/* Lifecycle Cohorts */}
-                <div className="lg:col-span-2 bg-gray-950/40 border border-gray-900 rounded-2xl p-5 space-y-4">
-                  <div className="flex justify-between items-center border-b border-gray-900 pb-3">
+                <div className={`lg:col-span-2 border rounded-2xl p-5 space-y-4 ${isLight ? "bg-white border-slate-200" : "bg-gray-950/40 border-gray-900"}`}>
+
+                  <div className={`flex justify-between items-center border-b pb-3 ${isLight ? "border-slate-200" : "border-gray-900"}`}>
+
                     <div className="flex items-center gap-1.5">
                       <Activity size={16} className="text-blue-400" />
-                      <h3 className="font-space text-xs font-bold text-white uppercase tracking-wider">Customer Lifecycle Cohorts</h3>
+                      <h3 className={`font-space text-xs font-bold uppercase tracking-wider ${isLight ? "text-slate-900" : "text-white"}`}>Customer Lifecycle Cohorts</h3>
                     </div>
                     {selectedLifecycleCohort && (
                       <button 
@@ -1855,7 +1868,7 @@ Overall campaign open rates hit **${avgOpenRate}%** with a click-through rate of
                           }`}
                         >
                           <span className="font-mono text-[9px] font-bold uppercase" style={{ color: coh.color }}>{coh.label}</span>
-                          <span className="font-space text-xl font-bold text-white my-1">{count}</span>
+                          <span className={`font-space text-xl font-bold my-1 ${isLight ? "text-slate-900" : "text-white"}`}>{count}</span>
                           <span className="font-mono text-[7.5px] text-gray-450 mt-auto leading-tight">{coh.desc}</span>
                         </button>
                       );
@@ -1869,10 +1882,12 @@ Overall campaign open rates hit **${avgOpenRate}%** with a click-through rate of
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
                 
                 {/* Reviews Feed */}
-                <div className="lg:col-span-4 bg-gray-950/40 border border-gray-900 rounded-2xl p-5 flex flex-col max-h-[480px]">
-                  <div className="flex items-center gap-1.5 border-b border-gray-900 pb-3 mb-3 shrink-0">
+                <div className={`lg:col-span-4 border rounded-2xl p-5 flex flex-col max-h-[480px] ${isLight ? "bg-white border-slate-200" : "bg-gray-950/40 border-gray-900"}`}>
+
+                  <div className={`flex items-center gap-1.5 border-b pb-3 mb-3 shrink-0 ${isLight ? "border-slate-200" : "border-gray-900"}`}>
+
                     <MessageSquare size={15} className="text-purple-400" />
-                    <h3 className="font-space text-xs font-bold text-white uppercase tracking-wider">Customer Voice Feed ({allReviews.length})</h3>
+                    <h3 className={`font-space text-xs font-bold uppercase tracking-wider ${isLight ? "text-slate-900" : "text-white"}`}>Customer Voice Feed ({allReviews.length})</h3>
                   </div>
 
                   <div className="flex-1 overflow-y-auto space-y-3 pr-1">
@@ -1886,11 +1901,11 @@ Overall campaign open rates hit **${avgOpenRate}%** with a click-through rate of
                             key={idx}
                             onClick={() => setSelectedCustomerId(rev.customerId)}
                             className={`p-3 rounded-xl border font-mono text-[9.5px] text-gray-350 leading-relaxed cursor-pointer transition-all hover:border-gray-800 ${
-                              isSelected ? "border-blue-500 bg-blue-500/5" : "bg-gray-950/60 border-gray-900"
+                              isSelected ? (isLight ? "border-blue-500 bg-blue-50/50" : "border-blue-500 bg-blue-500/5") : (isLight ? "bg-slate-50 border-slate-200 hover:border-slate-300" : "bg-gray-950/60 border-gray-900")
                             }`}
                           >
                             <div className="flex justify-between items-baseline mb-1.5">
-                              <span className="text-white font-bold hover:underline">{rev.customerName}</span>
+                              <span className={`font-bold hover:underline ${isLight ? "text-slate-900" : "text-white"}`}>{rev.customerName}</span>
                               <span className={`text-[8px] font-bold px-1.5 py-0.2 rounded ${
                                 rev.sentiment === "Positive" ? "bg-green-500/10 text-green-400 border border-green-500/20" :
                                 rev.sentiment === "Negative" ? "bg-red-500/10 text-red-400 border border-red-500/20" : "bg-gray-900 text-gray-455 border border-gray-800"
@@ -1905,11 +1920,13 @@ Overall campaign open rates hit **${avgOpenRate}%** with a click-through rate of
                 </div>
 
                 {/* Directory */}
-                <div className="lg:col-span-8 bg-gray-950/40 border border-gray-900 rounded-2xl p-5 flex flex-col max-h-[480px]">
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-gray-900 pb-3 mb-3 shrink-0">
+                <div className={`lg:col-span-8 border rounded-2xl p-5 flex flex-col max-h-[480px] ${isLight ? "bg-white border-slate-200" : "bg-gray-950/40 border-gray-900"}`}>
+
+                  <div className={`flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b pb-3 mb-3 shrink-0 ${isLight ? "border-slate-200" : "border-gray-900"}`}>
+
                     <div className="flex items-center gap-1.5">
                       <Users size={15} className="text-blue-400" />
-                      <h3 className="font-space text-xs font-bold text-white uppercase tracking-wider">
+                      <h3 className={`font-space text-xs font-bold uppercase tracking-wider ${isLight ? "text-slate-900" : "text-white"}`}>
                         {selectedLifecycleCohort ? `${selectedLifecycleCohort} Directory` : "All Customers Directory"} ({cohortFiltered.length})
                       </h3>
                     </div>
@@ -1921,15 +1938,17 @@ Overall campaign open rates hit **${avgOpenRate}%** with a click-through rate of
                         placeholder="Search roster..."
                         value={voiceSearchQuery}
                         onChange={(e) => setVoiceSearchQuery(e.target.value)}
-                        className="w-full bg-gray-950/80 border border-gray-900 rounded-lg pl-8 pr-3 py-1 font-mono text-[9px] text-white placeholder-gray-650 focus:outline-none focus:border-gray-800 transition-colors"
+                        className={`w-full rounded-lg pl-8 pr-3 py-1 font-mono text-[9px] focus:outline-none border transition-colors ${isLight ? "bg-white border-slate-200 text-slate-800 focus:border-blue-500 placeholder-slate-400" : "bg-gray-950/80 border-gray-900 text-white placeholder-gray-650 focus:border-gray-800"}`}
                       />
                     </div>
                   </div>
 
-                  <div className="flex-1 overflow-y-auto border border-gray-900 rounded-xl bg-black/10">
+                  <div className={`flex-1 overflow-y-auto border rounded-xl ${isLight ? "border-slate-200 bg-white" : "border-gray-900 bg-black/10"}`}>
+
                     <table className="w-full text-left border-collapse font-mono text-[9px]">
                       <thead>
-                        <tr className="border-b border-gray-900 bg-gray-950/40 text-gray-550 uppercase tracking-wider">
+                        <tr className={`border-b uppercase tracking-wider ${isLight ? "border-slate-200 bg-slate-50 text-slate-500" : "border-gray-900 bg-gray-950/40 text-gray-550"}`}>
+
                           <th className="px-3.5 py-2">ID</th>
                           <th className="px-3.5 py-2">Name</th>
                           <th className="px-3.5 py-2">Lifecycle Stage</th>
@@ -1954,7 +1973,7 @@ Overall campaign open rates hit **${avgOpenRate}%** with a click-through rate of
                                 }`}
                               >
                                 <td className="px-3.5 py-2 font-bold text-gray-450">{c.id}</td>
-                                <td className="px-3.5 py-2 text-white font-medium">{c.name}</td>
+                                <td className={`px-3.5 py-2 font-medium ${isLight ? "text-slate-900" : "text-white"}`}>{c.name}</td>
                                 <td className="px-3.5 py-2">
                                   <span className={`px-1.5 py-0.2 rounded border text-[8px] font-bold ${
                                     c.lifecycleStage === "Recent Buyer" ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" :
@@ -1964,7 +1983,7 @@ Overall campaign open rates hit **${avgOpenRate}%** with a click-through rate of
                                     "bg-red-500/10 text-red-400 border-red-500/20"
                                   }`}>{c.lifecycleStage}</span>
                                 </td>
-                                <td className="px-3.5 py-2 text-right font-bold text-white">₹{c.ltv?.toLocaleString()}</td>
+                                <td className={`px-3.5 py-2 text-right font-bold ${isLight ? "text-slate-900" : "text-white"}`}>₹{c.ltv?.toLocaleString()}</td>
                                 <td className="px-3.5 py-2 text-center">
                                   <span className={`font-bold ${
                                     c.customerSentiment === "Positive" ? "text-green-400" :
@@ -1990,27 +2009,30 @@ Overall campaign open rates hit **${avgOpenRate}%** with a click-through rate of
           AI REPORT GENERATION MODAL
       ════════════════════════════════════════ */}
       {reportModalType && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-md font-mono">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm font-mono">
+
           <div 
-            className="w-full max-w-2xl bg-[#080d24] border border-gray-800 rounded-2xl p-6 shadow-2xl relative overflow-hidden flex flex-col max-h-[85vh]"
+            className={`w-full max-w-2xl border rounded-2xl p-6 shadow-2xl relative overflow-hidden flex flex-col max-h-[85vh] ${isLight ? "bg-white border-slate-200 text-slate-800" : "bg-[#080d24] border-gray-800 text-white"}`}
             style={{ animation: "scaleIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards" }}
           >
-            <div className="flex justify-between items-center border-b border-gray-900 pb-3 mb-4">
+            <div className={`flex justify-between items-center border-b pb-3 mb-4 ${isLight ? "border-slate-200" : "border-gray-900"}`}>
+
               <div className="flex items-center gap-2">
                 <Brain size={14} className="text-orbit-purple animate-pulse" />
-                <h3 className="font-space text-sm font-bold text-white uppercase tracking-wider">
+                <h3 className={`font-space text-sm font-bold uppercase tracking-wider ${isLight ? "text-slate-900" : "text-white"}`}>
+
                   {reportModalType === "executive" ? "Executive Summary Report" : reportModalType === "investor" ? "Investor Presentation" : "Client Performance Ledger"}
                 </h3>
               </div>
               <button 
                 onClick={() => setReportModalType(null)} 
-                className="text-gray-400 hover:text-white cursor-pointer"
+                className={`cursor-pointer ${isLight ? "text-gray-400 hover:text-slate-900" : "text-gray-400 hover:text-white"}`}
               >
                 ×
               </button>
             </div>
 
-            <div className="flex-1 overflow-y-auto pr-1 text-gray-300 text-[9.5px] leading-relaxed whitespace-pre-line border border-gray-950 p-4 rounded-xl bg-black/20">
+            <div className={`flex-1 overflow-y-auto pr-1 text-[9.5px] leading-relaxed whitespace-pre-line border p-4 rounded-xl ${isLight ? "bg-slate-50 border-slate-200 text-slate-700" : "bg-black/20 border-gray-950 text-gray-300"}`}>
               {reportModalLoading ? (
                 <div className="h-44 flex flex-col items-center justify-center gap-2 text-gray-500">
                   <div className="flex gap-1 animate-pulse">
@@ -2037,7 +2059,7 @@ Overall campaign open rates hit **${avgOpenRate}%** with a click-through rate of
                   }
                 }}
                 disabled={reportModalLoading}
-                className="px-4 py-2 bg-gray-900 border border-gray-800 hover:border-gray-700 text-gray-300 rounded-lg text-[8.5px] uppercase tracking-wider font-bold cursor-pointer transition-colors"
+                className={`px-4 py-2 border rounded-lg text-[8.5px] uppercase tracking-wider font-bold cursor-pointer transition-colors ${isLight ? "bg-slate-50 border-slate-200 hover:bg-slate-100 hover:border-slate-300 text-slate-700" : "bg-gray-900 border-gray-800 hover:border-gray-700 text-gray-300"}`}
               >
                 Copy to Clipboard
               </button>
@@ -2130,17 +2152,19 @@ Overall campaign open rates hit **${avgOpenRate}%** with a click-through rate of
         customerTimelineEvents.sort((a, b) => b.date.localeCompare(a.date));
 
         return (
-          <aside className="w-[420px] shrink-0 flex flex-col border-l border-gray-800/60 bg-gray-950/85 backdrop-blur-xl p-5 space-y-4 overflow-y-auto relative z-10 animate-fade-in font-mono">
+          <aside className={`w-[420px] shrink-0 flex flex-col border-l p-5 space-y-4 overflow-y-auto relative z-10 animate-fade-in font-mono ${isLight ? "bg-white border-slate-200" : "border-gray-800/60 bg-gray-950/85 backdrop-blur-xl"}`}>
+
             {/* Header */}
-            <div className="flex items-start justify-between border-b border-gray-800 pb-3 shrink-0">
+            <div className={`flex items-start justify-between border-b pb-3 shrink-0 ${isLight ? "border-slate-200" : "border-gray-800"}`}>
+
               <div>
                 <div className="text-[9px] font-mono text-gray-550 uppercase tracking-widest mb-1">CRM Profile Node</div>
-                <h2 className="font-space text-lg font-bold text-white tracking-tight leading-snug">{detail.name}</h2>
+                <h2 className={`font-space text-lg font-bold tracking-tight leading-snug ${isLight ? "text-slate-900" : "text-white"}`}>{detail.name}</h2>
                 <span className="font-mono text-[10px] text-gray-400 select-all">{detail.email}</span>
               </div>
               <button
                 onClick={() => setSelectedCustomerId(null)}
-                className="p-1.5 rounded-lg border border-gray-800 hover:border-gray-700 text-gray-500 hover:text-white transition-colors cursor-pointer"
+                className={`p-1.5 rounded-lg border transition-colors cursor-pointer ${isLight ? "border-slate-200 hover:bg-slate-100 text-gray-500 hover:text-slate-900" : "border-gray-800 hover:border-gray-700 text-gray-500 hover:text-white"}`}
               >
                 <X size={14} />
               </button>
@@ -2155,7 +2179,7 @@ Overall campaign open rates hit **${avgOpenRate}%** with a click-through rate of
                   {detail.segment}
                 </span>
               </div>
-              <div className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-gray-850 bg-gray-900/30 font-mono text-[10px]">
+              <div className={`flex items-center gap-1.5 px-3 py-2 rounded-xl border font-mono text-[10px] ${isLight ? "border-slate-200 bg-slate-50 text-slate-800" : "border-gray-855 bg-gray-900/30 text-white"}`}>
                 <span className="text-gray-550">SENTIMENT:</span>
                 <select
                   value={detail.customerSentiment || "Neutral"}
@@ -2168,9 +2192,9 @@ Overall campaign open rates hit **${avgOpenRate}%** with a click-through rate of
                     detail.customerSentiment === "Negative" ? "text-red-400" : "text-gray-300"
                   }`}
                 >
-                  <option value="Positive" className="bg-gray-900 text-green-400 font-bold">Positive</option>
-                  <option value="Neutral" className="bg-gray-900 text-gray-300 font-bold">Neutral</option>
-                  <option value="Negative" className="bg-gray-900 text-red-400 font-bold">Negative</option>
+                  <option value="Positive" className="bg-gray-900 text-green-400 font-bold" style={{ backgroundColor: "#0F172A" }}>Positive</option>
+                  <option value="Neutral" className="bg-gray-900 text-gray-300 font-bold" style={{ backgroundColor: "#0F172A" }}>Neutral</option>
+                  <option value="Negative" className="bg-gray-900 text-red-400 font-bold" style={{ backgroundColor: "#0F172A" }}>Negative</option>
                 </select>
               </div>
             </div>
@@ -2187,12 +2211,13 @@ Overall campaign open rates hit **${avgOpenRate}%** with a click-through rate of
                 { label: "Persona Archetype", value: detail.persona || "Unclassified", icon: <Cpu size={11} className="text-purple-400" /> },
                 { label: "Last Purchase", value: detail.lastPurchaseDate || "N/A", icon: <Calendar size={11} className="text-teal-400" /> }
               ].map((kpi, i) => (
-                <div key={i} className="bg-gray-900/20 border border-gray-850 rounded-xl p-3 shadow-sm hover:border-gray-800 transition-all">
+                <div key={i} className={`rounded-xl p-3 shadow-sm transition-all border ${isLight ? "bg-slate-50 border-slate-200 hover:border-slate-300" : "bg-gray-900/20 border-gray-850 hover:border-gray-800"}`}>
                   <div className="flex items-center gap-1 mb-1">
                     {kpi.icon}
                     <span className="font-mono text-[8.5px] text-gray-550 uppercase tracking-wider">{kpi.label}</span>
                   </div>
-                  <span className="font-space text-xs font-bold text-white mt-1 block truncate" title={kpi.value}>
+                  <span className={`font-space text-xs font-bold mt-1 block truncate ${isLight ? "text-slate-900" : "text-white"}`} title={kpi.value}>
+
                     {kpi.value}
                   </span>
                 </div>
@@ -2200,18 +2225,19 @@ Overall campaign open rates hit **${avgOpenRate}%** with a click-through rate of
             </div>
 
             {/* Growth Opportunity Card */}
-            <div className="p-3.5 rounded-xl bg-purple-500/5 border border-purple-500/20 space-y-1 shrink-0">
+            <div className={`p-3.5 rounded-xl space-y-1 shrink-0 border ${isLight ? "bg-purple-50 border-purple-200 text-purple-800" : "bg-purple-500/5 border-purple-500/20"}`}>
               <div className="flex items-center gap-1.5 font-mono text-[9px] text-purple-400 font-bold uppercase tracking-wider">
                 <Cpu size={12} className="animate-pulse" />
                 <span>AI Growth Opportunity Directive</span>
               </div>
-              <p className="font-mono text-[10px] text-gray-350 leading-relaxed">{detail.growthOpportunity || "N/A"}</p>
+              <p className={`font-mono text-[10px] leading-relaxed ${isLight ? "text-slate-700" : "text-gray-300"}`}>{detail.growthOpportunity || "N/A"}</p>
             </div>
 
             {/* Customer Voice Reviews */}
             <div className="space-y-3 pt-2 shrink-0">
               <div className="flex justify-between items-center">
-                <h3 className="font-space text-xs font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
+                <h3 className={`font-space text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 ${isLight ? "text-slate-900" : "text-white"}`}>
+
                   <MessageSquare size={13} className="text-purple-400" />
                   Customer Voice Reviews
                 </h3>
@@ -2234,7 +2260,7 @@ Overall campaign open rates hit **${avgOpenRate}%** with a click-through rate of
                   <p className="font-mono text-[9px] text-gray-650 text-center py-2">No reviews recorded</p>
                 ) : (
                   detail.reviews.map((rev, idx) => (
-                    <div key={idx} className="p-2 bg-gray-900/15 border border-gray-900 rounded-lg font-mono text-[9px] relative group text-gray-350 leading-relaxed">
+                    <div key={idx} className={`p-2 border rounded-lg font-mono text-[9px] relative group leading-relaxed ${isLight ? "bg-slate-50 border-slate-200 text-slate-700" : "bg-gray-900/15 border-gray-900 text-gray-350"}`}>
                       <button
                         onClick={() => {
                           if (confirm("Delete this review?")) {
@@ -2256,24 +2282,25 @@ Overall campaign open rates hit **${avgOpenRate}%** with a click-through rate of
 
             {/* Customer Timeline Ledger */}
             <div className="space-y-3 pt-2">
-              <h3 className="font-space text-xs font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
+              <h3 className={`font-space text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 ${isLight ? "text-slate-900" : "text-white"}`}>
+
                 <Activity size={13} className="text-blue-400" />
                 Customer Lifecycle Timeline
               </h3>
               
-              <div className="relative pl-4 space-y-4 border-l border-gray-800/80 ml-2 pt-1">
+              <div className={`relative pl-4 space-y-4 border-l ml-2 pt-1 ${isLight ? "border-slate-200" : "border-gray-800/80"}`}>
                 {customerTimelineEvents.map((ev, index) => {
                   let icon = <UserCheck size={11} className="text-purple-400" />;
-                  let borderCol = "border-purple-500/40 bg-purple-950/20";
+                  let borderCol = isLight ? "border-purple-200 bg-purple-50" : "border-purple-500/40 bg-purple-950/20";
                   if (ev.type === "purchase") {
                     icon = <ShoppingBag size={11} className="text-green-400" />;
-                    borderCol = "border-green-500/40 bg-green-950/20";
+                    borderCol = isLight ? "border-green-200 bg-green-50" : "border-green-500/40 bg-green-950/20";
                   } else if (ev.type === "campaign") {
                     icon = <Send size={11} className="text-blue-400" />;
-                    borderCol = "border-blue-500/40 bg-blue-950/20";
+                    borderCol = isLight ? "border-blue-200 bg-blue-50" : "border-blue-500/40 bg-blue-950/20";
                   } else if (ev.type === "segment") {
                     icon = <SlidersHorizontal size={11} className="text-amber-400" />;
-                    borderCol = "border-amber-500/40 bg-amber-950/20";
+                    borderCol = isLight ? "border-amber-200 bg-amber-50" : "border-amber-500/40 bg-amber-950/20";
                   }
                   
                   return (
@@ -2283,10 +2310,10 @@ Overall campaign open rates hit **${avgOpenRate}%** with a click-through rate of
                       </div>
                       
                       <span className="font-mono text-[8px] text-gray-550 block mb-0.5">{ev.date}</span>
-                      <h4 className="font-space text-[10px] font-bold text-white leading-tight uppercase">{ev.title}</h4>
-                      <p className="font-mono text-[9px] text-gray-450 mt-0.5 leading-snug">{ev.description}</p>
+                      <h4 className={`font-space text-[10px] font-bold leading-tight uppercase ${isLight ? "text-slate-900" : "text-white"}`}>{ev.title}</h4>
+                      <p className={`font-mono text-[9px] mt-0.5 leading-snug ${isLight ? "text-slate-500" : "text-gray-450"}`}>{ev.description}</p>
                       {ev.amount !== undefined && (
-                        <span className="inline-block mt-1 font-mono text-[9px] text-green-400 font-bold bg-green-950/15 border border-green-500/10 px-1.5 py-0.2 rounded">
+                        <span className={`inline-block mt-1 font-mono text-[9px] font-bold px-1.5 py-0.2 rounded border ${isLight ? "text-green-600 bg-green-50 border-green-200" : "text-green-400 bg-green-950/15 border border-green-500/10"}`}>
                           ₹{ev.amount.toLocaleString()}
                         </span>
                       )}
