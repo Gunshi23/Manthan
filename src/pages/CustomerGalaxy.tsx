@@ -571,7 +571,7 @@ export const CustomerGalaxy: React.FC = () => {
               <SlidersHorizontal size={14} className={isLight ? "text-blue-600" : "text-blue-400"} />
               Galaxy Filters
             </h2>
-            <p className={`font-mono text-[8px] uppercase ${isLight ? "text-gray-500" : "text-gray-550"}`}>Isolate sectors of customer space</p>
+            <p className={`font-mono text-[8px] uppercase ${isLight ? "text-gray-500" : "text-gray-555"}`}>Isolate sectors of customer space</p>
           </div>
           <button 
             onClick={() => setShowCrmFilters(false)}
@@ -597,7 +597,7 @@ export const CustomerGalaxy: React.FC = () => {
                   className={`flex items-center justify-between p-2 rounded-lg border text-left font-mono text-[10px] cursor-pointer transition-all ${
                     active 
                       ? isLight ? "bg-gray-50" : "bg-gray-900/65" 
-                      : "border-gray-200 bg-transparent opacity-40 hover:opacity-75"
+                      : isLight ? "border-gray-200 bg-transparent opacity-40 hover:opacity-75" : "border-gray-800 bg-transparent opacity-40 hover:opacity-75"
                   }`}
                   style={{ borderColor: active ? `${color}40` : undefined }}
                 >
@@ -605,7 +605,7 @@ export const CustomerGalaxy: React.FC = () => {
                     <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: color }} />
                     <span className={`font-semibold ${isLight ? "text-gray-800" : "text-gray-300"}`}>{seg}</span>
                   </div>
-                  <span className={`text-[9px] ${isLight ? "text-gray-400" : "text-gray-500"}`}>
+                  <span className={`text-[9px] ${isLight ? "text-gray-400" : "text-gray-550"}`}>
                     {customers.filter(c => c.segment === seg).length}*
                   </span>
                 </button>
@@ -617,8 +617,8 @@ export const CustomerGalaxy: React.FC = () => {
         {/* LTV Threshold Slider */}
         <div className="space-y-1.5">
           <div className="flex justify-between items-center text-[9px] font-mono">
-            <span className="text-gray-400 uppercase tracking-wider">Min LTV Yield</span>
-            <span className="text-blue-400 font-bold">₹{minLtv.toLocaleString()}</span>
+            <span className={isLight ? "text-gray-500 uppercase tracking-wider" : "text-gray-400 uppercase tracking-wider"}>Min LTV Yield</span>
+            <span className="text-blue-500 font-bold">₹{minLtv.toLocaleString()}</span>
           </div>
           <input
             type="range"
@@ -627,15 +627,15 @@ export const CustomerGalaxy: React.FC = () => {
             step={500}
             value={minLtv}
             onChange={e => setMinLtv(Number(e.target.value))}
-            className="w-full accent-blue-500 bg-gray-900 h-1 rounded-full border-none cursor-pointer"
+            className={`w-full accent-blue-500 h-1 rounded-full border-none cursor-pointer ${isLight ? "bg-gray-200" : "bg-gray-900"}`}
           />
         </div>
 
         {/* Max Churn Risk Slider */}
         <div className="space-y-1.5">
           <div className="flex justify-between items-center text-[9px] font-mono">
-            <span className="text-gray-400 uppercase tracking-wider">Max Churn Risk</span>
-            <span className="text-red-400 font-bold">{maxChurnRisk}%</span>
+            <span className={isLight ? "text-gray-500 uppercase tracking-wider" : "text-gray-400 uppercase tracking-wider"}>Max Churn Risk</span>
+            <span className="text-red-500 font-bold">{maxChurnRisk}%</span>
           </div>
           <input
             type="range"
@@ -644,17 +644,19 @@ export const CustomerGalaxy: React.FC = () => {
             step={5}
             value={maxChurnRisk}
             onChange={e => setMaxChurnRisk(Number(e.target.value))}
-            className="w-full accent-red-500 bg-gray-900 h-1 rounded-full border-none cursor-pointer"
+            className={`w-full accent-red-500 h-1 rounded-full border-none cursor-pointer ${isLight ? "bg-gray-200" : "bg-gray-900"}`}
           />
         </div>
 
         {/* Preferred Channel Dropdown */}
         <div className="space-y-1.5">
-          <label className="font-mono text-[9px] text-gray-400 uppercase tracking-wider block">Communication Node</label>
+          <label className={`font-mono text-[9px] uppercase tracking-wider block ${isLight ? "text-gray-500" : "text-gray-400"}`}>Communication Node</label>
           <select
             value={preferredChannel}
             onChange={e => setPreferredChannel(e.target.value)}
-            className="w-full bg-gray-900 border border-gray-800 rounded-lg p-2 font-mono text-[10px] text-white focus:outline-none focus:border-blue-500/50"
+            className={`w-full rounded-lg p-2 font-mono text-[10px] focus:outline-none focus:border-blue-500/50 ${
+              isLight ? "bg-white border-gray-200 text-gray-800" : "bg-gray-900 border border-gray-800 text-white"
+            }`}
           >
             <option value="All">ALL NODES</option>
             <option value="Email">EMAIL ONLY</option>
@@ -665,28 +667,30 @@ export const CustomerGalaxy: React.FC = () => {
         </div>
 
         {/* Constellations directory */}
-        <div className="border-t border-gray-800/60 pt-4 space-y-3">
+        <div className={`border-t pt-4 space-y-3 ${isLight ? "border-gray-150" : "border-gray-800/60"}`}>
           <div>
-            <h3 className="font-space text-xs font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
+            <h3 className={`font-space text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 ${isLight ? "text-gray-900" : "text-white"}`}>
               <Compass size={13} className="text-orbit-purple" />
               Constellation Directory
             </h3>
-            <p className="font-mono text-[8px] text-gray-550 uppercase mt-0.5">Segment profile metrics</p>
+            <p className={`font-mono text-[8px] uppercase mt-0.5 ${isLight ? "text-gray-400" : "text-gray-550"}`}>Segment profile metrics</p>
           </div>
           <div className="flex flex-col gap-2">
             {constellationStats.map(stat => (
-              <div key={stat.seg} className="p-2 bg-gray-900/10 rounded-lg border border-gray-900 text-[9px] font-mono space-y-1">
+              <div key={stat.seg} className={`p-2 rounded-lg border text-[9px] font-mono space-y-1 ${
+                isLight ? "bg-slate-50/50 border-gray-200" : "bg-gray-900/10 border border-gray-900"
+              }`}>
                 <div className="flex justify-between items-center">
                   <span className="font-bold uppercase" style={{ color: stat.color }}>{stat.seg}</span>
-                  <span className="text-gray-550">{stat.count} stars</span>
+                  <span className={isLight ? "text-gray-500" : "text-gray-555"}>{stat.count} stars</span>
                 </div>
-                <div className="flex justify-between text-gray-550 mt-1">
+                <div className={`flex justify-between mt-1 ${isLight ? "text-gray-500" : "text-gray-555"}`}>
                   <span>Avg LTV:</span>
-                  <span className="text-gray-300">₹{stat.avgLtv.toLocaleString()}</span>
+                  <span className={isLight ? "text-slate-800" : "text-gray-300"}>₹{stat.avgLtv.toLocaleString()}</span>
                 </div>
-                <div className="flex justify-between text-gray-550">
+                <div className={`flex justify-between ${isLight ? "text-gray-500" : "text-gray-555"}`}>
                   <span>Avg Risk:</span>
-                  <span className={stat.avgRisk > 60 ? "text-red-400" : "text-gray-300"}>{stat.avgRisk}%</span>
+                  <span className={stat.avgRisk > 60 ? "text-red-500 font-bold" : (isLight ? "text-slate-800" : "text-gray-300")}>{stat.avgRisk}%</span>
                 </div>
               </div>
             ))}
@@ -700,7 +704,7 @@ export const CustomerGalaxy: React.FC = () => {
       <main className="flex-1 flex flex-col min-w-0 overflow-hidden relative z-10">
         
         {/* Page title header */}
-        <div className="shrink-0 px-6 pt-4 bg-gray-950/20">
+        <div className={`shrink-0 px-6 pt-4 ${isLight ? "bg-white/40 border-b border-gray-200" : "bg-gray-950/20"}`}>
           <PageHeaderHUD
             title="Customer Galaxy"
             subtitle="Visualizing customer density clusters as constellations"
@@ -710,7 +714,9 @@ export const CustomerGalaxy: React.FC = () => {
                 {/* Mobile Filter Button */}
                 <button
                   onClick={() => setShowCrmFilters(true)}
-                  className="lg:hidden flex items-center gap-1.5 px-2.5 py-1 rounded bg-gray-900/50 border border-gray-800 text-[10px] text-gray-300 font-mono hover:bg-gray-800 transition-colors"
+                  className={`lg:hidden flex items-center gap-1.5 px-2.5 py-1 rounded border text-[10px] font-mono transition-colors ${
+                    isLight ? "bg-white border-gray-200 text-gray-600 hover:bg-gray-50" : "bg-gray-900/50 border border-gray-800 text-gray-300 hover:bg-gray-800"
+                  }`}
                 >
                   <SlidersHorizontal size={12} className="text-blue-400" />
                   <span>Filters</span>
@@ -1112,19 +1118,21 @@ export const CustomerGalaxy: React.FC = () => {
           <div className="space-y-2">
             <div className="flex items-center gap-1.5">
               <ShoppingBag size={12} className="text-orbit-blue" />
-              <span className="font-mono text-[8px] text-gray-450 uppercase tracking-widest">Order Ledger History</span>
+              <span className={`font-mono text-[8px] uppercase tracking-widest ${isLight ? "text-gray-500" : "text-gray-450"}`}>Order Ledger History</span>
             </div>
             <div className="space-y-1.5 max-h-[140px] overflow-y-auto pr-1">
               {orders.filter(o => o.customerId === selected.id).length === 0 ? (
-                <p className="font-mono text-[9px] text-gray-650 text-center py-3">No orders recorded in current ledger</p>
+                <p className={`font-mono text-[9px] text-center py-3 ${isLight ? "text-gray-500" : "text-gray-650"}`}>No orders recorded in current ledger</p>
               ) : (
                 orders
                   .filter(o => o.customerId === selected.id)
                   .map((order, idx) => (
-                    <div key={idx} className="p-2 bg-gray-900/10 border border-gray-900 rounded-lg flex items-center justify-between text-[9px] font-mono">
+                    <div key={idx} className={`p-2 rounded-lg border flex items-center justify-between text-[9px] font-mono ${
+                      isLight ? "bg-slate-50 border-slate-200" : "bg-gray-900/10 border-gray-900"
+                    }`}>
                       <div className="min-w-0 flex-1">
-                        <p className="font-bold text-white truncate">{order.product}</p>
-                        <span className="text-gray-600">{order.date} · via {order.channel}</span>
+                        <p className={`font-bold truncate ${isLight ? "text-slate-800" : "text-white"}`}>{order.product}</p>
+                        <span className={`text-[8.5px] ${isLight ? "text-gray-500" : "text-gray-600"}`}>{order.date} · via {order.channel}</span>
                       </div>
                       <span className="text-orbit-success font-semibold shrink-0 ml-2">₹{order.amount.toLocaleString()}</span>
                     </div>
@@ -1134,24 +1142,28 @@ export const CustomerGalaxy: React.FC = () => {
           </div>
 
           {/* Predicted Next Purchase (Vega model) */}
-          <div className="p-3.5 rounded-xl bg-orbit-blue/5 border border-orbit-blue/20 space-y-1.5 relative overflow-hidden">
+          <div className={`p-3.5 rounded-xl border space-y-1.5 relative overflow-hidden ${
+            isLight ? "bg-blue-50/30 border-blue-200" : "bg-orbit-blue/5 border-orbit-blue/20"
+          }`}>
             <div className="absolute top-0 right-0 w-16 h-16 bg-orbit-glow-blue opacity-30 pointer-events-none" />
             <div className="flex items-center gap-1.5 font-mono text-[9px] text-orbit-blue font-bold uppercase tracking-wider relative z-10">
               <Compass size={11} className="animate-spin-slow" />
               <span>VEGA CONVERSION PROJECTION</span>
             </div>
-            <p className="font-mono text-xs font-semibold text-white relative z-10">{selected.predictedNextPurchase}</p>
-            <p className="font-mono text-[9px] text-gray-500 relative z-10">Expected Product Category: <span className="text-gray-300 font-bold">{selected.predictedCategory}</span></p>
+            <p className={`font-mono text-xs font-semibold relative z-10 ${isLight ? "text-slate-800" : "text-white"}`}>{selected.predictedNextPurchase}</p>
+            <p className="font-mono text-[9px] text-gray-500 relative z-10">Expected Product Category: <span className={isLight ? "text-slate-800 font-bold" : "text-gray-300 font-bold"}>{selected.predictedCategory}</span></p>
           </div>
 
           {/* AI Profile Summary (Wrapped) */}
-          <div className="p-4 rounded-xl bg-orbit-purple/5 border border-orbit-purple/20 space-y-2 relative overflow-hidden">
+          <div className={`p-4 rounded-xl border space-y-2 relative overflow-hidden ${
+            isLight ? "bg-purple-50/30 border-purple-200" : "bg-orbit-purple/5 border-orbit-purple/20"
+          }`}>
             <div className="absolute top-0 right-0 w-16 h-16 bg-orbit-glow-purple opacity-30 pointer-events-none" />
             <div className="flex items-center gap-1.5 font-mono text-[9px] text-orbit-purple font-bold uppercase tracking-wider relative z-10">
               <Cpu size={12} className="animate-pulse" />
               <span>AI Wrapped Profile Summary</span>
             </div>
-            <p className="font-mono text-[10px] text-gray-300 leading-relaxed relative z-10">
+            <p className={`font-mono text-[10px] leading-relaxed relative z-10 ${isLight ? "text-slate-700" : "text-gray-300"}`}>
               {generateAiSummary(selected)}
             </p>
           </div>

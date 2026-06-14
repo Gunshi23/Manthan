@@ -1179,27 +1179,31 @@ const LaunchSequence: React.FC<{
           { label: "Channel optimized", ok: true },
           { label: "Nodes responsive", ok: true },
         ].map((item, i) => (
-          <div key={i} className="flex items-center gap-1.5 p-2 bg-gray-900/40 rounded-lg border border-gray-800">
+          <div key={i} className={`flex items-center gap-1.5 p-2 rounded-lg border ${
+            isLight ? "bg-white border-gray-200" : "bg-gray-900/40 border-gray-800"
+          }`}>
             <CheckCircle2 size={11} className="text-orbit-success shrink-0" />
-            <span className="font-mono text-[9px] text-gray-300">{item.label}</span>
+            <span className={`font-mono text-[9px] ${isLight ? "text-gray-700" : "text-gray-300"}`}>{item.label}</span>
           </div>
         ))}
       </div>
 
       {/* Summary */}
-      <div className="flex items-center gap-6 py-2.5 px-4 bg-gray-950/60 rounded-xl border border-gray-800">
+      <div className={`flex items-center gap-6 py-2.5 px-4 rounded-xl border ${
+        isLight ? "bg-white border-gray-200" : "bg-gray-950/60 border-gray-800"
+      }`}>
         <div className="text-center flex-1">
-          <p className="font-space text-lg font-bold text-white">{mission.audienceCount}</p>
+          <p className={`font-space text-lg font-bold ${isLight ? "text-slate-900" : "text-white"}`}>{mission.audienceCount}</p>
           <p className="font-mono text-[8px] text-gray-500 uppercase tracking-wider">Targets</p>
         </div>
-        <ArrowRight size={14} className="text-gray-700 shrink-0" />
+        <ArrowRight size={14} className="text-gray-750 shrink-0" />
         <div className="text-center flex-1">
           <p className="font-space text-lg font-bold" style={{ color: "#22C55E" }}>
             {CHANNEL_ICONS[mission.selectedChannel] || "✉"} {mission.selectedChannel}
           </p>
           <p className="font-mono text-[8px] text-gray-500 uppercase tracking-wider">Channel</p>
         </div>
-        <ArrowRight size={14} className="text-gray-700 shrink-0" />
+        <ArrowRight size={14} className="text-gray-750 shrink-0" />
         <div className="text-center flex-1">
           <p className="font-space text-lg font-bold text-orbit-success">₹{mission.predictedRevenue.toLocaleString()}</p>
           <p className="font-mono text-[8px] text-gray-500 uppercase tracking-wider">Forecast</p>
