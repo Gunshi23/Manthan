@@ -5,10 +5,10 @@ import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from "fire
 
 interface AuthFlowProps {
   onLoginSuccess: () => void;
-  onBack: () => void;
+  onBack?: () => void;
 }
 
-export const AuthFlow: React.FC<AuthFlowProps> = ({ onLoginSuccess, onBack }) => {
+export const AuthFlow: React.FC<AuthFlowProps> = ({ onLoginSuccess }) => {
   const [mode, setMode] = useState<"login" | "signup">("login");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -121,19 +121,6 @@ export const AuthFlow: React.FC<AuthFlowProps> = ({ onLoginSuccess, onBack }) =>
     setConfirmPassword("");
   };
 
-  const handleLocalBypass = () => {
-    localStorage.setItem("orbit_use_mock_auth", "true");
-    setIsLoggingIn(true);
-    setLogs(prev => [
-      ...prev,
-      "LOG: BIO-SIGNATURE BYPASS REQUESTED.",
-      "LOG: INITIALIZING SECURE LOCAL SANDBOX ENVIRONMENT..."
-    ]);
-    setTimeout(() => {
-      window.location.reload();
-    }, 1000);
-  };
-
   return (
     <div className="relative min-h-screen bg-Manthan-bg space-grid flex flex-col items-center justify-center p-4">
       {/* Laser grids / scans */}
@@ -151,12 +138,10 @@ export const AuthFlow: React.FC<AuthFlowProps> = ({ onLoginSuccess, onBack }) =>
               Manthan SECURE SHELL {mode === "login" ? "v4.81-LOGIN" : "v4.81-REGISTER"}
             </span>
           </div>
-          <button 
-            onClick={onBack}
-            className="text-[10px] font-mono text-gray-550 hover:text-white transition-colors uppercase cursor-pointer"
-          >
-            [ Cancel Boot ]
-          </button>
+          <div className="flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-Manthan-success animate-pulse" />
+            <span className="text-[10px] font-mono text-gray-500 uppercase">[ Secure Connection ]</span>
+          </div>
         </div>
 
         {/* Live Terminal logs */}
@@ -259,7 +244,7 @@ export const AuthFlow: React.FC<AuthFlowProps> = ({ onLoginSuccess, onBack }) =>
               : (mode === "login" ? "Verify Access" : "Initialize Account")}
           </button>
 
-          <div className="text-center mt-2 border-t border-gray-850 pt-4 flex flex-col gap-2">
+          <div className="text-center mt-2 border-t border-gray-850 pt-4">
             <button
               type="button"
               onClick={handleToggleMode}
@@ -276,14 +261,6 @@ export const AuthFlow: React.FC<AuthFlowProps> = ({ onLoginSuccess, onBack }) =>
                   Already have a node? [ Sign In Operator ]
                 </>
               )}
-            </button>
-
-            <button
-              type="button"
-              onClick={handleLocalBypass}
-              className="font-mono text-[9px] text-pink-500 hover:text-pink-400 transition-colors cursor-pointer uppercase flex items-center justify-center gap-1.5 mx-auto animate-pulse mt-1"
-            >
-              [ Run in Local Sandbox Mode (Offline Bypass) ]
             </button>
           </div>
         </form>
