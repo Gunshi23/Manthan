@@ -84,3 +84,17 @@ We implemented a complete Light Theme for Manthan (branded as **Executive Mode**
 - Ran TypeScript checks (`npx tsc`) showing **0 errors**.
 - Ran production build compilation (`npm run build`) successfully.
 
+---
+
+## 🚪 Landing Page Entry & Compulsory Auth Flow Restoration
+
+We restored the premium Landing Page as the default entry point of the application while keeping Firebase Authentication compulsory for entering the app.
+
+### Key Changes
+1. **App Stages**: Restored the `'landing'` stage in `src/App.tsx` and set it as the default initial stage (`useState<AppStage>('landing')`).
+2. **Landing Page Integration**: Imported and rendered `LandingPage` correctly inside `src/App.tsx`.
+3. **Login Redirection**: Clicking the initialization or boot buttons on the landing page triggers `onEnterOS`, which checks authentication state and directs the user to the `'auth'` stage if they are not logged in.
+4. **Cancel Boot Button**: Restored the `onBack` prop for `AuthFlow` to allow users to navigate back to the Landing Page. If `onBack` is provided, a `[ Cancel Boot ]` button is rendered alongside the secure connection status indicator.
+5. **Logout Route**: Configured the logout action to redirect users back to the `'landing'` stage.
+
+
